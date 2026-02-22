@@ -2,41 +2,77 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Controles Corregidos</title>
+    <title>Minecraft JS: 9 Slots & Scroll</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; }
-        #menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; }
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
+        
+        /* --- UI CAPAS --- */
+        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+        #menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; pointer-events: auto; }
         .btn { background: #4CAF50; color: white; border: none; padding: 15px 32px; font-size: 16px; margin: 10px; cursor: pointer; border-radius: 4px; }
-        
-        /* Controles Celular */
-        #mobile-hud { position: absolute; inset: 0; pointer-events: none; display: none; }
-        #joystick-area { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
-        #jump-btn { position: absolute; bottom: 40px; right: 40px; width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; pointer-events: auto; border: 2px solid #fff; }
-        
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 15px; height: 15px; border: 2px solid white; transform: translate(-50%, -50%); pointer-events: none; }
-        #hotbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; background: rgba(0,0,0,0.5); padding: 5px; border: 2px solid white; pointer-events: auto; }
-        .slot { width: 45px; height: 45px; border: 1px solid #777; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; }
-        .active { border: 3px solid #ffff00; background: rgba(255,255,0,0.2); }
+
+        /* --- VIDA --- */
+        #health-container { position: absolute; bottom: 95px; left: 50%; transform: translateX(-50%); width: 250px; height: 10px; background: #333; border: 2px solid #fff; }
+        #health-bar { width: 100%; height: 100%; background: #ff0000; transition: width 0.2s; }
+
+        /* --- CONTROLES MÓVILES --- */
+        #mobile-controls { display: none; pointer-events: auto; }
+        #joystick-wrapper { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #joystick-stick { width: 50px; height: 50px; background: #fff; border-radius: 50%; }
+        .action-btn { position: absolute; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; pointer-events: auto; border: 2px solid white; font-size: 10px; }
+        #btn-break { bottom: 120px; right: 100px; background: rgba(255, 0, 0, 0.4); }
+        #btn-place { bottom: 40px; right: 120px; background: rgba(0, 255, 0, 0.4); }
+        #btn-jump { bottom: 80px; right: 25px; background: rgba(255, 255, 255, 0.3); width: 55px; height: 55px; }
+
+        /* --- HOTBAR (9 SLOTS) --- */
+        #hotbar { 
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 4px; background: rgba(0,0,0,0.7); padding: 4px; 
+            border: 3px solid #555; pointer-events: auto; 
+        }
+        .slot { 
+            width: 42px; height: 42px; border: 2px solid #777; 
+            cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; color: white; font-size: 14px;
+            box-sizing: border-box; font-weight: bold;
+        }
+        .slot.active { border-color: #ffffff; background: rgba(255,255,255,0.2); box-shadow: inset 0 0 5px #fff; }
+
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; border: 1px solid white; transform: translate(-50%, -50%); pointer-events: none; }
+        #damage-flash { position: fixed; inset: 0; background: rgba(255, 0, 0, 0); pointer-events: none; z-index: 50; transition: background 0.1s; }
     </style>
 </head>
 <body>
 
+    <div id="damage-flash"></div>
     <div id="menu">
         <h1>MINECRAFT JS</h1>
         <button class="btn" onclick="startGame(false)">MODO PC</button>
         <button class="btn" onclick="startGame(true)">MODO CELULAR</button>
     </div>
 
-    <div id="mobile-hud">
-        <div id="joystick-area"></div>
-        <div id="jump-btn">SALTAR</div>
-    </div>
+    <div id="ui-layer">
+        <div id="crosshair"></div>
+        <div id="health-container"><div id="health-bar"></div></div>
+        
+        <div id="mobile-controls">
+            <div id="joystick-wrapper"><div id="joystick-stick"></div></div>
+            <div id="btn-break" class="action-btn">ROMPER</div>
+            <div id="btn-place" class="action-btn">PONER</div>
+            <div id="btn-jump" class="action-btn">SALTAR</div>
+        </div>
 
-    <div id="crosshair"></div>
-    <div id="hotbar">
-        <div id="s1" class="slot active" style="background: #2e7d32;" onclick="selectBlock(0x2e7d32, 's1')">TIERRA</div>
-        <div id="s2" class="slot" style="background: #5d4037;" onclick="selectBlock(0x5d4037, 's2')">MADERA</div>
-        <div id="s3" class="slot" style="background: #757575;" onclick="selectBlock(0x757575, 's3')">PIEDRA</div>
+        <div id="hotbar">
+            <div class="slot active" data-index="0" data-color="0x2e7d32" style="background:#2e7d32">1</div>
+            <div class="slot" data-index="1" data-color="0x5d4037" style="background:#5d4037">2</div>
+            <div class="slot" data-index="2" data-color="0x757575" style="background:#757575">3</div>
+            <div class="slot" data-index="3" data-color="0x1976d2" style="background:#1976d2">4</div>
+            <div class="slot" data-index="4" data-color="0xfbc02d" style="background:#fbc02d">5</div>
+            <div class="slot" data-index="5" data-color="0x8e24aa" style="background:#8e24aa">6</div>
+            <div class="slot" data-index="6" data-color="0xd84315" style="background:#d84315">7</div>
+            <div class="slot" data-index="7" data-color="0x00796b" style="background:#00796b">8</div>
+            <div class="slot" data-index="8" data-color="0x455a64" style="background:#455a64">9</div>
+        </div>
     </div>
 
     <script type="importmap">
@@ -47,24 +83,61 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
+        // --- ESTADO ---
         let isMobile = false;
         let blocks = [];
+        let activeSlotIndex = 0;
         let selectedColor = 0x2e7d32;
+        let joystickPos = { x: 0, y: 0 };
+        let hp = 100;
+        let velocityY = 0;
+        let isGrounded = false;
+        let fallStartY = 0;
+        let wasFalling = false;
         const playerSize = new THREE.Vector3(0.6, 1.8, 0.6);
+
+        // --- LÓGICA HOTBAR ---
+        const slots = document.querySelectorAll('.slot');
+        function updateActiveSlot(index) {
+            activeSlotIndex = (index + 9) % 9; // Asegura que el índice esté entre 0 y 8
+            slots.forEach((s, i) => {
+                s.classList.toggle('active', i === activeSlotIndex);
+            });
+            selectedColor = parseInt(slots[activeSlotIndex].getAttribute('data-color'));
+        }
+
+        // Click o Touch en hotbar
+        slots.forEach((s, i) => {
+            s.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                updateActiveSlot(i);
+            });
+        });
+
+        // Rueda del ratón (Scroll)
+        window.addEventListener('wheel', (e) => {
+            if (e.deltaY > 0) updateActiveSlot(activeSlotIndex + 1);
+            else updateActiveSlot(activeSlotIndex - 1);
+        });
+
+        // Teclas 1-9
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '9') {
+                updateActiveSlot(parseInt(e.key) - 1);
+            }
+        });
 
         // --- INICIO ---
         window.startGame = (mobile) => {
             isMobile = mobile;
             document.getElementById('menu').style.display = 'none';
-            if(isMobile) document.getElementById('mobile-hud').style.display = 'block';
-            else controls.lock();
+            if(isMobile) {
+                document.getElementById('mobile-controls').style.display = 'block';
+                setupMobileEvents();
+            } else {
+                controls.lock();
+            }
             animate();
-        };
-
-        window.selectBlock = (color, id) => {
-            selectedColor = color;
-            document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
         };
 
         // --- ESCENA ---
@@ -78,110 +151,135 @@
         const controls = new PointerLockControls(camera, document.body);
         const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 
-        // --- MUNDO (3x3 Chunks aprox) ---
         function createWorld() {
-            for(let x = -10; x < 26; x++) {
-                for(let z = -10; z < 26; z++) {
-                    addBlock(x, 0, z, 0x2e7d32);
+            for(let x = -16; x < 16; x++) {
+                for(let z = -16; z < 16; z++) {
+                    const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
+                    mesh.position.set(x, 0, z);
+                    scene.add(mesh);
+                    blocks.push(mesh);
                 }
             }
         }
-        function addBlock(x, y, z, color) {
-            const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color }));
-            mesh.position.set(x, y, z);
-            scene.add(mesh);
-            blocks.push(mesh);
-        }
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.5));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
         createWorld();
-        camera.position.set(8, 3, 8);
+        camera.position.set(0, 3, 0);
 
-        // --- COLISIONES ---
-        function checkCollision(pos) {
-            const pBox = new THREE.Box3().setFromCenterAndSize(
-                pos.clone().sub(new THREE.Vector3(0, 0.9, 0)),
-                playerSize
-            );
-            for (let b of blocks) {
-                if (pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
-            }
-            return false;
+        // --- ACCIONES JUEGO ---
+        function applyDamage(val) {
+            hp -= val;
+            document.getElementById('health-bar').style.width = Math.max(0, hp) + "%";
+            document.getElementById('damage-flash').style.background = "rgba(255,0,0,0.4)";
+            setTimeout(() => document.getElementById('damage-flash').style.background = "transparent", 150);
+            if(hp <= 0) { alert("Game Over"); location.reload(); }
         }
 
-        // --- INTERACCIÓN ---
-        window.addEventListener('mousedown', (e) => {
-            if (!controls.isLocked && !isMobile) return;
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(new THREE.Vector2(), camera);
-            const intersects = raycaster.intersectObjects(blocks);
-
+        function handleAction(type) {
+            const ray = new THREE.Raycaster();
+            ray.setFromCamera(new THREE.Vector2(), camera);
+            const intersects = ray.intersectObjects(blocks);
             if (intersects.length > 0) {
                 const intersect = intersects[0];
-                if (e.button === 0) { // Romper
+                if (type === 0) { // Romper
                     scene.remove(intersect.object);
                     blocks = blocks.filter(b => b !== intersect.object);
-                } else if (e.button === 2 || (isMobile && e.button === 0)) { // Poner
-                    const newPos = intersect.object.position.clone().add(intersect.face.normal);
-                    const blockBox = new THREE.Box3().setFromCenterAndSize(newPos, new THREE.Vector3(1,1,1));
-                    const playerBox = new THREE.Box3().setFromCenterAndSize(
-                        camera.position.clone().sub(new THREE.Vector3(0, 0.9, 0)),
-                        playerSize
-                    );
-                    if (!blockBox.intersectsBox(playerBox)) addBlock(newPos.x, newPos.y, newPos.z, selectedColor);
+                } else { // Poner
+                    const p = intersect.object.position.clone().add(intersect.face.normal);
+                    const bBox = new THREE.Box3().setFromCenterAndSize(p, new THREE.Vector3(1,1,1));
+                    const pBox = new THREE.Box3().setFromCenterAndSize(camera.position.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
+                    if(!bBox.intersectsBox(pBox)) {
+                        const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: selectedColor }));
+                        mesh.position.copy(p);
+                        scene.add(mesh);
+                        blocks.push(mesh);
+                    }
                 }
             }
-        });
+        }
 
-        // --- MOVIMIENTO ---
+        // --- MÓVIL ---
+        function setupMobileEvents() {
+            const joy = document.getElementById('joystick-wrapper');
+            const stick = document.getElementById('joystick-stick');
+            joy.addEventListener('touchmove', (e) => {
+                const rect = joy.getBoundingClientRect();
+                const dx = e.touches[0].clientX - (rect.left + rect.width/2);
+                const dy = e.touches[0].clientY - (rect.top + rect.height/2);
+                const d = Math.min(Math.sqrt(dx*dx+dy*dy), 50);
+                const a = Math.atan2(dy, dx);
+                joystickPos.x = (Math.cos(a)*d)/50; joystickPos.y = (Math.sin(a)*d)/50;
+                stick.style.transform = `translate(${joystickPos.x*40}px, ${joystickPos.y*40}px)`;
+            });
+            joy.addEventListener('touchend', () => { joystickPos = {x:0, y:0}; stick.style.transform = "none"; });
+            
+            document.getElementById('btn-jump').addEventListener('touchstart', (e) => { e.preventDefault(); if(isGrounded) velocityY = 10; });
+            document.getElementById('btn-break').addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(0); });
+            document.getElementById('btn-place').addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(2); });
+
+            let lastTouchX, lastTouchY;
+            window.addEventListener('touchstart', e => { lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY; });
+            window.addEventListener('touchmove', e => {
+                if(lastTouchX > window.innerWidth/2) {
+                    camera.rotation.y -= (e.touches[0].clientX - lastTouchX) * 0.005;
+                    camera.rotation.x -= (e.touches[0].clientY - lastTouchY) * 0.005;
+                }
+                lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY;
+            });
+        }
+
+        // --- FÍSICA Y LOOP ---
         let keys = {};
-        window.addEventListener('keydown', (e) => keys[e.code] = true);
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
+        window.addEventListener('keydown', e => { keys[e.code] = true; });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+        window.addEventListener('mousedown', e => { if(!isMobile && controls.isLocked) handleAction(e.button); });
 
-        let velocityY = 0;
         const clock = new THREE.Clock();
-
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
-            velocityY -= 25 * delta; // Gravedad
+            velocityY -= 25 * delta;
 
-            if (controls.isLocked || isMobile) {
-                const moveVec = new THREE.Vector3();
-                if (keys['KeyW']) moveVec.z += 1; // Hacia adelante
-                if (keys['KeyS']) moveVec.z -= 1; // Hacia atrás
-                if (keys['KeyA']) moveVec.x -= 1; // Izquierda corregido
-                if (keys['KeyD']) moveVec.x += 1; // Derecha corregido
-                
-                // Cálculo de direcciones basado en la cámara
-                const camDir = new THREE.Vector3();
-                camera.getWorldDirection(camDir); camDir.y = 0; camDir.normalize();
-                
-                // Vector lateral (Derecha): Producto cruzado entre dirección y arriba
-                const camRight = new THREE.Vector3().crossVectors(camDir, camera.up).normalize();
-                
-                const nextPos = camera.position.clone();
-                // Aplicar movimiento relativo corregido
-                nextPos.addScaledVector(camDir, moveVec.z * 5 * delta);
-                nextPos.addScaledVector(camRight, moveVec.x * 5 * delta);
-
-                if (!checkCollision(nextPos)) {
-                    camera.position.x = nextPos.x;
-                    camera.position.z = nextPos.z;
+            if(controls.isLocked || isMobile) {
+                const move = new THREE.Vector3();
+                if(!isMobile) {
+                    if(keys['KeyW']) move.z += 1; if(keys['KeyS']) move.z -= 1;
+                    if(keys['KeyA']) move.x -= 1; if(keys['KeyD']) move.x += 1;
+                    if(keys['Space'] && isGrounded) velocityY = 10;
+                } else {
+                    move.z = -joystickPos.y; move.x = joystickPos.x;
                 }
 
-                // Salto y Gravedad
+                const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
+                const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
+                
+                const nextPos = camera.position.clone();
+                nextPos.addScaledVector(dir, move.z * 5 * delta);
+                nextPos.addScaledVector(right, move.x * 5 * delta);
+
+                const hBox = new THREE.Box3().setFromCenterAndSize(nextPos.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
+                let hitH = false;
+                for(let b of blocks) { if(hBox.intersectsBox(new THREE.Box3().setFromObject(b))) { hitH = true; break; } }
+                if(!hitH) { camera.position.x = nextPos.x; camera.position.z = nextPos.z; }
+
+                if(velocityY < 0 && !wasFalling) { fallStartY = camera.position.y; wasFalling = true; }
+
                 camera.position.y += velocityY * delta;
-                if (checkCollision(camera.position)) {
-                    camera.position.y -= velocityY * delta;
-                    velocityY = 0;
-                    if (keys['Space']) velocityY = 10;
+                isGrounded = false;
+                const vBox = new THREE.Box3().setFromCenterAndSize(camera.position.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
+                for(let b of blocks) {
+                    if(vBox.intersectsBox(new THREE.Box3().setFromObject(b))) {
+                        camera.position.y -= velocityY * delta;
+                        if(velocityY < 0) {
+                            const dist = fallStartY - camera.position.y;
+                            if(dist > 5) applyDamage((dist-5)*15);
+                            isGrounded = true; wasFalling = false;
+                        }
+                        velocityY = 0; break;
+                    }
                 }
             }
             renderer.render(scene, camera);
         }
-
-        // Evento Salto Móvil
-        document.getElementById('jump-btn').addEventListener('pointerdown', () => { if(velocityY === 0) velocityY = 10; });
     </script>
 </body>
 </html>
