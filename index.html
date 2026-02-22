@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: 9 Slots & Scroll</title>
+    <title>Minecraft JS: Inventario Real</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         
@@ -24,19 +24,20 @@
         #btn-place { bottom: 40px; right: 120px; background: rgba(0, 255, 0, 0.4); }
         #btn-jump { bottom: 80px; right: 25px; background: rgba(255, 255, 255, 0.3); width: 55px; height: 55px; }
 
-        /* --- HOTBAR (9 SLOTS) --- */
+        /* --- HOTBAR (VACIADA AL INICIO) --- */
         #hotbar { 
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); 
             display: flex; gap: 4px; background: rgba(0,0,0,0.7); padding: 4px; 
             border: 3px solid #555; pointer-events: auto; 
         }
         .slot { 
-            width: 42px; height: 42px; border: 2px solid #777; 
+            width: 42px; height: 42px; border: 2px solid #444; 
             cursor: pointer; display: flex; align-items: center; 
-            justify-content: center; color: white; font-size: 14px;
+            justify-content: center; color: white; font-size: 10px;
             box-sizing: border-box; font-weight: bold;
+            background: rgba(0,0,0,0.5); /* Color inicial vacío */
         }
-        .slot.active { border-color: #ffffff; background: rgba(255,255,255,0.2); box-shadow: inset 0 0 5px #fff; }
+        .slot.active { border-color: #ffffff; box-shadow: inset 0 0 5px #fff; }
 
         #crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; border: 1px solid white; transform: translate(-50%, -50%); pointer-events: none; }
         #damage-flash { position: fixed; inset: 0; background: rgba(255, 0, 0, 0); pointer-events: none; z-index: 50; transition: background 0.1s; }
@@ -63,15 +64,15 @@
         </div>
 
         <div id="hotbar">
-            <div class="slot active" data-index="0" data-color="0x2e7d32" style="background:#2e7d32">1</div>
-            <div class="slot" data-index="1" data-color="0x5d4037" style="background:#5d4037">2</div>
-            <div class="slot" data-index="2" data-color="0x757575" style="background:#757575">3</div>
-            <div class="slot" data-index="3" data-color="0x1976d2" style="background:#1976d2">4</div>
-            <div class="slot" data-index="4" data-color="0xfbc02d" style="background:#fbc02d">5</div>
-            <div class="slot" data-index="5" data-color="0x8e24aa" style="background:#8e24aa">6</div>
-            <div class="slot" data-index="6" data-color="0xd84315" style="background:#d84315">7</div>
-            <div class="slot" data-index="7" data-color="0x00796b" style="background:#00796b">8</div>
-            <div class="slot" data-index="8" data-color="0x455a64" style="background:#455a64">9</div>
+            <div id="s1" class="slot active" data-color="null" data-count="0">1</div>
+            <div id="s2" class="slot" data-color="null" data-count="0">2</div>
+            <div id="s3" class="slot" data-color="null" data-count="0">3</div>
+            <div id="s4" class="slot" data-color="null" data-count="0">4</div>
+            <div id="s5" class="slot" data-color="null" data-count="0">5</div>
+            <div id="s6" class="slot" data-color="null" data-count="0">6</div>
+            <div id="s7" class="slot" data-color="null" data-count="0">7</div>
+            <div id="s8" class="slot" data-color="null" data-count="0">8</div>
+            <div id="s9" class="slot" data-color="null" data-count="0">9</div>
         </div>
     </div>
 
@@ -83,11 +84,10 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-        // --- ESTADO ---
         let isMobile = false;
         let blocks = [];
         let activeSlotIndex = 0;
-        let selectedColor = 0x2e7d32;
+        let selectedColor = null; // No hay nada seleccionado al inicio
         let joystickPos = { x: 0, y: 0 };
         let hp = 100;
         let velocityY = 0;
@@ -96,64 +96,100 @@
         let wasFalling = false;
         const playerSize = new THREE.Vector3(0.6, 1.8, 0.6);
 
-        // --- LÓGICA HOTBAR ---
         const slots = document.querySelectorAll('.slot');
+
         function updateActiveSlot(index) {
-            activeSlotIndex = (index + 9) % 9; // Asegura que el índice esté entre 0 y 8
-            slots.forEach((s, i) => {
-                s.classList.toggle('active', i === activeSlotIndex);
-            });
-            selectedColor = parseInt(slots[activeSlotIndex].getAttribute('data-color'));
+            activeSlotIndex = (index + 9) % 9;
+            slots.forEach((s, i) => s.classList.toggle('active', i === activeSlotIndex));
+            const colorAttr = slots[activeSlotIndex].getAttribute('data-color');
+            selectedColor = colorAttr === "null" ? null : parseInt(colorAttr);
         }
 
-        // Click o Touch en hotbar
         slots.forEach((s, i) => {
-            s.addEventListener('pointerdown', (e) => {
-                e.stopPropagation();
-                updateActiveSlot(i);
-            });
+            s.addEventListener('pointerdown', (e) => { e.stopPropagation(); updateActiveSlot(i); });
         });
 
-        // Rueda del ratón (Scroll)
-        window.addEventListener('wheel', (e) => {
-            if (e.deltaY > 0) updateActiveSlot(activeSlotIndex + 1);
-            else updateActiveSlot(activeSlotIndex - 1);
-        });
+        // --- SISTEMA DE INVENTARIO ---
+        function addToInventory(color) {
+            const currentSlot = slots[activeSlotIndex];
+            let count = parseInt(currentSlot.getAttribute('data-count'));
+            
+            // Actualizamos color y cantidad del slot actual
+            currentSlot.setAttribute('data-color', color);
+            currentSlot.style.backgroundColor = "#" + color.toString(16).padStart(6, '0');
+            count++;
+            currentSlot.setAttribute('data-count', count);
+            currentSlot.innerText = count;
+            selectedColor = color;
+        }
 
-        // Teclas 1-9
-        window.addEventListener('keydown', (e) => {
-            if (e.key >= '1' && e.key <= '9') {
-                updateActiveSlot(parseInt(e.key) - 1);
+        function removeFromInventory() {
+            const currentSlot = slots[activeSlotIndex];
+            let count = parseInt(currentSlot.getAttribute('data-count'));
+            
+            if (count > 0) {
+                count--;
+                currentSlot.setAttribute('data-count', count);
+                currentSlot.innerText = count > 0 ? count : (activeSlotIndex + 1);
+                
+                if (count === 0) {
+                    currentSlot.setAttribute('data-color', "null");
+                    currentSlot.style.backgroundColor = "rgba(0,0,0,0.5)";
+                    selectedColor = null;
+                }
             }
-        });
+        }
 
-        // --- INICIO ---
+        // --- ACCIÓN ---
+        function handleAction(type) {
+            const ray = new THREE.Raycaster();
+            ray.setFromCamera(new THREE.Vector2(), camera);
+            const intersects = ray.intersectObjects(blocks);
+            
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                if (type === 0) { // Romper
+                    const blockColor = intersect.object.material.color.getHex();
+                    addToInventory(blockColor);
+                    scene.remove(intersect.object);
+                    blocks = blocks.filter(b => b !== intersect.object);
+                } else if (type === 2 && selectedColor !== null) { // Poner
+                    const p = intersect.object.position.clone().add(intersect.face.normal);
+                    const bBox = new THREE.Box3().setFromCenterAndSize(p, new THREE.Vector3(1,1,1));
+                    const pBox = new THREE.Box3().setFromCenterAndSize(camera.position.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
+                    
+                    if(!bBox.intersectsBox(pBox)) {
+                        const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: selectedColor }));
+                        mesh.position.copy(p);
+                        scene.add(mesh);
+                        blocks.push(mesh);
+                        removeFromInventory();
+                    }
+                }
+            }
+        }
+
+        // --- RESTO DEL CÓDIGO (FISICA, CONTROLES, ESCENA) ---
         window.startGame = (mobile) => {
             isMobile = mobile;
             document.getElementById('menu').style.display = 'none';
-            if(isMobile) {
-                document.getElementById('mobile-controls').style.display = 'block';
-                setupMobileEvents();
-            } else {
-                controls.lock();
-            }
+            if(isMobile) { document.getElementById('mobile-controls').style.display = 'block'; setupMobileEvents(); }
+            else { controls.lock(); }
             animate();
         };
 
-        // --- ESCENA ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
-
         const controls = new PointerLockControls(camera, document.body);
         const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 
         function createWorld() {
-            for(let x = -16; x < 16; x++) {
-                for(let z = -16; z < 16; z++) {
+            for(let x = -10; x < 10; x++) {
+                for(let z = -10; z < 10; z++) {
                     const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
                     mesh.position.set(x, 0, z);
                     scene.add(mesh);
@@ -165,39 +201,12 @@
         createWorld();
         camera.position.set(0, 3, 0);
 
-        // --- ACCIONES JUEGO ---
         function applyDamage(val) {
             hp -= val;
             document.getElementById('health-bar').style.width = Math.max(0, hp) + "%";
-            document.getElementById('damage-flash').style.background = "rgba(255,0,0,0.4)";
-            setTimeout(() => document.getElementById('damage-flash').style.background = "transparent", 150);
             if(hp <= 0) { alert("Game Over"); location.reload(); }
         }
 
-        function handleAction(type) {
-            const ray = new THREE.Raycaster();
-            ray.setFromCamera(new THREE.Vector2(), camera);
-            const intersects = ray.intersectObjects(blocks);
-            if (intersects.length > 0) {
-                const intersect = intersects[0];
-                if (type === 0) { // Romper
-                    scene.remove(intersect.object);
-                    blocks = blocks.filter(b => b !== intersect.object);
-                } else { // Poner
-                    const p = intersect.object.position.clone().add(intersect.face.normal);
-                    const bBox = new THREE.Box3().setFromCenterAndSize(p, new THREE.Vector3(1,1,1));
-                    const pBox = new THREE.Box3().setFromCenterAndSize(camera.position.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
-                    if(!bBox.intersectsBox(pBox)) {
-                        const mesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: selectedColor }));
-                        mesh.position.copy(p);
-                        scene.add(mesh);
-                        blocks.push(mesh);
-                    }
-                }
-            }
-        }
-
-        // --- MÓVIL ---
         function setupMobileEvents() {
             const joy = document.getElementById('joystick-wrapper');
             const stick = document.getElementById('joystick-stick');
@@ -211,11 +220,9 @@
                 stick.style.transform = `translate(${joystickPos.x*40}px, ${joystickPos.y*40}px)`;
             });
             joy.addEventListener('touchend', () => { joystickPos = {x:0, y:0}; stick.style.transform = "none"; });
-            
             document.getElementById('btn-jump').addEventListener('touchstart', (e) => { e.preventDefault(); if(isGrounded) velocityY = 10; });
             document.getElementById('btn-break').addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(0); });
             document.getElementById('btn-place').addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(2); });
-
             let lastTouchX, lastTouchY;
             window.addEventListener('touchstart', e => { lastTouchX = e.touches[0].clientX; lastTouchY = e.touches[0].clientY; });
             window.addEventListener('touchmove', e => {
@@ -227,7 +234,8 @@
             });
         }
 
-        // --- FÍSICA Y LOOP ---
+        window.addEventListener('wheel', (e) => { if(e.deltaY > 0) updateActiveSlot(activeSlotIndex+1); else updateActiveSlot(activeSlotIndex-1); });
+        window.addEventListener('keydown', (e) => { if(e.key >= '1' && e.key <= '9') updateActiveSlot(parseInt(e.key)-1); });
         let keys = {};
         window.addEventListener('keydown', e => { keys[e.code] = true; });
         window.addEventListener('keyup', e => keys[e.code] = false);
@@ -238,31 +246,23 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             velocityY -= 25 * delta;
-
             if(controls.isLocked || isMobile) {
                 const move = new THREE.Vector3();
                 if(!isMobile) {
                     if(keys['KeyW']) move.z += 1; if(keys['KeyS']) move.z -= 1;
                     if(keys['KeyA']) move.x -= 1; if(keys['KeyD']) move.x += 1;
                     if(keys['Space'] && isGrounded) velocityY = 10;
-                } else {
-                    move.z = -joystickPos.y; move.x = joystickPos.x;
-                }
-
+                } else { move.z = -joystickPos.y; move.x = joystickPos.x; }
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
-                
                 const nextPos = camera.position.clone();
                 nextPos.addScaledVector(dir, move.z * 5 * delta);
                 nextPos.addScaledVector(right, move.x * 5 * delta);
-
                 const hBox = new THREE.Box3().setFromCenterAndSize(nextPos.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
                 let hitH = false;
                 for(let b of blocks) { if(hBox.intersectsBox(new THREE.Box3().setFromObject(b))) { hitH = true; break; } }
                 if(!hitH) { camera.position.x = nextPos.x; camera.position.z = nextPos.z; }
-
                 if(velocityY < 0 && !wasFalling) { fallStartY = camera.position.y; wasFalling = true; }
-
                 camera.position.y += velocityY * delta;
                 isGrounded = false;
                 const vBox = new THREE.Box3().setFromCenterAndSize(camera.position.clone().sub(new THREE.Vector3(0,0.9,0)), playerSize);
