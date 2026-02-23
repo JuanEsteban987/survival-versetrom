@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Doom Zombie AI</title>
+    <title>Minecraft JS: Doom Zombie Spawner</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
@@ -65,7 +65,7 @@
         <button class="btn btn-red" onclick="openSubMenu('m-hub')">VOLVER</button>
     </div>
     <div id="creative-panel">
-        <h3 style="margin-top:0">MODO CREATIVO</h3>
+        <h3 style="margin-top:0">MODO CREATIVO (T)</h3>
         <div id="creative-list"></div>
         <button class="btn btn-red" style="width:100%; margin: 10px 0 0 0;" onclick="toggleCreative()">CERRAR [T]</button>
     </div>
@@ -104,8 +104,8 @@
         <div class="crafting-grid" id="main-craft-grid">
             <div id="c0" class="craft-slot" onclick="tapToCraft(0)"></div>
             <div id="c1" class="craft-slot" onclick="tapToCraft(1)"></div>
-            <div id="c2" class="craft-slot" onclick="tapToCraft(2)"></div>
-            <div id="c3" class="craft-slot" onclick="tapToCraft(3)"></div>
+            <div id="c2" class="craft-slot" onclick="tapToCraft(3)"></div>
+            <div id="c3" class="craft-slot" onclick="tapToCraft(4)"></div>
         </div>
         <div id="craft-result" onclick="finishCraft()">CRAFTEAR</div>
     </div>
@@ -114,8 +114,8 @@
             <div id="s0" class="slot active" data-color="null" data-count="0" onclick="updateActiveSlot(0)">1</div>
             <div id="s1" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(1)">2</div>
             <div id="s2" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(2)">3</div>
-            <div id="s3" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(3)">4</div>
-            <div id="s4" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(4)">5</div>
+            <div id="s3" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(4)">4</div>
+            <div id="s4" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(5)">5</div>
         </div>
     </div>
 
@@ -187,6 +187,7 @@
             {name:"Hojas",color:0x388e3c, type:"block"},
             {name:"Piedra",color:0x9e9e9e, type:"block"},
             {name:"Bedrock",color:0x1a1a1a, type:"block"},
+            {name:"Spawn Zombie", color:0xff0000, type:"spawner"},
             {name:"Pico Madera", color:0x8B4513, type:"tool", power: 2.5}
         ];
 
@@ -204,31 +205,35 @@
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
-        // --- ZOMBIE DOOM (IA & ANIMATION) ---
+        // --- SISTEMA DE ZOMBIES ---
         const zombieTexture = new THREE.TextureLoader().load('https://images.itsthisforthat.com/doom_zombie.png'); 
         zombieTexture.magFilter = THREE.NearestFilter;
         zombieTexture.minFilter = THREE.NearestFilter;
-        const zombieMat = new THREE.SpriteMaterial({ map: zombieTexture });
-        const zombieSprite = new THREE.Sprite(zombieMat);
-        zombieSprite.scale.set(1.2, 2.2, 1);
-        zombieSprite.position.set(10, 2, 10);
-        scene.add(zombieSprite);
+        const zombies = [];
 
-        let zombieState = { speed: 2.5, angle: 0, bobbing: 0 };
-        function updateZombieIA(delta) {
-            const dist = zombieSprite.position.distanceTo(camera.position);
-            // Si el jugador está cerca (menos de 15 metros), el zombie lo persigue
-            if (dist < 15 && dist > 1.2) {
-                const dir = new THREE.Vector3().subVectors(camera.position, zombieSprite.position).normalize();
-                zombieSprite.position.x += dir.x * zombieState.speed * delta;
-                zombieSprite.position.z += dir.z * zombieState.speed * delta;
-                
-                // Animación de balanceo (walking bobbing)
-                zombieState.bobbing += delta * 10;
-                zombieSprite.position.y = 1.8 + Math.abs(Math.sin(zombieState.bobbing)) * 0.3;
-            }
+        function spawnZombie(x, y, z) {
+            const zombieMat = new THREE.SpriteMaterial({ map: zombieTexture });
+            const sprite = new THREE.Sprite(zombieMat);
+            sprite.scale.set(1.2, 2.2, 1);
+            sprite.position.set(x, y + 1.1, z);
+            scene.add(sprite);
+            zombies.push({ sprite, bobbing: Math.random() * 10, speed: 2.5 });
         }
-        // ------------------------------------
+
+        function updateZombies(delta) {
+            zombies.forEach(z => {
+                const dist = z.sprite.position.distanceTo(camera.position);
+                if (dist < 15 && dist > 1.2) {
+                    const dir = new THREE.Vector3().subVectors(camera.position, z.sprite.position).normalize();
+                    z.sprite.position.x += dir.x * z.speed * delta;
+                    z.sprite.position.z += dir.z * z.speed * delta;
+                    z.bobbing += delta * 10;
+                    z.sprite.position.y = 1.1 + Math.abs(Math.sin(z.bobbing)) * 0.3;
+                }
+            });
+        }
+        // Iniciar un zombie de prueba
+        spawnZombie(10, 2, 10);
 
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(blockBox, new THREE.MeshStandardMaterial({ color }));
@@ -290,20 +295,26 @@
             const hits = ray.intersectObjects(blocks.filter(b => b.parent && b.parent.visible), false);
             if(hits.length > 0 && hits[0].distance < 5) {
                 const s = document.querySelectorAll('.slot')[activeSlot];
-                if(s.dataset.color !== "null" && s.dataset.type === "block") {
+                if(s.dataset.color !== "null") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
-                    const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.9, 0.9, 0.9));
-                    if(!pBox.intersectsBox(bBox)) {
-                        const colorInt = parseInt(s.dataset.color);
-                        const newB = addBlock(pos.x, pos.y, pos.z, colorInt);
-                        hits[0].object.parent.add(newB);
-                        broadcastPlace(pos.x, pos.y, pos.z, colorInt); 
-                        if(!document.getElementById('mod-creative-inf').checked) {
-                            let c = parseInt(s.dataset.count) - 1;
-                            s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
-                            if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+                    
+                    if(s.dataset.type === "spawner") {
+                        spawnZombie(pos.x, pos.y, pos.z);
+                    } else if(s.dataset.type === "block") {
+                        const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
+                        const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.9, 0.9, 0.9));
+                        if(!pBox.intersectsBox(bBox)) {
+                            const colorInt = parseInt(s.dataset.color);
+                            const newB = addBlock(pos.x, pos.y, pos.z, colorInt);
+                            hits[0].object.parent.add(newB);
+                            broadcastPlace(pos.x, pos.y, pos.z, colorInt);
                         }
+                    }
+                    
+                    if(!document.getElementById('mod-creative-inf').checked && s.dataset.type !== "tool") {
+                        let c = parseInt(s.dataset.count) - 1;
+                        s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
+                        if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
                     }
                 }
             }
@@ -315,7 +326,7 @@
             const delta = Math.min(clock.getDelta(), 0.1);
             updateChunks();
             broadcastMove(); 
-            updateZombieIA(delta); // Actualizar Zombie
+            updateZombies(delta);
 
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
@@ -368,7 +379,7 @@
 
         window.addToInventory = (color, count = 1, type = "block") => {
             const slots = document.querySelectorAll('.slot');
-            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
+            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color && s.dataset.type === type) || Array.from(slots).find(s => s.dataset.color === "null");
             if(t) {
                 t.dataset.color = color; t.dataset.count = (parseInt(t.dataset.count) || 0) + count; t.dataset.type = type;
                 t.style.backgroundColor = "#" + color.toString(16).padStart(6,'0'); t.innerText = t.dataset.count;
