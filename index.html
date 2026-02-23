@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Doom Zombie Spawner</title>
+    <title>Minecraft JS: Entity Engine</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
@@ -17,6 +17,7 @@
         .btn:active { border-bottom: 0; transform: translateY(2px); }
         .btn-red { background: #f44336; border-bottom-color: #b71c1c; }
         .btn-blue { background: #2196F3; border-bottom-color: #1565C0; }
+        .btn-purple { background: #9c27b0; border-bottom-color: #7b1fa2; }
         .mod-row { margin: 8px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; width: 300px; justify-content: space-between; font-size: 13px; }
         #creative-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 400px; background: #c6c6c6; border: 4px solid #373737; display: none; flex-direction: column; padding: 15px; z-index: 300; pointer-events: auto; color: #333; overflow-y: auto; }
         #creative-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
@@ -54,9 +55,35 @@
         <div id="mp-status" style="font-size: 12px; color: #aaa; margin-bottom: 10px;">ID Mi Dispositivo: ...</div>
         <button class="btn btn-blue" onclick="openSubMenu('mp-menu')">🌐 MULTIJUGADOR</button>
         <button class="btn" onclick="openSubMenu('obj-editor')">🏗️ CREAR NUEVO OBJETO</button>
+        <button class="btn btn-purple" onclick="openSubMenu('ent-editor')">👹 DISEÑAR ENTIDAD</button>
         <button class="btn" onclick="openSubMenu('mod-menu-inner')">🚀 MENÚ DE MODS</button>
         <button class="btn btn-red" onclick="closeAllMenus()">CERRAR [M]</button>
     </div>
+
+    <div id="ent-editor" class="full-overlay">
+        <h2>CREADOR DE ENTIDADES</h2>
+        <input type="text" id="ent-name" placeholder="Nombre de la entidad..." style="padding:10px; margin:5px;">
+        <div class="mod-row">Color Base: <input type="color" id="ent-color" value="#ff0000"></div>
+        <div class="mod-row">Vida: <input type="number" id="ent-hp" value="20" style="width:50px"> ❤️</div>
+        <div class="mod-row">Daño: <input type="number" id="ent-dmg" value="4" style="width:50px"> ⚔️</div>
+        <div class="mod-row">Comportamiento: 
+            <select id="ent-behavior">
+                <option value="hostile">Hostil</option>
+                <option value="passive">Pasivo</option>
+                <option value="neutral">Neutral</option>
+            </select>
+        </div>
+        <div class="mod-row">Drop al morir: 
+            <select id="ent-drop">
+                <option value="0x9e9e9e">Piedra</option>
+                <option value="0x5d4037">Madera</option>
+                <option value="0x2e7d32">Pasto</option>
+            </select>
+        </div>
+        <button class="btn btn-purple" onclick="saveCustomEntity()">🧬 CREAR Y AÑADIR HUEVO</button>
+        <button class="btn btn-red" onclick="openSubMenu('m-hub')">VOLVER</button>
+    </div>
+
     <div id="mp-menu" class="full-overlay">
         <h2>MULTIJUGADOR P2P</h2>
         <div class="mod-row">Tu Código: <b id="my-code-display">Cargando...</b></div>
@@ -104,8 +131,8 @@
         <div class="crafting-grid" id="main-craft-grid">
             <div id="c0" class="craft-slot" onclick="tapToCraft(0)"></div>
             <div id="c1" class="craft-slot" onclick="tapToCraft(1)"></div>
-            <div id="c2" class="craft-slot" onclick="tapToCraft(3)"></div>
-            <div id="c3" class="craft-slot" onclick="tapToCraft(4)"></div>
+            <div id="c2" class="craft-slot" onclick="tapToCraft(2)"></div>
+            <div id="c3" class="craft-slot" onclick="tapToCraft(3)"></div>
         </div>
         <div id="craft-result" onclick="finishCraft()">CRAFTEAR</div>
     </div>
@@ -114,8 +141,8 @@
             <div id="s0" class="slot active" data-color="null" data-count="0" onclick="updateActiveSlot(0)">1</div>
             <div id="s1" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(1)">2</div>
             <div id="s2" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(2)">3</div>
-            <div id="s3" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(4)">4</div>
-            <div id="s4" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(5)">5</div>
+            <div id="s3" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(3)">4</div>
+            <div id="s4" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(4)">5</div>
         </div>
     </div>
 
@@ -187,9 +214,14 @@
             {name:"Hojas",color:0x388e3c, type:"block"},
             {name:"Piedra",color:0x9e9e9e, type:"block"},
             {name:"Bedrock",color:0x1a1a1a, type:"block"},
-            {name:"Spawn Zombie", color:0xff0000, type:"spawner"},
+            {name:"Zombie Original", color:0xff0000, type:"spawner", entId: 'default_zombie'},
             {name:"Pico Madera", color:0x8B4513, type:"tool", power: 2.5}
         ];
+
+        // BASE DE DATOS DE ENTIDADES PERSONALIZADAS
+        const entityBlueprints = {
+            'default_zombie': { hp: 20, dmg: 4, behavior: 'hostile', drop: 0x5d4037, color: 0xff0000 }
+        };
 
         const CHUNK_SIZE = 12;
         const RENDER_DISTANCE = 1; 
@@ -205,35 +237,60 @@
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
-        // --- SISTEMA DE ZOMBIES ---
+        // --- SISTEMA DE ENTIDADES DINÁMICO ---
         const zombieTexture = new THREE.TextureLoader().load('https://images.itsthisforthat.com/doom_zombie.png'); 
         zombieTexture.magFilter = THREE.NearestFilter;
         zombieTexture.minFilter = THREE.NearestFilter;
-        const zombies = [];
+        const entities = [];
 
-        function spawnZombie(x, y, z) {
-            const zombieMat = new THREE.SpriteMaterial({ map: zombieTexture });
-            const sprite = new THREE.Sprite(zombieMat);
+        function spawnEntity(x, y, z, blueprintId) {
+            const bp = entityBlueprints[blueprintId];
+            const mat = new THREE.SpriteMaterial({ map: zombieTexture, color: bp.color });
+            const sprite = new THREE.Sprite(mat);
             sprite.scale.set(1.2, 2.2, 1);
             sprite.position.set(x, y + 1.1, z);
             scene.add(sprite);
-            zombies.push({ sprite, bobbing: Math.random() * 10, speed: 2.5 });
+            entities.push({ 
+                sprite, 
+                hp: bp.hp, 
+                dmg: bp.dmg, 
+                behavior: bp.behavior, 
+                drop: bp.drop,
+                bobbing: Math.random() * 10, 
+                speed: 2.5 
+            });
         }
 
-        function updateZombies(delta) {
-            zombies.forEach(z => {
-                const dist = z.sprite.position.distanceTo(camera.position);
-                if (dist < 15 && dist > 1.2) {
-                    const dir = new THREE.Vector3().subVectors(camera.position, z.sprite.position).normalize();
-                    z.sprite.position.x += dir.x * z.speed * delta;
-                    z.sprite.position.z += dir.z * z.speed * delta;
-                    z.bobbing += delta * 10;
-                    z.sprite.position.y = 1.1 + Math.abs(Math.sin(z.bobbing)) * 0.3;
+        function updateEntities(delta) {
+            entities.forEach((ent, index) => {
+                const dist = ent.sprite.position.distanceTo(camera.position);
+                
+                // IA de Movimiento
+                if (ent.behavior === 'hostile' && dist < 15 && dist > 1.2) {
+                    const dir = new THREE.Vector3().subVectors(camera.position, ent.sprite.position).normalize();
+                    ent.sprite.position.x += dir.x * ent.speed * delta;
+                    ent.sprite.position.z += dir.z * ent.speed * delta;
+                    ent.bobbing += delta * 10;
+                    ent.sprite.position.y = 1.1 + Math.abs(Math.sin(ent.bobbing)) * 0.3;
                 }
             });
         }
-        // Iniciar un zombie de prueba
-        spawnZombie(10, 2, 10);
+
+        window.saveCustomEntity = () => {
+            const id = 'ent_' + Date.now();
+            const name = document.getElementById('ent-name').value || "Nuevo Monstruo";
+            const color = parseInt(document.getElementById('ent-color').value.replace('#','0x'));
+            const hp = parseInt(document.getElementById('ent-hp').value);
+            const dmg = parseInt(document.getElementById('ent-dmg').value);
+            const behavior = document.getElementById('ent-behavior').value;
+            const drop = parseInt(document.getElementById('ent-drop').value);
+
+            entityBlueprints[id] = { hp, dmg, behavior, drop, color };
+            catalog.push({ name: "Huevo " + name, color: color, type: "spawner", entId: id });
+            
+            alert("¡Entidad guardada! Busca el huevo en el menú T");
+            openSubMenu('m-hub');
+        };
 
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(blockBox, new THREE.MeshStandardMaterial({ color }));
@@ -299,7 +356,7 @@
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
                     
                     if(s.dataset.type === "spawner") {
-                        spawnZombie(pos.x, pos.y, pos.z);
+                        spawnEntity(pos.x, pos.y, pos.z, s.dataset.entid);
                     } else if(s.dataset.type === "block") {
                         const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
                         const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.9, 0.9, 0.9));
@@ -309,12 +366,6 @@
                             hits[0].object.parent.add(newB);
                             broadcastPlace(pos.x, pos.y, pos.z, colorInt);
                         }
-                    }
-                    
-                    if(!document.getElementById('mod-creative-inf').checked && s.dataset.type !== "tool") {
-                        let c = parseInt(s.dataset.count) - 1;
-                        s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
-                        if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
                     }
                 }
             }
@@ -326,7 +377,7 @@
             const delta = Math.min(clock.getDelta(), 0.1);
             updateChunks();
             broadcastMove(); 
-            updateZombies(delta);
+            updateEntities(delta);
 
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
@@ -377,11 +428,12 @@
             return false;
         }
 
-        window.addToInventory = (color, count = 1, type = "block") => {
+        window.addToInventory = (color, count = 1, type = "block", entId = null) => {
             const slots = document.querySelectorAll('.slot');
             let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color && s.dataset.type === type) || Array.from(slots).find(s => s.dataset.color === "null");
             if(t) {
                 t.dataset.color = color; t.dataset.count = (parseInt(t.dataset.count) || 0) + count; t.dataset.type = type;
+                if(entId) t.dataset.entid = entId;
                 t.style.backgroundColor = "#" + color.toString(16).padStart(6,'0'); t.innerText = t.dataset.count;
             }
         };
@@ -430,7 +482,7 @@
             catalog.forEach(item => {
                 const div = document.createElement('div'); div.className = 'c-item';
                 div.style.backgroundColor = "#" + item.color.toString(16).padStart(6, '0');
-                div.innerText = item.name; div.onclick = () => addToInventory(item.color, 64, item.type); 
+                div.innerText = item.name; div.onclick = () => addToInventory(item.color, 64, item.type, item.entId); 
                 list.appendChild(div);
             });
         }
