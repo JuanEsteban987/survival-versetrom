@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Ultimate Structures</title>
+    <title>Minecraft JS: Tools & Nature</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
@@ -38,27 +38,35 @@
 <body>
     <div id="break-indicator"></div>
     <div id="menu" class="full-overlay" style="display: flex;">
-        <h1>MINECRAFT JS: STRUCTURES</h1>
+        <h1>MINECRAFT JS: TOOLS</h1>
         <button class="btn" onclick="startGame(false)">MODO PC</button>
         <button class="btn" onclick="startGame(true)">MODO CELULAR</button>
     </div>
-    
+
     <div id="m-hub" class="full-overlay">
         <h2>CENTRO DE CONTROL (M)</h2>
         <button class="btn" onclick="openSubMenu('obj-editor')">🏗️ CREAR NUEVO OBJETO</button>
         <button class="btn" onclick="openSubMenu('mod-menu-inner')">🚀 MENÚ DE MODS</button>
         <button class="btn btn-red" onclick="closeAllMenus()">CERRAR [M]</button>
     </div>
+
     <div id="creative-panel">
         <h3 style="margin-top:0">MODO CREATIVO</h3>
         <div id="creative-list"></div>
         <button class="btn btn-red" style="width:100%; margin: 10px 0 0 0;" onclick="toggleCreative()">CERRAR [T]</button>
     </div>
+
     <div id="obj-editor" class="full-overlay">
-        <h2>CREADOR DE BLOQUES</h2>
+        <h2>CREADOR DE ÍTEMS</h2>
         <input type="text" id="obj-name" placeholder="Nombre..." style="padding:10px; margin:5px;">
-        <div class="mod-row">Color: <input type="color" id="obj-color" value="#ff00ff"></div>
-        <div class="mod-row">Minado (s): <input type="range" id="obj-hard" min="0" max="10" step="0.5" value="2" oninput="updateHardText(this.value)"> <span id="hard-val">2s</span></div>
+        <div class="mod-row">Tipo: 
+            <select id="obj-type" style="padding:5px;">
+                <option value="block">Bloque</option>
+                <option value="tool">Pico (Herramienta)</option>
+            </select>
+        </div>
+        <div class="mod-row">Color: <input type="color" id="obj-color" value="#ffffff"></div>
+        <div class="mod-row">Dureza/Poder: <input type="range" id="obj-hard" min="0" max="10" step="0.5" value="2" oninput="updateHardText(this.value)"> <span id="hard-val">2s</span></div>
         <div class="crafting-grid">
             <div class="craft-slot" id="e0" onclick="cycleEditMat(this)" data-mat="null">VACÍO</div>
             <div class="craft-slot" id="e1" onclick="cycleEditMat(this)" data-mat="null">VACÍO</div>
@@ -68,6 +76,7 @@
         <button class="btn" onclick="saveCustomObject()">💾 GUARDAR</button>
         <button class="btn btn-red" onclick="openSubMenu('m-hub')">CANCELAR</button>
     </div>
+
     <div id="mod-menu-inner" class="full-overlay">
         <h2>MODS</h2>
         <div class="mod-row">Creativo Inf: <input type="checkbox" id="mod-creative-inf"></div>
@@ -75,6 +84,7 @@
         <div class="mod-row">Velocidad: <input type="range" id="mod-speed" min="1" max="30" value="6" oninput="updateMods()"></div>
         <button class="btn" onclick="openSubMenu('m-hub')">VOLVER</button>
     </div>
+
     <div id="mobile-controls">
         <div id="joystick-container"><div id="joystick-knob"></div></div>
         <div class="m-btn" id="m-mine">MINAR</div>
@@ -84,6 +94,7 @@
         <div class="m-btn" id="m-mod">M</div>
         <div class="m-btn" id="m-cre">T</div>
     </div>
+
     <div id="inventory-panel">
         <div class="crafting-grid" id="main-craft-grid">
             <div id="c0" class="craft-slot" onclick="tapToCraft(0)"></div>
@@ -93,6 +104,7 @@
         </div>
         <div id="craft-result" onclick="finishCraft()">CRAFTEAR</div>
     </div>
+
     <div id="ui-layer">
         <div id="hotbar">
             <div id="s0" class="slot active" data-color="null" data-count="0" onclick="updateActiveSlot(0)">1</div>
@@ -108,20 +120,26 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-        // --- GLOBALES ---
         let blocks = [], isMobile = false, activeSlot = 0;
         let isInventoryOpen = false, isAnyMOpen = false, isCreativeOpen = false;
         let velocityY = 0, isGrounded = false, keys = {};
         let config = { gravity: 28, speed: 6, fly: false, sensitivity: 0.002, fov: 80 };
         let isMining = false, mineProgress = 0, currentTarget = null;
+
+        // Base de Datos de Ítems
         let hardness = { "2e7d32": 0.4, "795548": 0.5, "5d4037": 1.2, "388e3c": 0.2, "9e9e9e": 2.5, "1a1a1a": Infinity };
+        let tools = { "wooden_pick": 2.5, "diamond_pick": 10.0 }; // Multiplicadores de velocidad
+        
         const catalog = [
-            {name:"Pasto",color:0x2e7d32}, {name:"Tierra",color:0x795548}, 
-            {name:"Madera",color:0x5d4037}, {name:"Hojas",color:0x388e3c}, 
-            {name:"Piedra",color:0x9e9e9e}, {name:"Bedrock",color:0x1a1a1a}
+            {name:"Pasto",color:0x2e7d32, type:"block"},
+            {name:"Tierra",color:0x795548, type:"block"},
+            {name:"Madera",color:0x5d4037, type:"block"},
+            {name:"Hojas",color:0x388e3c, type:"block"},
+            {name:"Piedra",color:0x9e9e9e, type:"block"},
+            {name:"Bedrock",color:0x1a1a1a, type:"block"},
+            {name:"Pico Madera", color:0x8B4513, type:"tool", power: 2.5}
         ];
 
-        // --- SISTEMA DE MUNDO ---
         const CHUNK_SIZE = 12;
         const RENDER_DISTANCE = 1; 
         const chunks = new Map();
@@ -145,32 +163,17 @@
             return m;
         }
 
-        // Estructuras Procedurales
-        function createTree(x, y, z, group) {
-            for(let i=1; i<=4; i++) {
-                const trunk = addBlock(x, y+i, z, 0x5d4037); group.add(trunk);
+        // Generador de Árboles
+        function spawnTree(x, y, z, group) {
+            const trunkHeight = 3 + Math.floor(Math.random()*2);
+            for(let i=1; i<=trunkHeight; i++) {
+                group.add(addBlock(x, y+i, z, 0x5d4037));
             }
-            for(let ox=-1; ox<=1; ox++){
-                for(let oz=-1; oz<=1; oz++){
-                    for(let oy=4; oy<=5; oy++){
-                        const leaf = addBlock(x+ox, y+oy, z+oz, 0x388e3c); group.add(leaf);
+            for(let ox=-1; ox<=1; ox++) {
+                for(let oz=-1; oz<=1; oz++) {
+                    for(let oy=0; oy<2; oy++) {
+                        group.add(addBlock(x+ox, y+trunkHeight+oy, z+oz, 0x388e3c));
                     }
-                }
-            }
-        }
-
-        function createHouse(x, y, z, group) {
-            for(let ox=0; ox<3; ox++){
-                for(let oz=0; oz<3; oz++){
-                    for(let oy=1; oy<3; oy++){
-                        if(ox === 1 && oz === 0 && oy === 1) continue; // Puerta
-                        const wall = addBlock(x+ox, y+oy, z+oz, 0x9e9e9e); group.add(wall);
-                    }
-                }
-            }
-            for(let ox=-1; ox<4; ox++) {
-                for(let oz=-1; oz<4; oz++) {
-                    const roof = addBlock(x+ox, y+3, z+oz, 0x5d4037); group.add(roof);
                 }
             }
         }
@@ -178,7 +181,6 @@
         async function generateChunk(cx, cz) {
             const key = `${cx},${cz}`;
             if (chunks.has(key)) return;
-            
             const chunkGroup = new THREE.Group();
             chunks.set(key, chunkGroup);
             scene.add(chunkGroup);
@@ -192,11 +194,8 @@
                     chunkGroup.add(addBlock(worldX, h, worldZ, 0x2e7d32));
                     chunkGroup.add(addBlock(worldX, h-1, worldZ, 0x795548));
 
-                    // Probabilidad de estructuras (Solo en la superficie)
-                    if(x > 1 && x < CHUNK_SIZE-2 && z > 1 && z < CHUNK_SIZE-2) {
-                        const rand = Math.random();
-                        if(rand < 0.02) createTree(worldX, h, worldZ, chunkGroup);
-                        else if(rand < 0.025) createHouse(worldX, h, worldZ, chunkGroup);
+                    if(Math.random() < 0.015 && x > 1 && x < CHUNK_SIZE-2) {
+                        spawnTree(worldX, h, worldZ, chunkGroup);
                     }
                 }
                 if(x % 4 === 0) await new Promise(r => setTimeout(r, 0));
@@ -223,7 +222,6 @@
             }
         }
 
-        // --- LÓGICA DE JUEGO ---
         scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
         camera.position.set(5, 12, 5);
 
@@ -232,16 +230,10 @@
             const hits = ray.intersectObjects(blocks.filter(b => b.parent && b.parent.visible), false);
             if(hits.length > 0 && hits[0].distance < 5) {
                 const s = document.querySelectorAll('.slot')[activeSlot];
-                if(s.dataset.color !== "null") {
+                if(s.dataset.color !== "null" && s.dataset.type === "block") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    
-                    // VALIDACIÓN: No colocar sobre el jugador
-                    const pBox = new THREE.Box3().setFromCenterAndSize(
-                        new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), 
-                        new THREE.Vector3(0.6, 1.8, 0.6)
-                    );
-                    const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.95, 0.95, 0.95));
-                    
+                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
+                    const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.9, 0.9, 0.9));
                     if(!pBox.intersectsBox(bBox)) {
                         const newB = addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
                         hits[0].object.parent.add(newB);
@@ -269,10 +261,15 @@
                     const hex = b.material.color.getHexString().toLowerCase();
                     if(hardness[hex] !== Infinity) {
                         if(currentTarget !== b) { currentTarget = b; mineProgress = 0; }
-                        mineProgress += delta;
+                        
+                        // Lógica de Herramienta: Si el slot activo es un Pico, mina más rápido
+                        const s = document.querySelectorAll('.slot')[activeSlot];
+                        let power = (s.dataset.type === "tool") ? parseFloat(s.dataset.power) : 1;
+                        
+                        mineProgress += delta * power;
                         document.getElementById('break-indicator').style.display = 'block';
                         if(mineProgress >= (hardness[hex] || 1)) {
-                            addToInventory(b.material.color.getHex());
+                            addToInventory(b.material.color.getHex(), 1, "block");
                             b.parent.remove(b); blocks = blocks.filter(x => x !== b); resetMining();
                         }
                     }
@@ -284,21 +281,18 @@
                 const moveVec = new THREE.Vector3();
                 if(isMobile) { moveVec.z = -joyDir.y; moveVec.x = joyDir.x; }
                 else { if(keys['KeyW']) moveVec.z += 1; if(keys['KeyS']) moveVec.z -= 1; if(keys['KeyA']) moveVec.x -= 1; if(keys['KeyD']) moveVec.x += 1; }
-                
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
                 const nextX = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
-                
                 if(!checkCollisions(new THREE.Vector3(nextX.x, camera.position.y, camera.position.z))) camera.position.x = nextX.x;
                 if(!checkCollisions(new THREE.Vector3(camera.position.x, camera.position.y, nextX.z))) camera.position.z = nextX.z;
-                
                 if(!config.fly) {
                     const nextY = camera.position.clone(); nextY.y += velocityY * delta;
                     if(!checkCollisions(nextY)) { camera.position.y = nextY.y; isGrounded = false; }
                     else { if(velocityY < 0) isGrounded = true; velocityY = 0; }
                 } else {
-                    if(keys['Space']) camera.position.y += 0.15;
-                    if(keys['ShiftLeft']) camera.position.y -= 0.15;
+                    if(keys['Space']) camera.position.y += 0.2;
+                    if(keys['ShiftLeft']) camera.position.y -= 0.2;
                 }
             }
             renderer.render(scene, camera);
@@ -315,32 +309,38 @@
             return false;
         }
 
-        // --- SISTEMAS DE SOPORTE (INV, CRAFT, UI) ---
-        window.addToInventory = (color, count = 1) => {
+        window.addToInventory = (color, count = 1, type = "block", power = 1) => {
             const slots = document.querySelectorAll('.slot');
-            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
+            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color && s.dataset.type === type) || Array.from(slots).find(s => s.dataset.color === "null");
             if(t) {
                 let current = (parseInt(t.dataset.count) || 0);
-                t.dataset.color = color; t.dataset.count = current + count;
+                t.dataset.color = color; 
+                t.dataset.count = current + count;
+                t.dataset.type = type;
+                t.dataset.power = power;
                 t.style.backgroundColor = "#" + color.toString(16).padStart(6,'0');
-                t.innerText = t.dataset.count;
+                t.innerText = t.dataset.type === "tool" ? "⛏️" : t.dataset.count;
             }
         };
+
         window.tapToCraft = (idx) => {
             const s = document.querySelectorAll('.slot')[activeSlot];
             if(s.dataset.color !== "null") {
                 const el = document.getElementById('c'+idx);
-                el.style.backgroundColor = s.style.backgroundColor; el.dataset.color = s.dataset.color;
+                el.style.backgroundColor = s.style.backgroundColor; 
+                el.dataset.color = s.dataset.color;
             }
         };
+
         window.finishCraft = () => {
             const craftSlots = document.querySelectorAll('#main-craft-grid .craft-slot');
             if(Array.from(craftSlots).some(s => s.dataset.color !== "null")) {
-                addToInventory(catalog[catalog.length-1].color, 1);
+                addToInventory(catalog[catalog.length-1].color, 1, catalog[catalog.length-1].type, catalog[catalog.length-1].power);
                 craftSlots.forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
             }
         };
-        window.updateHardText = (v) => { document.getElementById('hard-val').innerText = v + "s"; };
+
+        window.updateHardText = (v) => { document.getElementById('hard-val').innerText = v + "x"; };
         window.cycleEditMat = (el) => {
             const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"0x2e7d32"}, {n:"MADERA",c:"0x5d4037"}, {n:"PIEDRA",c:"0x9e9e9e"}];
             let idx = mats.findIndex(m => m.c === el.dataset.mat);
@@ -348,24 +348,35 @@
             el.dataset.mat = next.c; el.innerText = next.n;
             el.style.backgroundColor = (next.c !== "null") ? "#" + parseInt(next.c).toString(16).padStart(6,'0') : "#8b8b8b";
         };
+
         window.saveCustomObject = () => {
             const colorHex = document.getElementById('obj-color').value;
-            catalog.push({ name: document.getElementById('obj-name').value || "Bloque", color: parseInt(colorHex.replace('#','0x')) });
-            hardness[colorHex.replace('#','').toLowerCase()] = parseFloat(document.getElementById('obj-hard').value);
+            const type = document.getElementById('obj-type').value;
+            const val = parseFloat(document.getElementById('obj-hard').value);
+            const colorInt = parseInt(colorHex.replace('#','0x'));
+            
+            catalog.push({ name: document.getElementById('obj-name').value || "Ítem", color: colorInt, type: type, power: val });
+            if(type === "block") hardness[colorHex.replace('#','').toLowerCase()] = val;
+            
             openSubMenu('m-hub');
         };
+
         window.toggleCreative = () => {
             isCreativeOpen = !isCreativeOpen; document.getElementById('creative-panel').style.display = isCreativeOpen ? 'flex' : 'none';
             if(isCreativeOpen) { renderCreativeList(); if(!isMobile) controls.unlock(); } else if(!isMobile) controls.lock();
         };
+
         function renderCreativeList() {
             const list = document.getElementById('creative-list'); list.innerHTML = "";
             catalog.forEach(item => {
                 const div = document.createElement('div'); div.className = 'c-item';
                 div.style.backgroundColor = "#" + item.color.toString(16).padStart(6, '0');
-                div.innerText = item.name; div.onclick = () => addToInventory(item.color, 64); list.appendChild(div);
+                div.innerText = item.name; 
+                div.onclick = () => addToInventory(item.color, 64, item.type, item.power || 1); 
+                list.appendChild(div);
             });
         }
+
         function resetMining() { currentTarget = null; isMining = false; document.getElementById('break-indicator').style.display = 'none'; }
         window.startGame = (m) => { isMobile = m; document.getElementById('menu').style.display='none'; if(m) document.getElementById('mobile-controls').style.display='block'; else controls.lock(); animate(); };
         window.openSubMenu = (id) => { isAnyMOpen = true; document.querySelectorAll('.full-overlay').forEach(el => el.style.display = 'none'); document.getElementById(id).style.display = 'flex'; if(!isMobile) controls.unlock(); };
@@ -374,7 +385,6 @@
         window.updateActiveSlot = (i) => { activeSlot = i; document.querySelectorAll('.slot').forEach((s,idx) => s.classList.toggle('active', idx === i)); };
         window.updateMods = () => { config.speed = parseFloat(document.getElementById('mod-speed').value); config.fly = document.getElementById('mod-fly').checked; };
 
-        // CONTROLES
         window.addEventListener('mousedown', (e) => { if(controls.isLocked) { if(e.button===0) isMining=true; if(e.button===2) handlePlace(); }});
         window.addEventListener('mouseup', resetMining);
         window.addEventListener('keydown', e => { 
@@ -387,7 +397,6 @@
         });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
-        // Mobile Events
         document.getElementById('m-mine').ontouchstart = (e) => { e.preventDefault(); isMining = true; };
         document.getElementById('m-mine').ontouchend = resetMining;
         document.getElementById('m-place').onclick = handlePlace;
