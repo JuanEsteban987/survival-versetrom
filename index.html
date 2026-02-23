@@ -273,7 +273,8 @@
         window.saveCustomObject = () => {
             const hex = document.getElementById('obj-color').value.replace('#','');
             customItemColor = parseInt("0x"+hex);
-            hardness[hex] = document.getElementById('obj-hard').value / 10;
+            // CORRECCIÓN: Dureza determinada directamente por segundos
+            hardness[hex] = parseFloat(document.getElementById('obj-hard').value);
             openSubMenu('m-hub');
         };
 
@@ -318,6 +319,27 @@
         };
 
         window.finishCraft = () => {
+            // CORRECCIÓN: Quitar los items del inventario al usarlos
+            const craftSlots = document.querySelectorAll('.crafting-grid .craft-slot[id^="c"]');
+            const inventorySlots = document.querySelectorAll('.slot');
+
+            craftSlots.forEach(cSlot => {
+                if (cSlot.dataset.color !== "null") {
+                    let invSlot = Array.from(inventorySlots).find(s => s.dataset.color === cSlot.dataset.color);
+                    if (invSlot) {
+                        let count = parseInt(invSlot.dataset.count) - 1;
+                        invSlot.dataset.count = count;
+                        if (count <= 0) {
+                            invSlot.dataset.color = "null";
+                            invSlot.style.backgroundColor = "rgba(255,255,255,0.1)";
+                            invSlot.innerText = Array.from(inventorySlots).indexOf(invSlot) + 1;
+                        } else {
+                            invSlot.innerText = count;
+                        }
+                    }
+                }
+            });
+
             document.querySelectorAll('.craft-slot').forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
             addToInventory(customItemColor);
         };
@@ -327,7 +349,6 @@
         // --- NUEVOS EVENTOS: RATÓN Y NÚMEROS ---
         window.addEventListener('wheel', (e) => {
             if (controls.isLocked) {
-                // Cambia slot con la rueda
                 activeSlot = (activeSlot + (e.deltaY > 0 ? 1 : -1) + 5) % 5;
                 updateActiveSlot(activeSlot);
             }
@@ -365,9 +386,7 @@
 
         window.addEventListener('keydown', e => { 
             keys[e.code] = true; 
-            // CAMBIO DE HOTBAR CON NÚMEROS
             if (['1','2','3','4','5'].includes(e.key)) updateActiveSlot(parseInt(e.key) - 1);
-            
             if(e.key.toLowerCase()==='m') isAnyMOpen ? closeAllMenus() : openSubMenu('m-hub'); 
             if(e.key.toLowerCase()==='e') toggleInventory();
             if(e.code==='Space' && (isGrounded || config.fly)) velocityY = 11;
