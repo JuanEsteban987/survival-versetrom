@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Ultra Optimized</title>
+    <title>Minecraft JS: Ultimate Structures</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
@@ -38,10 +38,11 @@
 <body>
     <div id="break-indicator"></div>
     <div id="menu" class="full-overlay" style="display: flex;">
-        <h1>MINECRAFT JS (ULTRA)</h1>
+        <h1>MINECRAFT JS: STRUCTURES</h1>
         <button class="btn" onclick="startGame(false)">MODO PC</button>
         <button class="btn" onclick="startGame(true)">MODO CELULAR</button>
     </div>
+    
     <div id="m-hub" class="full-overlay">
         <h2>CENTRO DE CONTROL (M)</h2>
         <button class="btn" onclick="openSubMenu('obj-editor')">🏗️ CREAR NUEVO OBJETO</button>
@@ -107,17 +108,21 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-        // --- VARIABLES Y CONFIG ---
+        // --- GLOBALES ---
         let blocks = [], isMobile = false, activeSlot = 0;
         let isInventoryOpen = false, isAnyMOpen = false, isCreativeOpen = false;
         let velocityY = 0, isGrounded = false, keys = {};
-        let config = { gravity: 25, speed: 6, fly: false, sensitivity: 0.002, fov: 80 };
+        let config = { gravity: 28, speed: 6, fly: false, sensitivity: 0.002, fov: 80 };
         let isMining = false, mineProgress = 0, currentTarget = null;
         let hardness = { "2e7d32": 0.4, "795548": 0.5, "5d4037": 1.2, "388e3c": 0.2, "9e9e9e": 2.5, "1a1a1a": Infinity };
-        const catalog = [{name:"Pasto",color:0x2e7d32},{name:"Tierra",color:0x795548},{name:"Madera",color:0x5d4037},{name:"Hojas",color:0x388e3c},{name:"Piedra",color:0x9e9e9e},{name:"Bedrock",color:0x1a1a1a}];
+        const catalog = [
+            {name:"Pasto",color:0x2e7d32}, {name:"Tierra",color:0x795548}, 
+            {name:"Madera",color:0x5d4037}, {name:"Hojas",color:0x388e3c}, 
+            {name:"Piedra",color:0x9e9e9e}, {name:"Bedrock",color:0x1a1a1a}
+        ];
 
-        // --- SISTEMA DE CHUNKS OPTIMIZADO ---
-        const CHUNK_SIZE = 12; // Más grande pero más eficiente
+        // --- SISTEMA DE MUNDO ---
+        const CHUNK_SIZE = 12;
         const RENDER_DISTANCE = 1; 
         const chunks = new Map();
         let currentChunkCoords = { x: 999, z: 999 };
@@ -125,8 +130,8 @@
 
         const scene = new THREE.Scene(); 
         scene.background = new THREE.Color(0x87ceeb);
-        const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth/window.innerHeight, 0.1, 500);
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
@@ -140,6 +145,36 @@
             return m;
         }
 
+        // Estructuras Procedurales
+        function createTree(x, y, z, group) {
+            for(let i=1; i<=4; i++) {
+                const trunk = addBlock(x, y+i, z, 0x5d4037); group.add(trunk);
+            }
+            for(let ox=-1; ox<=1; ox++){
+                for(let oz=-1; oz<=1; oz++){
+                    for(let oy=4; oy<=5; oy++){
+                        const leaf = addBlock(x+ox, y+oy, z+oz, 0x388e3c); group.add(leaf);
+                    }
+                }
+            }
+        }
+
+        function createHouse(x, y, z, group) {
+            for(let ox=0; ox<3; ox++){
+                for(let oz=0; oz<3; oz++){
+                    for(let oy=1; oy<3; oy++){
+                        if(ox === 1 && oz === 0 && oy === 1) continue; // Puerta
+                        const wall = addBlock(x+ox, y+oy, z+oz, 0x9e9e9e); group.add(wall);
+                    }
+                }
+            }
+            for(let ox=-1; ox<4; ox++) {
+                for(let oz=-1; oz<4; oz++) {
+                    const roof = addBlock(x+ox, y+3, z+oz, 0x5d4037); group.add(roof);
+                }
+            }
+        }
+
         async function generateChunk(cx, cz) {
             const key = `${cx},${cz}`;
             if (chunks.has(key)) return;
@@ -148,44 +183,37 @@
             chunks.set(key, chunkGroup);
             scene.add(chunkGroup);
 
-            // Generación inteligente: Solo superficies y capas visibles
             for(let x = 0; x < CHUNK_SIZE; x++) {
                 for(let z = 0; z < CHUNK_SIZE; z++) {
                     const worldX = cx * CHUNK_SIZE + x;
                     const worldZ = cz * CHUNK_SIZE + z;
-                    const h = Math.round(Math.sin(worldX/8)*Math.cos(worldZ/8) * 2);
+                    const h = Math.round(Math.sin(worldX/10)*Math.cos(worldZ/10) * 3);
                     
-                    // Bloque superficie
-                    const b1 = addBlock(worldX, h, worldZ, 0x2e7d32);
-                    chunkGroup.add(b1);
-                    
-                    // Bloque sub-suelo (solo 1 capa para optimizar)
-                    const b2 = addBlock(worldX, h-1, worldZ, 0x795548);
-                    chunkGroup.add(b2);
+                    chunkGroup.add(addBlock(worldX, h, worldZ, 0x2e7d32));
+                    chunkGroup.add(addBlock(worldX, h-1, worldZ, 0x795548));
 
-                    // Piedra base lejana
-                    const b3 = addBlock(worldX, -5, worldZ, 0x1a1a1a);
-                    chunkGroup.add(b3);
+                    // Probabilidad de estructuras (Solo en la superficie)
+                    if(x > 1 && x < CHUNK_SIZE-2 && z > 1 && z < CHUNK_SIZE-2) {
+                        const rand = Math.random();
+                        if(rand < 0.02) createTree(worldX, h, worldZ, chunkGroup);
+                        else if(rand < 0.025) createHouse(worldX, h, worldZ, chunkGroup);
+                    }
                 }
-                // Yield para no congelar el frame
-                if(x % 3 === 0) await new Promise(r => setTimeout(r, 0));
+                if(x % 4 === 0) await new Promise(r => setTimeout(r, 0));
             }
         }
 
         function updateChunks() {
             const cx = Math.floor(camera.position.x / CHUNK_SIZE);
             const cz = Math.floor(camera.position.z / CHUNK_SIZE);
-            
             if (cx !== currentChunkCoords.x || cz !== currentChunkCoords.z) {
                 currentChunkCoords = { x: cx, z: cz };
-                
                 for (let x = cx - RENDER_DISTANCE; x <= cx + RENDER_DISTANCE; x++) {
                     for (let z = cz - RENDER_DISTANCE; z <= cz + RENDER_DISTANCE; z++) {
                         generateChunk(x, z);
                         if (chunks.has(`${x},${z}`)) chunks.get(`${x},${z}`).visible = true;
                     }
                 }
-                
                 for (let [key, group] of chunks) {
                     const [kx, kz] = key.split(',').map(Number);
                     if (Math.abs(kx - cx) > RENDER_DISTANCE || Math.abs(kz - cz) > RENDER_DISTANCE) {
@@ -195,25 +223,46 @@
             }
         }
 
-        // --- LUCES ---
-        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.3);
-        sun.position.set(10, 20, 10);
-        scene.add(sun);
+        // --- LÓGICA DE JUEGO ---
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
+        camera.position.set(5, 12, 5);
 
-        camera.position.set(5, 10, 5);
+        window.handlePlace = () => {
+            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
+            const hits = ray.intersectObjects(blocks.filter(b => b.parent && b.parent.visible), false);
+            if(hits.length > 0 && hits[0].distance < 5) {
+                const s = document.querySelectorAll('.slot')[activeSlot];
+                if(s.dataset.color !== "null") {
+                    const pos = hits[0].object.position.clone().add(hits[0].face.normal);
+                    
+                    // VALIDACIÓN: No colocar sobre el jugador
+                    const pBox = new THREE.Box3().setFromCenterAndSize(
+                        new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), 
+                        new THREE.Vector3(0.6, 1.8, 0.6)
+                    );
+                    const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.95, 0.95, 0.95));
+                    
+                    if(!pBox.intersectsBox(bBox)) {
+                        const newB = addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
+                        hits[0].object.parent.add(newB);
+                        if(!document.getElementById('mod-creative-inf').checked) {
+                            let c = parseInt(s.dataset.count) - 1;
+                            s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
+                            if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+                        }
+                    }
+                }
+            }
+        };
 
-        // --- BUCLE PRINCIPAL ---
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
-            
             updateChunks();
 
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
-                // Solo intersectamos bloques visibles para ganar velocidad
                 const hits = ray.intersectObjects(blocks.filter(b => b.parent && b.parent.visible), false);
                 if(hits.length > 0 && hits[0].distance < 4.5) {
                     const b = hits[0].object;
@@ -224,9 +273,7 @@
                         document.getElementById('break-indicator').style.display = 'block';
                         if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex());
-                            b.parent.remove(b); 
-                            blocks = blocks.filter(x => x !== b); 
-                            resetMining();
+                            b.parent.remove(b); blocks = blocks.filter(x => x !== b); resetMining();
                         }
                     }
                 } else resetMining();
@@ -236,14 +283,10 @@
                 if(!config.fly) velocityY -= config.gravity * delta;
                 const moveVec = new THREE.Vector3();
                 if(isMobile) { moveVec.z = -joyDir.y; moveVec.x = joyDir.x; }
-                else { 
-                    if(keys['KeyW']) moveVec.z += 1; if(keys['KeyS']) moveVec.z -= 1; 
-                    if(keys['KeyA']) moveVec.x -= 1; if(keys['KeyD']) moveVec.x += 1; 
-                }
+                else { if(keys['KeyW']) moveVec.z += 1; if(keys['KeyS']) moveVec.z -= 1; if(keys['KeyA']) moveVec.x -= 1; if(keys['KeyD']) moveVec.x += 1; }
                 
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
-                
                 const nextX = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
                 
                 if(!checkCollisions(new THREE.Vector3(nextX.x, camera.position.y, camera.position.z))) camera.position.x = nextX.x;
@@ -254,8 +297,8 @@
                     if(!checkCollisions(nextY)) { camera.position.y = nextY.y; isGrounded = false; }
                     else { if(velocityY < 0) isGrounded = true; velocityY = 0; }
                 } else {
-                    if(keys['Space']) camera.position.y += 0.2;
-                    if(keys['ShiftLeft']) camera.position.y -= 0.2;
+                    if(keys['Space']) camera.position.y += 0.15;
+                    if(keys['ShiftLeft']) camera.position.y -= 0.15;
                 }
             }
             renderer.render(scene, camera);
@@ -263,7 +306,6 @@
 
         function checkCollisions(pos) {
             const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(pos.x, pos.y-0.9, pos.z), new THREE.Vector3(0.5, 1.8, 0.5));
-            // Filtro de proximidad espacial (Solo revisa bloques a menos de 2 metros)
             for(let i=0; i<blocks.length; i++) {
                 const b = blocks[i];
                 if(b.parent && b.parent.visible && Math.abs(b.position.x - pos.x) < 1.5 && Math.abs(b.position.z - pos.z) < 1.5) {
@@ -273,25 +315,7 @@
             return false;
         }
 
-        // --- LÓGICA DE JUEGO (Mantenida de tu código) ---
-        window.handlePlace = () => {
-            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
-            const hits = ray.intersectObjects(blocks.filter(b => b.parent && b.parent.visible), false);
-            if(hits.length > 0 && hits[0].distance < 5) {
-                const s = document.querySelectorAll('.slot')[activeSlot];
-                if(s.dataset.color !== "null") {
-                    const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    const newB = addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
-                    hits[0].object.parent.add(newB);
-                    if(!document.getElementById('mod-creative-inf').checked) {
-                        let c = parseInt(s.dataset.count) - 1;
-                        s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
-                        if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
-                    }
-                }
-            }
-        };
-
+        // --- SISTEMAS DE SOPORTE (INV, CRAFT, UI) ---
         window.addToInventory = (color, count = 1) => {
             const slots = document.querySelectorAll('.slot');
             let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
@@ -302,7 +326,6 @@
                 t.innerText = t.dataset.count;
             }
         };
-
         window.tapToCraft = (idx) => {
             const s = document.querySelectorAll('.slot')[activeSlot];
             if(s.dataset.color !== "null") {
@@ -310,17 +333,13 @@
                 el.style.backgroundColor = s.style.backgroundColor; el.dataset.color = s.dataset.color;
             }
         };
-
         window.finishCraft = () => {
             const craftSlots = document.querySelectorAll('#main-craft-grid .craft-slot');
-            const matsInGrid = Array.from(craftSlots).map(slot => slot.dataset.color);
-            if(matsInGrid.some(m => m !== "null")) {
+            if(Array.from(craftSlots).some(s => s.dataset.color !== "null")) {
                 addToInventory(catalog[catalog.length-1].color, 1);
                 craftSlots.forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
             }
         };
-
-        // --- SISTEMAS DE UI ---
         window.updateHardText = (v) => { document.getElementById('hard-val').innerText = v + "s"; };
         window.cycleEditMat = (el) => {
             const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"0x2e7d32"}, {n:"MADERA",c:"0x5d4037"}, {n:"PIEDRA",c:"0x9e9e9e"}];
@@ -355,7 +374,7 @@
         window.updateActiveSlot = (i) => { activeSlot = i; document.querySelectorAll('.slot').forEach((s,idx) => s.classList.toggle('active', idx === i)); };
         window.updateMods = () => { config.speed = parseFloat(document.getElementById('mod-speed').value); config.fly = document.getElementById('mod-fly').checked; };
 
-        // --- CONTROLES EVENTOS ---
+        // CONTROLES
         window.addEventListener('mousedown', (e) => { if(controls.isLocked) { if(e.button===0) isMining=true; if(e.button===2) handlePlace(); }});
         window.addEventListener('mouseup', resetMining);
         window.addEventListener('keydown', e => { 
@@ -368,7 +387,7 @@
         });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
-        // Mobile Controls
+        // Mobile Events
         document.getElementById('m-mine').ontouchstart = (e) => { e.preventDefault(); isMining = true; };
         document.getElementById('m-mine').ontouchend = resetMining;
         document.getElementById('m-place').onclick = handlePlace;
