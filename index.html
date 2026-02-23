@@ -158,7 +158,12 @@
 
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({ color }));
-            m.position.set(x, y, z); scene.add(m); blocks.push(m);
+            m.position.set(x, y, z); 
+            // NUEVO: Cuadrícula en los bloques
+            const edges = new THREE.EdgesGeometry(m.geometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 }));
+            m.add(line);
+            scene.add(m); blocks.push(m);
         }
 
         // --- MEJORA DE ÁRBOLES Y MUNDO ---
@@ -166,18 +171,16 @@
             const h = Math.round(Math.sin(x/4)*Math.cos(z/4));
             addBlock(x, h, z, 0x2e7d32); addBlock(x, h-1, z, 0x795548); addBlock(x, -5, z, 0x1a1a1a);
             
-            // LÓGICA DE ÁRBOLES MEJORADA
             if(Math.random()>0.96 && Math.abs(x)>1 && Math.abs(z)>1) { 
                 let treeH = 3 + Math.floor(Math.random()*2);
-                for(let i=1; i<=treeH; i++) addBlock(x, h+i, z, 0x5d4037); // Tronco
-                // Hojas (Capa frondosa)
+                for(let i=1; i<=treeH; i++) addBlock(x, h+i, z, 0x5d4037); 
                 for(let lx=-1; lx<=1; lx++) {
                     for(let lz=-1; lz<=1; lz++) {
                         addBlock(x+lx, h+treeH+1, z+lz, 0x388e3c); 
                         if(Math.random()>0.3) addBlock(x+lx, h+treeH+2, z+lz, 0x388e3c);
                     }
                 }
-                addBlock(x, h+treeH+3, z, 0x388e3c); // Punta
+                addBlock(x, h+treeH+3, z, 0x388e3c); 
             }
         }
         scene.add(new THREE.AmbientLight(0xffffff, 0.7), new THREE.DirectionalLight(0xffffff, 0.5));
@@ -246,7 +249,6 @@
             renderer.render(scene, camera);
         }
 
-        // --- SISTEMAS DE MENÚ ---
         window.openSubMenu = (id) => {
             isAnyMOpen = true;
             document.querySelectorAll('.full-overlay').forEach(el => { if(el.id !== 'menu') el.style.display = 'none'; });
@@ -273,7 +275,6 @@
         window.saveCustomObject = () => {
             const hex = document.getElementById('obj-color').value.replace('#','');
             customItemColor = parseInt("0x"+hex);
-            // CORRECCIÓN: Dureza determinada directamente por segundos
             hardness[hex] = parseFloat(document.getElementById('obj-hard').value);
             openSubMenu('m-hub');
         };
@@ -289,10 +290,16 @@
                 const s = document.querySelectorAll('.slot')[activeSlot];
                 if(s.dataset.color !== "null") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
-                    let count = parseInt(s.dataset.count) - 1;
-                    s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
-                    if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+                    
+                    // NUEVO: No dejar poner bloques donde está el player
+                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
+                    const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(1, 1, 1));
+                    if(!pBox.intersectsBox(bBox)) {
+                        addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
+                        let count = parseInt(s.dataset.count) - 1;
+                        s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
+                        if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+                    }
                 }
             }
         };
@@ -319,10 +326,8 @@
         };
 
         window.finishCraft = () => {
-            // CORRECCIÓN: Quitar los items del inventario al usarlos
             const craftSlots = document.querySelectorAll('.crafting-grid .craft-slot[id^="c"]');
             const inventorySlots = document.querySelectorAll('.slot');
-
             craftSlots.forEach(cSlot => {
                 if (cSlot.dataset.color !== "null") {
                     let invSlot = Array.from(inventorySlots).find(s => s.dataset.color === cSlot.dataset.color);
@@ -333,20 +338,16 @@
                             invSlot.dataset.color = "null";
                             invSlot.style.backgroundColor = "rgba(255,255,255,0.1)";
                             invSlot.innerText = Array.from(inventorySlots).indexOf(invSlot) + 1;
-                        } else {
-                            invSlot.innerText = count;
-                        }
+                        } else { invSlot.innerText = count; }
                     }
                 }
             });
-
             document.querySelectorAll('.craft-slot').forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
             addToInventory(customItemColor);
         };
 
         function resetMining() { if(currentTarget) { currentTarget.position.copy(originalPos); currentTarget = null; } isMining = false; document.getElementById('break-indicator').style.display='none'; }
 
-        // --- NUEVOS EVENTOS: RATÓN Y NÚMEROS ---
         window.addEventListener('wheel', (e) => {
             if (controls.isLocked) {
                 activeSlot = (activeSlot + (e.deltaY > 0 ? 1 : -1) + 5) % 5;
