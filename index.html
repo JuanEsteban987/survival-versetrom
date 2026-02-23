@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Mega Edition</title>
+    <title>Minecraft JS: Ultimate Physics & Mining</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
@@ -35,18 +35,20 @@
         .craft-slot { width: 50px; height: 50px; background: #8b8b8b; border: 2px solid #373737; }
         #craft-result { width: 55px; height: 55px; background: #999; border: 3px solid #373737; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; cursor: pointer; }
 
-        /* --- FX --- */
+        /* --- FX E INDICADORES --- */
         #damage-flash { position: fixed; inset: 0; background: rgba(255,0,0,0); pointer-events: none; z-index: 1000; transition: background 0.1s; }
         #hotbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 4px; border: 2px solid #555; pointer-events: auto; }
         .slot { width: 40px; height: 40px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; background: rgba(0,0,0,0.4); }
         .slot.active { border-color: #fff; box-shadow: 0 0 8px #fff; }
-        #break-indicator { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 5; }
+        #break-indicator { position: absolute; top: 50%; left: 50%; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 5; pointer-events: none; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: white; border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div id="damage-flash"></div>
     <div id="break-indicator"></div>
+    <div id="crosshair"></div>
 
     <div id="menu">
         <h1>MINECRAFT JS</h1>
@@ -65,7 +67,7 @@
     </div>
 
     <div id="mod-menu">
-        <h2>MODS ACTIVOS</h2>
+        <h2>MENÚ DE MODS</h2>
         <div class="mod-row">Gravedad: <input type="range" id="mod-grav" min="0" max="50" value="25" oninput="updateMods()"></div>
         <div class="mod-row">Velocidad: <input type="range" id="mod-speed" min="1" max="25" value="5" oninput="updateMods()"></div>
         <div class="mod-row">Cielo: <input type="color" id="mod-sky" value="#87ceeb" oninput="updateMods()"></div>
@@ -124,13 +126,12 @@
         let velocityY = 0, isGrounded = false, fallStartY = 0;
         let joyDir = { x: 0, y: 0 }, touchX = 0, touchY = 0, keys = {};
         
-        // Settings Corregidos (Menos zoom, menos sensibilidad)
         let config = { gravity: 25, speed: 5, fly: false, sensitivity: 0.002, fov: 85 };
         
-        // Lógica de Minado
+        // --- SISTEMA DE MINADO ---
         let isMining = false, mineProgress = 0, currentTarget = null, originalPos = new THREE.Vector3();
         const hardness = { "2e7d32": 0.5, "5d4037": 1.0, "388e3c": 0.2, "795548": 0.5, "9e9e9e": 2.0, "1a1a1a": Infinity };
-        let customItem = { color: 0xff00ff, recipe: ["null", "null", "null", "null"] };
+        let customItemColor = 0xff00ff;
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb);
@@ -145,26 +146,28 @@
             m.position.set(x, y, z); scene.add(m); blocks.push(m);
         }
 
-        // --- GENERACIÓN DE MUNDO ---
-        for(let x=-8; x<8; x++) {
-            for(let z=-8; z<8; z++) {
-                const h = Math.round(Math.sin(x/4)*Math.cos(z/4));
-                addBlock(x, h, z, 0x2e7d32); // Pasto
-                addBlock(x, h-1, z, 0x795548); // Tierra
-                addBlock(x, -4, z, 0x1a1a1a); // Bedrock
-                if(Math.random()>0.97) { // Árboles
-                    for(let i=1; i<=3; i++) addBlock(x, h+i, z, 0x5d4037);
-                    addBlock(x, h+4, z, 0x388e3c);
-                }
+        // Generar Mundo
+        for(let x=-8; x<8; x++) for(let z=-8; z<8; z++) {
+            const h = Math.round(Math.sin(x/4)*Math.cos(z/4));
+            addBlock(x, h, z, 0x2e7d32); addBlock(x, h-1, z, 0x795548); addBlock(x, -4, z, 0x1a1a1a);
+            if(Math.random()>0.97) { // Árboles
+                for(let i=1; i<=3; i++) addBlock(x, h+i, z, 0x5d4037);
+                addBlock(x, h+4, z, 0x388e3c);
             }
         }
         scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
         camera.position.set(0, 5, 0);
 
-        function checkCollisions(nextPos) {
+        // --- COLISIONES SÓLIDAS ---
+        function checkCollisions(pos) {
             if(config.fly) return false;
-            const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(nextPos.x, nextPos.y - 0.8, nextPos.z), new THREE.Vector3(0.6, 1.8, 0.6));
-            for(let b of blocks) if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
+            const pBox = new THREE.Box3().setFromCenterAndSize(
+                new THREE.Vector3(pos.x, pos.y - 0.9, pos.z),
+                new THREE.Vector3(0.6, 1.8, 0.6)
+            );
+            for(let b of blocks) {
+                if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
+            }
             return false;
         }
 
@@ -173,23 +176,21 @@
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
 
-            // Mecánica de Minado
+            // --- LÓGICA DE MINADO (ROMPER) ---
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
                 const hits = ray.intersectObjects(blocks);
-                if(hits.length > 0 && hits[0].distance < 5) {
+                if(hits.length > 0 && hits[0].distance < 4.5) {
                     const b = hits[0].object;
                     const hex = b.material.color.getHexString().toLowerCase();
-                    const max = hardness[hex] || 1.0;
-                    if(max !== Infinity) {
+                    if(hardness[hex] !== Infinity) {
                         if(currentTarget !== b) { currentTarget = b; originalPos.copy(b.position); mineProgress = 0; }
                         mineProgress += delta;
-                        b.position.x = originalPos.x + (Math.random()-0.5)*0.1; // Vibración
-                        document.getElementById('break-indicator').style.display = 'block';
-                        if(mineProgress >= max) {
+                        b.position.x = originalPos.x + (Math.random()-0.5)*0.12; // Vibración
+                        document.getElementById('break-indicator').style.display='block';
+                        if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex());
-                            scene.remove(b); blocks = blocks.filter(x => x !== b);
-                            resetMining();
+                            scene.remove(b); blocks = blocks.filter(x => x !== b); resetMining();
                         }
                     }
                 } else resetMining();
@@ -207,19 +208,19 @@
 
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
-                
-                // Movimiento con colisiones por eje
-                const nextXZ = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
-                if(!checkCollisions(new THREE.Vector3(nextXZ.x, camera.position.y, nextXZ.z))) {
-                    camera.position.x = nextXZ.x; camera.position.z = nextXZ.z;
-                }
+
+                // Movimiento con Colisiones
+                const nextX = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
+                if(!checkCollisions(new THREE.Vector3(nextX.x, camera.position.y, camera.position.z))) camera.position.x = nextX.x;
+                if(!checkCollisions(new THREE.Vector3(camera.position.x, camera.position.y, nextX.z))) camera.position.z = nextX.z;
 
                 if(!config.fly) {
                     const nextY = camera.position.clone(); nextY.y += velocityY * delta;
-                    if(!checkCollisions(nextY)) { camera.position.y = nextY.y; isGrounded = false; }
-                    else {
+                    if(!checkCollisions(nextY)) {
+                        camera.position.y = nextY.y; isGrounded = false;
+                    } else {
                         if(velocityY < 0) {
-                            if(fallStartY - camera.position.y > 4.5) { // Daño caída
+                            if(fallStartY - camera.position.y > 4.5) {
                                 document.getElementById('damage-flash').style.background = 'rgba(255,0,0,0.4)';
                                 setTimeout(()=> document.getElementById('damage-flash').style.background = 'transparent', 100);
                             }
@@ -227,12 +228,14 @@
                         }
                         velocityY = 0;
                     }
-                } else { camera.position.y += (keys['Space'] ? 0.1 : 0) - (keys['ShiftLeft'] ? 0.1 : 0); }
+                } else {
+                    camera.position.y += (keys['Space'] ? 0.15 : 0) - (keys['ShiftLeft'] ? 0.15 : 0);
+                }
             }
             renderer.render(scene, camera);
         }
 
-        // --- SISTEMAS DE INTERACCIÓN ---
+        // --- SISTEMA DE PONER BLOQUES ---
         window.handlePlace = () => {
             const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
             const hits = ray.intersectObjects(blocks);
@@ -240,57 +243,35 @@
                 const s = document.querySelectorAll('.slot')[activeSlot];
                 if(s.dataset.color !== "null") {
                     const p = hits[0].object.position.clone().add(hits[0].face.normal);
-                    addBlock(p.x, p.y, p.z, parseInt(s.dataset.color));
-                    let count = parseInt(s.dataset.count) - 1;
-                    s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
-                    if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(0,0,0,0.4)"; }
+                    // Evitar poner bloque dentro del jugador
+                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
+                    const bBox = new THREE.Box3().setFromCenterAndSize(p, new THREE.Vector3(1,1,1));
+                    if(!pBox.intersectsBox(bBox)) {
+                        addBlock(p.x, p.y, p.z, parseInt(s.dataset.color));
+                        let count = parseInt(s.dataset.count) - 1;
+                        s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
+                        if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(0,0,0,0.4)"; }
+                    }
                 }
             }
         };
 
         function addToInventory(color) {
             const slots = document.querySelectorAll('.slot');
-            let target = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
-            if(target) {
-                let c = (parseInt(target.dataset.count) || 0) + 1;
-                target.dataset.color = color; target.dataset.count = c;
-                target.style.backgroundColor = "#" + color.toString(16).padStart(6,'0');
-                target.innerText = c;
+            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
+            if(t) {
+                let c = (parseInt(t.dataset.count) || 0) + 1;
+                t.dataset.color = color; t.dataset.count = c;
+                t.style.backgroundColor = "#" + color.toString(16).padStart(6,'0');
+                t.innerText = c;
             }
         }
 
         function resetMining() { if(currentTarget) currentTarget.position.copy(originalPos); isMining = false; document.getElementById('break-indicator').style.display='none'; }
 
-        // --- CONTROL CELULAR ---
-        window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
-        window.addEventListener('touchmove', e => {
-            if(isMobile && !isInventoryOpen && !isEscMenuOpen && !isModMenuOpen && e.touches[0].pageX > window.innerWidth/2) {
-                camera.rotation.y -= (e.touches[0].pageX - touchX) * config.sensitivity;
-                camera.rotation.x -= (e.touches[0].pageY - touchY) * config.sensitivity;
-                camera.rotation.x = Math.max(-1.5, Math.min(1.5, camera.rotation.x));
-                touchX = e.touches[0].pageX; touchY = e.touches[0].pageY;
-            }
-        });
-
-        document.getElementById('joystick-container').addEventListener('touchmove', e => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.touches[0].clientX - rect.left - 50;
-            const y = e.touches[0].clientY - rect.top - 50;
-            const dist = Math.min(Math.sqrt(x*x + y*y), 40);
-            const angle = Math.atan2(y, x);
-            joyDir = { x: (Math.cos(angle)*dist)/40, y: (Math.sin(angle)*dist)/40 };
-            document.getElementById('joystick-knob').style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-        });
-        document.getElementById('joystick-container').addEventListener('touchend', () => { joyDir = {x:0,y:0}; document.getElementById('joystick-knob').style.transform = 'translate(0,0)'; });
-
-        document.getElementById('m-mine').ontouchstart = () => isMining = true;
-        document.getElementById('m-mine').ontouchend = resetMining;
-        document.getElementById('m-place').onclick = handlePlace;
-        document.getElementById('m-jump').onclick = () => { if(isGrounded || config.fly) velocityY = 10; };
-        
-        // --- MENÚS ---
+        // --- CONTROLES Y MENÚS ---
         window.startGame = (m) => { isMobile = m; document.getElementById('menu').style.display='none'; if(m) document.getElementById('mobile-controls').style.display='block'; else controls.lock(); animate(); };
-        window.toggleModMenu = () => { isModMenuOpen = !isModMenuOpen; document.getElementById('mod-menu').style.display = isModMenuOpen ? 'flex' : 'none'; };
+        window.toggleModMenu = () => { isModMenuOpen = !isModMenuOpen; document.getElementById('mod-menu').style.display = isModMenuOpen ? 'flex' : 'none'; if(!isMobile) isModMenuOpen ? controls.unlock() : controls.lock(); };
         window.toggleInventory = () => { isInventoryOpen = !isInventoryOpen; document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none'; };
         window.toggleEscMenu = () => { isEscMenuOpen = !isEscMenuOpen; document.getElementById('esc-menu').style.display = isEscMenuOpen ? 'flex' : 'none'; if(!isMobile) isEscMenuOpen ? controls.unlock() : controls.lock(); };
         window.updateMods = () => {
@@ -301,38 +282,58 @@
         };
         window.updateActiveSlot = (i) => { activeSlot = i; document.querySelectorAll('.slot').forEach((s,idx) => s.classList.toggle('active', idx === i)); };
         
-        // Crafteo
+        // Editor y Crafteo
         window.tapToCraft = (idx) => {
             const s = document.querySelectorAll('.slot')[activeSlot];
             if(s.dataset.color !== "null") {
                 const el = document.getElementById('c'+idx);
-                el.style.backgroundColor = s.style.backgroundColor;
-                el.dataset.color = s.dataset.color;
+                el.style.backgroundColor = s.style.backgroundColor; el.dataset.color = s.dataset.color;
             }
         };
-        window.finishCraft = () => { 
+        window.finishCraft = () => {
             document.querySelectorAll('.craft-slot').forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
-            addToInventory(customItem.color);
+            addToInventory(customItemColor);
         };
-
-        // Editor
         window.openEditor = () => document.getElementById('obj-editor').style.display='flex';
+        window.saveNewObject = () => { customItemColor = parseInt("0x"+document.getElementById('obj-color').value.replace('#','')); document.getElementById('obj-editor').style.display = 'none'; };
         window.cycleMaterial = (el) => {
             const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"2e7d32"}, {n:"MADERA",c:"5d4037"}, {n:"PIEDRA",c:"9e9e9e"}];
             let idx = mats.findIndex(m => m.c === el.getAttribute("data-mat"));
             let next = mats[(idx + 1) % mats.length];
             el.setAttribute("data-mat", next.c); el.innerText = next.n;
         };
-        window.saveNewObject = () => {
-            const hex = document.getElementById('obj-color').value.replace('#','');
-            customItem.color = parseInt("0x"+hex);
-            document.getElementById('obj-editor').style.display = 'none';
-        };
 
+        // Eventos Mobile
+        window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
+        window.addEventListener('touchmove', e => {
+            if(isMobile && !isInventoryOpen && !isEscMenuOpen && !isModMenuOpen && e.touches[0].pageX > window.innerWidth/2) {
+                camera.rotation.y -= (e.touches[0].pageX - touchX) * config.sensitivity;
+                camera.rotation.x -= (e.touches[0].pageY - touchY) * config.sensitivity;
+                camera.rotation.x = Math.max(-1.5, Math.min(1.5, camera.rotation.x));
+                touchX = e.touches[0].pageX; touchY = e.touches[0].pageY;
+            }
+        });
+        document.getElementById('joystick-container').addEventListener('touchmove', e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left - 50, y = e.touches[0].clientY - rect.top - 50;
+            const dist = Math.min(Math.sqrt(x*x + y*y), 40), angle = Math.atan2(y, x);
+            joyDir = { x: (Math.cos(angle)*dist)/40, y: (Math.sin(angle)*dist)/40 };
+            document.getElementById('joystick-knob').style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+        });
+        document.getElementById('joystick-container').addEventListener('touchend', () => { joyDir = {x:0,y:0}; document.getElementById('joystick-knob').style.transform = 'translate(0,0)'; });
+
+        // Botones Celular
+        document.getElementById('m-mine').ontouchstart = (e) => { e.preventDefault(); isMining = true; };
+        document.getElementById('m-mine').ontouchend = resetMining;
+        document.getElementById('m-place').onclick = handlePlace;
+        document.getElementById('m-jump').onclick = () => { if(isGrounded || config.fly) velocityY = 10; };
         document.getElementById('m-mod').onclick = toggleModMenu;
         document.getElementById('m-inv').onclick = toggleInventory;
         document.getElementById('m-esc').onclick = toggleEscMenu;
 
+        // PC Events
+        window.addEventListener('mousedown', (e) => { if(controls.isLocked) { if(e.button === 0) isMining = true; if(e.button === 2) handlePlace(); }});
+        window.addEventListener('mouseup', () => resetMining());
         window.addEventListener('keydown', e => { 
             keys[e.code] = true; 
             if(e.key.toLowerCase()==='m') toggleModMenu(); 
