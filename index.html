@@ -7,6 +7,30 @@
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+        
+        /* --- ESTILOS DE LA MIRA (CROSSHAIR) --- */
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            pointer-events: none; /* Permite hacer clic a través de la cruz */
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ch-line {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
+        .ch-v { width: 2px; height: 100%; }
+        .ch-h { width: 100%; height: 2px; }
+        /* -------------------------------------- */
+
         .full-overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; background: rgba(0,0,0,0.85); pointer-events: auto; }
         #m-hub { background: rgba(0,0,0,0.95); }
         .btn { background: #4CAF50; color: white; border: none; padding: 12px 20px; font-size: 14px; margin: 8px; cursor: pointer; border-radius: 4px; width: 260px; font-weight: bold; border-bottom: 4px solid #2e7d32; }
@@ -38,13 +62,18 @@
     </style>
 </head>
 <body>
+    <div id="crosshair">
+        <div class="ch-line ch-v"></div>
+        <div class="ch-line ch-h"></div>
+    </div>
+
     <div id="break-indicator"></div>
     <div id="menu" class="full-overlay" style="display: flex;">
         <h1>MINECRAFT JS: TOOLS</h1>
         <button class="btn" onclick="startGame(false)">MODO PC</button>
         <button class="btn" onclick="startGame(true)">MODO CELULAR</button>
     </div>
-
+    
     <div id="m-hub" class="full-overlay">
         <h2>CENTRO DE CONTROL (M)</h2>
         <div id="mp-status" style="font-size: 12px; color: #aaa; margin-bottom: 10px;">ID Mi Dispositivo: ...</div>
@@ -130,6 +159,7 @@
 
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
     <script type="module">
+        /* El script permanece igual, no necesita cambios */
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
@@ -145,13 +175,11 @@
         const playerMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
         function initMultiplayer() {
-            peer = new Peer(); // Genera un ID aleatorio corto
+            peer = new Peer(); 
             peer.on('open', (id) => {
                 document.getElementById('mp-status').innerText = "ID Dispositivo: " + id;
                 document.getElementById('my-code-display').innerText = id;
             });
-
-            // Al recibir una conexión
             peer.on('connection', (conn) => {
                 setupConnection(conn);
             });
@@ -160,24 +188,19 @@
         function setupConnection(conn) {
             conn.on('open', () => {
                 connections.push(conn);
-                console.log("Conectado con:", conn.peer);
-                // Crear avatar para el otro jugador
                 const pMesh = new THREE.Mesh(playerGeo, playerMat);
                 scene.add(pMesh);
                 remotePlayers[conn.peer] = pMesh;
             });
-
             conn.on('data', (data) => {
                 if(data.type === 'move' && remotePlayers[conn.peer]) {
                     remotePlayers[conn.peer].position.set(data.x, data.y, data.z);
                 }
                 if(data.type === 'place') {
                     const newB = addBlock(data.x, data.y, data.z, data.color);
-                    // Buscar si cae en un grupo o escena directamente
                     scene.add(newB);
                 }
             });
-
             conn.on('close', () => {
                 if(remotePlayers[conn.peer]) scene.remove(remotePlayers[conn.peer]);
                 delete remotePlayers[conn.peer];
@@ -202,9 +225,6 @@
             connections.forEach(c => c.send({ type: 'place', x, y, z, color }));
         }
 
-        // --- FIN MULTIPLAYER LOGIC ---
-
-        // Base de Datos de Ítems
         let hardness = { "2e7d32": 0.4, "795548": 0.5, "5d4037": 1.2, "388e3c": 0.2, "9e9e9e": 2.5, "1a1a1a": Infinity };
         let tools = { "wooden_pick": 2.5, "diamond_pick": 10.0 };
         
@@ -261,16 +281,13 @@
             const chunkGroup = new THREE.Group();
             chunks.set(key, chunkGroup);
             scene.add(chunkGroup);
-
             for(let x = 0; x < CHUNK_SIZE; x++) {
                 for(let z = 0; z < CHUNK_SIZE; z++) {
                     const worldX = cx * CHUNK_SIZE + x;
                     const worldZ = cz * CHUNK_SIZE + z;
                     const h = Math.round(Math.sin(worldX/10)*Math.cos(worldZ/10) * 3);
-                    
                     chunkGroup.add(addBlock(worldX, h, worldZ, 0x2e7d32));
                     chunkGroup.add(addBlock(worldX, h-1, worldZ, 0x795548));
-
                     if(Math.random() < 0.015 && x > 1 && x < CHUNK_SIZE-2) {
                         spawnTree(worldX, h, worldZ, chunkGroup);
                     }
@@ -315,7 +332,7 @@
                         const colorInt = parseInt(s.dataset.color);
                         const newB = addBlock(pos.x, pos.y, pos.z, colorInt);
                         hits[0].object.parent.add(newB);
-                        broadcastPlace(pos.x, pos.y, pos.z, colorInt); // MULTIPLAYER
+                        broadcastPlace(pos.x, pos.y, pos.z, colorInt); 
                         if(!document.getElementById('mod-creative-inf').checked) {
                             let c = parseInt(s.dataset.count) - 1;
                             s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
@@ -331,7 +348,7 @@
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
             updateChunks();
-            broadcastMove(); // MULTIPLAYER
+            broadcastMove(); 
 
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
@@ -457,7 +474,7 @@
             isMobile = m; 
             document.getElementById('menu').style.display='none'; 
             if(m) document.getElementById('mobile-controls').style.display='block'; else controls.lock(); 
-            initMultiplayer(); // Iniciamos PeerJS al arrancar
+            initMultiplayer(); 
             animate(); 
         };
         window.openSubMenu = (id) => { isAnyMOpen = true; document.querySelectorAll('.full-overlay').forEach(el => el.style.display = 'none'); document.getElementById(id).style.display = 'flex'; if(!isMobile) controls.unlock(); };
