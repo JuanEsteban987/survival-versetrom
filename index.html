@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Mega Hub Edition</title>
+    <title>Minecraft JS: Full Restoration Edition</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
         
-        /* --- MENÚ PRINCIPAL M (HUB) --- */
+        /* --- MENÚS --- */
         .full-overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; background: rgba(0,0,0,0.85); pointer-events: auto; }
         #m-hub { background: rgba(0,0,0,0.9); }
         
@@ -15,7 +15,7 @@
         .btn:active { border-bottom: 0; transform: translateY(2px); }
         .btn-red { background: #f44336; border-bottom-color: #b71c1c; }
 
-        .mod-row { margin: 8px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; width: 280px; justify-content: space-between; }
+        .mod-row { margin: 8px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; width: 280px; justify-content: space-between; font-size: 13px; }
 
         /* --- CONTROLES MÓVILES --- */
         #mobile-controls { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 50; }
@@ -30,18 +30,18 @@
         #m-mod { top: 15px; left: 75px; width: 50px; height: 50px; background: #ff9800; }
         #m-esc { top: 15px; right: 15px; width: 50px; height: 50px; background: #555; }
 
-        /* --- INVENTARIO --- */
+        /* --- INVENTARIO / CRAFTEO --- */
         #inventory-panel { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: 240px; background: #c6c6c6; border: 4px solid #373737; display: none; flex-direction: column; align-items: center; padding: 12px; z-index: 200; pointer-events: auto; }
-        .crafting-grid { display: grid; grid-template-columns: repeat(2, 55px); gap: 8px; background: #8b8b8b; padding: 10px; }
-        .craft-slot { width: 55px; height: 55px; background: #8b8b8b; border: 3px solid #373737; }
-        #craft-result { width: 60px; height: 60px; background: #999; border: 4px solid #373737; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        .crafting-grid { display: grid; grid-template-columns: repeat(2, 55px); gap: 8px; background: #8b8b8b; padding: 10px; border: 2px solid #373737; }
+        .craft-slot { width: 55px; height: 55px; background: #8b8b8b; border: 3px solid #373737; cursor: pointer; }
+        #craft-result { width: 60px; height: 60px; background: #999; border: 4px solid #373737; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
 
-        /* --- UI DEL JUEGO --- */
+        /* --- UI JUEGO --- */
         #hotbar { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; background: rgba(0,0,0,0.7); padding: 5px; border: 3px solid #555; pointer-events: auto; }
         .slot { width: 45px; height: 45px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; background: rgba(255,255,255,0.1); }
         .slot.active { border-color: #fff; box-shadow: 0 0 10px #fff; }
         #damage-flash { position: fixed; inset: 0; background: rgba(255,0,0,0); pointer-events: none; z-index: 1000; transition: background 0.1s; }
-        #break-indicator { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 5; }
+        #break-indicator { position: absolute; top: 50%; left: 50%; width: 22px; height: 22px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 5; }
     </style>
 </head>
 <body>
@@ -56,7 +56,7 @@
     </div>
 
     <div id="m-hub" class="full-overlay">
-        <h2>MENÚ DE CONTROL</h2>
+        <h2>CENTRO DE CONTROL</h2>
         <button class="btn" onclick="openSubMenu('options-menu')">OPCIONES</button>
         <button class="btn" onclick="openSubMenu('obj-editor')">CREAR NUEVO OBJETO</button>
         <button class="btn" onclick="openSubMenu('mod-menu-inner')">MENÚ DE MODS</button>
@@ -70,18 +70,18 @@
     </div>
 
     <div id="obj-editor" class="full-overlay">
-        <h2>NUEVO OBJETO</h2>
+        <h2>EDITOR DE OBJETO</h2>
         <input type="text" id="obj-name" placeholder="Nombre..." style="padding:10px; margin:5px;">
         <div class="mod-row">Color: <input type="color" id="obj-color" value="#ff00ff"></div>
-        <div class="mod-row">Dureza (Romper): <input type="range" id="obj-hard" min="1" max="50" value="10"></div>
-        <p>Crafteo (slots 2x2):</p>
+        <div class="mod-row">Dureza: <input type="range" id="obj-hard" min="1" max="50" value="10"></div>
+        <p>Receta (2x2):</p>
         <div class="crafting-grid" style="margin-bottom:10px;">
             <button class="craft-slot" id="e0" onclick="cycleEditMat(this)" data-mat="null">VACÍO</button>
             <button class="craft-slot" id="e1" onclick="cycleEditMat(this)" data-mat="null">VACÍO</button>
             <button class="craft-slot" id="e2" onclick="cycleEditMat(this)" data-mat="null">VACÍO</button>
             <button class="craft-slot" id="e3" onclick="cycleEditMat(this)" data-mat="null">VACÍO</button>
         </div>
-        <button class="btn" onclick="saveCustomObject()">GUARDAR OBJETO</button>
+        <button class="btn" onclick="saveCustomObject()">GUARDAR</button>
         <button class="btn btn-red" onclick="openSubMenu('m-hub')">VOLVER</button>
     </div>
 
@@ -90,7 +90,7 @@
         <div class="mod-row">Gravedad: <input type="range" id="mod-grav" min="0" max="50" value="25" oninput="updateMods()"></div>
         <div class="mod-row">Velocidad: <input type="range" id="mod-speed" min="1" max="30" value="6" oninput="updateMods()"></div>
         <div class="mod-row">Cielo: <input type="color" id="mod-sky" value="#87ceeb" oninput="updateMods()"></div>
-        <div class="mod-row">Modo Vuelo: <input type="checkbox" id="mod-fly" onchange="updateMods()"></div>
+        <div class="mod-row">Vuelo: <input type="checkbox" id="mod-fly" onchange="updateMods()"></div>
         <button class="btn" onclick="openSubMenu('m-hub')">VOLVER</button>
     </div>
 
@@ -111,7 +111,7 @@
             <div id="c2" class="craft-slot" onclick="tapToCraft(2)"></div>
             <div id="c3" class="craft-slot" onclick="tapToCraft(3)"></div>
         </div>
-        <div id="craft-result" onclick="finishCraft()">CRAFTEAR</div>
+        <div id="craft-result" onclick="finishCraft()">CRAFT</div>
     </div>
 
     <div id="esc-menu" class="full-overlay">
@@ -181,6 +181,7 @@
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
 
+            // --- RECOLOCACIÓN Y VIBRACIÓN DE BLOQUES ---
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
                 const hits = ray.intersectObjects(blocks);
@@ -188,17 +189,22 @@
                     const b = hits[0].object;
                     const hex = b.material.color.getHexString().toLowerCase();
                     if(hardness[hex] !== Infinity) {
-                        if(currentTarget !== b) { currentTarget = b; originalPos.copy(b.position); mineProgress = 0; }
-                        mineProgress += delta; b.position.x = originalPos.x + (Math.random()-0.5)*0.15;
+                        if(currentTarget !== b) { 
+                            if(currentTarget) resetMining(); // Resetea el anterior antes de cambiar
+                            currentTarget = b; originalPos.copy(b.position); mineProgress = 0; 
+                        }
+                        mineProgress += delta; 
+                        b.position.x = originalPos.x + (Math.random()-0.5)*0.15; // Vibración
                         document.getElementById('break-indicator').style.display='block';
                         if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex());
                             scene.remove(b); blocks = blocks.filter(x => x !== b); resetMining();
                         }
                     }
-                } else resetMining();
-            }
+                } else { resetMining(); }
+            } else { if(currentTarget) resetMining(); }
 
+            // Movimiento y Física
             if((controls.isLocked || isMobile) && !isInventoryOpen && !isEscMenuOpen && !isAnyMOpen) {
                 if(!config.fly) velocityY -= config.gravity * delta;
                 const moveVec = new THREE.Vector3();
@@ -232,13 +238,24 @@
             renderer.render(scene, camera);
         }
 
-        // --- SISTEMA M MULTI-MENÚ ---
+        // --- SISTEMA DE MENÚS Y MOUSE UNLOCK ---
         window.openSubMenu = (id) => {
             isAnyMOpen = true;
             document.querySelectorAll('.full-overlay').forEach(el => { if(el.id !== 'menu') el.style.display = 'none'; });
             document.getElementById(id).style.display = 'flex';
+            if(!isMobile) controls.unlock(); // Desbloquea mouse para interactuar con el menú
         };
         window.closeAllMenus = () => { isAnyMOpen = false; document.querySelectorAll('.full-overlay').forEach(el => { if(el.id !== 'menu') el.style.display = 'none'; }); if(!isMobile) controls.lock(); };
+        
+        window.toggleInventory = () => { 
+            isInventoryOpen = !isInventoryOpen; 
+            document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none'; 
+            if(!isMobile) {
+                if(isInventoryOpen) controls.unlock(); // DESBLOQUEAR MOUSE AL ABRIR CRAFTEO
+                else if(!isEscMenuOpen && !isAnyMOpen) controls.lock(); 
+            }
+        };
+
         window.updateOptions = () => { config.sensitivity = document.getElementById('opt-sens').value / 10000; };
         window.updateMods = () => {
             config.gravity = parseFloat(document.getElementById('mod-grav').value);
@@ -258,14 +275,11 @@
             const hex = document.getElementById('obj-color').value.replace('#','');
             customItemColor = parseInt("0x"+hex);
             hardness[hex] = document.getElementById('obj-hard').value / 10;
-            alert("¡Objeto guardado! Craftealo en el inventario.");
             openSubMenu('m-hub');
         };
 
-        // --- RESTO DE FUNCIONES ---
         window.startGame = (m) => { isMobile = m; document.getElementById('menu').style.display='none'; if(m) document.getElementById('mobile-controls').style.display='block'; else controls.lock(); animate(); };
-        window.toggleEscMenu = () => { isEscMenuOpen = !isEscMenuOpen; document.getElementById('esc-menu').style.display = isEscMenuOpen ? 'flex' : 'none'; };
-        window.toggleInventory = () => { isInventoryOpen = !isInventoryOpen; document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none'; };
+        window.toggleEscMenu = () => { isEscMenuOpen = !isEscMenuOpen; document.getElementById('esc-menu').style.display = isEscMenuOpen ? 'flex' : 'none'; if(!isMobile) isEscMenuOpen ? controls.unlock() : controls.lock(); };
         
         window.handlePlace = () => {
             const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
@@ -306,9 +320,20 @@
             addToInventory(customItemColor);
         };
 
-        function resetMining() { if(currentTarget) currentTarget.position.copy(originalPos); isMining = false; document.getElementById('break-indicator').style.display='none'; }
+        // --- RESETEO DE POSICIÓN (RECOLOCACIÓN) ---
+        function resetMining() { 
+            if(currentTarget) {
+                currentTarget.position.copy(originalPos); // Vuelve a su posición original
+                currentTarget = null;
+            }
+            isMining = false; 
+            document.getElementById('break-indicator').style.display='none'; 
+        }
 
         // --- EVENTOS ---
+        window.addEventListener('mousedown', (e) => { if(controls.isLocked) { if(e.button===0) isMining=true; if(e.button===2) handlePlace(); }});
+        window.addEventListener('mouseup', () => resetMining());
+
         window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
         window.addEventListener('touchmove', e => {
             if(isMobile && !isInventoryOpen && !isEscMenuOpen && !isAnyMOpen && e.touches[0].pageX > window.innerWidth/2) {
@@ -331,7 +356,7 @@
         document.getElementById('m-mine').ontouchend = resetMining;
         document.getElementById('m-place').onclick = handlePlace;
         document.getElementById('m-jump').onclick = () => { if(isGrounded || config.fly) velocityY = 11; };
-        document.getElementById('m-mod').onclick = () => openSubMenu('m-hub');
+        document.getElementById('m-mod').onclick = () => isAnyMOpen ? closeAllMenus() : openSubMenu('m-hub');
         document.getElementById('m-inv').onclick = toggleInventory;
         document.getElementById('m-esc').onclick = toggleEscMenu;
 
