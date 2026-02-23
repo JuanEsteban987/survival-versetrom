@@ -2,18 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Full Survival & Touch</title>
+    <title>Minecraft JS: Mega Edition</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
         
         /* --- MENÚS --- */
-        #menu, #esc-menu, #obj-editor { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; pointer-events: auto; }
+        #menu, #esc-menu, #obj-editor, #mod-menu { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; pointer-events: auto; }
         #menu { background: rgba(0,0,0,0.9); }
-        #esc-menu { background: rgba(0,0,0,0.85); display: none; }
+        #esc-menu, #mod-menu { background: rgba(0,0,0,0.85); display: none; }
         #obj-editor { background: #1a1a1a; display: none; padding: 20px; border: 4px solid #4CAF50; overflow-y: auto; text-align: center; }
 
-        .btn { background: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 14px; margin: 5px; cursor: pointer; border-radius: 4px; width: 200px; }
+        .btn { background: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 14px; margin: 5px; cursor: pointer; border-radius: 4px; width: 220px; }
+        .mod-row { margin: 10px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; font-size: 12px; }
 
         /* --- CONTROLES MÓVILES --- */
         #mobile-controls { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 50; }
@@ -21,29 +22,32 @@
         #joystick-knob { position: absolute; top: 30px; left: 30px; width: 40px; height: 40px; background: rgba(255,255,255,0.4); border-radius: 50%; }
         
         .m-btn { position: absolute; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; pointer-events: auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; text-align: center; }
-        #m-mine { bottom: 110px; right: 110px; background: rgba(255, 0, 0, 0.3); border: 2px solid rgba(255,0,0,0.3); }
-        #m-place { bottom: 110px; right: 30px; background: rgba(0, 100, 255, 0.3); border: 2px solid rgba(0,100,255,0.3); }
-        #m-jump { bottom: 30px; right: 75px; width: 90px; height: 50px; background: rgba(255,255,255,0.3); }
+        #m-mine { bottom: 110px; right: 110px; background: rgba(255, 0, 0, 0.3); border: 2px solid rgba(255,0,0,0.2); }
+        #m-place { bottom: 110px; right: 30px; background: rgba(0, 100, 255, 0.3); border: 2px solid rgba(0,100,255,0.2); }
+        #m-jump { bottom: 30px; right: 75px; width: 90px; height: 50px; background: rgba(255,255,255,0.2); }
         #m-inv { top: 10px; left: 10px; width: 45px; height: 45px; background: #4CAF50; }
+        #m-mod { top: 10px; left: 60px; width: 45px; height: 45px; background: #ff9800; }
         #m-esc { top: 10px; right: 10px; width: 45px; height: 45px; background: #555; }
 
-        /* --- INVENTARIO COMPACTO --- */
+        /* --- INVENTARIO --- */
         #inventory-panel { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 220px; background: #c6c6c6; border: 3px solid #373737; display: none; flex-direction: column; align-items: center; padding: 10px; z-index: 200; pointer-events: auto; }
         .crafting-grid { display: grid; grid-template-columns: repeat(2, 50px); gap: 5px; background: #8b8b8b; padding: 5px; }
         .craft-slot { width: 50px; height: 50px; background: #8b8b8b; border: 2px solid #373737; }
         #craft-result { width: 55px; height: 55px; background: #999; border: 3px solid #373737; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; cursor: pointer; }
 
-        /* --- UI JUEGO --- */
+        /* --- FX --- */
         #damage-flash { position: fixed; inset: 0; background: rgba(255,0,0,0); pointer-events: none; z-index: 1000; transition: background 0.1s; }
         #hotbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 4px; border: 2px solid #555; pointer-events: auto; }
         .slot { width: 40px; height: 40px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; background: rgba(0,0,0,0.4); }
         .slot.active { border-color: #fff; box-shadow: 0 0 8px #fff; }
-        #break-indicator { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.4); border-radius: 50%; border-top-color: #fff; transform: translate(-50%, -50%); display: none; }
+        #break-indicator { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 5; }
     </style>
 </head>
 <body>
 
     <div id="damage-flash"></div>
+    <div id="break-indicator"></div>
+
     <div id="menu">
         <h1>MINECRAFT JS</h1>
         <button class="btn" onclick="startGame(false)">MODO PC</button>
@@ -56,17 +60,27 @@
         <div class="m-btn" id="m-place">PONER</div>
         <div class="m-btn" id="m-jump">SALTAR</div>
         <div class="m-btn" id="m-inv">INV</div>
+        <div class="m-btn" id="m-mod">M</div>
         <div class="m-btn" id="m-esc">ESC</div>
+    </div>
+
+    <div id="mod-menu">
+        <h2>MODS ACTIVOS</h2>
+        <div class="mod-row">Gravedad: <input type="range" id="mod-grav" min="0" max="50" value="25" oninput="updateMods()"></div>
+        <div class="mod-row">Velocidad: <input type="range" id="mod-speed" min="1" max="25" value="5" oninput="updateMods()"></div>
+        <div class="mod-row">Cielo: <input type="color" id="mod-sky" value="#87ceeb" oninput="updateMods()"></div>
+        <div class="mod-row">Modo Vuelo: <input type="checkbox" id="mod-fly" onchange="updateMods()"></div>
+        <button class="btn" onclick="toggleModMenu()">CERRAR M</button>
     </div>
 
     <div id="inventory-panel">
         <div class="crafting-grid">
-            <div class="craft-slot" id="c0" onclick="tapToCraft(0)"></div>
-            <div class="craft-slot" id="c1" onclick="tapToCraft(1)"></div>
-            <div class="craft-slot" id="c2" onclick="tapToCraft(2)"></div>
-            <div class="craft-slot" id="c3" onclick="tapToCraft(3)"></div>
+            <div id="c0" class="craft-slot" onclick="tapToCraft(0)"></div>
+            <div id="c1" class="craft-slot" onclick="tapToCraft(1)"></div>
+            <div id="c2" class="craft-slot" onclick="tapToCraft(2)"></div>
+            <div id="c3" class="craft-slot" onclick="tapToCraft(3)"></div>
         </div>
-        <div id="craft-result" onclick="finishCraft()">RES</div>
+        <div id="craft-result" onclick="finishCraft()">CRAFT</div>
     </div>
 
     <div id="esc-menu">
@@ -80,7 +94,6 @@
         <h3>EDITOR</h3>
         <input type="text" id="obj-name" placeholder="Nombre...">
         <div>Color: <input type="color" id="obj-color" value="#ff00ff"></div>
-        <div>Segundos: <input type="range" id="obj-dur" min="0.1" max="5.0" step="0.1" value="1.0"></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin:10px;">
             <button class="btn" style="width:80px" onclick="cycleMaterial(this)" data-mat="null">VACÍO</button>
             <button class="btn" style="width:80px" onclick="cycleMaterial(this)" data-mat="null">VACÍO</button>
@@ -91,7 +104,6 @@
     </div>
 
     <div id="ui-layer">
-        <div id="break-indicator"></div>
         <div id="hotbar">
             <div id="s0" class="slot active" data-color="null" data-count="0" onclick="updateActiveSlot(0)">1</div>
             <div id="s1" class="slot" data-color="null" data-count="0" onclick="updateActiveSlot(1)">2</div>
@@ -108,33 +120,38 @@
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
         let blocks = [], isMobile = false, activeSlot = 0;
-        let isInventoryOpen = false, isEscMenuOpen = false;
+        let isInventoryOpen = false, isEscMenuOpen = false, isModMenuOpen = false;
         let velocityY = 0, isGrounded = false, fallStartY = 0;
         let joyDir = { x: 0, y: 0 }, touchX = 0, touchY = 0, keys = {};
         
+        // Settings Corregidos (Menos zoom, menos sensibilidad)
+        let config = { gravity: 25, speed: 5, fly: false, sensitivity: 0.002, fov: 85 };
+        
+        // Lógica de Minado
         let isMining = false, mineProgress = 0, currentTarget = null, originalPos = new THREE.Vector3();
         const hardness = { "2e7d32": 0.5, "5d4037": 1.0, "388e3c": 0.2, "795548": 0.5, "9e9e9e": 2.0, "1a1a1a": Infinity };
         let customItem = { color: 0xff00ff, recipe: ["null", "null", "null", "null"] };
-        const materials = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"2e7d32"}, {n:"MADERA",c:"5d4037"}, {n:"HOJA",c:"388e3c"}, {n:"TIERRA",c:"795548"}, {n:"PIEDRA",c:"9e9e9e"}];
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb);
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
-        // --- GENERACIÓN DE MUNDO ---
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({ color }));
             m.position.set(x, y, z); scene.add(m); blocks.push(m);
         }
 
+        // --- GENERACIÓN DE MUNDO ---
         for(let x=-8; x<8; x++) {
             for(let z=-8; z<8; z++) {
                 const h = Math.round(Math.sin(x/4)*Math.cos(z/4));
-                addBlock(x, h, z, 0x2e7d32); addBlock(x, h-1, z, 0x795548); addBlock(x, -4, z, 0x1a1a1a);
+                addBlock(x, h, z, 0x2e7d32); // Pasto
+                addBlock(x, h-1, z, 0x795548); // Tierra
+                addBlock(x, -4, z, 0x1a1a1a); // Bedrock
                 if(Math.random()>0.97) { // Árboles
                     for(let i=1; i<=3; i++) addBlock(x, h+i, z, 0x5d4037);
                     addBlock(x, h+4, z, 0x388e3c);
@@ -144,24 +161,19 @@
         scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
         camera.position.set(0, 5, 0);
 
-        // --- COLISIONES SÓLIDAS ---
         function checkCollisions(nextPos) {
-            const pBox = new THREE.Box3().setFromCenterAndSize(
-                new THREE.Vector3(nextPos.x, nextPos.y - 0.8, nextPos.z),
-                new THREE.Vector3(0.6, 1.8, 0.6)
-            );
-            for(let b of blocks) {
-                if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
-            }
+            if(config.fly) return false;
+            const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(nextPos.x, nextPos.y - 0.8, nextPos.z), new THREE.Vector3(0.6, 1.8, 0.6));
+            for(let b of blocks) if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
             return false;
         }
 
-        // --- LOOP PRINCIPAL ---
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
 
+            // Mecánica de Minado
             if(isMining) {
                 const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
                 const hits = ray.intersectObjects(blocks);
@@ -172,7 +184,7 @@
                     if(max !== Infinity) {
                         if(currentTarget !== b) { currentTarget = b; originalPos.copy(b.position); mineProgress = 0; }
                         mineProgress += delta;
-                        b.position.x = originalPos.x + (Math.random()-0.5)*0.1;
+                        b.position.x = originalPos.x + (Math.random()-0.5)*0.1; // Vibración
                         document.getElementById('break-indicator').style.display = 'block';
                         if(mineProgress >= max) {
                             addToInventory(b.material.color.getHex());
@@ -183,8 +195,9 @@
                 } else resetMining();
             }
 
-            if((controls.isLocked || isMobile) && !isInventoryOpen && !isEscMenuOpen) {
-                velocityY -= 25 * delta;
+            if((controls.isLocked || isMobile) && !isInventoryOpen && !isEscMenuOpen && !isModMenuOpen) {
+                if(!config.fly) velocityY -= config.gravity * delta;
+                
                 const moveVec = new THREE.Vector3();
                 if(isMobile) { moveVec.z = -joyDir.y; moveVec.x = joyDir.x; }
                 else {
@@ -195,93 +208,65 @@
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
                 
-                // Colisión Eje X/Z
-                const nextXZ = camera.position.clone().addScaledVector(dir, moveVec.z * 5 * delta).addScaledVector(right, moveVec.x * 5 * delta);
+                // Movimiento con colisiones por eje
+                const nextXZ = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
                 if(!checkCollisions(new THREE.Vector3(nextXZ.x, camera.position.y, nextXZ.z))) {
                     camera.position.x = nextXZ.x; camera.position.z = nextXZ.z;
                 }
 
-                // Colisión Eje Y (Gravedad)
-                const nextY = camera.position.clone(); nextY.y += velocityY * delta;
-                if(!checkCollisions(nextY)) {
-                    camera.position.y = nextY.y; isGrounded = false;
-                } else {
-                    if(velocityY < 0) {
-                        if(fallStartY - camera.position.y > 4.5) {
-                            document.getElementById('damage-flash').style.background = 'rgba(255,0,0,0.4)';
-                            setTimeout(()=> document.getElementById('damage-flash').style.background = 'transparent', 100);
+                if(!config.fly) {
+                    const nextY = camera.position.clone(); nextY.y += velocityY * delta;
+                    if(!checkCollisions(nextY)) { camera.position.y = nextY.y; isGrounded = false; }
+                    else {
+                        if(velocityY < 0) {
+                            if(fallStartY - camera.position.y > 4.5) { // Daño caída
+                                document.getElementById('damage-flash').style.background = 'rgba(255,0,0,0.4)';
+                                setTimeout(()=> document.getElementById('damage-flash').style.background = 'transparent', 100);
+                            }
+                            isGrounded = true; fallStartY = camera.position.y;
                         }
-                        isGrounded = true; fallStartY = camera.position.y;
+                        velocityY = 0;
                     }
-                    velocityY = 0;
-                }
+                } else { camera.position.y += (keys['Space'] ? 0.1 : 0) - (keys['ShiftLeft'] ? 0.1 : 0); }
             }
             renderer.render(scene, camera);
         }
 
-        // --- SISTEMAS ---
-        window.startGame = (m) => { 
-            isMobile = m; document.getElementById('menu').style.display='none'; 
-            if(m) { document.getElementById('mobile-controls').style.display='block'; camera.rotation.order = "YXZ"; }
-            else controls.lock(); animate(); 
-        };
-
-        window.toggleInventory = () => {
-            isInventoryOpen = !isInventoryOpen;
-            document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none';
-        };
-
-        window.toggleEscMenu = () => {
-            isEscMenuOpen = !isEscMenuOpen;
-            document.getElementById('esc-menu').style.display = isEscMenuOpen ? 'flex' : 'none';
-        };
-
-        window.tapToCraft = (idx) => {
-            const s = document.querySelectorAll('.slot')[activeSlot];
-            if(s.dataset.color !== "null") {
-                const el = document.getElementById('c'+idx);
-                el.style.backgroundColor = s.style.backgroundColor;
-                el.dataset.color = s.dataset.color;
-                checkRecipe();
+        // --- SISTEMAS DE INTERACCIÓN ---
+        window.handlePlace = () => {
+            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
+            const hits = ray.intersectObjects(blocks);
+            if(hits.length > 0 && hits[0].distance < 5) {
+                const s = document.querySelectorAll('.slot')[activeSlot];
+                if(s.dataset.color !== "null") {
+                    const p = hits[0].object.position.clone().add(hits[0].face.normal);
+                    addBlock(p.x, p.y, p.z, parseInt(s.dataset.color));
+                    let count = parseInt(s.dataset.count) - 1;
+                    s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
+                    if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(0,0,0,0.4)"; }
+                }
             }
         };
 
         function addToInventory(color) {
             const slots = document.querySelectorAll('.slot');
-            let t = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
-            if(t) {
-                let c = (parseInt(t.dataset.count) || 0) + 1;
-                t.dataset.color = color; t.dataset.count = c;
-                t.style.backgroundColor = "#" + color.toString(16).padStart(6,'0');
-                t.innerText = c;
+            let target = Array.from(slots).find(s => parseInt(s.dataset.color) === color) || Array.from(slots).find(s => s.dataset.color === "null");
+            if(target) {
+                let c = (parseInt(target.dataset.count) || 0) + 1;
+                target.dataset.color = color; target.dataset.count = c;
+                target.style.backgroundColor = "#" + color.toString(16).padStart(6,'0');
+                target.innerText = c;
             }
         }
 
-        window.handleInteraction = (type) => {
-            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
-            const hits = ray.intersectObjects(blocks);
-            if(hits.length > 0 && hits[0].distance < 5) {
-                if(type === 'place') {
-                    const s = document.querySelectorAll('.slot')[activeSlot];
-                    if(s.dataset.color !== "null") {
-                        const p = hits[0].object.position.clone().add(hits[0].face.normal);
-                        addBlock(p.x, p.y, p.z, parseInt(s.dataset.color));
-                        let c = parseInt(s.dataset.count) - 1;
-                        s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
-                        if(c <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(0,0,0,0.4)"; }
-                    }
-                }
-            }
-        };
+        function resetMining() { if(currentTarget) currentTarget.position.copy(originalPos); isMining = false; document.getElementById('break-indicator').style.display='none'; }
 
-        function resetMining() { if(currentTarget) currentTarget.position.copy(originalPos); isMining = false; document.getElementById('break-indicator').style.display = 'none'; }
-
-        // Eventos Táctiles
+        // --- CONTROL CELULAR ---
         window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
         window.addEventListener('touchmove', e => {
-            if(isMobile && !isInventoryOpen && !isEscMenuOpen && e.touches[0].pageX > window.innerWidth/2) {
-                camera.rotation.y -= (e.touches[0].pageX - touchX) * 0.006;
-                camera.rotation.x -= (e.touches[0].pageY - touchY) * 0.006;
+            if(isMobile && !isInventoryOpen && !isEscMenuOpen && !isModMenuOpen && e.touches[0].pageX > window.innerWidth/2) {
+                camera.rotation.y -= (e.touches[0].pageX - touchX) * config.sensitivity;
+                camera.rotation.x -= (e.touches[0].pageY - touchY) * config.sensitivity;
                 camera.rotation.x = Math.max(-1.5, Math.min(1.5, camera.rotation.x));
                 touchX = e.touches[0].pageX; touchY = e.touches[0].pageY;
             }
@@ -300,33 +285,61 @@
 
         document.getElementById('m-mine').ontouchstart = () => isMining = true;
         document.getElementById('m-mine').ontouchend = resetMining;
-        document.getElementById('m-place').onclick = () => handleInteraction('place');
-        document.getElementById('m-jump').onclick = () => { if(isGrounded) velocityY = 10; };
-        document.getElementById('m-inv').onclick = toggleInventory;
-        document.getElementById('m-esc').onclick = toggleEscMenu;
-
+        document.getElementById('m-place').onclick = handlePlace;
+        document.getElementById('m-jump').onclick = () => { if(isGrounded || config.fly) velocityY = 10; };
+        
+        // --- MENÚS ---
+        window.startGame = (m) => { isMobile = m; document.getElementById('menu').style.display='none'; if(m) document.getElementById('mobile-controls').style.display='block'; else controls.lock(); animate(); };
+        window.toggleModMenu = () => { isModMenuOpen = !isModMenuOpen; document.getElementById('mod-menu').style.display = isModMenuOpen ? 'flex' : 'none'; };
+        window.toggleInventory = () => { isInventoryOpen = !isInventoryOpen; document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none'; };
+        window.toggleEscMenu = () => { isEscMenuOpen = !isEscMenuOpen; document.getElementById('esc-menu').style.display = isEscMenuOpen ? 'flex' : 'none'; if(!isMobile) isEscMenuOpen ? controls.unlock() : controls.lock(); };
+        window.updateMods = () => {
+            config.gravity = parseFloat(document.getElementById('mod-grav').value);
+            config.speed = parseFloat(document.getElementById('mod-speed').value);
+            config.fly = document.getElementById('mod-fly').checked;
+            scene.background = new THREE.Color(document.getElementById('mod-sky').value);
+        };
         window.updateActiveSlot = (i) => { activeSlot = i; document.querySelectorAll('.slot').forEach((s,idx) => s.classList.toggle('active', idx === i)); };
-        window.addEventListener('keydown', e => { keys[e.code] = true; if(e.key.toLowerCase()==='e') toggleInventory(); if(e.code==='Space' && isGrounded) velocityY=10; });
-        window.addEventListener('keyup', e => keys[e.code] = false);
+        
+        // Crafteo
+        window.tapToCraft = (idx) => {
+            const s = document.querySelectorAll('.slot')[activeSlot];
+            if(s.dataset.color !== "null") {
+                const el = document.getElementById('c'+idx);
+                el.style.backgroundColor = s.style.backgroundColor;
+                el.dataset.color = s.dataset.color;
+            }
+        };
+        window.finishCraft = () => { 
+            document.querySelectorAll('.craft-slot').forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
+            addToInventory(customItem.color);
+        };
 
-        // Editor y Recetas
+        // Editor
+        window.openEditor = () => document.getElementById('obj-editor').style.display='flex';
         window.cycleMaterial = (el) => {
-            let idx = materials.findIndex(m => m.c === el.getAttribute("data-mat"));
-            let next = materials[(idx + 1) % materials.length];
+            const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"2e7d32"}, {n:"MADERA",c:"5d4037"}, {n:"PIEDRA",c:"9e9e9e"}];
+            let idx = mats.findIndex(m => m.c === el.getAttribute("data-mat"));
+            let next = mats[(idx + 1) % mats.length];
             el.setAttribute("data-mat", next.c); el.innerText = next.n;
         };
         window.saveNewObject = () => {
-            const hex = document.getElementById('obj-color').value.replace('#','').toLowerCase();
-            hardness[hex] = parseFloat(document.getElementById('obj-dur').value);
-            customItem = { color: parseInt("0x"+hex), recipe: Array.from(document.querySelectorAll('#obj-editor .btn[data-mat]')).map(b => b.getAttribute("data-mat")) };
+            const hex = document.getElementById('obj-color').value.replace('#','');
+            customItem.color = parseInt("0x"+hex);
             document.getElementById('obj-editor').style.display = 'none';
         };
-        window.openEditor = () => document.getElementById('obj-editor').style.display='flex';
-        function checkRecipe() { /* Lógica similar a versiones anteriores */ }
-        window.finishCraft = () => {
-             document.querySelectorAll('.craft-slot').forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
-             addToInventory(customItem.color);
-        }
+
+        document.getElementById('m-mod').onclick = toggleModMenu;
+        document.getElementById('m-inv').onclick = toggleInventory;
+        document.getElementById('m-esc').onclick = toggleEscMenu;
+
+        window.addEventListener('keydown', e => { 
+            keys[e.code] = true; 
+            if(e.key.toLowerCase()==='m') toggleModMenu(); 
+            if(e.key.toLowerCase()==='e') toggleInventory();
+            if(e.code==='Space' && isGrounded) velocityY = 10;
+        });
+        window.addEventListener('keyup', e => keys[e.code] = false);
     </script>
 </body>
 </html>
