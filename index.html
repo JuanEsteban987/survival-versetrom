@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Infinite Chunk Edition</title>
+    <title>Minecraft JS: Infinite Fixed</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
@@ -116,11 +116,10 @@
         let hardness = { "2e7d32": 0.4, "795548": 0.5, "5d4037": 1.2, "388e3c": 0.2, "9e9e9e": 2.5, "1a1a1a": Infinity };
         const catalog = [{name:"Pasto",color:0x2e7d32},{name:"Tierra",color:0x795548},{name:"Madera",color:0x5d4037},{name:"Hojas",color:0x388e3c},{name:"Piedra",color:0x9e9e9e},{name:"Bedrock",color:0x1a1a1a}];
 
-        // SISTEMA DE CHUNKS
         const CHUNK_SIZE = 8;
-        const RENDER_DISTANCE = 1; // 1 chunk alrededor = 3x3 chunks totales
+        const RENDER_DISTANCE = 1; 
         const chunks = new Map();
-        let currentChunkCoords = { x: 0, z: 0 };
+        let currentChunkCoords = { x: 999, z: 999 }; // Forzar actualización inicial
 
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x87ceeb);
         const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -137,14 +136,12 @@
         function generateChunk(cx, cz) {
             const chunkKey = `${cx},${cz}`;
             if (chunks.has(chunkKey)) return;
-            
             const chunkBlocks = [];
             for(let x = 0; x < CHUNK_SIZE; x++) {
                 for(let z = 0; z < CHUNK_SIZE; z++) {
                     const worldX = cx * CHUNK_SIZE + x;
                     const worldZ = cz * CHUNK_SIZE + z;
                     const h = Math.round(Math.sin(worldX/4)*Math.cos(worldZ/4));
-                    
                     chunkBlocks.push(addBlock(worldX, h, worldZ, 0x2e7d32));
                     chunkBlocks.push(addBlock(worldX, h-1, worldZ, 0x795548));
                     for(let d=2; d<5; d++) chunkBlocks.push(addBlock(worldX, h-d, worldZ, 0x9e9e9e));
@@ -157,22 +154,14 @@
         function updateChunks() {
             const cx = Math.floor(camera.position.x / CHUNK_SIZE);
             const cz = Math.floor(camera.position.z / CHUNK_SIZE);
-
             if (cx !== currentChunkCoords.x || cz !== currentChunkCoords.z) {
                 currentChunkCoords = { x: cx, z: cz };
-                
-                // Mostrar chunks en rango 3x3
                 for (let x = cx - RENDER_DISTANCE; x <= cx + RENDER_DISTANCE; x++) {
                     for (let z = cz - RENDER_DISTANCE; z <= cz + RENDER_DISTANCE; z++) {
                         generateChunk(x, z);
-                        const chunkKey = `${x},${z}`;
-                        if (chunks.has(chunkKey)) {
-                            chunks.get(chunkKey).forEach(b => b.visible = true);
-                        }
+                        if (chunks.has(`${x},${z}`)) chunks.get(`${x},${z}`).forEach(b => b.visible = true);
                     }
                 }
-
-                // Ocultar chunks lejanos
                 for (let [key, chunkBlocks] of chunks) {
                     const [kx, kz] = key.split(',').map(Number);
                     if (Math.abs(kx - cx) > RENDER_DISTANCE || Math.abs(kz - cz) > RENDER_DISTANCE) {
@@ -183,13 +172,12 @@
         }
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
-        camera.position.set(0, 5, 0);
+        camera.position.set(4, 5, 4); // Spawn fijo dentro de un chunk inicial
 
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
-            
             updateChunks();
 
             if(isMining) {
@@ -236,7 +224,7 @@
             const visibleBlocks = blocks.filter(b => b.visible);
             for(let i=0; i<visibleBlocks.length; i++) {
                 const b = visibleBlocks[i];
-                if(Math.abs(b.position.x - pos.x) < 2 && Math.abs(b.position.z - pos.z) < 2) {
+                if(Math.abs(b.position.x - pos.x) < 1.5 && Math.abs(b.position.z - pos.z) < 1.5) {
                     if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
                 }
             }
@@ -254,12 +242,9 @@
                     const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(1, 1, 1));
                     if(!pBox.intersectsBox(bBox)) {
                         const newB = addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
-                        // Añadir el bloque al chunk correspondiente para que no desaparezca
                         const cx = Math.floor(pos.x / CHUNK_SIZE);
                         const cz = Math.floor(pos.z / CHUNK_SIZE);
-                        const key = `${cx},${cz}`;
-                        if(chunks.has(key)) chunks.get(key).push(newB);
-                        
+                        if(chunks.has(`${cx},${cz}`)) chunks.get(`${cx},${cz}`).push(newB);
                         if(!document.getElementById('mod-creative-inf').checked) {
                             let c = parseInt(s.dataset.count) - 1;
                             s.dataset.count = c; s.innerText = c > 0 ? c : activeSlot+1;
