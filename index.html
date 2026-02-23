@@ -128,8 +128,7 @@
 
         let blocks = [], isMobile = false, activeSlot = 0;
         let isInventoryOpen = false, isEscMenuOpen = false, isAnyMOpen = false;
-        let velocityY = 0, isGrounded = false, fallStartY = 0;
-        let joyDir = { x: 0, y: 0 }, touchX = 0, touchY = 0, keys = {};
+        let velocityY = 0, isGrounded = false, keys = {};
         
         let config = { gravity: 25, speed: 6, fly: false, sensitivity: 0.002, fov: 85 };
         
@@ -189,7 +188,7 @@
                 ray.setFromCamera(new THREE.Vector2(), camera);
                 const hits = ray.intersectObjects(blocks, false); 
                 
-                if(hits.length > 0 && hits[0].distance < 4) {
+                if(hits.length > 0 && hits[0].distance < 4.5) {
                     const b = hits[0].object;
                     const hex = b.material.color.getHexString().toLowerCase();
                     
@@ -198,7 +197,6 @@
                         mineProgress += delta;
                         document.getElementById('break-indicator').style.display = 'block';
                         
-                        // Si se completa el tiempo de ruptura
                         if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex());
                             scene.remove(b);
@@ -251,7 +249,6 @@
                 if(s.dataset.color !== "null") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
                     
-                    // No poner bloque donde está el jugador
                     const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y - 0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
                     const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(1, 1, 1));
                     
@@ -295,7 +292,6 @@
         });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
-        // Controles Móviles
         document.getElementById('m-mine').ontouchstart = (e) => { e.preventDefault(); isMining = true; };
         document.getElementById('m-mine').ontouchend = resetMining;
         document.getElementById('m-place').onclick = handlePlace;
@@ -304,7 +300,7 @@
         document.getElementById('m-inv').onclick = toggleInventory;
         document.getElementById('m-esc').onclick = toggleEscMenu;
 
-        // Joystick
+        let joyDir = { x: 0, y: 0 }, touchX = 0, touchY = 0;
         document.getElementById('joystick-container').addEventListener('touchmove', e => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.touches[0].clientX - rect.left - 55, y = e.touches[0].clientY - rect.top - 55;
@@ -314,7 +310,6 @@
         });
         document.getElementById('joystick-container').addEventListener('touchend', () => { joyDir = {x:0,y:0}; document.getElementById('joystick-knob').style.transform = 'translate(0,0)'; });
 
-        // Cámara móvil
         window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
         window.addEventListener('touchmove', e => {
             if(isMobile && !isInventoryOpen && !isEscMenuOpen && !isAnyMOpen && e.touches[0].pageX > window.innerWidth/2) {
