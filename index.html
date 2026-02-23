@@ -3,59 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft JS: INFINITE CHUNKS EDITION</title>
+    <title>MINECRAFT JS: THE FINAL VERSION</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noisejs/2.0.2/perlin.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #87ceeb; user-select: none; touch-action: none; }
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
-        .full-overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; background: rgba(0,0,0,0.85); pointer-events: auto; }
-        .panel { background: #c6c6c6; border: 4px solid #373737; padding: 20px; color: #333; text-align: center; box-shadow: inset -4px -4px #555, inset 4px 4px #fff; }
-        .btn { background: #4CAF50; color: white; border: none; padding: 12px; margin: 8px; cursor: pointer; font-weight: bold; border-bottom: 4px solid #2e7d32; width: 220px; }
-        .btn-blue { background: #2196F3; border-bottom-color: #0b7ad1; }
+        .full-overlay { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; background: rgba(0,0,0,0.9); pointer-events: auto; }
+        
+        /* Paneles Estilo Minecraft */
+        .panel { background: #c6c6c6; border: 4px solid #373737; padding: 20px; color: #333; text-align: center; box-shadow: inset -4px -4px #555, inset 4px 4px #fff; max-width: 90%; }
+        .btn { background: #4CAF50; color: white; border: none; padding: 12px; margin: 5px; cursor: pointer; font-weight: bold; border-bottom: 4px solid #2e7d32; width: 180px; text-shadow: 1px 1px #000; }
         .btn-red { background: #f44336; border-bottom-color: #b71c1c; }
-        #hotbar { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; background: rgba(0,0,0,0.6); padding: 6px; border: 3px solid #555; pointer-events: auto; }
-        .h-slot { width: 45px; height: 45px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; }
+        .btn-blue { background: #2196F3; border-bottom-color: #0b7ad1; }
+
+        /* Inventario y Hotbar */
+        .grid { display: grid; grid-template-columns: repeat(3, 50px); gap: 5px; background: #8b8b8b; padding: 10px; border: 3px solid #373737; margin: 10px auto; }
+        .slot-ui { width: 50px; height: 50px; background: #8b8b8b; border: 3px solid #373737; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; position: relative; }
+        #hotbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 5px; border: 2px solid #555; pointer-events: auto; }
+        .h-slot { width: 40px; height: 40px; border: 2px solid #444; color: white; font-size: 8px; text-align: center; display: flex; align-items: center; justify-content: center; }
         .h-slot.active { border-color: #fff; background: rgba(255,255,255,0.2); }
+
+        /* Controles Móviles */
         #mobile-controls { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 50; }
-        .m-btn { position: absolute; width: 65px; height: 65px; background: rgba(255,255,255,0.2); border-radius: 12px; pointer-events: auto; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold; border: 2px solid rgba(255,255,255,0.1); }
-        #joystick-zone { position: absolute; bottom: 40px; left: 40px; width: 110px; height: 110px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
-        #joystick-knob { position: absolute; top: 35px; left: 35px; width: 40px; height: 40px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        #m-jump { bottom: 40px; right: 100px; width: 90px; }
-        #m-mine { bottom: 220px; right: 30px; background: rgba(255,0,0,0.3); }
-        #m-place { bottom: 140px; right: 110px; background: rgba(0,120,255,0.3); }
-        #m-inv { top: 15px; left: 15px; background: #4CAF50; }
-        #m-srv { top: 15px; right: 15px; background: #2196F3; }
-        #stats { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); color: white; font-size: 12px; text-shadow: 1px 1px #000; pointer-events: none; }
+        .m-btn { position: absolute; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 10px; pointer-events: auto; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
+        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
+        #joystick-knob { position: absolute; top: 30px; left: 30px; width: 40px; height: 40px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+        #m-jump { bottom: 30px; right: 80px; width: 80px; }
+        #m-mine { bottom: 180px; right: 20px; background: rgba(255,0,0,0.3); }
+        #m-place { bottom: 110px; right: 90px; background: rgba(0,120,255,0.3); }
+        #m-inv { top: 10px; left: 10px; background: #4CAF50; }
+        #m-srv { top: 10px; right: 10px; background: #2196F3; }
+        #m-mod { top: 10px; left: 80px; background: #ff9800; }
+        
+        #break-indicator { position: fixed; top: 50%; left: 50%; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="stats">Chunks cargados: 0</div>
-    
+    <div id="break-indicator"></div>
+
     <div id="main-menu" class="full-overlay" style="display: flex;">
         <div class="panel">
-            <h1>INFINITE JS CRAFT</h1>
-            <button class="btn" onclick="start(false)">MODO PC</button>
-            <button class="btn" onclick="start(true)">MODO MÓVIL</button>
+            <h1>MINECRAFT JS TOTAL</h1>
+            <button class="btn" onclick="init(false)">MODO PC</button>
+            <button class="btn" onclick="init(true)">MODO MÓVIL</button>
         </div>
     </div>
 
     <div id="srv-panel" class="full-overlay">
         <div class="panel">
-            <h2>MULTIPLAYER P2P</h2>
-            <p id="srv-id">ID: Generando...</p>
-            <button class="btn btn-blue" onclick="hostSrv()">HOSTEAR</button>
-            <input type="text" id="join-id" placeholder="ID del Host..." style="padding:10px; margin:5px;"><br>
-            <button class="btn" onclick="joinSrv()">UNIRSE</button><br>
+            <h2>SERVIDOR P2P</h2>
+            <p id="srv-status">ID: Generando...</p>
+            <button class="btn btn-blue" onclick="hostGame()">SER HOST</button>
+            <input type="text" id="join-id" placeholder="ID del Host..." style="padding:8px; width:80%;"><br>
+            <button class="btn" onclick="joinGame()">UNIRSE</button>
             <button class="btn btn-red" onclick="closeAll()">CERRAR</button>
         </div>
     </div>
 
     <div id="inv-panel" class="full-overlay">
         <div class="panel">
-            <h2>INVENTARIO / CRAFTEO</h2>
-            <div id="inv-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:15px;"></div>
-            <button class="btn btn-blue" onclick="alert('Crafteo: 4 Madera -> 1 Mesa')">CRAFTEAR</button>
+            <h2>INVENTARIO & CRAFTEO</h2>
+            <div class="grid" id="inv-grid"></div>
+            <button class="btn btn-blue" onclick="craftingLogic()">CRAFTEAR (2 MADERA -> 1 PICO)</button>
+            <button class="btn btn-red" onclick="closeAll()">CERRAR</button>
+        </div>
+    </div>
+
+    <div id="mod-panel" class="full-overlay">
+        <div class="panel">
+            <h2>CREADOR DE BLOQUES</h2>
+            <input type="text" id="mod-name" placeholder="Nombre..."><br>
+            <input type="color" id="mod-color" value="#ffffff"><br>
+            <button class="btn" onclick="createModBlock()">GUARDAR MOD</button>
             <button class="btn btn-red" onclick="closeAll()">CERRAR</button>
         </div>
     </div>
@@ -67,15 +87,16 @@
         <div class="m-btn" id="m-jump">SALTAR</div>
         <div class="m-btn" id="m-inv">INV</div>
         <div class="m-btn" id="m-srv">SRV</div>
+        <div class="m-btn" id="m-mod">MOD</div>
     </div>
 
     <div id="ui-layer">
         <div id="hotbar">
-            <div class="h-slot active" id="s0">Pasto</div>
-            <div class="h-slot" id="s1">Tierra</div>
-            <div class="h-slot" id="s2">Piedra</div>
-            <div class="h-slot" id="s3">Madera</div>
-            <div class="h-slot" id="s4">Mesa</div>
+            <div class="h-slot active" id="hs0"></div>
+            <div class="h-slot" id="hs1"></div>
+            <div class="h-slot" id="hs2"></div>
+            <div class="h-slot" id="hs3"></div>
+            <div class="h-slot" id="hs4"></div>
         </div>
     </div>
 
@@ -84,39 +105,42 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-        // --- CONFIGURACIÓN DE CHUNKS ---
+        // --- MOTOR DE CHUNKS & MUNDO ---
         const CHUNK_SIZE = 16;
-        const RENDER_DISTANCE = 2; // Chunks a la redonda
+        const RENDER_DIST = 2;
         const chunks = new Map();
-        let currentChunk = { x: 0, z: 0 };
-
-        // --- ESTADO DEL JUEGO ---
         let scene, camera, renderer, controls, clock;
         let isMobile = false, activeSlot = 0, velocityY = 0, isGrounded = false;
-        let keys = {}, inventory = [64, 0, 0, 0, 0];
-        const colors = [0x567d46, 0x8b5a2b, 0x808080, 0x654321, 0xdeb887];
-        
-        // Multiplayer
+        let keys = {}, isMining = false, mineTime = 0, miningTarget = null;
         let peer, conn, remotePlayers = {};
 
-        window.start = (mobile) => {
-            isMobile = mobile;
+        const catalog = [
+            { name: "Pasto", color: 0x567d46, count: 64 },
+            { name: "Tierra", color: 0x8b5a2b, count: 0 },
+            { name: "Piedra", color: 0x808080, count: 0 },
+            { name: "Madera", color: 0x654321, count: 0 },
+            { name: "Pico", color: 0xffd700, count: 0, tool: true }
+        ];
+
+        window.init = (m) => {
+            isMobile = m;
             document.getElementById('main-menu').style.display = 'none';
-            if(isMobile) document.getElementById('mobile-controls').style.display = 'block';
+            if(m) document.getElementById('mobile-controls').style.display = 'block';
             
-            initThree();
+            setupThree();
             noise.seed(Math.random());
-            updateChunks();
+            updateWorld();
             animate();
+            updateUI();
         };
 
-        function initThree() {
+        function setupThree() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.Fog(0x87ceeb, 10, CHUNK_SIZE * RENDER_DISTANCE * 1.5);
+            scene.fog = new THREE.Fog(0x87ceeb, 10, 50);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.set(8, 10, 8);
+            camera.position.set(8, 15, 8);
 
             renderer = new THREE.WebGLRenderer({ antialias: false });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -131,33 +155,15 @@
             scene.add(sun);
         }
 
-        // --- MOTOR DE CHUNKS INFINITO ---
-        function updateChunks() {
+        // --- GENERACIÓN INFINITA ---
+        function updateWorld() {
             const cx = Math.floor(camera.position.x / CHUNK_SIZE);
             const cz = Math.floor(camera.position.z / CHUNK_SIZE);
 
-            if (cx !== currentChunk.x || cz !== currentChunk.z) {
-                currentChunk = { x: cx, z: cz };
-                
-                // Generar nuevos chunks dentro del rango
-                for (let x = cx - RENDER_DISTANCE; x <= cx + RENDER_DISTANCE; x++) {
-                    for (let z = cz - RENDER_DISTANCE; z <= cz + RENDER_DISTANCE; z++) {
-                        const key = `${x},${z}`;
-                        if (!chunks.has(key)) {
-                            generateChunk(x, z);
-                        }
-                    }
+            for (let x = cx - RENDER_DIST; x <= cx + RENDER_DIST; x++) {
+                for (let z = cz - RENDER_DIST; z <= cz + RENDER_DIST; z++) {
+                    if (!chunks.has(`${x},${z}`)) generateChunk(x, z);
                 }
-
-                // Limpiar chunks lejanos para ahorrar memoria
-                for (const [key, chunk] of chunks) {
-                    const [kx, kz] = key.split(',').map(Number);
-                    if (Math.abs(kx - cx) > RENDER_DISTANCE + 1 || Math.abs(kz - cz) > RENDER_DISTANCE + 1) {
-                        chunk.forEach(b => { scene.remove(b); b.geometry.dispose(); b.material.dispose(); });
-                        chunks.delete(key);
-                    }
-                }
-                document.getElementById('stats').innerText = `Chunks cargados: ${chunks.size} | Pos: ${Math.round(camera.position.x)}, ${Math.round(camera.position.z)}`;
             }
         }
 
@@ -165,137 +171,152 @@
             const chunkBlocks = [];
             for (let x = 0; x < CHUNK_SIZE; x++) {
                 for (let z = 0; z < CHUNK_SIZE; z++) {
-                    const worldX = cx * CHUNK_SIZE + x;
-                    const worldZ = cz * CHUNK_SIZE + z;
+                    const wx = cx * CHUNK_SIZE + x;
+                    const wz = cz * CHUNK_SIZE + z;
+                    const h = Math.floor(noise.perlin2(wx/20, wz/20) * 6) + 5;
                     
-                    // Ruido Perlin para elevación
-                    const h = Math.floor(noise.perlin2(worldX / 20, worldZ / 20) * 5) + 5;
-
-                    // Bloque de superficie
-                    chunkBlocks.push(addBlock(worldX, h, worldZ, colors[0]));
-                    // Bloque de tierra debajo
-                    chunkBlocks.push(addBlock(worldX, h-1, worldZ, colors[1]));
-                    // Piedra profunda
-                    chunkBlocks.push(addBlock(worldX, h-2, worldZ, colors[2]));
+                    chunkBlocks.push(addBlock(wx, h, wz, catalog[0].color, false));
+                    chunkBlocks.push(addBlock(wx, h-1, wz, catalog[1].color, false));
                 }
             }
             chunks.set(`${cx},${cz}`, chunkBlocks);
         }
 
-        function addBlock(x, y, z, color) {
-            const mesh = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshStandardMaterial({ color })
-            );
+        function addBlock(x, y, z, color, sync = true) {
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({ color }));
             mesh.position.set(x, y, z);
             scene.add(mesh);
+            if(sync && conn && conn.open) conn.send({type:'place', x, y, z, color});
             return mesh;
         }
 
         // --- MULTIPLAYER ---
-        window.hostSrv = () => {
+        window.hostGame = () => {
             peer = new Peer();
-            peer.on('open', id => document.getElementById('srv-id').innerText = "ID: " + id);
+            peer.on('open', id => document.getElementById('srv-status').innerText = "ID: " + id);
             peer.on('connection', c => { conn = c; setupConn(); });
         };
-
-        window.joinSrv = () => {
-            const id = document.getElementById('join-id').value;
+        window.joinGame = () => {
             peer = new Peer();
-            peer.on('open', () => { conn = peer.connect(id); setupConn(); });
+            peer.on('open', () => { conn = peer.connect(document.getElementById('join-id').value); setupConn(); });
         };
-
         function setupConn() {
-            conn.on('open', () => {
-                closeAll();
-                setInterval(() => {
-                    conn.send({ type: 'move', x: camera.position.x, y: camera.position.y, z: camera.position.z });
-                }, 50);
-            });
-            conn.on('data', data => {
-                if(data.type === 'move') {
-                    if(!remotePlayers[conn.peer]) {
-                        remotePlayers[conn.peer] = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), new THREE.MeshBasicMaterial({color: 0xff0000}));
-                        scene.add(remotePlayers[conn.peer]);
-                    }
-                    remotePlayers[conn.peer].position.set(data.x, data.y - 0.8, data.z);
+            conn.on('open', () => { closeAll(); setInterval(() => conn.send({type:'move', x:camera.position.x, y:camera.position.y, z:camera.position.z}), 50); });
+            conn.on('data', d => {
+                if(d.type === 'move') {
+                    if(!remotePlayers[conn.peer]) { remotePlayers[conn.peer] = new THREE.Mesh(new THREE.BoxGeometry(0.6,1.8,0.6), new THREE.MeshBasicMaterial({color:0xff0000})); scene.add(remotePlayers[conn.peer]); }
+                    remotePlayers[conn.peer].position.set(d.x, d.y-0.8, d.z);
                 }
+                if(d.type === 'place') addBlock(d.x, d.y, d.z, d.color, false);
             });
         }
 
-        // --- LOOP PRINCIPAL ---
+        // --- MECÁNICAS DE JUEGO ---
+        function handleMining(delta) {
+            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
+            const hits = ray.intersectObjects(scene.children.filter(o => o.type === "Mesh" && o.geometry.type === "BoxGeometry"));
+            if(hits.length > 0 && hits[0].distance < 4) {
+                miningTarget = hits[0].object;
+                document.getElementById('break-indicator').style.display = 'block';
+                mineTime += delta;
+                if(mineTime > 0.8) {
+                    const col = miningTarget.material.color.getHex();
+                    const item = catalog.find(i => i.color === col);
+                    if(item) item.count++;
+                    scene.remove(miningTarget);
+                    mineTime = 0; updateUI();
+                }
+            } else { mineTime = 0; document.getElementById('break-indicator').style.display = 'none'; }
+        }
+
+        function placeBlock() {
+            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
+            const hits = ray.intersectObjects(scene.children.filter(o => o.type === "Mesh" && o.geometry.type === "BoxGeometry"));
+            if(hits.length > 0 && hits[0].distance < 5 && catalog[activeSlot].count > 0) {
+                const p = hits[0].object.position.clone().add(hits[0].face.normal);
+                addBlock(p.x, p.y, p.z, catalog[activeSlot].color);
+                catalog[activeSlot].count--; updateUI();
+            }
+        }
+
+        window.craftingLogic = () => {
+            if(catalog[3].count >= 2) { catalog[3].count -= 2; catalog[4].count++; alert("Pico Crafteado!"); updateUI(); }
+            else alert("Necesitas 2 de Madera");
+        }
+
+        window.createModBlock = () => {
+            const name = document.getElementById('mod-name').value || "Mod";
+            const color = parseInt(document.getElementById('mod-color').value.replace('#','0x'));
+            catalog.push({name, color, count:10});
+            alert("Bloque Mod Creado!"); updateUI();
+        }
+
+        function updateUI() {
+            for(let i=0; i<5; i++) {
+                const s = document.getElementById('hs'+i);
+                s.style.background = "#" + (catalog[i]?.color.toString(16) || "444");
+                s.innerText = (catalog[i]?.name || "") + " ("+(catalog[i]?.count || 0)+")";
+            }
+        }
+
+        window.closeAll = () => { document.querySelectorAll('.full-overlay').forEach(e => e.style.display='none'); if(!isMobile) controls.lock(); };
+
+        // --- LOOP & FÍSICA ---
         function animate() {
             requestAnimationFrame(animate);
             const delta = Math.min(clock.getDelta(), 0.1);
-
-            if (controls.isLocked || isMobile) {
-                updateChunks();
+            if(isMining) handleMining(delta);
+            if(controls.isLocked || isMobile) {
+                updateWorld();
                 velocityY -= 25 * delta;
-                
                 const move = new THREE.Vector3();
-                if (isMobile) { move.z = -joyDir.y; move.x = joyDir.x; }
-                else {
-                    if(keys['KeyW']) move.z += 1; if(keys['KeyS']) move.z -= 1;
-                    if(keys['KeyA']) move.x -= 1; if(keys['KeyD']) move.x += 1;
-                }
-
+                if(isMobile) { move.z = -joyDir.y; move.x = joyDir.x; }
+                else { if(keys['KeyW']) move.z += 1; if(keys['KeyS']) move.z -= 1; if(keys['KeyA']) move.x -= 1; if(keys['KeyD']) move.x += 1; }
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up);
-
                 camera.position.addScaledVector(dir, move.z * 7 * delta);
                 camera.position.addScaledVector(right, move.x * 7 * delta);
                 camera.position.y += velocityY * delta;
-
-                // Colisión básica con suelo dinámico
-                if(camera.position.y < 12) { // Altura mínima de seguridad
-                    camera.position.y = 12; velocityY = 0; isGrounded = true;
-                } else { isGrounded = false; }
+                if(camera.position.y < 12) { camera.position.y = 12; velocityY = 0; isGrounded = true; } else isGrounded = false;
             }
             renderer.render(scene, camera);
         }
 
-        // --- INPUTS & UI ---
-        window.addEventListener('keydown', e => {
-            keys[e.code] = true;
+        // --- CONTROLES ---
+        window.addEventListener('keydown', e => { 
+            keys[e.code] = true; 
             if(e.code === 'Space' && isGrounded) velocityY = 10;
-            if(e.key >= 1 && e.key <= 5) setSlot(e.key - 1);
+            if(e.code === 'KeyE') { document.getElementById('inv-panel').style.display='flex'; controls.unlock(); }
+            if(e.code === 'KeyM') { document.getElementById('mod-panel').style.display='flex'; controls.unlock(); }
+            if(e.key >= 1 && e.key <= 5) { activeSlot = e.key - 1; document.querySelectorAll('.h-slot').forEach((s,i) => s.classList.toggle('active', i === activeSlot)); }
         });
         window.addEventListener('keyup', e => keys[e.code] = false);
-
-        function setSlot(i) {
-            activeSlot = i;
-            document.querySelectorAll('.h-slot').forEach((s, idx) => s.classList.toggle('active', idx === i));
-        }
-
-        window.closeAll = () => {
-            document.querySelectorAll('.full-overlay').forEach(e => e.style.display = 'none');
-            if(!isMobile) controls.lock();
-        };
+        window.addEventListener('mousedown', e => { if(e.button === 0) isMining = true; if(e.button === 2) placeBlock(); });
+        window.addEventListener('mouseup', () => { isMining = false; });
 
         document.getElementById('m-jump').onclick = () => { if(isGrounded) velocityY = 10; };
-        document.getElementById('m-inv').onclick = () => { document.getElementById('inv-panel').style.display = 'flex'; controls.unlock(); };
-        document.getElementById('m-srv').onclick = () => { document.getElementById('srv-panel').style.display = 'flex'; controls.unlock(); };
+        document.getElementById('m-mine').ontouchstart = () => isMining = true;
+        document.getElementById('m-mine').ontouchend = () => { isMining = false; };
+        document.getElementById('m-place').onclick = () => placeBlock();
+        document.getElementById('m-inv').onclick = () => { document.getElementById('inv-panel').style.display='flex'; };
+        document.getElementById('m-srv').onclick = () => { document.getElementById('srv-panel').style.display='flex'; };
+        document.getElementById('m-mod').onclick = () => { document.getElementById('mod-panel').style.display='flex'; };
 
-        // Joystick
+        // Joystick y Cámara táctil
         let joyDir = {x:0, y:0}, touchX, touchY;
         document.getElementById('joystick-zone').ontouchmove = e => {
             const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.touches[0].clientX - (rect.left + 55), y = e.touches[0].clientY - (rect.top + 55);
-            const dist = Math.min(Math.sqrt(x*x + y*y), 40), angle = Math.atan2(y, x);
-            joyDir = { x: (Math.cos(angle)*dist)/40, y: (Math.sin(angle)*dist)/40 };
-            document.getElementById('joystick-knob').style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+            const x = e.touches[0].clientX - (rect.left + 50), y = e.touches[0].clientY - (rect.top + 50);
+            const dist = Math.min(Math.sqrt(x*x + y*y), 40), ang = Math.atan2(y, x);
+            joyDir = {x: (Math.cos(ang)*dist)/40, y: (Math.sin(ang)*dist)/40};
+            document.getElementById('joystick-knob').style.transform = `translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px)`;
         };
-        document.getElementById('joystick-zone').ontouchend = () => {
-            joyDir = {x:0, y:0}; document.getElementById('joystick-knob').style.transform = 'translate(0,0)';
-        };
-
-        // Cámara Táctil (Lado derecho de la pantalla)
+        document.getElementById('joystick-zone').ontouchend = () => { joyDir = {x:0, y:0}; document.getElementById('joystick-knob').style.transform = 'translate(0,0)'; };
         window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
         window.addEventListener('touchmove', e => {
             if(isMobile && e.touches[0].pageX > window.innerWidth/2) {
-                camera.rotation.y -= (e.touches[0].pageX - touchX) * 0.006;
-                camera.rotation.x -= (e.touches[0].pageY - touchY) * 0.006;
-                camera.rotation.x = Math.max(-1.5, Math.min(1.5, camera.rotation.x));
+                camera.rotation.y -= (e.touches[0].pageX - touchX) * 0.007;
+                camera.rotation.x -= (e.touches[0].pageY - touchY) * 0.007;
                 touchX = e.touches[0].pageX; touchY = e.touches[0].pageY;
             }
         });
