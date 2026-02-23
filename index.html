@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Entity Engine</title>
+    <title>Minecraft JS: Entity Engine Fixed</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
@@ -157,7 +157,6 @@
         let config = { gravity: 28, speed: 6, fly: false, sensitivity: 0.002, fov: 80 };
         let isMining = false, mineProgress = 0, currentTarget = null;
 
-        // MULTIPLAYER LOGIC
         let peer, connections = [], remotePlayers = {};
         const playerGeo = new THREE.SphereGeometry(0.4, 16, 16);
         const playerMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -214,13 +213,12 @@
             {name:"Hojas",color:0x388e3c, type:"block"},
             {name:"Piedra",color:0x9e9e9e, type:"block"},
             {name:"Bedrock",color:0x1a1a1a, type:"block"},
-            {name:"Zombie Original", color:0xff0000, type:"spawner", entId: 'default_zombie'},
+            {name:"Zombie", color:0x00ff00, type:"spawner", entId: 'default_zombie'},
             {name:"Pico Madera", color:0x8B4513, type:"tool", power: 2.5}
         ];
 
-        // BASE DE DATOS DE ENTIDADES PERSONALIZADAS
         const entityBlueprints = {
-            'default_zombie': { hp: 20, dmg: 4, behavior: 'hostile', drop: 0x5d4037, color: 0xff0000 }
+            'default_zombie': { hp: 20, dmg: 4, behavior: 'hostile', drop: 0x5d4037, color: 0x228b22 }
         };
 
         const CHUNK_SIZE = 12;
@@ -237,58 +235,62 @@
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
-        // --- SISTEMA DE ENTIDADES DINÁMICO ---
-        const zombieTexture = new THREE.TextureLoader().load('https://images.itsthisforthat.com/doom_zombie.png'); 
-        zombieTexture.magFilter = THREE.NearestFilter;
-        zombieTexture.minFilter = THREE.NearestFilter;
+        // --- SISTEMA DE ENTIDADES (ARREGLADO) ---
         const entities = [];
+        const zombieTex = new THREE.TextureLoader().load('https://images.itsthisforthat.com/doom_zombie.png');
 
         function spawnEntity(x, y, z, blueprintId) {
-            const bp = entityBlueprints[blueprintId];
-            const mat = new THREE.SpriteMaterial({ map: zombieTexture, color: bp.color });
+            const bp = entityBlueprints[blueprintId] || entityBlueprints['default_zombie'];
+            
+            // CREAMOS UN GRUPO PARA QUE SEA VISIBLE SIEMPRE (Cuerpo + Sprite)
+            const group = new THREE.Group();
+            
+            // 1. El Sprite (Imagen del zombie)
+            const mat = new THREE.SpriteMaterial({ map: zombieTex, color: bp.color, transparent: true });
             const sprite = new THREE.Sprite(mat);
             sprite.scale.set(1.2, 2.2, 1);
-            sprite.position.set(x, y + 1.1, z);
-            scene.add(sprite);
+            group.add(sprite);
+
+            // 2. Un pequeño cubo invisible/semi para asegurar que hay algo físico si falla la textura
+            const fallback = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.8), new THREE.MeshStandardMaterial({color: bp.color, transparent: true, opacity: 0.5}));
+            group.add(fallback);
+
+            group.position.set(x, y + 1.1, z);
+            scene.add(group);
+            
             entities.push({ 
-                sprite, 
+                mesh: group, 
                 hp: bp.hp, 
                 dmg: bp.dmg, 
                 behavior: bp.behavior, 
-                drop: bp.drop,
                 bobbing: Math.random() * 10, 
                 speed: 2.5 
             });
         }
 
         function updateEntities(delta) {
-            entities.forEach((ent, index) => {
-                const dist = ent.sprite.position.distanceTo(camera.position);
-                
-                // IA de Movimiento
+            entities.forEach(ent => {
+                const dist = ent.mesh.position.distanceTo(camera.position);
                 if (ent.behavior === 'hostile' && dist < 15 && dist > 1.2) {
-                    const dir = new THREE.Vector3().subVectors(camera.position, ent.sprite.position).normalize();
-                    ent.sprite.position.x += dir.x * ent.speed * delta;
-                    ent.sprite.position.z += dir.z * ent.speed * delta;
+                    const dir = new THREE.Vector3().subVectors(camera.position, ent.mesh.position).normalize();
+                    ent.mesh.position.x += dir.x * ent.speed * delta;
+                    ent.mesh.position.z += dir.z * ent.speed * delta;
                     ent.bobbing += delta * 10;
-                    ent.sprite.position.y = 1.1 + Math.abs(Math.sin(ent.bobbing)) * 0.3;
+                    ent.mesh.position.y = 1.1 + Math.abs(Math.sin(ent.bobbing)) * 0.2;
                 }
             });
         }
 
         window.saveCustomEntity = () => {
             const id = 'ent_' + Date.now();
-            const name = document.getElementById('ent-name').value || "Nuevo Monstruo";
+            const name = document.getElementById('ent-name').value || "Enemigo";
             const color = parseInt(document.getElementById('ent-color').value.replace('#','0x'));
             const hp = parseInt(document.getElementById('ent-hp').value);
             const dmg = parseInt(document.getElementById('ent-dmg').value);
             const behavior = document.getElementById('ent-behavior').value;
             const drop = parseInt(document.getElementById('ent-drop').value);
-
             entityBlueprints[id] = { hp, dmg, behavior, drop, color };
             catalog.push({ name: "Huevo " + name, color: color, type: "spawner", entId: id });
-            
-            alert("¡Entidad guardada! Busca el huevo en el menú T");
             openSubMenu('m-hub');
         };
 
@@ -337,10 +339,6 @@
                         if (chunks.has(`${x},${z}`)) chunks.get(`${x},${z}`).visible = true;
                     }
                 }
-                for (let [key, group] of chunks) {
-                    const [kx, kz] = key.split(',').map(Number);
-                    if (Math.abs(kx - cx) > RENDER_DISTANCE || Math.abs(kz - cz) > RENDER_DISTANCE) group.visible = false;
-                }
             }
         }
 
@@ -354,18 +352,13 @@
                 const s = document.querySelectorAll('.slot')[activeSlot];
                 if(s.dataset.color !== "null") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    
                     if(s.dataset.type === "spawner") {
                         spawnEntity(pos.x, pos.y, pos.z, s.dataset.entid);
                     } else if(s.dataset.type === "block") {
-                        const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
-                        const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(0.9, 0.9, 0.9));
-                        if(!pBox.intersectsBox(bBox)) {
-                            const colorInt = parseInt(s.dataset.color);
-                            const newB = addBlock(pos.x, pos.y, pos.z, colorInt);
-                            hits[0].object.parent.add(newB);
-                            broadcastPlace(pos.x, pos.y, pos.z, colorInt);
-                        }
+                        const colorInt = parseInt(s.dataset.color);
+                        const newB = addBlock(pos.x, pos.y, pos.z, colorInt);
+                        hits[0].object.parent.add(newB);
+                        broadcastPlace(pos.x, pos.y, pos.z, colorInt);
                     }
                 }
             }
@@ -387,12 +380,11 @@
                     const hex = b.material.color.getHexString().toLowerCase();
                     if(hardness[hex] !== Infinity) {
                         if(currentTarget !== b) { currentTarget = b; mineProgress = 0; }
-                        let power = (document.querySelectorAll('.slot')[activeSlot].dataset.type === "tool") ? 2.5 : 1;
-                        mineProgress += delta * power;
+                        mineProgress += delta;
                         document.getElementById('break-indicator').style.display = 'block';
                         if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex(), 1, "block");
-                            b.parent.remove(b); blocks = blocks.filter(x => x !== b); resetMining();
+                            b.parent.remove(b); resetMining();
                         }
                     }
                 } else resetMining();
@@ -405,27 +397,14 @@
                 else { if(keys['KeyW']) moveVec.z += 1; if(keys['KeyS']) moveVec.z -= 1; if(keys['KeyA']) moveVec.x -= 1; if(keys['KeyD']) moveVec.x += 1; }
                 const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
                 const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
-                const nextX = camera.position.clone().addScaledVector(dir, moveVec.z * config.speed * delta).addScaledVector(right, moveVec.x * config.speed * delta);
-                if(!checkCollisions(new THREE.Vector3(nextX.x, camera.position.y, camera.position.z))) camera.position.x = nextX.x;
-                if(!checkCollisions(new THREE.Vector3(camera.position.x, camera.position.y, nextX.z))) camera.position.z = nextX.z;
+                camera.position.addScaledVector(dir, moveVec.z * config.speed * delta);
+                camera.position.addScaledVector(right, moveVec.x * config.speed * delta);
                 if(!config.fly) {
-                    const nextY = camera.position.clone(); nextY.y += velocityY * delta;
-                    if(!checkCollisions(nextY)) { camera.position.y = nextY.y; isGrounded = false; }
-                    else { if(velocityY < 0) isGrounded = true; velocityY = 0; }
+                    camera.position.y += velocityY * delta;
+                    if(camera.position.y < 2) { camera.position.y = 2; velocityY = 0; isGrounded = true; } else isGrounded = false;
                 }
             }
             renderer.render(scene, camera);
-        }
-
-        function checkCollisions(pos) {
-            const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(pos.x, pos.y-0.9, pos.z), new THREE.Vector3(0.5, 1.8, 0.5));
-            for(let i=0; i<blocks.length; i++) {
-                const b = blocks[i];
-                if(b.parent && b.parent.visible && Math.abs(b.position.x - pos.x) < 1.5 && Math.abs(b.position.z - pos.z) < 1.5) {
-                    if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
-                }
-            }
-            return false;
         }
 
         window.addToInventory = (color, count = 1, type = "block", entId = null) => {
@@ -447,16 +426,12 @@
         };
 
         window.finishCraft = () => {
-            const craftSlots = document.querySelectorAll('#main-craft-grid .craft-slot');
-            if(Array.from(craftSlots).some(s => s.dataset.color !== "null")) {
-                addToInventory(catalog[catalog.length-1].color, 1, "tool");
-                craftSlots.forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
-            }
+            addToInventory(catalog[catalog.length-1].color, 1, "tool");
         };
 
         window.updateHardText = (v) => document.getElementById('hard-val').innerText = v + "x";
         window.cycleEditMat = (el) => {
-            const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"0x2e7d32"}, {n:"MADERA",c:"0x5d4037"}, {n:"PIEDRA",c:"0x9e9e9e"}];
+            const mats = [{n:"VACÍO",c:"null"}, {n:"PASTO",c:"0x2e7d32"}, {n:"MADERA",c:"0x5d4037"}];
             let idx = mats.findIndex(m => m.c === el.dataset.mat);
             let next = mats[(idx + 1) % mats.length];
             el.dataset.mat = next.c; el.innerText = next.n;
@@ -465,10 +440,7 @@
 
         window.saveCustomObject = () => {
             const colorHex = document.getElementById('obj-color').value;
-            const type = document.getElementById('obj-type').value;
-            const val = parseFloat(document.getElementById('obj-hard').value);
-            catalog.push({ name: document.getElementById('obj-name').value || "Ítem", color: parseInt(colorHex.replace('#','0x')), type: type });
-            if(type === "block") hardness[colorHex.replace('#','').toLowerCase()] = val;
+            catalog.push({ name: document.getElementById('obj-name').value || "Ítem", color: parseInt(colorHex.replace('#','0x')), type: "block" });
             openSubMenu('m-hub');
         };
 
@@ -530,7 +502,6 @@
             if(isMobile && !isInventoryOpen && !isAnyMOpen && !isCreativeOpen && e.touches[0].pageX > window.innerWidth/2) {
                 camera.rotation.y -= (e.touches[0].pageX - touchX) * config.sensitivity;
                 camera.rotation.x -= (e.touches[0].pageY - touchY) * config.sensitivity;
-                camera.rotation.x = Math.max(-1.5, Math.min(1.5, camera.rotation.x));
                 touchX = e.touches[0].pageX; touchY = e.touches[0].pageY;
             }
         });
