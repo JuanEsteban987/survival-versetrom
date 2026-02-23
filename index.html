@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft JS: Infinite Fixed</title>
+    <title>Minecraft JS: Smooth Infinite</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; user-select: none; touch-action: none; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
@@ -119,36 +119,46 @@
         const CHUNK_SIZE = 8;
         const RENDER_DISTANCE = 1; 
         const chunks = new Map();
-        let currentChunkCoords = { x: 999, z: 999 }; // Forzar actualización inicial
+        let currentChunkCoords = { x: 999, z: 999 };
+        let loadingChunks = new Set(); // Para no cargar el mismo chunk varias veces a la vez
 
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x87ceeb);
         const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: false }); // Antialias off para más FPS
         renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({ color }));
-            m.position.set(x, y, z); scene.add(m); blocks.push(m);
+            m.position.set(x, y, z);
+            m.matrixAutoUpdate = false; m.updateMatrix(); // Optimización: no calcular matriz cada frame
+            scene.add(m); blocks.push(m);
             return m;
         }
 
-        function generateChunk(cx, cz) {
+        async function generateChunk(cx, cz) {
             const chunkKey = `${cx},${cz}`;
-            if (chunks.has(chunkKey)) return;
+            if (chunks.has(chunkKey) || loadingChunks.has(chunkKey)) return;
+            
+            loadingChunks.add(chunkKey);
             const chunkBlocks = [];
+            
             for(let x = 0; x < CHUNK_SIZE; x++) {
                 for(let z = 0; z < CHUNK_SIZE; z++) {
                     const worldX = cx * CHUNK_SIZE + x;
                     const worldZ = cz * CHUNK_SIZE + z;
                     const h = Math.round(Math.sin(worldX/4)*Math.cos(worldZ/4));
+                    
                     chunkBlocks.push(addBlock(worldX, h, worldZ, 0x2e7d32));
                     chunkBlocks.push(addBlock(worldX, h-1, worldZ, 0x795548));
-                    for(let d=2; d<5; d++) chunkBlocks.push(addBlock(worldX, h-d, worldZ, 0x9e9e9e));
-                    chunkBlocks.push(addBlock(worldX, h-5, worldZ, 0x1a1a1a));
+                    for(let d=2; d<4; d++) chunkBlocks.push(addBlock(worldX, h-d, worldZ, 0x9e9e9e));
+                    chunkBlocks.push(addBlock(worldX, h-4, worldZ, 0x1a1a1a));
                 }
+                // Pausa asíncrona cada columna para mantener FPS altos
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
             chunks.set(chunkKey, chunkBlocks);
+            loadingChunks.delete(chunkKey);
         }
 
         function updateChunks() {
@@ -159,7 +169,8 @@
                 for (let x = cx - RENDER_DISTANCE; x <= cx + RENDER_DISTANCE; x++) {
                     for (let z = cz - RENDER_DISTANCE; z <= cz + RENDER_DISTANCE; z++) {
                         generateChunk(x, z);
-                        if (chunks.has(`${x},${z}`)) chunks.get(`${x},${z}`).forEach(b => b.visible = true);
+                        const key = `${x},${z}`;
+                        if (chunks.has(key)) chunks.get(key).forEach(b => b.visible = true);
                     }
                 }
                 for (let [key, chunkBlocks] of chunks) {
@@ -172,7 +183,7 @@
         }
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.8), new THREE.DirectionalLight(0xffffff, 0.4));
-        camera.position.set(4, 5, 4); // Spawn fijo dentro de un chunk inicial
+        camera.position.set(4, 5, 4);
 
         const clock = new THREE.Clock();
         function animate() {
@@ -221,10 +232,10 @@
 
         function checkCollisions(pos) {
             const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(pos.x, pos.y-0.9, pos.z), new THREE.Vector3(0.6, 1.8, 0.6));
-            const visibleBlocks = blocks.filter(b => b.visible);
-            for(let i=0; i<visibleBlocks.length; i++) {
-                const b = visibleBlocks[i];
-                if(Math.abs(b.position.x - pos.x) < 1.5 && Math.abs(b.position.z - pos.z) < 1.5) {
+            // Optimizado: Solo colisionar con bloques muy cercanos
+            for(let i=0; i<blocks.length; i++) {
+                const b = blocks[i];
+                if(b.visible && Math.abs(b.position.x - pos.x) < 1.2 && Math.abs(b.position.z - pos.z) < 1.2) {
                     if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
                 }
             }
@@ -274,19 +285,25 @@
         };
         window.finishCraft = () => {
             const craftSlots = document.querySelectorAll('#main-craft-grid .craft-slot');
-            const invSlots = document.querySelectorAll('.slot');
-            craftSlots.forEach(cs => {
-                if(cs.dataset.color && cs.dataset.color !== "null") {
-                    let inv = Array.from(invSlots).find(s => s.dataset.color === cs.dataset.color);
-                    if(inv) {
-                        let c = parseInt(inv.dataset.count) - 1;
-                        inv.dataset.count = c; inv.innerText = c > 0 ? c : (Array.from(invSlots).indexOf(inv)+1);
-                        if(c <= 0) { inv.dataset.color = "null"; inv.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+            const matsInGrid = Array.from(craftSlots).map(slot => slot.dataset.color);
+            const woodCount = matsInGrid.filter(m => m === "0x5d4037").length;
+            const stoneCount = matsInGrid.filter(m => m === "0x9e9e9e").length;
+
+            if(woodCount === 4 || stoneCount === 4) {
+                const invSlots = document.querySelectorAll('.slot');
+                craftSlots.forEach(cs => {
+                    if(cs.dataset.color && cs.dataset.color !== "null") {
+                        let inv = Array.from(invSlots).find(s => s.dataset.color === cs.dataset.color);
+                        if(inv) {
+                            let c = parseInt(inv.dataset.count) - 1;
+                            inv.dataset.count = c; inv.innerText = c > 0 ? c : (Array.from(invSlots).indexOf(inv)+1);
+                            if(c <= 0) { inv.dataset.color = "null"; inv.style.backgroundColor = "rgba(255,255,255,0.1)"; }
+                        }
                     }
-                }
-            });
-            craftSlots.forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
-            addToInventory(catalog[catalog.length-1].color, 1);
+                });
+                craftSlots.forEach(s => { s.style.backgroundColor="#8b8b8b"; s.dataset.color="null"; });
+                addToInventory(catalog[catalog.length-1].color, 1);
+            }
         };
         window.updateHardText = (v) => { document.getElementById('hard-val').innerText = v + "s"; };
         window.cycleEditMat = (el) => {
