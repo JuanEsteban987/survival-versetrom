@@ -159,11 +159,12 @@
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({ color }));
             m.position.set(x, y, z); 
-            // NUEVO: Relieves en color NEGRO
+            // Relieves en NEGRO
             const edges = new THREE.EdgesGeometry(m.geometry);
-            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.8 }));
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
             m.add(line);
-            scene.add(m); blocks.push(m);
+            scene.add(m); 
+            blocks.push(m);
         }
 
         // --- MUNDO ---
@@ -189,7 +190,9 @@
         function checkCollisions(pos) {
             if(config.fly) return false;
             const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(pos.x, pos.y-0.9, pos.z), new THREE.Vector3(0.6, 1.8, 0.6));
-            for(let b of blocks) if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
+            for(let b of blocks) {
+                if(pBox.intersectsBox(new THREE.Box3().setFromObject(b))) return true;
+            }
             return false;
         }
 
@@ -199,14 +202,15 @@
             const delta = Math.min(clock.getDelta(), 0.1);
 
             if(isMining) {
-                const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
-                const hits = ray.intersectObjects(blocks);
+                const ray = new THREE.Raycaster(); 
+                ray.setFromCamera(new THREE.Vector2(), camera);
+                const hits = ray.intersectObjects(blocks, false); // false para ignorar hijos (relieves)
                 if(hits.length > 0 && hits[0].distance < 4.5) {
                     const b = hits[0].object;
                     const hex = b.material.color.getHexString().toLowerCase();
                     if(hardness[hex] !== Infinity) {
                         if(currentTarget !== b) { if(currentTarget) resetMining(); currentTarget = b; originalPos.copy(b.position); mineProgress = 0; }
-                        mineProgress += delta; b.position.x = originalPos.x + (Math.random()-0.5)*0.15;
+                        mineProgress += delta; b.position.x = originalPos.x + (Math.random()-0.5)*0.1;
                         document.getElementById('break-indicator').style.display='block';
                         if(mineProgress >= (hardness[hex] || 1)) {
                             addToInventory(b.material.color.getHex());
@@ -284,18 +288,23 @@
         window.toggleInventory = () => { isInventoryOpen = !isInventoryOpen; document.getElementById('inventory-panel').style.display = isInventoryOpen ? 'flex' : 'none'; if(!isMobile) isInventoryOpen ? controls.unlock() : controls.lock(); };
 
         window.handlePlace = () => {
-            const ray = new THREE.Raycaster(); ray.setFromCamera(new THREE.Vector2(), camera);
-            const hits = ray.intersectObjects(blocks);
+            const ray = new THREE.Raycaster(); 
+            ray.setFromCamera(new THREE.Vector2(), camera);
+            const hits = ray.intersectObjects(blocks, false);
             if(hits.length > 0 && hits[0].distance < 5) {
                 const s = document.querySelectorAll('.slot')[activeSlot];
                 if(s.dataset.color !== "null") {
                     const pos = hits[0].object.position.clone().add(hits[0].face.normal);
-                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y-0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
+                    
+                    // Verificación de posición del jugador
+                    const pBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(camera.position.x, camera.position.y - 0.9, camera.position.z), new THREE.Vector3(0.6, 1.8, 0.6));
                     const bBox = new THREE.Box3().setFromCenterAndSize(pos, new THREE.Vector3(1, 1, 1));
+                    
                     if(!pBox.intersectsBox(bBox)) {
                         addBlock(pos.x, pos.y, pos.z, parseInt(s.dataset.color));
                         let count = parseInt(s.dataset.count) - 1;
-                        s.dataset.count = count; s.innerText = count > 0 ? count : activeSlot+1;
+                        s.dataset.count = count; 
+                        s.innerText = count > 0 ? count : activeSlot + 1;
                         if(count <= 0) { s.dataset.color = "null"; s.style.backgroundColor = "rgba(255,255,255,0.1)"; }
                     }
                 }
@@ -346,14 +355,12 @@
 
         function resetMining() { if(currentTarget) { currentTarget.position.copy(originalPos); currentTarget = null; } isMining = false; document.getElementById('break-indicator').style.display='none'; }
 
-        window.addEventListener('wheel', (e) => {
-            if (controls.isLocked) {
-                activeSlot = (activeSlot + (e.deltaY > 0 ? 1 : -1) + 5) % 5;
-                updateActiveSlot(activeSlot);
+        window.addEventListener('mousedown', (e) => { 
+            if(controls.isLocked) { 
+                if(e.button===0) isMining=true; 
+                if(e.button===2) handlePlace(); 
             }
-        }, {passive: true});
-
-        window.addEventListener('mousedown', (e) => { if(controls.isLocked) { if(e.button===0) isMining=true; if(e.button===2) handlePlace(); }});
+        });
         window.addEventListener('mouseup', () => resetMining());
 
         window.addEventListener('touchstart', e => { if(isMobile && e.touches[0].pageX > window.innerWidth/2) { touchX = e.touches[0].pageX; touchY = e.touches[0].pageY; }});
