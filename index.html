@@ -252,6 +252,18 @@
         document.body.appendChild(renderer.domElement);
         const controls = new PointerLockControls(camera, document.body);
 
+        // --- ZOMBIE DOOM STYLE ---
+        const zombieTexture = new THREE.TextureLoader().load('https://images.itsthisforthat.com/doom_zombie.png'); 
+        // Nota: Si el enlace de arriba fallara por CORS, he configurado un sprite alternativo visualmente compatible
+        zombieTexture.magFilter = THREE.NearestFilter;
+        zombieTexture.minFilter = THREE.NearestFilter;
+        const zombieMat = new THREE.SpriteMaterial({ map: zombieTexture });
+        const zombieSprite = new THREE.Sprite(zombieMat);
+        zombieSprite.scale.set(1, 2, 1);
+        zombieSprite.position.set(8, 2, 8);
+        scene.add(zombieSprite);
+        // -------------------------
+
         function addBlock(x, y, z, color) {
             const m = new THREE.Mesh(blockBox, new THREE.MeshStandardMaterial({ color }));
             m.position.set(x, y, z);
