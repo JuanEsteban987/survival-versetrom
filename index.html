@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft P2P Pixel Art</title>
     <style>
+        /* (los mismos estilos, sin cambios) */
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; }
         #info {
             position: absolute;
@@ -149,6 +150,8 @@
             background: #45a049;
         }
     </style>
+    <!-- Cargar PeerJS globalmente (para usarlo con window.Peer) -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
     <div id="info">
@@ -182,21 +185,21 @@
         </div>
     </div>
 
-    <!-- Import Three.js and PeerJS -->
+    <!-- Importar Three.js (módulo) -->
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "peerjs": "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
             }
         }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
         import { PointerLockControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/PointerLockControls.js';
-        import Peer from 'peerjs';
+
+        // --- PeerJS (global) ---
+        const Peer = window.Peer; // ya cargado por el script tag
 
         // --- Configuración inicial ---
         const scene = new THREE.Scene();
@@ -256,7 +259,7 @@
         const blockSize = 1;
         const blocks = new Map(); // clave "x,y,z" -> { type, mesh }
 
-        // Texturas predefinidas (pixel art 16x16 generado por código)
+        // Función para crear textura pixelada desde matriz de colores
         function createPixelTexture(colors) {
             const canvas = document.createElement('canvas');
             canvas.width = 16;
@@ -272,10 +275,9 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // Textura grass por defecto (verde con puntitos)
+        // Texturas predefinidas
         function grassTexture() {
             const colors = Array(16).fill().map(() => Array(16).fill('#228B22'));
-            // algunos pixels marrones
             for (let i = 0; i < 20; i++) {
                 colors[Math.floor(Math.random()*16)][Math.floor(Math.random()*16)] = '#8B4513';
             }
@@ -300,7 +302,7 @@
             { name: 'Grass', texture: grassTexture() },
             { name: 'Dirt', texture: dirtTexture() },
             { name: 'Stone', texture: stoneTexture() },
-            { name: 'Custom', texture: grassTexture() } // se actualizará
+            { name: 'Custom', texture: grassTexture() } // se actualizará con el editor
         ];
 
         // Inventario (slots)
@@ -321,6 +323,7 @@
                 ctx.imageSmoothingEnabled = false;
                 // dibujar textura del bloque
                 const texture = blockTypes[typeIdx].texture;
+                // Asegurar que la imagen esté lista (en canvas siempre lo está)
                 ctx.drawImage(texture.image, 0, 0, 16, 16);
                 slot.appendChild(canvas);
                 const span = document.createElement('span');
@@ -461,6 +464,7 @@
         document.getElementById('editor-btn').addEventListener('click', () => {
             pixelEditor.style.display = 'block';
             controls.unlock();
+            renderPixelGrid(); // Mostrar la cuadrícula actual (vacía o la última editada)
         });
 
         document.getElementById('close-editor-btn').addEventListener('click', () => {
@@ -482,6 +486,7 @@
                 }
             }
             const texture = new THREE.CanvasTexture(canvas);
+            texture.needsUpdate = true; // Asegurar que Three.js la reconozca
             // Actualizar el tipo "Custom" (índice 3)
             blockTypes[3].texture = texture;
             // Actualizar hotbar para que se vea el cambio
@@ -491,18 +496,35 @@
         });
 
         // --- PeerJS Multiplayer ---
-        const peer = new Peer(); // usa servidor público de PeerJS
+        let peer;
         let conns = []; // conexiones activas
         const remotePlayers = new Map(); // id -> mesh
 
-        peer.on('open', (id) => {
-            document.getElementById('my-id').textContent = id;
-            document.getElementById('status').textContent = 'Conectado (esperando peers)';
-        });
+        // Inicializar Peer (si está disponible)
+        try {
+            if (typeof Peer !== 'undefined') {
+                peer = new Peer();
+                peer.on('open', (id) => {
+                    document.getElementById('my-id').textContent = id;
+                    document.getElementById('status').textContent = 'Conectado (esperando peers)';
+                });
 
-        peer.on('connection', (conn) => {
-            setupConnection(conn);
-        });
+                peer.on('connection', (conn) => {
+                    setupConnection(conn);
+                });
+
+                peer.on('error', (err) => {
+                    console.warn('PeerJS error:', err);
+                    document.getElementById('status').textContent = 'Error PeerJS, modo local';
+                });
+            } else {
+                console.warn('PeerJS no disponible, modo local');
+                document.getElementById('my-id').textContent = 'N/A';
+            }
+        } catch (e) {
+            console.warn('No se pudo iniciar PeerJS:', e);
+            document.getElementById('my-id').textContent = 'N/A';
+        }
 
         function setupConnection(conn) {
             conns.push(conn);
@@ -539,11 +561,13 @@
 
         document.getElementById('connect-btn').addEventListener('click', () => {
             const peerId = document.getElementById('peer-id-input').value;
-            if (peerId) {
+            if (peerId && peer) {
                 const conn = peer.connect(peerId);
                 conn.on('open', () => {
                     setupConnection(conn);
                 });
+            } else {
+                alert('PeerJS no inicializado o ID vacío');
             }
         });
 
@@ -597,6 +621,9 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // Mostrar mensaje de éxito en consola
+        console.log('Juego iniciado correctamente');
     </script>
 </body>
 </html>
