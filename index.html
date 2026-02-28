@@ -2,475 +2,121 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini WorldBox · Simulador de Dios</title>
+    <title>Mini WorldBox Clone</title>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-        body {
-            background: #1a2a32;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            margin: 0;
-            padding: 16px;
-        }
-        .game-container {
-            background: #2a3f4a;
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.6);
-        }
-        .canvas-wrapper {
-            display: flex;
-            justify-content: center;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: inset 0 0 0 2px #1e2f38, 0 10px 15px -5px #0f1a1f;
-        }
-        canvas {
-            display: block;
-            width: 600px;
-            height: 600px;
-            background: #2d4d3a;
-            cursor: crosshair;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: center;
-        }
-        button {
-            background: #3e5a66;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 20px;
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 5px 0 #1e2f38, 0 8px 12px rgba(0,0,0,0.4);
-            cursor: pointer;
-            transition: 0.07s ease;
-            border: 1px solid #6b8b9c;
-        }
-        button:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #1e2f38, 0 5px 10px rgba(0,0,0,0.4);
-        }
-        .brush-indicator {
-            background: #263b45;
-            border-radius: 40px;
-            padding: 8px 18px;
-            color: #c3e2f0;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: inset 0 2px 5px #0f1f27;
-        }
-        .color-dot {
-            width: 24px;
-            height: 24px;
-            border-radius: 24px;
-            border: 2px solid white;
-        }
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 16px;
-            background: #1f333c;
-            border-radius: 40px;
-            padding: 8px 20px;
-            color: #bcdae8;
-            font-weight: 500;
-        }
-        .footer-note {
-            color: #7f9faa;
-            text-align: center;
-            margin-top: 12px;
-            font-size: 14px;
-        }
-        .btn-special {
-            background: #6a4e3a;
-            border-color: #b98f6b;
-        }
+        body { background: #222; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        canvas { border: 4px solid #444; background: #000; cursor: crosshair; image-rendering: pixelated; }
+        .controls { margin: 10px; display: flex; gap: 10px; }
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-land { background: #3a5f0b; color: white; }
+        .btn-water { background: #0b5f5f; color: white; }
+        .btn-human { background: #d2b48c; color: black; }
+        .btn-spawn { background: #ffcc00; }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="canvas-wrapper">
-        <canvas id="worldCanvas" width="600" height="600"></canvas>
-    </div>
 
-    <div class="toolbar">
-        <button id="btnGrass" style="background:#5b8c5a;">🌿 Tierra</button>
-        <button id="btnTree" style="background:#2d6a4f;">🌲 Árbol</button>
-        <button id="btnWater" style="background:#2c7da0;">💧 Agua</button>
-        <button id="btnFire" style="background:#d45d2e;">🔥 Fuego</button>
-        <button id="btnEraser" style="background:#6b6b6b;">⌫ Borrar</button>
-        <button id="btnRandom" class="btn-special">🎲 Aleatorio</button>
-        <button id="btnClear" style="background:#4f5f6e;">🗑️ Limpiar</button>
+    <h2>Simulador de Dios HTML5</h2>
+    <div class="controls">
+        <button class="btn-land" onclick="setTool('land')">Tierra</button>
+        <button class="btn-water" onclick="setTool('water')">Agua</button>
+        <button class="btn-human" onclick="setTool('human')">Crear Humano</button>
+        <button class="btn-spawn" onclick="generateMap()">Regenerar Mundo</button>
     </div>
-
-    <div class="toolbar">
-        <button id="btnPlayPause" style="background:#3f7e6b; min-width: 120px;">⏸️ Pausa</button>
-        <button id="btnStep" style="background:#5d6174;">⏩ Un paso</button>
-        <div class="brush-indicator">
-            <span>Pincel:</span>
-            <span id="brushName">Tierra</span>
-            <span class="color-dot" id="brushColor" style="background:#5b8c5a;"></span>
-        </div>
-    </div>
-
-    <div class="status-bar">
-        <span>🌳 <span id="treeCount">0</span></span>
-        <span>🔥 <span id="fireCount">0</span></span>
-        <span>💧 <span id="waterCount">0</span></span>
-        <span>🌿 <span id="grassCount">0</span></span>
-    </div>
-    <div class="footer-note">
-        ⚡ Click izquierdo: pintar · Click derecho: borrar · Los elementos interactúan
-    </div>
-</div>
+    <canvas id="worldCanvas" width="600" height="400"></canvas>
 
 <script>
-    (function() {
-        // ---------- CONSTANTES Y CONFIG ----------
-        const GRID_SIZE = 40;              // 40x40 celdas
-        const CELL_SIZE = 15;               // píxeles por celda
-        const TYPES = {
-            VACIO: 0,
-            GRASS: 1,
-            TREE: 2,
-            WATER: 3,
-            FIRE: 4
-        };
-        const TYPE_NAMES = ['Vacío', 'Tierra', 'Árbol', 'Agua', 'Fuego'];
-        const TYPE_COLORS = [
-            '#3d5a4b',   // vacío / gris oscuro (fondo base)
-            '#5b8c5a',   // grass / tierra
-            '#2d6a4f',   // árbol
-            '#2c7da0',   // agua
-            '#d45d2e'    // fuego
-        ];
+    const canvas = document.getElementById('worldCanvas');
+    const ctx = canvas.getContext('2d');
+    const cellSize = 10;
+    const rows = canvas.height / cellSize;
+    const cols = canvas.width / cellSize;
 
-        // ---------- ESTADO GLOBAL ----------
-        let grid = [];                     // matriz 2D [fila][col]
-        let selectedBrush = TYPES.GRASS;    // pincel inicial: tierra
-        let painting = false;               // si el mouse está presionando
-        let simulationInterval = null;
-        let simulationRunning = false;       // arranca pausado (lo ponemos en true tras init para que corra)
-        const canvas = document.getElementById('worldCanvas');
-        const ctx = canvas.getContext('2d');
+    let world = [];
+    let entities = [];
+    let currentTool = 'land';
 
-        // elementos UI
-        const brushNameSpan = document.getElementById('brushName');
-        const brushColorDiv = document.getElementById('brushColor');
-        const treeCountSpan = document.getElementById('treeCount');
-        const fireCountSpan = document.getElementById('fireCount');
-        const waterCountSpan = document.getElementById('waterCount');
-        const grassCountSpan = document.getElementById('grassCount');
-        const playPauseBtn = document.getElementById('btnPlayPause');
+    // Tipos de terreno
+    const TERRAIN = {
+        WATER: { color: '#1e90ff', id: 0 },
+        SAND: { color: '#f0e68c', id: 1 },
+        GRASS: { color: '#228b22', id: 2 }
+    };
 
-        // ---------- INICIALIZAR GRID (mundo) ----------
-        function initGrid() {
-            grid = [];
-            for (let row = 0; row < GRID_SIZE; row++) {
-                const fila = [];
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    // empezamos con tierra, algunos árboles y algo de agua
-                    let rand = Math.random();
-                    if (rand < 0.1) {
-                        fila.push(TYPES.WATER);
-                    } else if (rand < 0.25) {
-                        fila.push(TYPES.TREE);
-                    } else {
-                        fila.push(TYPES.GRASS);
-                    }
-                }
-                grid.push(fila);
+    function init() {
+        generateMap();
+        setInterval(update, 200); // 5 frames por segundo para estilo retro
+    }
+
+    function generateMap() {
+        world = [];
+        entities = [];
+        for (let r = 0; r < rows; r++) {
+            world[r] = [];
+            for (let c = 0; c < cols; c++) {
+                // Generación aleatoria simple (luego puedes usar Perlin Noise)
+                world[r][c] = Math.random() > 0.1 ? TERRAIN.WATER : TERRAIN.SAND;
             }
         }
+        draw();
+    }
 
-        // ---------- DIBUJAR EL MUNDO ----------
-        function drawGrid() {
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const type = grid[row][col];
-                    ctx.fillStyle = TYPE_COLORS[type];
-                    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE-0.5, CELL_SIZE-0.5);
+    function setTool(tool) { currentTool = tool; }
+
+    // Interacción con el ratón
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / cellSize);
+        const y = Math.floor((e.clientY - rect.top) / cellSize);
+
+        if (currentTool === 'land') world[y][x] = TERRAIN.GRASS;
+        if (currentTool === 'water') world[y][x] = TERRAIN.WATER;
+        if (currentTool === 'human') entities.push({ x, y, color: '#ffdbac', hunger: 100 });
+        
+        draw();
+    });
+
+    function update() {
+        // Simulación: La hierba se expande cerca del agua
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (world[r][c] === TERRAIN.SAND && Math.random() > 0.98) {
+                    world[r][c] = TERRAIN.GRASS;
                 }
             }
-            // pequeñas líneas de separación (opcional, da sensación de rejilla)
-            ctx.strokeStyle = '#1e3b2b';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i <= GRID_SIZE; i++) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#2b4a37';
-                ctx.lineWidth = 0.4;
-                ctx.moveTo(i * CELL_SIZE, 0);
-                ctx.lineTo(i * CELL_SIZE, canvas.height);
-                ctx.stroke();
-                ctx.moveTo(0, i * CELL_SIZE);
-                ctx.lineTo(canvas.width, i * CELL_SIZE);
-                ctx.stroke();
-            }
-
-            // actualizar contadores
-            updateCounts();
         }
 
-        // ---------- CONTADORES ESTADÍSTICOS ----------
-        function updateCounts() {
-            let trees = 0, fires = 0, waters = 0, grasses = 0;
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const val = grid[row][col];
-                    if (val === TYPES.TREE) trees++;
-                    else if (val === TYPES.FIRE) fires++;
-                    else if (val === TYPES.WATER) waters++;
-                    else if (val === TYPES.GRASS) grasses++;
-                }
-            }
-            treeCountSpan.innerText = trees;
-            fireCountSpan.innerText = fires;
-            waterCountSpan.innerText = waters;
-            grassCountSpan.innerText = grasses;
-        }
+        // IA Básica de humanos
+        entities.forEach(h => {
+            h.x += Math.floor(Math.random() * 3) - 1;
+            h.y += Math.floor(Math.random() * 3) - 1;
+            // Mantener dentro de los límites
+            h.x = Math.max(0, Math.min(cols - 1, h.x));
+            h.y = Math.max(0, Math.min(rows - 1, h.y));
+        });
 
-        // ---------- SIMULACIÓN (REGLAS) ----------
-        function nextGeneration() {
-            const newGrid = JSON.parse(JSON.stringify(grid)); // copia profunda
+        draw();
+    }
 
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const cell = grid[row][col];
-
-                    // Reglas para cada tipo (basadas en el grid actual)
-                    if (cell === TYPES.TREE) {
-                        // Si algún vecino es fuego, el árbol puede incendiarse
-                        if (hasNeighbor(row, col, TYPES.FIRE)) {
-                            if (Math.random() < 0.35) { // probabilidad de prender
-                                newGrid[row][col] = TYPES.FIRE;
-                            }
-                        }
-                    }
-                    else if (cell === TYPES.GRASS) {
-                        // El pasto puede incendiarse si hay fuego cerca
-                        if (hasNeighbor(row, col, TYPES.FIRE)) {
-                            if (Math.random() < 0.25) {
-                                newGrid[row][col] = TYPES.FIRE;
-                            }
-                        }
-                    }
-                    else if (cell === TYPES.FIRE) {
-                        // El fuego se apaga si toca agua, o se extingue solo aleatoriamente
-                        if (hasNeighbor(row, col, TYPES.WATER)) {
-                            newGrid[row][col] = TYPES.GRASS; // se apaga y deja tierra
-                        } else if (Math.random() < 0.1) {
-                            newGrid[row][col] = TYPES.GRASS; // se apaga solo
-                        } else {
-                            // permanece fuego
-                            newGrid[row][col] = TYPES.FIRE;
-                        }
-                    }
-                    // Agua y vacío no cambian (por ahora)
-                }
-            }
-            grid = newGrid;
-            drawGrid();
-        }
-
-        // Util: comprueba si en las 8 celdas vecinas hay un tipo dado (o 4 direcciones? pondremos 8 para más interacción)
-        function hasNeighbor(row, col, type) {
-            for (let dr = -1; dr <= 1; dr++) {
-                for (let dc = -1; dc <= 1; dc++) {
-                    if (dr === 0 && dc === 0) continue;
-                    const nr = row + dr;
-                    const nc = col + dc;
-                    if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
-                        if (grid[nr][nc] === type) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        // ---------- CONTROL DE SIMULACIÓN ----------
-        function startSimulation() {
-            if (simulationInterval) return;
-            simulationRunning = true;
-            playPauseBtn.innerHTML = '⏸️ Pausa';
-            simulationInterval = setInterval(() => {
-                nextGeneration();
-            }, 150); // velocidad agradable
-        }
-
-        function stopSimulation() {
-            if (simulationInterval) {
-                clearInterval(simulationInterval);
-                simulationInterval = null;
-            }
-            simulationRunning = false;
-            playPauseBtn.innerHTML = '▶️ Iniciar';
-        }
-
-        function toggleSimulation() {
-            if (simulationRunning) {
-                stopSimulation();
-            } else {
-                startSimulation();
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dibujar Terreno
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                ctx.fillStyle = world[r][c].color;
+                ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
             }
         }
 
-        // ---------- PINTAR CON MOUSE ----------
-        function getCellFromCoord(coord, maxIndex) {
-            return Math.floor(coord / CELL_SIZE);
-        }
-
-        function handlePaint(col, row, brush) {
-            if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) return;
-            grid[row][col] = brush;
-            drawGrid();
-        }
-
-        // Eventos de mouse
-        canvas.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const mouseX = (e.clientX - rect.left) * scaleX;
-            const mouseY = (e.clientY - rect.top) * scaleY;
-
-            const col = getCellFromCoord(mouseX, GRID_SIZE);
-            const row = getCellFromCoord(mouseY, GRID_SIZE);
-
-            if (e.button === 0) { // izquierdo: pincel actual
-                painting = true;
-                handlePaint(col, row, selectedBrush);
-            } else if (e.button === 2) { // derecho: borrar (vacío)
-                painting = true;
-                handlePaint(col, row, TYPES.VACIO);
-            }
+        // Dibujar Entidades (Humanos)
+        entities.forEach(h => {
+            ctx.fillStyle = h.color;
+            ctx.fillRect(h.x * cellSize + 2, h.y * cellSize + 2, cellSize - 4, cellSize - 4);
         });
+    }
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!painting) return;
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (e.clientX - rect.left) * scaleX;
-            const mouseY = (e.clientY - rect.top) * scaleY;
-            const col = getCellFromCoord(mouseX, GRID_SIZE);
-            const row = getCellFromCoord(mouseY, GRID_SIZE);
-
-            if (e.buttons === 1) { // izquierdo
-                handlePaint(col, row, selectedBrush);
-            } else if (e.buttons === 2) { // derecho
-                handlePaint(col, row, TYPES.VACIO);
-            }
-        });
-
-        canvas.addEventListener('mouseup', (e) => {
-            painting = false;
-        });
-
-        canvas.addEventListener('mouseleave', () => {
-            painting = false;
-        });
-
-        // Desactivar menú contextual en el canvas (para usar botón derecho)
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        // ---------- BOTONES DE HERRAMIENTAS ----------
-        document.getElementById('btnGrass').addEventListener('click', () => {
-            selectedBrush = TYPES.GRASS;
-            brushNameSpan.innerText = 'Tierra';
-            brushColorDiv.style.background = TYPE_COLORS[TYPES.GRASS];
-        });
-        document.getElementById('btnTree').addEventListener('click', () => {
-            selectedBrush = TYPES.TREE;
-            brushNameSpan.innerText = 'Árbol';
-            brushColorDiv.style.background = TYPE_COLORS[TYPES.TREE];
-        });
-        document.getElementById('btnWater').addEventListener('click', () => {
-            selectedBrush = TYPES.WATER;
-            brushNameSpan.innerText = 'Agua';
-            brushColorDiv.style.background = TYPE_COLORS[TYPES.WATER];
-        });
-        document.getElementById('btnFire').addEventListener('click', () => {
-            selectedBrush = TYPES.FIRE;
-            brushNameSpan.innerText = 'Fuego';
-            brushColorDiv.style.background = TYPE_COLORS[TYPES.FIRE];
-        });
-        document.getElementById('btnEraser').addEventListener('click', () => {
-            selectedBrush = TYPES.VACIO;
-            brushNameSpan.innerText = 'Borrar';
-            brushColorDiv.style.background = TYPE_COLORS[TYPES.VACIO];
-        });
-
-        // Botón aleatorio: llena de tipos aleatorios con más vegetación
-        document.getElementById('btnRandom').addEventListener('click', () => {
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const rand = Math.random();
-                    if (rand < 0.1) grid[r][c] = TYPES.WATER;
-                    else if (rand < 0.3) grid[r][c] = TYPES.TREE;
-                    else if (rand < 0.4) grid[r][c] = TYPES.FIRE;
-                    else grid[r][c] = TYPES.GRASS;
-                }
-            }
-            drawGrid();
-        });
-
-        // Botón limpiar: todo tierra (vacío no, para que no quede gris)
-        document.getElementById('btnClear').addEventListener('click', () => {
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    grid[r][c] = TYPES.GRASS;
-                }
-            }
-            drawGrid();
-        });
-
-        // Botón play/pausa
-        playPauseBtn.addEventListener('click', toggleSimulation);
-
-        // Botón paso a paso (avanza una generación aunque esté pausado)
-        document.getElementById('btnStep').addEventListener('click', () => {
-            if (simulationRunning) {
-                // si está corriendo, no interrumpimos, pero ejecutamos un extra
-                nextGeneration();
-            } else {
-                nextGeneration();
-            }
-        });
-
-        // ---------- INICIALIZAR TODO Y EMPEZAR SIMULACIÓN ----------
-        initGrid();
-        drawGrid();
-        // Iniciamos la simulación automáticamente (como en WorldBox)
-        startSimulation();
-
-        // Ajustar nombre del pincel inicial
-        brushNameSpan.innerText = 'Tierra';
-        brushColorDiv.style.background = TYPE_COLORS[TYPES.GRASS];
-    })();
+    init();
 </script>
 </body>
 </html>
