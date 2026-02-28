@@ -3,715 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft P2P Pixel Art (Hotbar y colocación corregidas)</title>
+    <title>Minecraft 3D P2P · Demo simple</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         #info {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
+            padding: 15px 25px;
+            border-radius: 8px;
             pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            border: 1px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         #controls {
             position: absolute;
-            bottom: 80px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 20px;
-            border-radius: 20px;
-            z-index: 100;
-            pointer-events: none;
-        }
-        #hotbar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.9);
+            color: #eee;
+            padding: 15px 30px;
+            border-radius: 50px;
             display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 10px;
-            z-index: 200;
-            pointer-events: auto;
-        }
-        .slot {
-            width: 60px;
-            height: 60px;
-            background: #8b8b8b;
-            border: 3px solid #555;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            text-shadow: 1px 1px 0 #000;
-            font-size: 12px;
-            transition: 0.2s;
-            image-rendering: pixelated;
-        }
-        .slot.selected {
-            border-color: #ffaa00;
-            transform: scale(1.1);
-        }
-        .slot canvas {
-            width: 40px;
-            height: 40px;
-            image-rendering: pixelated;
-        }
-        #pixel-editor {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #333;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #fff;
-            z-index: 300;
-            display: none;
-            color: white;
-            text-align: center;
-        }
-        #pixel-grid {
-            display: grid;
-            grid-template-columns: repeat(16, 20px);
-            gap: 1px;
-            margin: 10px 0;
-            background: #222;
-            padding: 5px;
-        }
-        .pixel-cell {
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            cursor: pointer;
-            image-rendering: pixelated;
-        }
-        #color-palette {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        .color-option {
-            width: 30px;
-            height: 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            border: 2px solid #fff;
-        }
-        #peer-section {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            pointer-events: auto;
-        }
-        #peer-section input, #peer-section button {
-            padding: 5px;
-            font-family: inherit;
-        }
-        #status {
-            color: #0f0;
-            font-size: 12px;
+            gap: 15px;
+            z-index: 20;
+            backdrop-filter: blur(4px);
+            border: 1px solid #888;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         button {
-            background: #4CAF50;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
             border: none;
-            color: white;
-            padding: 8px 12px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            border-radius: 5px;
+            border-radius: 40px;
             cursor: pointer;
-            font-family: inherit;
+            transition: all 0.2s ease;
+            background: #2c3e50;
+            color: white;
+            letter-spacing: 0.5px;
+            border: 1px solid #5f6b7a;
         }
         button:hover {
-            background: #45a049;
+            background: #34495e;
+            transform: scale(1.02);
+        }
+        button#crearBtn {
+            background: #27ae60;
+            border-color: #2ecc71;
+        }
+        button#crearBtn:hover {
+            background: #2ecc71;
+        }
+        button#unirseBtn {
+            background: #2980b9;
+            border-color: #3498db;
+        }
+        button#unirseBtn:hover {
+            background: #3498db;
+        }
+        button#desconectarBtn {
+            background: #c0392b;
+            border-color: #e74c3c;
+        }
+        button#desconectarBtn:hover {
+            background: #e74c3c;
+        }
+        #estado {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            z-index: 15;
+            border: 1px solid #00ff8040;
+            backdrop-filter: blur(3px);
+        }
+        #peerIdDisplay {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        input {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            background: #333;
+            color: white;
+            margin-right: 8px;
+            width: 180px;
+        }
+        .conectado {
+            color: #4CAF50;
+        }
+        .desconectado {
+            color: #f44336;
         }
     </style>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
     <div id="info">
-        <div>Romper: Click izquierdo | Poner: Click derecho</div>
-        <div>Movimiento: WASD | Saltar: Espacio | Mirar: Mouse</div>
-        <div>Pixel art: Botón "Editor"</div>
+        <h2>⚡ Minecraft 3D · P2P ⚡</h2>
+        <p>WASD = mover | Mouse = mirar | Click para bloquear cursor | ESC = liberar</p>
+        <p>Mundo estático con árboles. Otros jugadores = cubo naranja.</p>
     </div>
-    <div id="controls">Bloque seleccionado: <span id="selected-block-name">Grass</span></div>
-    <div id="hotbar"></div>
-    <div id="peer-section">
-        <div>Mi ID: <span id="my-id">conectando...</span></div>
-        <input type="text" id="peer-id-input" placeholder="ID del peer">
-        <button id="connect-btn">Conectar</button>
-        <button id="editor-btn">Editor Pixel Art</button>
-        <div id="status">Desconectado</div>
+    <div id="estado">
+        🔌 Estado: <span id="estadoTexto" class="desconectado">Desconectado</span><br>
+        🆔 Mi ID: <span id="miPeerId">-</span><br>
+        👥 Conectado a: <span id="conectadoA">-</span>
     </div>
-    <div id="pixel-editor">
-        <h3>Editor 16x16</h3>
-        <div id="pixel-grid"></div>
-        <div id="color-palette">
-            <div class="color-option" style="background:#8B4513;"></div>
-            <div class="color-option" style="background:#654321;"></div>
-            <div class="color-option" style="background:#228B22;"></div>
-            <div class="color-option" style="background:#FF0000;"></div>
-            <div class="color-option" style="background:#0000FF;"></div>
-            <div class="color-option" style="background:#FFFF00;"></div>
-        </div>
-        <div>
-            <button id="save-pixel-btn">Guardar como bloque</button>
-            <button id="close-editor-btn">Cerrar</button>
-        </div>
+    <div id="controls">
+        <button id="crearBtn">🎮 Crear sala (Host)</button>
+        <button id="unirseBtn">🔗 Unirse a sala</button>
+        <button id="desconectarBtn" disabled>⛔ Desconectar</button>
+        <span style="margin-left: 10px; color: #aaa;">|</span>
+        <input type="text" id="peerIdInput" placeholder="ID del host para unirse" />
     </div>
 
+    <!-- Importar PeerJS (proporciona peer global) -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    
+    <!-- Import map para Three.js y addons -->
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
             }
         }
     </script>
 
     <script type="module">
+        // ----- Configuración básica de Three.js -----
         import * as THREE from 'three';
-        import { PointerLockControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/PointerLockControls.js';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        const Peer = window.Peer;
-
-        // --- Configuración inicial ---
+        // Escena, cámara, renderizador
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        
+        scene.background = new THREE.Color(0x87CEEB); // Cielo celeste
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.8, 5); // altura de ojos
-        
-        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        camera.position.set(0, 2, 5); // Posición inicial
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true; // Sombras para más realismo
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
         // Luces
-        const ambientLight = new THREE.AmbientLight(0x404040);
+        // Luz ambiental
+        const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 1, 1).normalize();
-        scene.add(directionalLight);
-        const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        backLight.position.set(-1, 0.5, -1);
-        scene.add(backLight);
 
-        // Controles primera persona (solo para mirar, movimiento manual)
+        // Luz solar direccional
+        const sunLight = new THREE.DirectionalLight(0xfff5d1, 1.2);
+        sunLight.position.set(10, 20, 5);
+        sunLight.castShadow = true;
+        sunLight.receiveShadow = true;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
+        const d = 30;
+        sunLight.shadow.camera.left = -d;
+        sunLight.shadow.camera.right = d;
+        sunLight.shadow.camera.top = d;
+        sunLight.shadow.camera.bottom = -d;
+        sunLight.shadow.camera.near = 1;
+        sunLight.shadow.camera.far = 50;
+        scene.add(sunLight);
+
+        // Control de primera persona
         const controls = new PointerLockControls(camera, document.body);
-        scene.add(controls.getObject());
+        scene.add(controls.getObject()); // El objeto de controles es el que movemos
 
+        // Bloquear cursor al hacer clic en el canvas
         renderer.domElement.addEventListener('click', () => {
-            if (!controls.isLocked) controls.lock();
+            controls.lock();
         });
 
-        // --- Variables de movimiento y física ---
-        const moveState = { w: false, a: false, s: false, d: false, space: false };
-        const velocity = new THREE.Vector3(0, 0, 0);
-        const gravity = -12.0;
-        const jumpSpeed = 5.0;
-        const walkSpeed = 1.5; // más lento que antes
-        const playerHeight = 1.8;
-        const playerRadius = 0.3; // para colisiones
+        // Variables de movimiento
+        const moveState = { forward: false, backward: false, left: false, right: false };
+        const velocity = new THREE.Vector3();
+        const speed = 5.0;
 
-        let onGround = false;
-
+        // Eventos de teclado
         document.addEventListener('keydown', (e) => {
             switch(e.code) {
-                case 'KeyW': moveState.w = true; e.preventDefault(); break;
-                case 'KeyA': moveState.a = true; e.preventDefault(); break;
-                case 'KeyS': moveState.s = true; e.preventDefault(); break;
-                case 'KeyD': moveState.d = true; e.preventDefault(); break;
-                case 'Space': moveState.space = true; e.preventDefault(); break;
+                case 'KeyW': moveState.forward = true; break;
+                case 'KeyA': moveState.left = true; break;
+                case 'KeyS': moveState.backward = true; break;
+                case 'KeyD': moveState.right = true; break;
             }
         });
         document.addEventListener('keyup', (e) => {
             switch(e.code) {
-                case 'KeyW': moveState.w = false; e.preventDefault(); break;
-                case 'KeyA': moveState.a = false; e.preventDefault(); break;
-                case 'KeyS': moveState.s = false; e.preventDefault(); break;
-                case 'KeyD': moveState.d = false; e.preventDefault(); break;
-                case 'Space': moveState.space = false; e.preventDefault(); break;
+                case 'KeyW': moveState.forward = false; break;
+                case 'KeyA': moveState.left = false; break;
+                case 'KeyS': moveState.backward = false; break;
+                case 'KeyD': moveState.right = false; break;
             }
         });
 
-        // --- Mundo de bloques ---
-        const blockSize = 1;
-        const blocks = new Map(); // clave "x,y,z" -> { type, mesh }
+        // ----- Crear mundo estático (estilo Minecraft básico) -----
+        
+        // Suelo de hierba
+        const groundGeometry = new THREE.PlaneGeometry(50, 50);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x3c9e3c });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.01;
+        ground.receiveShadow = true;
+        scene.add(ground);
 
-        function createPixelTexture(colors) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 16;
-            canvas.height = 16;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
-                    ctx.fillStyle = colors[y][x] || '#8B4513';
-                    ctx.fillRect(x, y, 1, 1);
+        // Rejilla decorativa
+        const gridHelper = new THREE.GridHelper(50, 20, 0x888888, 0x444444);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        // Árboles / bloques decorativos (simples cubos verdes y marrones)
+        function crearArbol(x, z) {
+            // Tronco
+            const troncoGeo = new THREE.BoxGeometry(0.8, 2, 0.8);
+            const troncoMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            const tronco = new THREE.Mesh(troncoGeo, troncoMat);
+            tronco.position.set(x, 1, z);
+            tronco.castShadow = true;
+            tronco.receiveShadow = true;
+            scene.add(tronco);
+
+            // Hojas (copa simple)
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    for (let k = 0; k < 2; k++) {
+                        const hojaGeo = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+                        const hojaMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57 });
+                        const hoja = new THREE.Mesh(hojaGeo, hojaMat);
+                        hoja.position.set(x - 1 + i, 2.5 + k, z - 1 + j);
+                        hoja.castShadow = true;
+                        hoja.receiveShadow = true;
+                        scene.add(hoja);
+                    }
                 }
             }
-            return new THREE.CanvasTexture(canvas);
         }
 
-        function grassTexture() {
-            const colors = Array(16).fill().map(() => Array(16).fill('#228B22'));
-            for (let i = 0; i < 20; i++) {
-                colors[Math.floor(Math.random()*16)][Math.floor(Math.random()*16)] = '#8B4513';
-            }
-            return createPixelTexture(colors);
-        }
-
-        function dirtTexture() {
-            const colors = Array(16).fill().map(() => Array(16).fill('#8B4513'));
-            return createPixelTexture(colors);
-        }
-
-        function stoneTexture() {
-            const colors = Array(16).fill().map(() => Array(16).fill('#808080'));
-            for (let i = 0; i < 30; i++) {
-                colors[Math.floor(Math.random()*16)][Math.floor(Math.random()*16)] = '#A9A9A9';
-            }
-            return createPixelTexture(colors);
-        }
-
-        // Tipos de bloque
-        const blockTypes = [
-            { name: 'Grass', texture: grassTexture() },
-            { name: 'Dirt', texture: dirtTexture() },
-            { name: 'Stone', texture: stoneTexture() },
-            { name: 'Custom', texture: grassTexture() } // se actualizará
+        // Crear algunos árboles aleatorios
+        const posiciones = [
+            [-5, -5], [5, 5], [-6, 4], [7, -3], [0, -8], [8, 8], [-8, 0], [3, -7]
         ];
+        posiciones.forEach(pos => crearArbol(pos[0], pos[1]));
 
-        // Inventario: índices de blockTypes
-        let inventory = [0, 1, 2, 3];
-        let selectedSlot = 0;
-
-        // --- Hotbar UI ---
-        const hotbarDiv = document.getElementById('hotbar');
-        const selectedNameSpan = document.getElementById('selected-block-name');
-
-        function updateHotbar() {
-            hotbarDiv.innerHTML = '';
-            inventory.forEach((typeIdx, i) => {
-                const slot = document.createElement('div');
-                slot.className = 'slot' + (i === selectedSlot ? ' selected' : '');
-                
-                // Miniatura
-                const canvas = document.createElement('canvas');
-                canvas.width = 16;
-                canvas.height = 16;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = false;
-                const texture = blockTypes[typeIdx].texture;
-                // La imagen puede no estar cargada instantáneamente, pero como es canvas sí
-                ctx.drawImage(texture.image, 0, 0, 16, 16);
-                slot.appendChild(canvas);
-                
-                const span = document.createElement('span');
-                span.textContent = blockTypes[typeIdx].name;
-                slot.appendChild(span);
-                
-                // Evento de selección
-                slot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    selectedSlot = i;
-                    updateHotbar();
-                    selectedNameSpan.textContent = blockTypes[inventory[selectedSlot]].name;
-                });
-                
-                hotbarDiv.appendChild(slot);
-            });
-        }
-        updateHotbar();
-        selectedNameSpan.textContent = blockTypes[inventory[selectedSlot]].name;
-
-        // Funciones de bloques
-        function addBlock(x, y, z, typeIndex) {
-            const key = `${x},${y},${z}`;
-            if (blocks.has(key)) return;
-            
-            const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
-            const materials = [
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture })
-            ];
-            const cube = new THREE.Mesh(geometry, materials);
-            cube.position.set(x, y, z);
+        // Algunos bloques sueltos (piedra, tierra)
+        const bloquesSueltos = [
+            { color: 0x808080, pos: [2, 0.5, 2] },   // piedra
+            { color: 0x654321, pos: [-2, 0.5, -3] }, // tierra
+            { color: 0x808080, pos: [4, 0.5, -4] },
+            { color: 0x654321, pos: [-5, 0.5, 5] },
+        ];
+        bloquesSueltos.forEach(b => {
+            const geo = new THREE.BoxGeometry(1, 1, 1);
+            const mat = new THREE.MeshStandardMaterial({ color: b.color });
+            const cube = new THREE.Mesh(geo, mat);
+            cube.position.set(b.pos[0], b.pos[1], b.pos[2]);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
             scene.add(cube);
-            blocks.set(key, { type: typeIndex, mesh: cube });
-        }
-
-        function removeBlock(x, y, z) {
-            const key = `${x},${y},${z}`;
-            const block = blocks.get(key);
-            if (block) {
-                scene.remove(block.mesh);
-                block.mesh.geometry.dispose();
-                block.mesh.material.forEach(m => m.dispose());
-                blocks.delete(key);
-                return true;
-            }
-            return false;
-        }
-
-        // Suelo inicial (piso de grass)
-        for (let x = -5; x < 5; x++) {
-            for (let z = -5; z < 5; z++) {
-                addBlock(x, 0, z, 0);
-            }
-        }
-        // Algunos bloques de prueba
-        addBlock(2, 1, 2, 1);
-        addBlock(2, 2, 2, 2);
-        addBlock(-2, 1, -2, 0);
-
-        // --- Raycaster para interacción ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        function getBlockAtCursor() {
-            if (!controls.isLocked) return null;
-            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-            const intersects = raycaster.intersectObjects(Array.from(blocks.values()).map(b => b.mesh));
-            if (intersects.length > 0) {
-                const hit = intersects[0];
-                const pos = hit.object.position;
-                return { 
-                    pos: pos.clone(), 
-                    face: hit.face.normal.clone(),
-                    block: blocks.get(`${pos.x},${pos.y},${pos.z}`)
-                };
-            }
-            return null;
-        }
-
-        // Eventos de clic
-        renderer.domElement.addEventListener('mousedown', (e) => {
-            if (!controls.isLocked) return;
-            e.preventDefault();
-            const hit = getBlockAtCursor();
-            if (!hit) return;
-
-            if (e.button === 0) { // Izquierdo: romper
-                removeBlock(hit.pos.x, hit.pos.y, hit.pos.z);
-                sendToAll({ type: 'break', x: hit.pos.x, y: hit.pos.y, z: hit.pos.z });
-            } else if (e.button === 2) { // Derecho: colocar
-                e.preventDefault();
-                const normal = hit.face;
-                const newPos = hit.pos.clone().add(normal);
-                // Redondear a coordenadas enteras por si acaso
-                newPos.x = Math.round(newPos.x);
-                newPos.y = Math.round(newPos.y);
-                newPos.z = Math.round(newPos.z);
-                
-                if (!blocks.has(`${newPos.x},${newPos.y},${newPos.z}`)) {
-                    const typeIdx = inventory[selectedSlot];
-                    addBlock(newPos.x, newPos.y, newPos.z, typeIdx);
-                    sendToAll({ type: 'place', x: newPos.x, y: newPos.y, z: newPos.z, blockType: typeIdx });
-                }
-            }
         });
 
-        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        // --- Colisiones con bloques (detección simple) ---
-        function collidesWithWorld(pos) {
-            // Caja del jugador: desde pos.y - playerHeight/2 hasta pos.y + playerHeight/2? 
-            // Mejor usar un punto central y comprobar bloques alrededor.
-            // Usaremos un enfoque simple: comprobar si el bloque en (floor(x), floor(y), floor(z)) está ocupado,
-            // pero el jugador tiene volumen. Para simplificar, comprobamos 8 esquinas de la caja.
-            const playerMinX = pos.x - playerRadius;
-            const playerMaxX = pos.x + playerRadius;
-            const playerMinY = pos.y - playerHeight/2; // pies
-            const playerMaxY = pos.y + playerHeight/2; // cabeza
-            const playerMinZ = pos.z - playerRadius;
-            const playerMaxZ = pos.z + playerRadius;
-
-            // Rango de bloques a comprobar (enteros)
-            const x0 = Math.floor(playerMinX);
-            const x1 = Math.floor(playerMaxX);
-            const y0 = Math.floor(playerMinY);
-            const y1 = Math.floor(playerMaxY);
-            const z0 = Math.floor(playerMinZ);
-            const z1 = Math.floor(playerMaxZ);
-
-            for (let ix = x0; ix <= x1; ix++) {
-                for (let iy = y0; iy <= y1; iy++) {
-                    for (let iz = z0; iz <= z1; iz++) {
-                        if (blocks.has(`${ix},${iy},${iz}`)) {
-                            // AABB del bloque
-                            const blockMinX = ix;
-                            const blockMaxX = ix + 1;
-                            const blockMinY = iy;
-                            const blockMaxY = iy + 1;
-                            const blockMinZ = iz;
-                            const blockMaxZ = iz + 1;
-
-                            if (playerMaxX > blockMinX && playerMinX < blockMaxX &&
-                                playerMaxY > blockMinY && playerMinY < blockMaxY &&
-                                playerMaxZ > blockMinZ && playerMinZ < blockMaxZ) {
-                                return true; // colisión
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
+        // Pequeñas flores/vegetación (cubos pequeños de colores)
+        for (let i = 0; i < 20; i++) {
+            const x = (Math.random() - 0.5) * 40;
+            const z = (Math.random() - 0.5) * 40;
+            if (Math.abs(x) < 2 && Math.abs(z) < 2) continue; // evitar centro
+            const florGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+            const florMat = new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff });
+            const flor = new THREE.Mesh(florGeo, florMat);
+            flor.position.set(x, 0.15, z);
+            flor.castShadow = true;
+            flor.receiveShadow = true;
+            scene.add(flor);
         }
 
-        // --- Pixel Art Editor ---
-        const pixelEditor = document.getElementById('pixel-editor');
-        const pixelGrid = document.getElementById('pixel-grid');
-        let currentColor = '#8B4513';
-        let pixelData = Array(16).fill().map(() => Array(16).fill('#FFFFFF'));
+        // ----- Lógica P2P con PeerJS -----
+        let peer = null;
+        let conn = null; // conexión activa
+        let remotePlayerMesh = null; // malla del otro jugador
+        let miId = null;
 
-        function renderPixelGrid() {
-            pixelGrid.innerHTML = '';
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'pixel-cell';
-                    cell.style.backgroundColor = pixelData[y][x];
-                    cell.dataset.x = x;
-                    cell.dataset.y = y;
-                    cell.addEventListener('click', () => {
-                        pixelData[y][x] = currentColor;
-                        renderPixelGrid();
-                    });
-                    pixelGrid.appendChild(cell);
-                }
-            }
-        }
+        // Elementos UI
+        const estadoTexto = document.getElementById('estadoTexto');
+        const miPeerSpan = document.getElementById('miPeerId');
+        const conectadoASpan = document.getElementById('conectadoA');
+        const crearBtn = document.getElementById('crearBtn');
+        const unirseBtn = document.getElementById('unirseBtn');
+        const desconectarBtn = document.getElementById('desconectarBtn');
+        const peerIdInput = document.getElementById('peerIdInput');
 
-        document.querySelectorAll('.color-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                currentColor = opt.style.backgroundColor;
-            });
-        });
-
-        document.getElementById('editor-btn').addEventListener('click', () => {
-            pixelEditor.style.display = 'block';
-            controls.unlock();
-            renderPixelGrid();
-        });
-
-        document.getElementById('close-editor-btn').addEventListener('click', () => {
-            pixelEditor.style.display = 'none';
-            controls.lock();
-        });
-
-        document.getElementById('save-pixel-btn').addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 16;
-            canvas.height = 16;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
-                    ctx.fillStyle = pixelData[y][x];
-                    ctx.fillRect(x, y, 1, 1);
-                }
-            }
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.needsUpdate = true;
-            blockTypes[3].texture = texture;
-            updateHotbar();
-            pixelEditor.style.display = 'none';
-            controls.lock();
-        });
-
-        // --- PeerJS Multiplayer ---
-        let peer;
-        let conns = [];
-        const remotePlayers = new Map();
-
-        try {
-            if (typeof Peer !== 'undefined') {
-                peer = new Peer();
-                peer.on('open', (id) => {
-                    document.getElementById('my-id').textContent = id;
-                    document.getElementById('status').textContent = 'Conectado (esperando peers)';
-                });
-                peer.on('connection', (conn) => setupConnection(conn));
-                peer.on('error', (err) => {
-                    console.warn('PeerJS error:', err);
-                    document.getElementById('status').textContent = 'Error PeerJS, modo local';
-                });
+        // Actualizar UI según estado de conexión
+        function actualizarUI(conectado, peerIdRemoto = null) {
+            if (conectado) {
+                estadoTexto.innerText = 'Conectado';
+                estadoTexto.className = 'conectado';
+                conectadoASpan.innerText = peerIdRemoto || '?';
+                desconectarBtn.disabled = false;
+                crearBtn.disabled = true;
+                unirseBtn.disabled = true;
             } else {
-                document.getElementById('my-id').textContent = 'N/A';
+                estadoTexto.innerText = 'Desconectado';
+                estadoTexto.className = 'desconectado';
+                conectadoASpan.innerText = '-';
+                desconectarBtn.disabled = true;
+                crearBtn.disabled = false;
+                unirseBtn.disabled = false;
+                // Eliminar malla remota si existe
+                if (remotePlayerMesh) {
+                    scene.remove(remotePlayerMesh);
+                    remotePlayerMesh = null;
+                }
             }
-        } catch (e) {
-            document.getElementById('my-id').textContent = 'N/A';
         }
 
-        function setupConnection(conn) {
-            conns.push(conn);
-            document.getElementById('status').textContent = `Conectado a ${conn.peer}`;
+        // Crear malla para el jugador remoto (un cubo naranja con una "cara" blanca para indicar dirección)
+        function crearJugadorRemoto() {
+            const grupo = new THREE.Group();
             
-            conn.on('data', (data) => {
-                if (data.type === 'break') {
-                    removeBlock(data.x, data.y, data.z);
-                } else if (data.type === 'place') {
-                    addBlock(data.x, data.y, data.z, data.blockType);
-                } else if (data.type === 'position') {
-                    let playerMesh = remotePlayers.get(conn.peer);
-                    if (!playerMesh) {
-                        const geometry = new THREE.BoxGeometry(0.8, 1.8, 0.8);
-                        const material = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
-                        playerMesh = new THREE.Mesh(geometry, material);
-                        scene.add(playerMesh);
-                        remotePlayers.set(conn.peer, playerMesh);
-                    }
-                    playerMesh.position.set(data.x, data.y, data.z);
-                }
-            });
+            // Cuerpo principal
+            const cuerpoGeo = new THREE.BoxGeometry(1, 2, 1);
+            const cuerpoMat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+            const cuerpo = new THREE.Mesh(cuerpoGeo, cuerpoMat);
+            cuerpo.position.y = 1;
+            cuerpo.castShadow = true;
+            cuerpo.receiveShadow = true;
+            grupo.add(cuerpo);
 
-            conn.on('close', () => {
-                conns = conns.filter(c => c !== conn);
-                if (remotePlayers.has(conn.peer)) {
-                    scene.remove(remotePlayers.get(conn.peer));
-                    remotePlayers.delete(conn.peer);
-                }
-            });
+            // "Cara" para indicar frente (blanco)
+            const caraGeo = new THREE.BoxGeometry(0.3, 0.3, 0.1);
+            const caraMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const cara = new THREE.Mesh(caraGeo, caraMat);
+            cara.position.set(0, 1.2, 0.51); // ligeramente adelante
+            grupo.add(cara);
+
+            // Ojos negros
+            const ojoGeo = new THREE.BoxGeometry(0.15, 0.15, 0.1);
+            const ojoMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            const ojoIzq = new THREE.Mesh(ojoGeo, ojoMat);
+            ojoIzq.position.set(-0.25, 1.3, 0.56);
+            grupo.add(ojoIzq);
+            const ojoDer = new THREE.Mesh(ojoGeo, ojoMat);
+            ojoDer.position.set(0.25, 1.3, 0.56);
+            grupo.add(ojoDer);
+
+            return grupo;
         }
 
-        document.getElementById('connect-btn').addEventListener('click', () => {
-            const peerId = document.getElementById('peer-id-input').value;
-            if (peerId && peer) {
-                const conn = peer.connect(peerId);
-                conn.on('open', () => setupConnection(conn));
-            } else {
-                alert('PeerJS no disponible o ID vacío');
-            }
-        });
-
-        function sendToAll(data) {
-            conns.forEach(conn => conn.send(data));
-        }
-
-        setInterval(() => {
-            if (conns.length > 0) {
+        // Enviar posición y rotación locales al otro peer
+        function enviarEstado() {
+            if (conn && conn.open) {
                 const pos = controls.getObject().position;
-                sendToAll({ type: 'position', x: pos.x, y: pos.y, z: pos.z });
+                // La rotación: yaw (rotación en Y) del objeto controls
+                const rot = controls.getObject().rotation;
+                conn.send({
+                    type: 'playerUpdate',
+                    x: pos.x,
+                    y: pos.y,
+                    z: pos.z,
+                    ry: rot.y // solo necesitamos rotación horizontal
+                });
             }
-        }, 100);
+        }
 
-        // --- Bucle de animación con física y colisiones ---
+        // Bucle de movimiento y envío de datos
         const clock = new THREE.Clock();
 
         function animate() {
-            requestAnimationFrame(animate);
-
-            const delta = Math.min(clock.getDelta(), 0.1); // seguridad
-
+            const delta = clock.getDelta();
+            
+            // Movimiento del jugador local (solo cuando el cursor está bloqueado)
             if (controls.isLocked) {
-                // Movimiento horizontal (WASD)
-                const moveX = (moveState.d ? 1 : 0) - (moveState.a ? 1 : 0);
-                const moveZ = (moveState.s ? 1 : 0) - (moveState.w ? 1 : 0);
+                velocity.x = 0;
+                velocity.z = 0;
+                if (moveState.forward) velocity.z = -speed * delta;
+                if (moveState.backward) velocity.z = speed * delta;
+                if (moveState.left) velocity.x = -speed * delta;
+                if (moveState.right) velocity.x = speed * delta;
                 
-                if (moveX !== 0 || moveZ !== 0) {
-                    const angle = camera.rotation.y;
-                    const speed = walkSpeed * delta;
-                    
-                    const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
-                    const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
-                    
-                    const moveDir = new THREE.Vector3();
-                    if (moveZ !== 0) moveDir.add(forward.multiplyScalar(moveZ));
-                    if (moveX !== 0) moveDir.add(right.multiplyScalar(moveX));
-                    moveDir.normalize();
-                    
-                    // Intentar mover en X y Z por separado para colisiones
-                    const oldPos = controls.getObject().position.clone();
-                    
-                    // Movimiento en X
-                    let newPosX = oldPos.x + moveDir.x * speed;
-                    controls.getObject().position.x = newPosX;
-                    if (collidesWithWorld(controls.getObject().position)) {
-                        controls.getObject().position.x = oldPos.x;
-                    }
-                    
-                    // Movimiento en Z
-                    let newPosZ = oldPos.z + moveDir.z * speed;
-                    controls.getObject().position.z = newPosZ;
-                    if (collidesWithWorld(controls.getObject().position)) {
-                        controls.getObject().position.z = oldPos.z;
-                    }
-                }
+                controls.moveRight(velocity.x);
+                controls.moveForward(velocity.z);
+                
+                // Mantener altura constante (opcional, pero el terreno es plano)
+                const pos = controls.getObject().position;
+                pos.y = 2; // fijar altura para no caer
+            }
 
-                // Gravedad y salto
-                velocity.y += gravity * delta;
-                
-                // Intentar movimiento vertical
-                const oldY = controls.getObject().position.y;
-                let newY = oldY + velocity.y * delta;
-                controls.getObject().position.y = newY;
-                
-                if (collidesWithWorld(controls.getObject().position)) {
-                    // Colisión vertical: ajustar posición y detener velocidad
-                    if (velocity.y < 0) {
-                        // Cayendo: colocar justo encima del bloque
-                        // Buscar el bloque superior
-                        const feetY = controls.getObject().position.y - playerHeight/2;
-                        const blockY = Math.floor(feetY);
-                        // Queremos que los pies estén en blockY + 1 (encima del bloque)
-                        controls.getObject().position.y = blockY + 1 + playerHeight/2;
-                        velocity.y = 0;
-                        onGround = true;
-                    } else if (velocity.y > 0) {
-                        // Saltando y choca cabeza
-                        const headY = controls.getObject().position.y + playerHeight/2;
-                        const blockY = Math.ceil(headY);
-                        controls.getObject().position.y = blockY - 1 - playerHeight/2;
-                        velocity.y = 0;
-                    }
-                } else {
-                    onGround = false;
-                }
-
-                // Salto (solo si en el suelo)
-                if (moveState.space && onGround) {
-                    velocity.y = jumpSpeed;
-                    onGround = false;
+            // Enviar actualización a peer conectado (máx 10 veces/segundo, pero lo hacemos cada frame, controlado por tiempo)
+            // Para no saturar, usamos un throttling simple
+            if (conn && conn.open) {
+                // Enviar cada 100ms aprox (10 fps)
+                if (Math.random() < 0.1) { // forma cutre de throttling, pero funciona
+                    enviarEstado();
                 }
             }
 
             renderer.render(scene, camera);
+            requestAnimationFrame(animate);
         }
         animate();
 
+        // Ajustar ventana
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // ----- Eventos de PeerJS -----
+        crearBtn.addEventListener('click', () => {
+            if (peer) peer.destroy();
+            
+            // Crear nuevo peer con ID aleatorio
+            peer = new Peer(); 
+            
+            peer.on('open', (id) => {
+                miId = id;
+                miPeerSpan.innerText = id;
+                estadoTexto.innerText = 'Esperando conexión...';
+                estadoTexto.className = '';
+                console.log('Mi peer ID:', id);
+            });
+
+            peer.on('connection', (connection) => {
+                conn = connection;
+                conn.on('open', () => {
+                    console.log('Conectado a:', conn.peer);
+                    actualizarUI(true, conn.peer);
+                    
+                    // Crear malla para el remoto si no existe
+                    if (!remotePlayerMesh) {
+                        remotePlayerMesh = crearJugadorRemoto();
+                        scene.add(remotePlayerMesh);
+                    }
+
+                    // Recibir datos
+                    conn.on('data', (data) => {
+                        if (data.type === 'playerUpdate' && remotePlayerMesh) {
+                            remotePlayerMesh.position.set(data.x, data.y, data.z);
+                            remotePlayerMesh.rotation.y = data.ry;
+                        }
+                    });
+                });
+
+                conn.on('close', () => {
+                    actualizarUI(false);
+                    conn = null;
+                });
+            });
+
+            peer.on('error', (err) => {
+                console.error('Peer error:', err);
+                alert('Error de Peer: ' + err.type);
+            });
+        });
+
+        unirseBtn.addEventListener('click', () => {
+            const remoteId = peerIdInput.value.trim();
+            if (!remoteId) {
+                alert('Ingresa un ID de host válido');
+                return;
+            }
+            if (!peer) {
+                // Crear peer si no existe
+                peer = new Peer();
+                peer.on('open', (id) => {
+                    miId = id;
+                    miPeerSpan.innerText = id;
+                    conectar(remoteId);
+                });
+            } else {
+                conectar(remoteId);
+            }
+        });
+
+        function conectar(remoteId) {
+            if (!peer) return;
+            const connection = peer.connect(remoteId);
+            connection.on('open', () => {
+                conn = connection;
+                actualizarUI(true, remoteId);
+                
+                if (!remotePlayerMesh) {
+                    remotePlayerMesh = crearJugadorRemoto();
+                    scene.add(remotePlayerMesh);
+                }
+
+                connection.on('data', (data) => {
+                    if (data.type === 'playerUpdate' && remotePlayerMesh) {
+                        remotePlayerMesh.position.set(data.x, data.y, data.z);
+                        remotePlayerMesh.rotation.y = data.ry;
+                    }
+                });
+
+                connection.on('close', () => {
+                    actualizarUI(false);
+                    conn = null;
+                });
+            });
+            connection.on('error', (err) => {
+                console.error('Connection error:', err);
+                alert('No se pudo conectar al peer');
+            });
+        }
+
+        desconectarBtn.addEventListener('click', () => {
+            if (conn) {
+                conn.close();
+                conn = null;
+            }
+            actualizarUI(false);
+        });
+
+        // Inicializar UI
+        actualizarUI(false);
+
+        // Nota: Para que funcione correctamente, el peer anfitrión debe compartir su ID que aparece en "Mi ID"
+        // y el otro debe ingresarlo en el campo y presionar "Unirse a sala".
+        // La comunicación es uno a uno.
     </script>
 </body>
 </html>
