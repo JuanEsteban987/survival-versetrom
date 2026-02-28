@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft P2P Pixel Art</title>
     <style>
-        /* (los mismos estilos, sin cambios) */
+        /* mismos estilos */
         body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; }
         #info {
             position: absolute;
@@ -150,7 +150,6 @@
             background: #45a049;
         }
     </style>
-    <!-- Cargar PeerJS globalmente (para usarlo con window.Peer) -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
@@ -185,7 +184,6 @@
         </div>
     </div>
 
-    <!-- Importar Three.js (módulo) -->
     <script type="importmap">
         {
             "imports": {
@@ -198,17 +196,16 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/PointerLockControls.js';
 
-        // --- PeerJS (global) ---
-        const Peer = window.Peer; // ya cargado por el script tag
+        const Peer = window.Peer;
 
         // --- Configuración inicial ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Sky blue
+        scene.background = new THREE.Color(0x87CEEB);
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 2, 5);
         
-        const renderer = new THREE.WebGLRenderer({ antialias: false }); // pixelated style
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
@@ -227,7 +224,6 @@
         const controls = new PointerLockControls(camera, document.body);
         scene.add(controls.getObject());
 
-        // Bloquear puntero al hacer click en el canvas
         renderer.domElement.addEventListener('click', () => {
             if (!controls.isLocked) controls.lock();
         });
@@ -236,7 +232,7 @@
         const moveState = { w: false, a: false, s: false, d: false };
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
-        const speed = 5.0;
+        const speed = 2.0; // Reducido de 5 a 2 para movimiento más lento
 
         document.addEventListener('keydown', (e) => {
             switch(e.code) {
@@ -259,7 +255,6 @@
         const blockSize = 1;
         const blocks = new Map(); // clave "x,y,z" -> { type, mesh }
 
-        // Función para crear textura pixelada desde matriz de colores
         function createPixelTexture(colors) {
             const canvas = document.createElement('canvas');
             canvas.width = 16;
@@ -275,7 +270,6 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // Texturas predefinidas
         function grassTexture() {
             const colors = Array(16).fill().map(() => Array(16).fill('#228B22'));
             for (let i = 0; i < 20; i++) {
@@ -297,19 +291,16 @@
             return createPixelTexture(colors);
         }
 
-        // Definición de tipos de bloque
         const blockTypes = [
             { name: 'Grass', texture: grassTexture() },
             { name: 'Dirt', texture: dirtTexture() },
             { name: 'Stone', texture: stoneTexture() },
-            { name: 'Custom', texture: grassTexture() } // se actualizará con el editor
+            { name: 'Custom', texture: grassTexture() }
         ];
 
-        // Inventario (slots)
-        let inventory = [0, 1, 2, 3]; // índices de blockTypes
+        let inventory = [0, 1, 2, 3];
         let selectedSlot = 0;
 
-        // Crear hotbar UI
         const hotbarDiv = document.getElementById('hotbar');
         function updateHotbar() {
             hotbarDiv.innerHTML = '';
@@ -321,9 +312,7 @@
                 canvas.height = 16;
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingEnabled = false;
-                // dibujar textura del bloque
                 const texture = blockTypes[typeIdx].texture;
-                // Asegurar que la imagen esté lista (en canvas siempre lo está)
                 ctx.drawImage(texture.image, 0, 0, 16, 16);
                 slot.appendChild(canvas);
                 const span = document.createElement('span');
@@ -340,19 +329,18 @@
         updateHotbar();
         document.getElementById('selected-block-name').textContent = blockTypes[inventory[selectedSlot]].name;
 
-        // Función para añadir bloque al mundo
         function addBlock(x, y, z, typeIndex) {
             const key = `${x},${y},${z}`;
             if (blocks.has(key)) return;
             
             const geometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
             const materials = [
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }), // right
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }), // left
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }), // top
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }), // bottom
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }), // front
-                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture })  // back
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture }),
+                new THREE.MeshStandardMaterial({ map: blockTypes[typeIndex].texture })
             ];
             const cube = new THREE.Mesh(geometry, materials);
             cube.position.set(x, y, z);
@@ -373,20 +361,54 @@
             return false;
         }
 
-        // Crear suelo inicial (10x10 de grass)
+        // Suelo inicial
         for (let x = -5; x < 5; x++) {
             for (let z = -5; z < 5; z++) {
-                addBlock(x, 0, z, 0); // grass
+                addBlock(x, 0, z, 0);
             }
         }
-        // Algunos bloques adicionales
-        addBlock(2, 1, 2, 1); // dirt
-        addBlock(2, 2, 2, 2); // stone
+        addBlock(2, 1, 2, 1);
+        addBlock(2, 2, 2, 2);
         addBlock(-2, 1, -2, 0);
 
-        // --- Raycaster para interacción ---
+        // --- Colisiones ---
+        // Tamaño del jugador (aproximado)
+        const playerHeight = 1.8;
+        const playerWidth = 0.6;
+        const playerDepth = 0.6;
+
+        function getPlayerBoundingBox(pos) {
+            // pos es la posición de la cámara (ojos), el centro del cuerpo está en pos.y - playerHeight/2
+            const min = new THREE.Vector3(
+                pos.x - playerWidth/2,
+                pos.y - playerHeight,
+                pos.z - playerDepth/2
+            );
+            const max = new THREE.Vector3(
+                pos.x + playerWidth/2,
+                pos.y,
+                pos.z + playerDepth/2
+            );
+            return { min, max };
+        }
+
+        function checkCollision(newPos) {
+            const box = getPlayerBoundingBox(newPos);
+            // Iterar sobre todos los bloques
+            for (let [key, block] of blocks) {
+                const blockPos = block.mesh.position;
+                // AABB collision
+                if (box.max.x > blockPos.x - 0.5 && box.min.x < blockPos.x + 0.5 &&
+                    box.max.y > blockPos.y - 0.5 && box.min.y < blockPos.y + 0.5 &&
+                    box.max.z > blockPos.z - 0.5 && box.min.z < blockPos.z + 0.5) {
+                    return true; // hay colisión
+                }
+            }
+            return false;
+        }
+
+        // --- Raycaster ---
         const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
 
         function getBlockAtCursor() {
             if (!controls.isLocked) return null;
@@ -404,22 +426,19 @@
             return null;
         }
 
-        // Eventos de click
         renderer.domElement.addEventListener('mousedown', (e) => {
             if (!controls.isLocked) return;
             e.preventDefault();
             const hit = getBlockAtCursor();
             if (!hit) return;
 
-            if (e.button === 0) { // izquierdo - romper
+            if (e.button === 0) { // izquierdo
                 removeBlock(hit.pos.x, hit.pos.y, hit.pos.z);
-                // Enviar a peers
                 sendToAll({ type: 'break', x: hit.pos.x, y: hit.pos.y, z: hit.pos.z });
-            } else if (e.button === 2) { // derecho - colocar
+            } else if (e.button === 2) { // derecho
                 e.preventDefault();
                 const normal = hit.face;
                 const newPos = hit.pos.clone().add(normal);
-                // Verificar que no haya bloque
                 if (!blocks.has(`${newPos.x},${newPos.y},${newPos.z}`)) {
                     const typeIdx = inventory[selectedSlot];
                     addBlock(newPos.x, newPos.y, newPos.z, typeIdx);
@@ -428,10 +447,9 @@
             }
         });
 
-        // Prevenir menú contextual
         renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // --- Pixel Art Editor ---
+        // --- Pixel Editor ---
         const pixelEditor = document.getElementById('pixel-editor');
         const pixelGrid = document.getElementById('pixel-grid');
         let currentColor = '#8B4513';
@@ -464,7 +482,7 @@
         document.getElementById('editor-btn').addEventListener('click', () => {
             pixelEditor.style.display = 'block';
             controls.unlock();
-            renderPixelGrid(); // Mostrar la cuadrícula actual (vacía o la última editada)
+            renderPixelGrid();
         });
 
         document.getElementById('close-editor-btn').addEventListener('click', () => {
@@ -473,7 +491,6 @@
         });
 
         document.getElementById('save-pixel-btn').addEventListener('click', () => {
-            // Crear textura a partir de pixelData
             const canvas = document.createElement('canvas');
             canvas.width = 16;
             canvas.height = 16;
@@ -486,21 +503,18 @@
                 }
             }
             const texture = new THREE.CanvasTexture(canvas);
-            texture.needsUpdate = true; // Asegurar que Three.js la reconozca
-            // Actualizar el tipo "Custom" (índice 3)
+            texture.needsUpdate = true;
             blockTypes[3].texture = texture;
-            // Actualizar hotbar para que se vea el cambio
             updateHotbar();
             pixelEditor.style.display = 'none';
             controls.lock();
         });
 
-        // --- PeerJS Multiplayer ---
+        // --- Multiplayer ---
         let peer;
-        let conns = []; // conexiones activas
-        const remotePlayers = new Map(); // id -> mesh
+        let conns = [];
+        const remotePlayers = new Map();
 
-        // Inicializar Peer (si está disponible)
         try {
             if (typeof Peer !== 'undefined') {
                 peer = new Peer();
@@ -508,22 +522,19 @@
                     document.getElementById('my-id').textContent = id;
                     document.getElementById('status').textContent = 'Conectado (esperando peers)';
                 });
-
                 peer.on('connection', (conn) => {
                     setupConnection(conn);
                 });
-
                 peer.on('error', (err) => {
                     console.warn('PeerJS error:', err);
                     document.getElementById('status').textContent = 'Error PeerJS, modo local';
                 });
             } else {
-                console.warn('PeerJS no disponible, modo local');
+                console.warn('PeerJS no disponible');
                 document.getElementById('my-id').textContent = 'N/A';
             }
         } catch (e) {
-            console.warn('No se pudo iniciar PeerJS:', e);
-            document.getElementById('my-id').textContent = 'N/A';
+            console.warn('PeerJS error:', e);
         }
 
         function setupConnection(conn) {
@@ -536,10 +547,8 @@
                 } else if (data.type === 'place') {
                     addBlock(data.x, data.y, data.z, data.blockType);
                 } else if (data.type === 'position') {
-                    // actualizar jugador remoto
                     let playerMesh = remotePlayers.get(conn.peer);
                     if (!playerMesh) {
-                        // crear representación simple
                         const geometry = new THREE.BoxGeometry(0.8, 1.8, 0.8);
                         const material = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
                         playerMesh = new THREE.Mesh(geometry, material);
@@ -575,7 +584,6 @@
             conns.forEach(conn => conn.send(data));
         }
 
-        // Enviar posición propia periódicamente
         setInterval(() => {
             if (conns.length > 0) {
                 const pos = controls.getObject().position;
@@ -583,31 +591,57 @@
             }
         }, 100);
 
-        // --- Bucle de animación ---
+        // --- Bucle de animación con física y colisiones ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // Movimiento del jugador
             if (controls.isLocked) {
-                velocity.x -= velocity.x * 10.0 * 0.01;
-                velocity.z -= velocity.z * 10.0 * 0.01;
+                // Aplicar fricción
+                velocity.x *= 0.9;
+                velocity.z *= 0.9;
                 
+                // Calcular dirección deseada
                 direction.z = Number(moveState.w) - Number(moveState.s);
                 direction.x = Number(moveState.d) - Number(moveState.a);
                 direction.normalize();
                 
-                if (moveState.w || moveState.s) velocity.z += direction.z * speed * 0.1;
-                if (moveState.a || moveState.d) velocity.x += direction.x * speed * 0.1;
+                // Aceleración
+                if (moveState.w || moveState.s) velocity.z += direction.z * speed * 0.05;
+                if (moveState.a || moveState.d) velocity.x += direction.x * speed * 0.05;
                 
-                controls.moveRight(velocity.x);
-                controls.moveForward(velocity.z);
-                
-                // Gravedad simple
-                const pos = controls.getObject().position;
-                if (pos.y > 1.5) {
-                    pos.y -= 0.02; // caer
+                // Intentar movimiento en X
+                let newPos = controls.getObject().position.clone();
+                newPos.x += velocity.x;
+                if (!checkCollision(newPos)) {
+                    controls.getObject().position.x = newPos.x;
                 } else {
-                    pos.y = 1.5; // suelo
+                    velocity.x = 0;
+                }
+                
+                // Intentar movimiento en Z
+                newPos = controls.getObject().position.clone();
+                newPos.z += velocity.z;
+                if (!checkCollision(newPos)) {
+                    controls.getObject().position.z = newPos.z;
+                } else {
+                    velocity.z = 0;
+                }
+                
+                // Gravedad
+                newPos = controls.getObject().position.clone();
+                newPos.y -= 0.1; // caída suave
+                if (!checkCollision(newPos)) {
+                    controls.getObject().position.y = newPos.y;
+                } else {
+                    // Si choca al caer, nos detenemos
+                    velocity.y = 0;
+                    // Ajustar para quedar justo encima del bloque?
+                    // Por simplicidad, no hacemos ajuste fino
+                }
+
+                // Mantener altura mínima (suelo)
+                if (controls.getObject().position.y < 1.5) {
+                    controls.getObject().position.y = 1.5;
                 }
             }
 
@@ -615,15 +649,13 @@
         }
         animate();
 
-        // Redimensionar ventana
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Mostrar mensaje de éxito en consola
-        console.log('Juego iniciado correctamente');
+        console.log('Juego iniciado con colisiones y movimiento lento');
     </script>
 </body>
 </html>
