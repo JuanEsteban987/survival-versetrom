@@ -2,121 +2,639 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mini WorldBox Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldBox + Personas y Zombies</title>
     <style>
-        body { background: #222; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        canvas { border: 4px solid #444; background: #000; cursor: crosshair; image-rendering: pixelated; }
-        .controls { margin: 10px; display: flex; gap: 10px; }
-        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
-        .btn-land { background: #3a5f0b; color: white; }
-        .btn-water { background: #0b5f5f; color: white; }
-        .btn-human { background: #d2b48c; color: black; }
-        .btn-spawn { background: #ffcc00; }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: #1e2b30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+        .game-container {
+            background: #2f424b;
+            border-radius: 32px;
+            padding: 24px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.7);
+        }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 2px #20333b, 0 12px 18px -6px #0f1a1f;
+        }
+        canvas {
+            display: block;
+            width: 720px;
+            height: 720px;
+            background: #2a4b3a;
+            cursor: crosshair;
+            image-rendering: crisp-edges;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+            justify-content: center;
+        }
+        button {
+            background: #3d5c69;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 15px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 5px 0 #1f353f, 0 6px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.07s ease;
+            border: 1px solid #6e94a3;
+        }
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #1f353f, 0 5px 8px rgba(0,0,0,0.5);
+        }
+        .brush-indicator {
+            background: #253e48;
+            border-radius: 40px;
+            padding: 6px 18px;
+            color: #d2ecf7;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: inset 0 2px 6px #10222a;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            background: #1d333d;
+            border-radius: 40px;
+            padding: 8px 22px;
+            color: #c6e2f0;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .footer-note {
+            color: #90b1be;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .btn-zombie {
+            background: #4f3b2c;
+            border-color: #b48b5a;
+        }
+        .btn-person {
+            background: #3d6b5e;
+            border-color: #82b3a1;
+        }
     </style>
 </head>
 <body>
-
-    <h2>Simulador de Dios HTML5</h2>
-    <div class="controls">
-        <button class="btn-land" onclick="setTool('land')">Tierra</button>
-        <button class="btn-water" onclick="setTool('water')">Agua</button>
-        <button class="btn-human" onclick="setTool('human')">Crear Humano</button>
-        <button class="btn-spawn" onclick="generateMap()">Regenerar Mundo</button>
+<div class="game-container">
+    <div class="canvas-wrapper">
+        <canvas id="worldCanvas" width="720" height="720"></canvas>
     </div>
-    <canvas id="worldCanvas" width="600" height="400"></canvas>
+
+    <div class="toolbar">
+        <button id="btnGrass" style="background:#528a4e;">🌿 Tierra</button>
+        <button id="btnTree" style="background:#2a7849;">🌲 Árbol</button>
+        <button id="btnWater" style="background:#1f7a9c;">💧 Agua</button>
+        <button id="btnFire" style="background:#bf5726;">🔥 Fuego</button>
+        <button id="btnEraser" style="background:#6b6b6b;">⌫ Borrar</button>
+        <button id="btnPerson" class="btn-person">🧍 Persona</button>
+        <button id="btnZombie" class="btn-zombie">🧟 Zombie</button>
+    </div>
+    <div class="toolbar">
+        <button id="btnRandom">🎲 Aleatorio</button>
+        <button id="btnClear">🗑️ Limpiar</button>
+        <button id="btnPlayPause" style="background:#3e786a; min-width: 120px;">⏸️ Pausa</button>
+        <button id="btnStep" style="background:#5b6077;">⏩ Un paso</button>
+        <div class="brush-indicator">
+            <span>Pincel:</span>
+            <span id="brushName">Tierra</span>
+            <span style="font-size:1.5rem;" id="brushEmoji">🌿</span>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span>🌲 <span id="treeCount">0</span></span>
+        <span>🔥 <span id="fireCount">0</span></span>
+        <span>💧 <span id="waterCount">0</span></span>
+        <span>🌿 <span id="grassCount">0</span></span>
+        <span>🧍 <span id="personCount">0</span></span>
+        <span>🧟 <span id="zombieCount">0</span></span>
+    </div>
+    <div class="footer-note">
+        ⚡ Click izquierdo: pintar · Click derecho: borrar · Personas huyen, zombies persiguen · Fuego quema
+    </div>
+</div>
 
 <script>
-    const canvas = document.getElementById('worldCanvas');
-    const ctx = canvas.getContext('2d');
-    const cellSize = 10;
-    const rows = canvas.height / cellSize;
-    const cols = canvas.width / cellSize;
+(function() {
+    // --- CONSTANTES ---
+    const GRID_SIZE = 60;               // 60 x 60 celdas
+    const CELL_SIZE = 12;                // píxeles por celda (canvas 720x720)
+    
+    const TYPES = {
+        VACIO: 0,
+        GRASS: 1,
+        TREE: 2,
+        WATER: 3,
+        FIRE: 4
+    };
+    const TYPE_EMOJI = ['⬛', '🌿', '🌲', '💧', '🔥'];  // vacío como cuadro negro (fondo)
+    const TYPE_COLORS = ['#2d4a3a', '#5b8c5a', '#2d6a4f', '#2c7da0', '#d45d2e']; // para texto
 
-    let world = [];
-    let entities = [];
-    let currentTool = 'land';
-
-    // Tipos de terreno
-    const TERRAIN = {
-        WATER: { color: '#1e90ff', id: 0 },
-        SAND: { color: '#f0e68c', id: 1 },
-        GRASS: { color: '#228b22', id: 2 }
+    // Entidades: personas y zombies
+    const ENTITY_TYPES = {
+        PERSON: 'person',
+        ZOMBIE: 'zombie'
+    };
+    const ENTITY_EMOJI = {
+        [ENTITY_TYPES.PERSON]: '🧍',
+        [ENTITY_TYPES.ZOMBIE]: '🧟'
     };
 
-    function init() {
-        generateMap();
-        setInterval(update, 200); // 5 frames por segundo para estilo retro
-    }
+    // --- ESTADO GLOBAL ---
+    let terrain = [];                // grid de terreno [fila][col] (TYPES)
+    let entities = [];               // lista de entidades { x, y, type }
+    let selectedBrush = TYPES.GRASS;  // pincel (puede ser tipo terreno o entidad)
+    let painting = false;
+    let simulationInterval = null;
+    let simulationRunning = true;      // arranca activo
 
-    function generateMap() {
-        world = [];
+    const canvas = document.getElementById('worldCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Elementos UI
+    const brushNameSpan = document.getElementById('brushName');
+    const brushEmojiSpan = document.getElementById('brushEmoji');
+    const treeSpan = document.getElementById('treeCount');
+    const fireSpan = document.getElementById('fireCount');
+    const waterSpan = document.getElementById('waterCount');
+    const grassSpan = document.getElementById('grassCount');
+    const personSpan = document.getElementById('personCount');
+    const zombieSpan = document.getElementById('zombieCount');
+    const playPauseBtn = document.getElementById('btnPlayPause');
+
+    // --- INICIALIZAR ---
+    function initWorld() {
+        // Terreno: pasto con algunos árboles y agua
+        terrain = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+            const row = [];
+            for (let c = 0; c < GRID_SIZE; c++) {
+                let rand = Math.random();
+                if (rand < 0.1) row.push(TYPES.WATER);
+                else if (rand < 0.25) row.push(TYPES.TREE);
+                else row.push(TYPES.GRASS);
+            }
+            terrain.push(row);
+        }
+        // Algunas entidades iniciales
         entities = [];
-        for (let r = 0; r < rows; r++) {
-            world[r] = [];
-            for (let c = 0; c < cols; c++) {
-                // Generación aleatoria simple (luego puedes usar Perlin Noise)
-                world[r][c] = Math.random() > 0.1 ? TERRAIN.WATER : TERRAIN.SAND;
+        for (let i = 0; i < 10; i++) {
+            let placed = false;
+            for (let tries = 0; tries < 200; tries++) {
+                let x = Math.floor(Math.random() * GRID_SIZE);
+                let y = Math.floor(Math.random() * GRID_SIZE);
+                if (isCellFreeForEntity(x, y)) {
+                    entities.push({ x, y, type: ENTITY_TYPES.PERSON });
+                    placed = true;
+                    break;
+                }
             }
         }
-        draw();
+        for (let i = 0; i < 5; i++) {
+            let placed = false;
+            for (let tries = 0; tries < 200; tries++) {
+                let x = Math.floor(Math.random() * GRID_SIZE);
+                let y = Math.floor(Math.random() * GRID_SIZE);
+                if (isCellFreeForEntity(x, y)) {
+                    entities.push({ x, y, type: ENTITY_TYPES.ZOMBIE });
+                    placed = true;
+                    break;
+                }
+            }
+        }
     }
 
-    function setTool(tool) { currentTool = tool; }
+    // Comprueba si una celda está libre de entidades y es transitable (no agua, no fuego)
+    function isCellFreeForEntity(x, y) {
+        if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
+        // Terreno no transitable: agua o fuego activo
+        if (terrain[y][x] === TYPES.WATER || terrain[y][x] === TYPES.FIRE) return false;
+        // Que no haya otra entidad
+        return !entities.some(e => e.x === x && e.y === y);
+    }
 
-    // Interacción con el ratón
-    canvas.addEventListener('mousedown', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = Math.floor((e.clientX - rect.left) / cellSize);
-        const y = Math.floor((e.clientY - rect.top) / cellSize);
+    // --- DIBUJADO con EMOJIS ---
+    function drawWorld() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 14px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-        if (currentTool === 'land') world[y][x] = TERRAIN.GRASS;
-        if (currentTool === 'water') world[y][x] = TERRAIN.WATER;
-        if (currentTool === 'human') entities.push({ x, y, color: '#ffdbac', hunger: 100 });
-        
-        draw();
-    });
+        // Dibujar terreno
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const type = terrain[r][c];
+                const emoji = TYPE_EMOJI[type];
+                const x = c * CELL_SIZE + CELL_SIZE/2;
+                const y = r * CELL_SIZE + CELL_SIZE/2;
+                ctx.fillStyle = '#000'; // sombra o borde? mejor color de fondo del canvas
+                ctx.fillStyle = TYPE_COLORS[type]; // color de fondo
+                ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                ctx.fillStyle = 'white'; // para el emoji
+                ctx.fillText(emoji, x, y);
+            }
+        }
 
-    function update() {
-        // Simulación: La hierba se expande cerca del agua
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                if (world[r][c] === TERRAIN.SAND && Math.random() > 0.98) {
-                    world[r][c] = TERRAIN.GRASS;
+        // Dibujar entidades encima
+        for (let e of entities) {
+            const x = e.x * CELL_SIZE + CELL_SIZE/2;
+            const y = e.y * CELL_SIZE + CELL_SIZE/2;
+            ctx.fillStyle = 'black'; // borde simulado
+            ctx.fillText(ENTITY_EMOJI[e.type], x+1, y+1);
+            ctx.fillStyle = 'white';
+            ctx.fillText(ENTITY_EMOJI[e.type], x, y);
+        }
+
+        // opcional rejilla suave
+        ctx.strokeStyle = '#2f4f3a';
+        ctx.lineWidth = 0.3;
+        for (let i = 0; i <= GRID_SIZE; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * CELL_SIZE, 0);
+            ctx.lineTo(i * CELL_SIZE, canvas.height);
+            ctx.stroke();
+            ctx.moveTo(0, i * CELL_SIZE);
+            ctx.lineTo(canvas.width, i * CELL_SIZE);
+            ctx.stroke();
+        }
+
+        updateCounts();
+    }
+
+    function updateCounts() {
+        let trees=0, fires=0, waters=0, grasses=0;
+        for (let r=0; r<GRID_SIZE; r++) {
+            for (let c=0; c<GRID_SIZE; c++) {
+                const t = terrain[r][c];
+                if (t === TYPES.TREE) trees++;
+                else if (t === TYPES.FIRE) fires++;
+                else if (t === TYPES.WATER) waters++;
+                else if (t === TYPES.GRASS) grasses++;
+            }
+        }
+        treeSpan.innerText = trees;
+        fireSpan.innerText = fires;
+        waterSpan.innerText = waters;
+        grassSpan.innerText = grasses;
+        personSpan.innerText = entities.filter(e => e.type === ENTITY_TYPES.PERSON).length;
+        zombieSpan.innerText = entities.filter(e => e.type === ENTITY_TYPES.ZOMBIE).length;
+    }
+
+    // --- SIMULACIÓN (terreno y entidades) ---
+    function nextGeneration() {
+        // 1. Actualizar terreno (fuego, propagación)
+        const newTerrain = JSON.parse(JSON.stringify(terrain));
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const cell = terrain[r][c];
+                if (cell === TYPES.TREE && hasNeighborTerrain(r, c, TYPES.FIRE)) {
+                    if (Math.random() < 0.3) newTerrain[r][c] = TYPES.FIRE;
+                } else if (cell === TYPES.GRASS && hasNeighborTerrain(r, c, TYPES.FIRE)) {
+                    if (Math.random() < 0.2) newTerrain[r][c] = TYPES.FIRE;
+                } else if (cell === TYPES.FIRE) {
+                    if (hasNeighborTerrain(r, c, TYPES.WATER) || Math.random() < 0.1) {
+                        newTerrain[r][c] = TYPES.GRASS;
+                    }
+                }
+            }
+        }
+        terrain = newTerrain;
+
+        // 2. Mover entidades y aplicar interacciones
+        let newEntities = [];
+
+        // Primero, eliminar entidades que están en fuego
+        entities = entities.filter(e => terrain[e.y][e.x] !== TYPES.FIRE);
+
+        // Comportamiento: personas huyen de zombies, zombies persiguen personas
+        // Simplificamos: cada entidad intenta moverse a una celda vecina (4 direcciones)
+        for (let e of entities) {
+            if (e.type === ENTITY_TYPES.PERSON) {
+                // Huir del zombie más cercano en radio 5
+                let closestZombie = findClosestEntity(e, ENTITY_TYPES.ZOMBIE, 7);
+                if (closestZombie) {
+                    // dirección opuesta al zombie
+                    let dx = e.x - closestZombie.x;
+                    let dy = e.y - closestZombie.y;
+                    // Normalizar y elegir movimiento cardinal
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        tryMove(e, dx > 0 ? 1 : -1, 0, newEntities);
+                    } else {
+                        tryMove(e, 0, dy > 0 ? 1 : -1, newEntities);
+                    }
+                } else {
+                    // Movimiento aleatorio
+                    randomMove(e, newEntities);
+                }
+            } else if (e.type === ENTITY_TYPES.ZOMBIE) {
+                // Perseguir persona más cercana
+                let closestPerson = findClosestEntity(e, ENTITY_TYPES.PERSON, 10);
+                if (closestPerson) {
+                    let dx = closestPerson.x - e.x;
+                    let dy = closestPerson.y - e.y;
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        tryMove(e, dx > 0 ? 1 : -1, 0, newEntities);
+                    } else {
+                        tryMove(e, 0, dy > 0 ? 1 : -1, newEntities);
+                    }
+                } else {
+                    randomMove(e, newEntities);
                 }
             }
         }
 
-        // IA Básica de humanos
-        entities.forEach(h => {
-            h.x += Math.floor(Math.random() * 3) - 1;
-            h.y += Math.floor(Math.random() * 3) - 1;
-            // Mantener dentro de los límites
-            h.x = Math.max(0, Math.min(cols - 1, h.x));
-            h.y = Math.max(0, Math.min(rows - 1, h.y));
-        });
-
-        draw();
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Dibujar Terreno
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                ctx.fillStyle = world[r][c].color;
-                ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        // Después de mover, procesar colisiones: si zombie y persona en misma celda, persona se convierte
+        // Agrupamos por celda
+        const grouped = {};
+        for (let e of newEntities) {
+            const key = `${e.x},${e.y}`;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(e);
+        }
+        const finalEntities = [];
+        for (let key in grouped) {
+            const cellEntities = grouped[key];
+            const hasZombie = cellEntities.some(e => e.type === ENTITY_TYPES.ZOMBIE);
+            const hasPerson = cellEntities.some(e => e.type === ENTITY_TYPES.PERSON);
+            if (hasZombie && hasPerson) {
+                // Todos los humanos de esa celda se convierten en zombies (eliminar personas y dejar zombies)
+                for (let e of cellEntities) {
+                    if (e.type === ENTITY_TYPES.ZOMBIE) finalEntities.push(e);
+                    // la persona no se añade, pero si queremos que se convierta en zombie, añadimos un zombie extra
+                }
+                // Añadimos un zombie por cada persona convertida (opcional, aquí solo un zombie extra como muestra)
+                // Para mantener número, convertimos una persona en zombie: añadimos un zombie en esa celda
+                finalEntities.push({ x: cellEntities[0].x, y: cellEntities[0].y, type: ENTITY_TYPES.ZOMBIE });
+            } else {
+                // No hay mezcla, añadimos todas
+                finalEntities.push(...cellEntities);
             }
         }
 
-        // Dibujar Entidades (Humanos)
-        entities.forEach(h => {
-            ctx.fillStyle = h.color;
-            ctx.fillRect(h.x * cellSize + 2, h.y * cellSize + 2, cellSize - 4, cellSize - 4);
-        });
+        // Eliminar duplicados? puede haber múltiples zombies en misma celda si se movieron, pero lo permitimos
+        entities = finalEntities;
+
+        // 3. Actualizar estadísticas y dibujar
+        drawWorld();
     }
 
-    init();
+    // Util para encontrar entidad más cercana de un tipo
+    function findClosestEntity(entity, targetType, maxDist) {
+        let best = null;
+        let bestDist = Infinity;
+        for (let other of entities) {
+            if (other === entity) continue;
+            if (other.type === targetType) {
+                const dx = other.x - entity.x;
+                const dy = other.y - entity.y;
+                const dist = Math.abs(dx) + Math.abs(dy); // Manhattan
+                if (dist < bestDist && dist <= maxDist) {
+                    bestDist = dist;
+                    best = other;
+                }
+            }
+        }
+        return best;
+    }
+
+    // Intenta mover una entidad en (dx, dy) (cada uno -1,0,1)
+    function tryMove(entity, dx, dy, newEntitiesList) {
+        const nx = entity.x + dx;
+        const ny = entity.y + dy;
+        // Comprobar si la nueva celda está libre de entidades y es transitable
+        if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE &&
+            terrain[ny][nx] !== TYPES.WATER && terrain[ny][nx] !== TYPES.FIRE &&
+            !newEntitiesList.some(e => e.x === nx && e.y === ny) &&
+            !entities.some(e => e.x === nx && e.y === ny && e !== entity)) { // evitar otras entidades que aún no se han movido? complejo, simplificamos mirando newEntities
+            newEntitiesList.push({ x: nx, y: ny, type: entity.type });
+        } else {
+            // No puede moverse, se queda
+            newEntitiesList.push({ x: entity.x, y: entity.y, type: entity.type });
+        }
+    }
+
+    function randomMove(entity, newEntitiesList) {
+        const dirs = [
+            [1,0],[-1,0],[0,1],[0,-1]
+        ];
+        const [dx, dy] = dirs[Math.floor(Math.random() * dirs.length)];
+        tryMove(entity, dx, dy, newEntitiesList);
+    }
+
+    // Comprueba si alguna celda vecina tiene cierto tipo de terreno
+    function hasNeighborTerrain(row, col, type) {
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr, nc = col + dc;
+                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+                    if (terrain[nr][nc] === type) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // --- PINTADO CON MOUSE ---
+    function getCellFromCoord(coord) {
+        return Math.floor(coord / CELL_SIZE);
+    }
+
+    function handlePaint(col, row, brush) {
+        if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) return;
+
+        // Si el pincel es una entidad
+        if (brush === ENTITY_TYPES.PERSON || brush === ENTITY_TYPES.ZOMBIE) {
+            // Solo si la celda está libre
+            if (terrain[row][col] !== TYPES.WATER && terrain[row][col] !== TYPES.FIRE &&
+                !entities.some(e => e.x === col && e.y === row)) {
+                entities.push({ x: col, y: row, type: brush });
+            }
+        } else {
+            // Terreno
+            terrain[row][col] = brush;
+        }
+        drawWorld();
+    }
+
+    // Eventos canvas
+    canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+        const col = getCellFromCoord(mouseX);
+        const row = getCellFromCoord(mouseY);
+
+        if (e.button === 0) { // izquierdo: pincel actual
+            painting = true;
+            handlePaint(col, row, selectedBrush);
+        } else if (e.button === 2) { // derecho: borrar (quitar entidad o poner vacío)
+            painting = true;
+            // Si hay entidad, la quitamos; si no, ponemos vacío
+            const index = entities.findIndex(e => e.x === col && e.y === row);
+            if (index !== -1) {
+                entities.splice(index, 1);
+                drawWorld();
+            } else {
+                handlePaint(col, row, TYPES.VACIO);
+            }
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!painting) return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+        const col = getCellFromCoord(mouseX);
+        const row = getCellFromCoord(mouseY);
+
+        if (e.buttons === 1) { // izquierdo
+            handlePaint(col, row, selectedBrush);
+        } else if (e.buttons === 2) { // derecho (borrar)
+            const index = entities.findIndex(e => e.x === col && e.y === row);
+            if (index !== -1) {
+                entities.splice(index, 1);
+                drawWorld();
+            } else {
+                handlePaint(col, row, TYPES.VACIO);
+            }
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => painting = false);
+    canvas.addEventListener('mouseleave', () => painting = false);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // --- CONTROLES ---
+    document.getElementById('btnGrass').addEventListener('click', () => {
+        selectedBrush = TYPES.GRASS;
+        brushNameSpan.innerText = 'Tierra';
+        brushEmojiSpan.innerText = '🌿';
+    });
+    document.getElementById('btnTree').addEventListener('click', () => {
+        selectedBrush = TYPES.TREE;
+        brushNameSpan.innerText = 'Árbol';
+        brushEmojiSpan.innerText = '🌲';
+    });
+    document.getElementById('btnWater').addEventListener('click', () => {
+        selectedBrush = TYPES.WATER;
+        brushNameSpan.innerText = 'Agua';
+        brushEmojiSpan.innerText = '💧';
+    });
+    document.getElementById('btnFire').addEventListener('click', () => {
+        selectedBrush = TYPES.FIRE;
+        brushNameSpan.innerText = 'Fuego';
+        brushEmojiSpan.innerText = '🔥';
+    });
+    document.getElementById('btnEraser').addEventListener('click', () => {
+        selectedBrush = TYPES.VACIO;
+        brushNameSpan.innerText = 'Borrar';
+        brushEmojiSpan.innerText = '⬛';
+    });
+    document.getElementById('btnPerson').addEventListener('click', () => {
+        selectedBrush = ENTITY_TYPES.PERSON;
+        brushNameSpan.innerText = 'Persona';
+        brushEmojiSpan.innerText = '🧍';
+    });
+    document.getElementById('btnZombie').addEventListener('click', () => {
+        selectedBrush = ENTITY_TYPES.ZOMBIE;
+        brushNameSpan.innerText = 'Zombie';
+        brushEmojiSpan.innerText = '🧟';
+    });
+
+    document.getElementById('btnRandom').addEventListener('click', () => {
+        for (let r=0; r<GRID_SIZE; r++) {
+            for (let c=0; c<GRID_SIZE; c++) {
+                const rand = Math.random();
+                if (rand < 0.1) terrain[r][c] = TYPES.WATER;
+                else if (rand < 0.3) terrain[r][c] = TYPES.TREE;
+                else if (rand < 0.4) terrain[r][c] = TYPES.FIRE;
+                else terrain[r][c] = TYPES.GRASS;
+            }
+        }
+        entities = [];
+        drawWorld();
+    });
+
+    document.getElementById('btnClear').addEventListener('click', () => {
+        for (let r=0; r<GRID_SIZE; r++) {
+            for (let c=0; c<GRID_SIZE; c++) {
+                terrain[r][c] = TYPES.GRASS;
+            }
+        }
+        entities = [];
+        drawWorld();
+    });
+
+    function toggleSimulation() {
+        if (simulationRunning) {
+            clearInterval(simulationInterval);
+            simulationInterval = null;
+            simulationRunning = false;
+            playPauseBtn.innerHTML = '▶️ Iniciar';
+        } else {
+            simulationInterval = setInterval(() => nextGeneration(), 200);
+            simulationRunning = true;
+            playPauseBtn.innerHTML = '⏸️ Pausa';
+        }
+    }
+    playPauseBtn.addEventListener('click', toggleSimulation);
+    document.getElementById('btnStep').addEventListener('click', () => {
+        if (!simulationRunning) nextGeneration();
+        else nextGeneration(); // igual
+    });
+
+    // Inicializar
+    initWorld();
+    drawWorld();
+    startSimulation();
+
+    function startSimulation() {
+        if (!simulationInterval) {
+            simulationInterval = setInterval(() => nextGeneration(), 200);
+            simulationRunning = true;
+        }
+    }
+})();
 </script>
 </body>
 </html>
