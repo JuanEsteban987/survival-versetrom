@@ -3,800 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft RPG 2D P2P - Mundo Abierto</title>
+    <title>Mini WorldBox · Simulador de Dios</title>
     <style>
-        /* (Mismos estilos que antes, pero ajusto el ancho del contenedor para mundo más grande) */
         * {
             box-sizing: border-box;
             user-select: none;
         }
         body {
-            background: #1a1a1a;
+            background: #1a2a32;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 16px;
         }
         .game-container {
-            background: #2d2d2d;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            max-width: 1200px;
+            background: #2a3f4a;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.6);
+        }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 2px #1e2f38, 0 10px 15px -5px #0f1a1f;
         }
         canvas {
             display: block;
-            margin: 0 auto;
-            border: 3px solid #555;
-            border-radius: 5px;
-            background: #87CEEB;
+            width: 600px;
+            height: 600px;
+            background: #2d4d3a;
             cursor: crosshair;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
-        .panel {
-            margin-top: 15px;
+        .toolbar {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            color: #eee;
-            background: #3a3a3a;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #555;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
         }
-        .stats, .inventory, .connection {
-            flex: 1;
-            min-width: 200px;
-        }
-        .stats div, .inventory div {
-            margin: 5px 0;
-        }
-        .bar {
-            background: #444;
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 5px;
-            width: 100%;
-        }
-        .bar-fill {
-            height: 100%;
-            background: #4caf50;
-            width: 0%;
-        }
-        .exp-bar .bar-fill {
-            background: #ffd700;
-        }
-        #hotbar {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        .slot {
-            width: 50px;
-            height: 50px;
-            background: #555;
-            text-align: center;
-            line-height: 50px;
-            border-radius: 5px;
-            border: 2px solid #777;
+        button {
+            background: #3e5a66;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 20px;
             font-weight: bold;
+            font-size: 16px;
             color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 0 #1e2f38, 0 8px 12px rgba(0,0,0,0.4);
             cursor: pointer;
-            position: relative;
+            transition: 0.07s ease;
+            border: 1px solid #6b8b9c;
         }
-        .slot.selected {
-            border-color: #ffaa00;
-            box-shadow: 0 0 10px gold;
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #1e2f38, 0 5px 10px rgba(0,0,0,0.4);
         }
-        .slot span {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 12px;
-            background: rgba(0,0,0,0.7);
-            border-radius: 10px;
-            padding: 2px 5px;
-            line-height: 1;
+        .brush-indicator {
+            background: #263b45;
+            border-radius: 40px;
+            padding: 8px 18px;
+            color: #c3e2f0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: inset 0 2px 5px #0f1f27;
         }
-        button, input {
-            background: #555;
-            color: white;
-            border: 1px solid #777;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-family: inherit;
-            margin: 5px 0;
-            width: 100%;
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 24px;
+            border: 2px solid white;
         }
-        button:hover {
-            background: #666;
-            cursor: pointer;
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            background: #1f333c;
+            border-radius: 40px;
+            padding: 8px 20px;
+            color: #bcdae8;
+            font-weight: 500;
         }
-        input {
-            background: #333;
-        }
-        .status {
-            color: #ffaa00;
-            margin-top: 10px;
+        .footer-note {
+            color: #7f9faa;
+            text-align: center;
+            margin-top: 12px;
             font-size: 14px;
         }
-        h3 {
-            margin-top: 0;
-            color: #ffaa00;
-            border-bottom: 1px solid #555;
-            padding-bottom: 5px;
+        .btn-special {
+            background: #6a4e3a;
+            border-color: #b98f6b;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        
-        <div class="panel">
-            <div class="stats">
-                <h3>📊 Estadísticas</h3>
-                <div>❤️ Salud: <span id="health">100</span>/100</div>
-                <div class="bar"><div class="bar-fill" id="healthBar" style="width:100%"></div></div>
-                <div>⭐ Nivel: <span id="level">1</span></div>
-                <div>🔮 Experiencia: <span id="exp">0</span>/<span id="expNext">100</span></div>
-                <div class="bar exp-bar"><div class="bar-fill" id="expBar" style="width:0%"></div></div>
-            </div>
-            <div class="inventory">
-                <h3>🎒 Inventario</h3>
-                <div>Selecciona con teclas 1-5</div>
-                <div id="hotbar">
-                    <div class="slot selected" data-type="1">🌿<br><span id="count1">10</span></div>
-                    <div class="slot" data-type="2">🟫<br><span id="count2">10</span></div>
-                    <div class="slot" data-type="3">🪨<br><span id="count3">5</span></div>
-                    <div class="slot" data-type="4">⏳<br><span id="count4">0</span></div>
-                    <div class="slot" data-type="5">🪵<br><span id="count5">0</span></div>
-                </div>
-                <div style="margin-top:10px;">Click izq: romper | Click der: colocar</div>
-            </div>
-            <div class="connection">
-                <h3>🌐 Conexión P2P</h3>
-                <div>Tu ID: <strong id="peerId">generando...</strong></div>
-                <input type="text" id="remoteId" placeholder="ID del amigo">
-                <button id="connectBtn">🔌 Conectar</button>
-                <button id="hostBtn">🎮 Crear nueva sala</button>
-                <div class="status" id="connectionStatus">Desconectado</div>
-            </div>
+<div class="game-container">
+    <div class="canvas-wrapper">
+        <canvas id="worldCanvas" width="600" height="600"></canvas>
+    </div>
+
+    <div class="toolbar">
+        <button id="btnGrass" style="background:#5b8c5a;">🌿 Tierra</button>
+        <button id="btnTree" style="background:#2d6a4f;">🌲 Árbol</button>
+        <button id="btnWater" style="background:#2c7da0;">💧 Agua</button>
+        <button id="btnFire" style="background:#d45d2e;">🔥 Fuego</button>
+        <button id="btnEraser" style="background:#6b6b6b;">⌫ Borrar</button>
+        <button id="btnRandom" class="btn-special">🎲 Aleatorio</button>
+        <button id="btnClear" style="background:#4f5f6e;">🗑️ Limpiar</button>
+    </div>
+
+    <div class="toolbar">
+        <button id="btnPlayPause" style="background:#3f7e6b; min-width: 120px;">⏸️ Pausa</button>
+        <button id="btnStep" style="background:#5d6174;">⏩ Un paso</button>
+        <div class="brush-indicator">
+            <span>Pincel:</span>
+            <span id="brushName">Tierra</span>
+            <span class="color-dot" id="brushColor" style="background:#5b8c5a;"></span>
         </div>
     </div>
 
-    <script>
-        (function() {
-            // ---------- CONSTANTES ----------
-            const TILE_SIZE = 24; // Reducido para que quepa más mundo en el canvas
-            const WORLD_WIDTH = 100;
-            const WORLD_HEIGHT = 60;
-            const PLAYER_WIDTH = 18;
-            const PLAYER_HEIGHT = 18;
-            const PLAYER_SPEED = 3;
-            const REACH_DISTANCE = 4.0;
+    <div class="status-bar">
+        <span>🌳 <span id="treeCount">0</span></span>
+        <span>🔥 <span id="fireCount">0</span></span>
+        <span>💧 <span id="waterCount">0</span></span>
+        <span>🌿 <span id="grassCount">0</span></span>
+    </div>
+    <div class="footer-note">
+        ⚡ Click izquierdo: pintar · Click derecho: borrar · Los elementos interactúan
+    </div>
+</div>
 
-            // Tipos de bloques
-            const BLOCK = {
-                AIR: 0,
-                GRASS: 1,
-                DIRT: 2,
-                STONE: 3,
-                SAND: 4,
-                WOOD: 5,
-                LEAF: 6,
-                SNOW: 7,
-                COBBLE: 8,  // para mazmorras
-                WATER: 9,    // nuevo
-                GRAVEL: 10,  // nuevo
-                COAL_ORE: 11,
-                IRON_ORE: 12
-            };
+<script>
+    (function() {
+        // ---------- CONSTANTES Y CONFIG ----------
+        const GRID_SIZE = 40;              // 40x40 celdas
+        const CELL_SIZE = 15;               // píxeles por celda
+        const TYPES = {
+            VACIO: 0,
+            GRASS: 1,
+            TREE: 2,
+            WATER: 3,
+            FIRE: 4
+        };
+        const TYPE_NAMES = ['Vacío', 'Tierra', 'Árbol', 'Agua', 'Fuego'];
+        const TYPE_COLORS = [
+            '#3d5a4b',   // vacío / gris oscuro (fondo base)
+            '#5b8c5a',   // grass / tierra
+            '#2d6a4f',   // árbol
+            '#2c7da0',   // agua
+            '#d45d2e'    // fuego
+        ];
 
-            const BLOCK_PROPS = {
-                [BLOCK.AIR]:   { name: 'Aire', color: '#87CEEB', solid: false, exp: 0 },
-                [BLOCK.GRASS]: { name: 'Hierba', color: '#7CFC00', solid: true, exp: 10 },
-                [BLOCK.DIRT]:  { name: 'Tierra', color: '#8B4513', solid: true, exp: 12 },
-                [BLOCK.STONE]: { name: 'Piedra', color: '#808080', solid: true, exp: 15 },
-                [BLOCK.SAND]:  { name: 'Arena', color: '#F4E542', solid: true, exp: 8 },
-                [BLOCK.WOOD]:  { name: 'Madera', color: '#A0522D', solid: true, exp: 20 },
-                [BLOCK.LEAF]:  { name: 'Hoja', color: '#228B22', solid: true, exp: 5 },
-                [BLOCK.SNOW]:  { name: 'Nieve', color: '#FFFFFF', solid: true, exp: 6 },
-                [BLOCK.COBBLE]: { name: 'Roca', color: '#696969', solid: true, exp: 15 },
-                [BLOCK.WATER]: { name: 'Agua', color: '#1E90FF', solid: false, exp: 0 }, // no sólido, pero no se puede minar
-                [BLOCK.GRAVEL]: { name: 'Grava', color: '#A9A9A9', solid: true, exp: 10 },
-                [BLOCK.COAL_ORE]: { name: 'Carbón', color: '#2F2F2F', solid: true, exp: 30 },
-                [BLOCK.IRON_ORE]: { name: 'Hierro', color: '#B87333', solid: true, exp: 50 }
-            };
+        // ---------- ESTADO GLOBAL ----------
+        let grid = [];                     // matriz 2D [fila][col]
+        let selectedBrush = TYPES.GRASS;    // pincel inicial: tierra
+        let painting = false;               // si el mouse está presionando
+        let simulationInterval = null;
+        let simulationRunning = false;       // arranca pausado (lo ponemos en true tras init para que corra)
+        const canvas = document.getElementById('worldCanvas');
+        const ctx = canvas.getContext('2d');
 
-            // ---------- ESTADO GLOBAL ----------
-            let canvas, ctx;
-            let world = [];
-            let player = {
-                x: 0, y: 0,
-                w: PLAYER_WIDTH, h: PLAYER_HEIGHT,
-                health: 100,
-                maxHealth: 100,
-                level: 1,
-                exp: 0,
-                expToNext: 100,
-                inventory: {
-                    [BLOCK.GRASS]: 20,
-                    [BLOCK.DIRT]: 20,
-                    [BLOCK.STONE]: 10,
-                    [BLOCK.SAND]: 0,
-                    [BLOCK.WOOD]: 0,
-                    [BLOCK.LEAF]: 0,
-                    [BLOCK.SNOW]: 0,
-                    [BLOCK.GRAVEL]: 0,
-                    [BLOCK.COAL_ORE]: 0,
-                    [BLOCK.IRON_ORE]: 0
-                },
-                selectedSlot: 1
-            };
-            let remotePlayer = { x: 0, y: 0, exists: false };
-            let camera = { x: 0, y: 0 };
-            let keys = {};
-            let mouse = { x: 0, y: 0, tileX: 0, tileY: 0 };
+        // elementos UI
+        const brushNameSpan = document.getElementById('brushName');
+        const brushColorDiv = document.getElementById('brushColor');
+        const treeCountSpan = document.getElementById('treeCount');
+        const fireCountSpan = document.getElementById('fireCount');
+        const waterCountSpan = document.getElementById('waterCount');
+        const grassCountSpan = document.getElementById('grassCount');
+        const playPauseBtn = document.getElementById('btnPlayPause');
 
-            // PeerJS
-            let peer = null;
-            let conn = null;
-            let myPeerId = null;
-
-            // Elementos DOM
-            const peerIdSpan = document.getElementById('peerId');
-            const remoteIdInput = document.getElementById('remoteId');
-            const connectBtn = document.getElementById('connectBtn');
-            const hostBtn = document.getElementById('hostBtn');
-            const connectionStatus = document.getElementById('connectionStatus');
-            const healthSpan = document.getElementById('health');
-            const healthBar = document.getElementById('healthBar');
-            const levelSpan = document.getElementById('level');
-            const expSpan = document.getElementById('exp');
-            const expNextSpan = document.getElementById('expNext');
-            const expBar = document.getElementById('expBar');
-            const count1 = document.getElementById('count1');
-            const count2 = document.getElementById('count2');
-            const count3 = document.getElementById('count3');
-            const count4 = document.getElementById('count4');
-            const count5 = document.getElementById('count5');
-            const hotbarSlots = document.querySelectorAll('.slot');
-
-            // ---------- RUIDO PERLIN MEJORADO (para terreno 2D) ----------
-            function hash(i, j) {
-                let n = i + j * 57;
-                n = (n << 13) ^ n;
-                return ( (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff ) / 0x7fffffff;
-            }
-
-            function smoothNoise(x, y) {
-                let xi = Math.floor(x);
-                let yi = Math.floor(y);
-                let fx = x - xi;
-                let fy = y - yi;
-                let v00 = hash(xi, yi);
-                let v10 = hash(xi+1, yi);
-                let v01 = hash(xi, yi+1);
-                let v11 = hash(xi+1, yi+1);
-                let u = fx * fx * (3 - 2 * fx);
-                let v = fy * fy * (3 - 2 * fy);
-                return (v00 * (1-u) + v10 * u) * (1-v) + (v01 * (1-u) + v11 * u) * v;
-            }
-
-            function noise2(x, y, octaves=3, persistence=0.6) {
-                let total = 0;
-                let freq = 0.05;
-                let amp = 1;
-                let maxAmp = 0;
-                for (let i=0; i<octaves; i++) {
-                    total += smoothNoise(x * freq, y * freq) * amp;
-                    maxAmp += amp;
-                    amp *= persistence;
-                    freq *= 2;
-                }
-                return total / maxAmp; // rango 0..1
-            }
-
-            // ---------- GENERACIÓN DEL MUNDO RPG (totalmente irregular) ----------
-            function generateWorld() {
-                world = [];
-                // Inicializar todo a aire
-                for (let row = 0; row < WORLD_HEIGHT; row++) {
-                    world[row] = [];
-                    for (let col = 0; col < WORLD_WIDTH; col++) {
-                        world[row][col] = BLOCK.AIR;
+        // ---------- INICIALIZAR GRID (mundo) ----------
+        function initGrid() {
+            grid = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                const fila = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    // empezamos con tierra, algunos árboles y algo de agua
+                    let rand = Math.random();
+                    if (rand < 0.1) {
+                        fila.push(TYPES.WATER);
+                    } else if (rand < 0.25) {
+                        fila.push(TYPES.TREE);
+                    } else {
+                        fila.push(TYPES.GRASS);
                     }
                 }
+                grid.push(fila);
+            }
+        }
 
-                // Generar mapa de alturas y biomas usando ruido 2D
-                for (let col = 0; col < WORLD_WIDTH; col++) {
-                    for (let row = 0; row < WORLD_HEIGHT; row++) {
-                        // Usamos dos capas de ruido: una para terreno (elevación) y otra para bioma/humedad
-                        let elevation = noise2(col, row, 3, 0.6); // 0-1
-                        let moisture = noise2(col + 500, row + 500, 3, 0.5); // otro ruido para bioma
+        // ---------- DIBUJAR EL MUNDO ----------
+        function drawGrid() {
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const type = grid[row][col];
+                    ctx.fillStyle = TYPE_COLORS[type];
+                    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE-0.5, CELL_SIZE-0.5);
+                }
+            }
+            // pequeñas líneas de separación (opcional, da sensación de rejilla)
+            ctx.strokeStyle = '#1e3b2b';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= GRID_SIZE; i++) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#2b4a37';
+                ctx.lineWidth = 0.4;
+                ctx.moveTo(i * CELL_SIZE, 0);
+                ctx.lineTo(i * CELL_SIZE, canvas.height);
+                ctx.stroke();
+                ctx.moveTo(0, i * CELL_SIZE);
+                ctx.lineTo(canvas.width, i * CELL_SIZE);
+                ctx.stroke();
+            }
 
-                        // Mapeamos la elevación a un tipo de bloque
-                        // Umbrales: agua, arena, hierba, piedra, nieve
-                        if (elevation < 0.25) {
-                            world[row][col] = BLOCK.WATER;
-                        } else if (elevation < 0.3) {
-                            world[row][col] = BLOCK.SAND; // playa
-                        } else if (elevation < 0.5) {
-                            // Zona de hierba (depende de humedad)
-                            if (moisture < 0.3) world[row][col] = BLOCK.SAND; // desierto
-                            else if (moisture < 0.7) world[row][col] = BLOCK.GRASS; // bosque
-                            else world[row][col] = BLOCK.GRASS; // también hierba
-                        } else if (elevation < 0.75) {
-                            // Montaña baja: piedra con algo de tierra
-                            if (moisture > 0.6) world[row][col] = BLOCK.DIRT;
-                            else world[row][col] = BLOCK.STONE;
+            // actualizar contadores
+            updateCounts();
+        }
+
+        // ---------- CONTADORES ESTADÍSTICOS ----------
+        function updateCounts() {
+            let trees = 0, fires = 0, waters = 0, grasses = 0;
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const val = grid[row][col];
+                    if (val === TYPES.TREE) trees++;
+                    else if (val === TYPES.FIRE) fires++;
+                    else if (val === TYPES.WATER) waters++;
+                    else if (val === TYPES.GRASS) grasses++;
+                }
+            }
+            treeCountSpan.innerText = trees;
+            fireCountSpan.innerText = fires;
+            waterCountSpan.innerText = waters;
+            grassCountSpan.innerText = grasses;
+        }
+
+        // ---------- SIMULACIÓN (REGLAS) ----------
+        function nextGeneration() {
+            const newGrid = JSON.parse(JSON.stringify(grid)); // copia profunda
+
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const cell = grid[row][col];
+
+                    // Reglas para cada tipo (basadas en el grid actual)
+                    if (cell === TYPES.TREE) {
+                        // Si algún vecino es fuego, el árbol puede incendiarse
+                        if (hasNeighbor(row, col, TYPES.FIRE)) {
+                            if (Math.random() < 0.35) { // probabilidad de prender
+                                newGrid[row][col] = TYPES.FIRE;
+                            }
+                        }
+                    }
+                    else if (cell === TYPES.GRASS) {
+                        // El pasto puede incendiarse si hay fuego cerca
+                        if (hasNeighbor(row, col, TYPES.FIRE)) {
+                            if (Math.random() < 0.25) {
+                                newGrid[row][col] = TYPES.FIRE;
+                            }
+                        }
+                    }
+                    else if (cell === TYPES.FIRE) {
+                        // El fuego se apaga si toca agua, o se extingue solo aleatoriamente
+                        if (hasNeighbor(row, col, TYPES.WATER)) {
+                            newGrid[row][col] = TYPES.GRASS; // se apaga y deja tierra
+                        } else if (Math.random() < 0.1) {
+                            newGrid[row][col] = TYPES.GRASS; // se apaga solo
                         } else {
-                            // Alta montaña: piedra y nieve
-                            if (elevation > 0.9) world[row][col] = BLOCK.SNOW;
-                            else world[row][col] = BLOCK.STONE;
+                            // permanece fuego
+                            newGrid[row][col] = TYPES.FIRE;
                         }
                     }
+                    // Agua y vacío no cambian (por ahora)
                 }
-
-                // Añadir árboles en zonas de hierba (bosques)
-                for (let col = 2; col < WORLD_WIDTH-2; col++) {
-                    for (let row = 2; row < WORLD_HEIGHT-2; row++) {
-                        if (world[row][col] === BLOCK.GRASS && Math.random() < 0.02) {
-                            // Crear un árbol de 3-4 bloques de alto
-                            let treeHeight = 3 + Math.floor(Math.random() * 3);
-                            // Verificar espacio
-                            let spaceOk = true;
-                            for (let h = 1; h <= treeHeight+2; h++) {
-                                if (row - h < 0 || world[row - h][col] !== BLOCK.AIR) {
-                                    spaceOk = false;
-                                    break;
-                                }
-                            }
-                            if (spaceOk) {
-                                for (let h = 1; h <= treeHeight; h++) {
-                                    world[row - h][col] = BLOCK.WOOD;
-                                }
-                                // Hojas
-                                let leafY = row - treeHeight - 1;
-                                if (leafY >= 0) {
-                                    for (let dx = -2; dx <= 2; dx++) {
-                                        for (let dy = -2; dy <= 2; dy++) {
-                                            let nx = col + dx;
-                                            let ny = leafY + dy;
-                                            if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
-                                                if (world[ny][nx] === BLOCK.AIR && (Math.abs(dx) < 2 || Math.abs(dy) < 2)) {
-                                                    world[ny][nx] = BLOCK.LEAF;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Añadir minerales (vetas subterráneas)
-                for (let col = 0; col < WORLD_WIDTH; col++) {
-                    for (let row = 0; row < WORLD_HEIGHT; row++) {
-                        if (world[row][col] === BLOCK.STONE) {
-                            if (Math.random() < 0.02) {
-                                world[row][col] = BLOCK.COAL_ORE;
-                            } else if (Math.random() < 0.01) {
-                                world[row][col] = BLOCK.IRON_ORE;
-                            }
-                        }
-                    }
-                }
-
-                // Estructuras: Mazmorra (una cueva con cofre simulado)
-                placeDungeon();
-                // Aldea (pequeño asentamiento)
-                placeVillage();
             }
+            grid = newGrid;
+            drawGrid();
+        }
 
-            function placeDungeon() {
-                // Buscar una zona de piedra profunda
-                for (let attempt = 0; attempt < 50; attempt++) {
-                    let x = Math.floor(Math.random() * (WORLD_WIDTH - 10)) + 5;
-                    let y = Math.floor(Math.random() * (WORLD_HEIGHT - 20)) + 10;
-                    if (world[y][x] === BLOCK.STONE) {
-                        // Crear una habitación
-                        for (let dy = 0; dy < 5; dy++) {
-                            for (let dx = -3; dx <= 3; dx++) {
-                                let nx = x + dx;
-                                let ny = y + dy;
-                                if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
-                                    if (dy === 0 || dy === 4 || dx === -3 || dx === 3) {
-                                        if (world[ny][nx] !== BLOCK.AIR) {
-                                            world[ny][nx] = BLOCK.COBBLE; // paredes
-                                        }
-                                    } else {
-                                        world[ny][nx] = BLOCK.AIR; // interior
-                                    }
-                                }
-                            }
-                        }
-                        // Poner un cofre (simbólico, un bloque de madera)
-                        world[y+2][x] = BLOCK.WOOD;
-                        break;
+        // Util: comprueba si en las 8 celdas vecinas hay un tipo dado (o 4 direcciones? pondremos 8 para más interacción)
+        function hasNeighbor(row, col, type) {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = row + dr;
+                    const nc = col + dc;
+                    if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+                        if (grid[nr][nc] === type) return true;
                     }
                 }
             }
+            return false;
+        }
 
-            function placeVillage() {
-                // Buscar una pradera (hierba plana)
-                for (let attempt = 0; attempt < 50; attempt++) {
-                    let vx = Math.floor(Math.random() * (WORLD_WIDTH - 20)) + 10;
-                    let vy = Math.floor(Math.random() * (WORLD_HEIGHT - 10)) + 5;
-                    if (world[vy][vx] === BLOCK.GRASS && world[vy+1][vx] !== BLOCK.AIR) {
-                        // Construir 3 casas pequeñas
-                        for (let i = 0; i < 3; i++) {
-                            let hx = vx + i * 4;
-                            let hy = vy - 2;
-                            // Paredes
-                            for (let dx = 0; dx < 3; dx++) {
-                                for (let dy = 0; dy < 3; dy++) {
-                                    let nx = hx + dx;
-                                    let ny = hy + dy;
-                                    if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
-                                        if (dx === 0 || dx === 2 || dy === 0 || dy === 2) {
-                                            world[ny][nx] = BLOCK.WOOD;
-                                        } else {
-                                            world[ny][nx] = BLOCK.AIR; // interior
-                                        }
-                                    }
-                                }
-                            }
-                            // Techo
-                            world[hy-1][hx+1] = BLOCK.WOOD;
-                        }
-                        break;
-                    }
+        // ---------- CONTROL DE SIMULACIÓN ----------
+        function startSimulation() {
+            if (simulationInterval) return;
+            simulationRunning = true;
+            playPauseBtn.innerHTML = '⏸️ Pausa';
+            simulationInterval = setInterval(() => {
+                nextGeneration();
+            }, 150); // velocidad agradable
+        }
+
+        function stopSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            simulationRunning = false;
+            playPauseBtn.innerHTML = '▶️ Iniciar';
+        }
+
+        function toggleSimulation() {
+            if (simulationRunning) {
+                stopSimulation();
+            } else {
+                startSimulation();
+            }
+        }
+
+        // ---------- PINTAR CON MOUSE ----------
+        function getCellFromCoord(coord, maxIndex) {
+            return Math.floor(coord / CELL_SIZE);
+        }
+
+        function handlePaint(col, row, brush) {
+            if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) return;
+            grid[row][col] = brush;
+            drawGrid();
+        }
+
+        // Eventos de mouse
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            const col = getCellFromCoord(mouseX, GRID_SIZE);
+            const row = getCellFromCoord(mouseY, GRID_SIZE);
+
+            if (e.button === 0) { // izquierdo: pincel actual
+                painting = true;
+                handlePaint(col, row, selectedBrush);
+            } else if (e.button === 2) { // derecho: borrar (vacío)
+                painting = true;
+                handlePaint(col, row, TYPES.VACIO);
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!painting) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+            const col = getCellFromCoord(mouseX, GRID_SIZE);
+            const row = getCellFromCoord(mouseY, GRID_SIZE);
+
+            if (e.buttons === 1) { // izquierdo
+                handlePaint(col, row, selectedBrush);
+            } else if (e.buttons === 2) { // derecho
+                handlePaint(col, row, TYPES.VACIO);
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            painting = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            painting = false;
+        });
+
+        // Desactivar menú contextual en el canvas (para usar botón derecho)
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // ---------- BOTONES DE HERRAMIENTAS ----------
+        document.getElementById('btnGrass').addEventListener('click', () => {
+            selectedBrush = TYPES.GRASS;
+            brushNameSpan.innerText = 'Tierra';
+            brushColorDiv.style.background = TYPE_COLORS[TYPES.GRASS];
+        });
+        document.getElementById('btnTree').addEventListener('click', () => {
+            selectedBrush = TYPES.TREE;
+            brushNameSpan.innerText = 'Árbol';
+            brushColorDiv.style.background = TYPE_COLORS[TYPES.TREE];
+        });
+        document.getElementById('btnWater').addEventListener('click', () => {
+            selectedBrush = TYPES.WATER;
+            brushNameSpan.innerText = 'Agua';
+            brushColorDiv.style.background = TYPE_COLORS[TYPES.WATER];
+        });
+        document.getElementById('btnFire').addEventListener('click', () => {
+            selectedBrush = TYPES.FIRE;
+            brushNameSpan.innerText = 'Fuego';
+            brushColorDiv.style.background = TYPE_COLORS[TYPES.FIRE];
+        });
+        document.getElementById('btnEraser').addEventListener('click', () => {
+            selectedBrush = TYPES.VACIO;
+            brushNameSpan.innerText = 'Borrar';
+            brushColorDiv.style.background = TYPE_COLORS[TYPES.VACIO];
+        });
+
+        // Botón aleatorio: llena de tipos aleatorios con más vegetación
+        document.getElementById('btnRandom').addEventListener('click', () => {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const rand = Math.random();
+                    if (rand < 0.1) grid[r][c] = TYPES.WATER;
+                    else if (rand < 0.3) grid[r][c] = TYPES.TREE;
+                    else if (rand < 0.4) grid[r][c] = TYPES.FIRE;
+                    else grid[r][c] = TYPES.GRASS;
                 }
             }
+            drawGrid();
+        });
 
-            // ---------- UTILIDADES ----------
-            function tileToPixel(col, row) {
-                return { x: col * TILE_SIZE, y: row * TILE_SIZE };
-            }
-            function pixelToTile(px, py) {
-                return { col: Math.floor(px / TILE_SIZE), row: Math.floor(py / TILE_SIZE) };
-            }
-            function isSolidBlock(type) {
-                return BLOCK_PROPS[type]?.solid || false;
-            }
-            function getBlockAt(col, row) {
-                if (row < 0 || row >= WORLD_HEIGHT || col < 0 || col >= WORLD_WIDTH) return BLOCK.STONE;
-                return world[row][col];
-            }
-            function setBlockAt(col, row, type) {
-                if (row >= 0 && row < WORLD_HEIGHT && col >= 0 && col < WORLD_WIDTH) {
-                    world[row][col] = type;
+        // Botón limpiar: todo tierra (vacío no, para que no quede gris)
+        document.getElementById('btnClear').addEventListener('click', () => {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    grid[r][c] = TYPES.GRASS;
                 }
             }
+            drawGrid();
+        });
 
-            // ---------- COLISIONES ----------
-            function collidesWithWorld(rect) {
-                if (rect.x < 0 || rect.x + rect.w > WORLD_WIDTH * TILE_SIZE ||
-                    rect.y < 0 || rect.y + rect.h > WORLD_HEIGHT * TILE_SIZE) {
-                    return true;
-                }
-                const minCol = Math.floor(rect.x / TILE_SIZE);
-                const maxCol = Math.floor((rect.x + rect.w - 1) / TILE_SIZE);
-                const minRow = Math.floor(rect.y / TILE_SIZE);
-                const maxRow = Math.floor((rect.y + rect.h - 1) / TILE_SIZE);
-                for (let row = minRow; row <= maxRow; row++) {
-                    for (let col = minCol; col <= maxCol; col++) {
-                        if (row >= 0 && row < WORLD_HEIGHT && col >= 0 && col < WORLD_WIDTH) {
-                            if (isSolidBlock(world[row][col])) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
+        // Botón play/pausa
+        playPauseBtn.addEventListener('click', toggleSimulation);
+
+        // Botón paso a paso (avanza una generación aunque esté pausado)
+        document.getElementById('btnStep').addEventListener('click', () => {
+            if (simulationRunning) {
+                // si está corriendo, no interrumpimos, pero ejecutamos un extra
+                nextGeneration();
+            } else {
+                nextGeneration();
             }
+        });
 
-            // ---------- MOVIMIENTO ----------
-            function movePlayer() {
-                let dx = 0, dy = 0;
-                if (keys['KeyW']) dy -= 1;
-                if (keys['KeyS']) dy += 1;
-                if (keys['KeyA']) dx -= 1;
-                if (keys['KeyD']) dx += 1;
-                if (dx === 0 && dy === 0) return false;
-                const len = Math.sqrt(dx*dx + dy*dy);
-                dx = (dx / len) * PLAYER_SPEED;
-                dy = (dy / len) * PLAYER_SPEED;
+        // ---------- INICIALIZAR TODO Y EMPEZAR SIMULACIÓN ----------
+        initGrid();
+        drawGrid();
+        // Iniciamos la simulación automáticamente (como en WorldBox)
+        startSimulation();
 
-                let newX = player.x + dx;
-                let newY = player.y;
-                let rect = { x: newX, y: newY, w: player.w, h: player.h };
-                if (!collidesWithWorld(rect)) player.x = newX;
-
-                newX = player.x;
-                newY = player.y + dy;
-                rect = { x: newX, y: newY, w: player.w, h: player.h };
-                if (!collidesWithWorld(rect)) player.y = newY;
-
-                return true;
-            }
-
-            function updateCamera() {
-                camera.x = player.x - canvas.width/2 + player.w/2;
-                camera.y = player.y - canvas.height/2 + player.h/2;
-                camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH * TILE_SIZE - canvas.width));
-                camera.y = Math.max(0, Math.min(camera.y, WORLD_HEIGHT * TILE_SIZE - canvas.height));
-            }
-
-            // ---------- DIBUJADO ----------
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const startCol = Math.floor(camera.x / TILE_SIZE);
-                const startRow = Math.floor(camera.y / TILE_SIZE);
-                const endCol = Math.ceil((camera.x + canvas.width) / TILE_SIZE);
-                const endRow = Math.ceil((camera.y + canvas.height) / TILE_SIZE);
-                
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startCol; col <= endCol; col++) {
-                        if (row < 0 || row >= WORLD_HEIGHT || col < 0 || col >= WORLD_WIDTH) continue;
-                        const type = world[row][col];
-                        const { x, y } = tileToPixel(col, row);
-                        ctx.fillStyle = BLOCK_PROPS[type].color;
-                        ctx.fillRect(x - camera.x, y - camera.y, TILE_SIZE-1, TILE_SIZE-1);
-                        ctx.strokeStyle = '#333';
-                        ctx.strokeRect(x - camera.x, y - camera.y, TILE_SIZE, TILE_SIZE);
-                    }
-                }
-
-                if (remotePlayer.exists) {
-                    ctx.fillStyle = '#FF5555';
-                    ctx.fillRect(remotePlayer.x - camera.x, remotePlayer.y - camera.y, player.w, player.h);
-                    ctx.strokeStyle = '#FFF';
-                    ctx.strokeRect(remotePlayer.x - camera.x, remotePlayer.y - camera.y, player.w, player.h);
-                }
-
-                ctx.fillStyle = '#55FF55';
-                ctx.fillRect(player.x - camera.x, player.y - camera.y, player.w, player.h);
-                ctx.strokeStyle = '#FFF';
-                ctx.strokeRect(player.x - camera.x, player.y - camera.y, player.w, player.h);
-
-                const mouseTile = pixelToTile(mouse.x + camera.x, mouse.y + camera.y);
-                const dist = Math.sqrt(Math.pow(player.x - (mouseTile.col * TILE_SIZE + TILE_SIZE/2), 2) + 
-                                      Math.pow(player.y - (mouseTile.row * TILE_SIZE + TILE_SIZE/2), 2)) / TILE_SIZE;
-                if (dist <= REACH_DISTANCE) {
-                    ctx.strokeStyle = '#FFF';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(mouseTile.col * TILE_SIZE - camera.x, mouseTile.row * TILE_SIZE - camera.y, TILE_SIZE, TILE_SIZE);
-                }
-            }
-
-            // ---------- ACCIONES ----------
-            function breakBlock(col, row) {
-                if (row < 0 || row >= WORLD_HEIGHT || col < 0 || col >= WORLD_WIDTH) return false;
-                const blockType = world[row][col];
-                if (blockType === BLOCK.AIR || blockType === BLOCK.WATER) return false;
-
-                player.inventory[blockType] = (player.inventory[blockType] || 0) + 1;
-                player.exp += BLOCK_PROPS[blockType].exp;
-                checkLevelUp();
-                setBlockAt(col, row, BLOCK.AIR);
-                if (conn && conn.open) conn.send({ type: 'blockBreak', col, row, newType: BLOCK.AIR });
-                updateInventoryUI();
-                return true;
-            }
-
-            function placeBlock(col, row) {
-                if (row < 0 || row >= WORLD_HEIGHT || col < 0 || col >= WORLD_WIDTH) return false;
-                if (world[row][col] !== BLOCK.AIR) return false;
-
-                let blockType = BLOCK.GRASS;
-                if (player.selectedSlot === 2) blockType = BLOCK.DIRT;
-                else if (player.selectedSlot === 3) blockType = BLOCK.STONE;
-                else if (player.selectedSlot === 4) blockType = BLOCK.SAND;
-                else if (player.selectedSlot === 5) blockType = BLOCK.WOOD;
-
-                if (player.inventory[blockType] <= 0) return false;
-                setBlockAt(col, row, blockType);
-                player.inventory[blockType]--;
-                if (conn && conn.open) conn.send({ type: 'blockPlace', col, row, blockType });
-                updateInventoryUI();
-                return true;
-            }
-
-            function checkLevelUp() {
-                while (player.exp >= player.expToNext) {
-                    player.exp -= player.expToNext;
-                    player.level++;
-                    player.expToNext = Math.floor(player.expToNext * 1.5);
-                    player.maxHealth += 20;
-                    player.health = player.maxHealth;
-                }
-                updateStatsUI();
-            }
-
-            // ---------- INTERFAZ ----------
-            function updateStatsUI() {
-                healthSpan.textContent = player.health;
-                healthBar.style.width = (player.health / player.maxHealth * 100) + '%';
-                levelSpan.textContent = player.level;
-                expSpan.textContent = player.exp;
-                expNextSpan.textContent = player.expToNext;
-                expBar.style.width = (player.exp / player.expToNext * 100) + '%';
-            }
-
-            function updateInventoryUI() {
-                count1.textContent = player.inventory[BLOCK.GRASS] || 0;
-                count2.textContent = player.inventory[BLOCK.DIRT] || 0;
-                count3.textContent = player.inventory[BLOCK.STONE] || 0;
-                count4.textContent = player.inventory[BLOCK.SAND] || 0;
-                count5.textContent = player.inventory[BLOCK.WOOD] || 0;
-            }
-
-            // ---------- EVENTOS RATÓN ----------
-            function handleMouseMove(e) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                mouse.x = (e.clientX - rect.left) * scaleX;
-                mouse.y = (e.clientY - rect.top) * scaleY;
-                const tile = pixelToTile(mouse.x + camera.x, mouse.y + camera.y);
-                mouse.tileX = tile.col;
-                mouse.tileY = tile.row;
-            }
-
-            function handleMouseDown(e) {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const mouseCanvasX = (e.clientX - rect.left) * scaleX;
-                const mouseCanvasY = (e.clientY - rect.top) * scaleY;
-                const tile = pixelToTile(mouseCanvasX + camera.x, mouseCanvasY + camera.y);
-                const col = tile.col, row = tile.row;
-
-                const dist = Math.sqrt(Math.pow(player.x - (col * TILE_SIZE + TILE_SIZE/2), 2) + 
-                                      Math.pow(player.y - (row * TILE_SIZE + TILE_SIZE/2), 2)) / TILE_SIZE;
-                if (dist > REACH_DISTANCE) return;
-
-                if (e.button === 0) breakBlock(col, row);
-                else if (e.button === 2) placeBlock(col, row);
-            }
-
-            // ---------- PEERJS ----------
-            function initPeer() {
-                peer = new Peer();
-                peer.on('open', (id) => {
-                    myPeerId = id;
-                    peerIdSpan.textContent = id;
-                    connectionStatus.textContent = 'Esperando conexión...';
-                });
-                peer.on('connection', (incomingConn) => {
-                    if (conn) { incomingConn.close(); return; }
-                    conn = incomingConn;
-                    setupConnection();
-                });
-                peer.on('error', (err) => {
-                    console.error('Peer error:', err);
-                    connectionStatus.textContent = 'Error: ' + err.type;
-                });
-            }
-
-            function setupConnection() {
-                conn.on('open', () => {
-                    connectionStatus.textContent = 'Conectado a ' + conn.peer;
-                    remotePlayer.exists = true;
-                });
-                conn.on('data', (data) => {
-                    if (data.type === 'move') {
-                        remotePlayer.x = data.x;
-                        remotePlayer.y = data.y;
-                        remotePlayer.exists = true;
-                    } else if (data.type === 'blockBreak') {
-                        setBlockAt(data.col, data.row, data.newType);
-                    } else if (data.type === 'blockPlace') {
-                        setBlockAt(data.col, data.row, data.blockType);
-                    }
-                });
-                conn.on('close', () => {
-                    connectionStatus.textContent = 'Desconectado';
-                    remotePlayer.exists = false;
-                    conn = null;
-                });
-            }
-
-            function connectToPeer(remoteId) {
-                if (!peer) return;
-                if (conn) { conn.close(); conn = null; }
-                conn = peer.connect(remoteId);
-                setupConnection();
-            }
-
-            let lastSentPos = { x: 0, y: 0 };
-            function sendPositionIfChanged() {
-                if (!conn || !conn.open) return;
-                if (Math.abs(player.x - lastSentPos.x) > 1 || Math.abs(player.y - lastSentPos.y) > 1) {
-                    conn.send({ type: 'move', x: player.x, y: player.y });
-                    lastSentPos = { x: player.x, y: player.y };
-                }
-            }
-
-            // ---------- BUCLE PRINCIPAL ----------
-            function gameLoop() {
-                movePlayer();
-                updateCamera();
-                sendPositionIfChanged();
-                draw();
-                requestAnimationFrame(gameLoop);
-            }
-
-            // ---------- INICIALIZACIÓN ----------
-            window.onload = () => {
-                canvas = document.getElementById('gameCanvas');
-                ctx = canvas.getContext('2d');
-                generateWorld();
-
-                // Colocar al jugador en una zona segura (sobre hierba)
-                let spawnFound = false;
-                for (let row = 0; row < WORLD_HEIGHT-5; row++) {
-                    for (let col = 10; col < WORLD_WIDTH-10; col++) {
-                        if (world[row][col] === BLOCK.GRASS && world[row-1][col] === BLOCK.AIR) {
-                            player.x = col * TILE_SIZE;
-                            player.y = (row-1) * TILE_SIZE;
-                            spawnFound = true;
-                            break;
-                        }
-                    }
-                    if (spawnFound) break;
-                }
-                if (!spawnFound) {
-                    player.x = 50 * TILE_SIZE;
-                    player.y = 30 * TILE_SIZE;
-                }
-
-                // Eventos
-                window.addEventListener('keydown', (e) => { keys[e.code] = true; });
-                window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-                canvas.addEventListener('mousemove', handleMouseMove);
-                canvas.addEventListener('mousedown', handleMouseDown);
-                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-                window.addEventListener('keydown', (e) => {
-                    if (e.code === 'Digit1') { player.selectedSlot = 1; updateHotbarSelection(); }
-                    if (e.code === 'Digit2') { player.selectedSlot = 2; updateHotbarSelection(); }
-                    if (e.code === 'Digit3') { player.selectedSlot = 3; updateHotbarSelection(); }
-                    if (e.code === 'Digit4') { player.selectedSlot = 4; updateHotbarSelection(); }
-                    if (e.code === 'Digit5') { player.selectedSlot = 5; updateHotbarSelection(); }
-                });
-
-                function updateHotbarSelection() {
-                    hotbarSlots.forEach((slot, idx) => {
-                        if (idx + 1 === player.selectedSlot) slot.classList.add('selected');
-                        else slot.classList.remove('selected');
-                    });
-                }
-
-                connectBtn.addEventListener('click', () => {
-                    const remoteId = remoteIdInput.value.trim();
-                    if (remoteId) connectToPeer(remoteId);
-                });
-                hostBtn.addEventListener('click', () => {
-                    if (peer) peer.destroy();
-                    initPeer();
-                });
-
-                initPeer();
-                updateStatsUI();
-                updateInventoryUI();
-                gameLoop();
-            };
-        })();
-    </script>
+        // Ajustar nombre del pincel inicial
+        brushNameSpan.innerText = 'Tierra';
+        brushColorDiv.style.background = TYPE_COLORS[TYPES.GRASS];
+    })();
+</script>
 </body>
 </html>
