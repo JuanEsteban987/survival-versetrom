@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft RPG 2D P2P</title>
+    <title>Minecraft RPG 2D P2P - Biomas y Estructuras</title>
     <style>
         * {
             box-sizing: border-box;
@@ -67,12 +67,15 @@
         .exp-bar .bar-fill {
             background: #ffd700;
         }
+        #hotbar {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
         .slot {
-            display: inline-block;
             width: 50px;
             height: 50px;
             background: #555;
-            margin-right: 5px;
             text-align: center;
             line-height: 50px;
             border-radius: 5px;
@@ -80,18 +83,21 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
+            position: relative;
         }
         .slot.selected {
             border-color: #ffaa00;
             box-shadow: 0 0 10px gold;
         }
         .slot span {
-            display: block;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
             font-size: 12px;
-            margin-top: -15px;
             background: rgba(0,0,0,0.7);
             border-radius: 10px;
-            padding: 2px;
+            padding: 2px 5px;
+            line-height: 1;
         }
         button, input {
             background: #555;
@@ -139,11 +145,13 @@
             </div>
             <div class="inventory">
                 <h3>🎒 Inventario</h3>
-                <div>Selecciona con teclas 1-3</div>
+                <div>Selecciona con teclas 1-5</div>
                 <div id="hotbar">
                     <div class="slot selected" data-type="1">🌿<br><span id="count1">10</span></div>
                     <div class="slot" data-type="2">🟫<br><span id="count2">10</span></div>
                     <div class="slot" data-type="3">🪨<br><span id="count3">5</span></div>
+                    <div class="slot" data-type="4">⏳<br><span id="count4">0</span></div>
+                    <div class="slot" data-type="5">🪵<br><span id="count5">0</span></div>
                 </div>
                 <div style="margin-top:10px;">Click izq: romper | Click der: colocar</div>
             </div>
@@ -162,26 +170,36 @@
         (function() {
             // ---------- CONSTANTES ----------
             const TILE_SIZE = 32;
-            const WORLD_WIDTH = 20;
-            const WORLD_HEIGHT = 20;
+            const WORLD_WIDTH = 40;  // Aumentamos el mundo para que quepan biomas y estructuras
+            const WORLD_HEIGHT = 30;
             const PLAYER_WIDTH = 24;
             const PLAYER_HEIGHT = 24;
             const PLAYER_SPEED = 3;
-            const REACH_DISTANCE = 2.5; // tiles
+            const REACH_DISTANCE = 3.5; // tiles
 
-            // Tipos de bloques
+            // Tipos de bloques (ampliados)
             const BLOCK = {
                 AIR: 0,
                 GRASS: 1,
                 DIRT: 2,
-                STONE: 3
+                STONE: 3,
+                SAND: 4,
+                WOOD: 5,
+                LEAF: 6,
+                SNOW: 7,
+                COBBLE: 8  // para mazmorras, similar a stone pero lo trataremos igual
             };
 
             const BLOCK_PROPS = {
                 [BLOCK.AIR]:   { name: 'Aire', color: '#87CEEB', solid: false, exp: 0 },
                 [BLOCK.GRASS]: { name: 'Hierba', color: '#7CFC00', solid: true, exp: 10 },
                 [BLOCK.DIRT]:  { name: 'Tierra', color: '#8B4513', solid: true, exp: 12 },
-                [BLOCK.STONE]: { name: 'Piedra', color: '#808080', solid: true, exp: 15 }
+                [BLOCK.STONE]: { name: 'Piedra', color: '#808080', solid: true, exp: 15 },
+                [BLOCK.SAND]:  { name: 'Arena', color: '#F4E542', solid: true, exp: 8 },
+                [BLOCK.WOOD]:  { name: 'Madera', color: '#A0522D', solid: true, exp: 20 },
+                [BLOCK.LEAF]:  { name: 'Hoja', color: '#228B22', solid: true, exp: 5 },
+                [BLOCK.SNOW]:  { name: 'Nieve', color: '#FFFFFF', solid: true, exp: 6 },
+                [BLOCK.COBBLE]: { name: 'Roca', color: '#696969', solid: true, exp: 15 }
             };
 
             // ---------- ESTADO GLOBAL ----------
@@ -198,9 +216,13 @@
                 inventory: {
                     [BLOCK.GRASS]: 10,
                     [BLOCK.DIRT]: 10,
-                    [BLOCK.STONE]: 5
+                    [BLOCK.STONE]: 5,
+                    [BLOCK.SAND]: 0,
+                    [BLOCK.WOOD]: 0,
+                    [BLOCK.LEAF]: 0,
+                    [BLOCK.SNOW]: 0
                 },
-                selectedSlot: 1  // 1: grass, 2: dirt, 3: stone
+                selectedSlot: 1  // 1: grass, 2: dirt, 3: stone, 4: sand, 5: wood
             };
             let remotePlayer = {
                 x: 0, y: 0,
@@ -232,24 +254,209 @@
             const count1 = document.getElementById('count1');
             const count2 = document.getElementById('count2');
             const count3 = document.getElementById('count3');
+            const count4 = document.getElementById('count4');
+            const count5 = document.getElementById('count5');
             const hotbarSlots = document.querySelectorAll('.slot');
 
-            // ---------- INICIALIZAR MUNDO ----------
+            // ---------- RUIDO PERLIN SIMPLE (Value Noise) ----------
+            function hash(i, j) {
+                let n = i + j * 57;
+                n = (n << 13) ^ n;
+                return ( (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff ) / 0x7fffffff;
+            }
+
+            function smoothNoise(x, y) {
+                let xi = Math.floor(x);
+                let yi = Math.floor(y);
+                let fx = x - xi;
+                let fy = y - yi;
+                let v00 = hash(xi, yi);
+                let v10 = hash(xi+1, yi);
+                let v01 = hash(xi, yi+1);
+                let v11 = hash(xi+1, yi+1);
+                // Interpolación cúbica (suavizado)
+                let u = fx * fx * (3 - 2 * fx);
+                let v = fy * fy * (3 - 2 * fy);
+                return (v00 * (1-u) + v10 * u) * (1-v) + (v01 * (1-u) + v11 * u) * v;
+            }
+
+            function noise2(x, y, octaves=2, persistence=0.5) {
+                let total = 0;
+                let freq = 1;
+                let amp = 1;
+                let maxAmp = 0;
+                for (let i=0; i<octaves; i++) {
+                    total += smoothNoise(x * freq, y * freq) * amp;
+                    maxAmp += amp;
+                    amp *= persistence;
+                    freq *= 2;
+                }
+                return total / maxAmp;
+            }
+
+            // ---------- GENERACIÓN DEL MUNDO CON BIOMAS Y ESTRUCTURAS ----------
             function generateWorld() {
                 world = [];
+                // Inicializar mundo vacío (todo aire)
                 for (let row = 0; row < WORLD_HEIGHT; row++) {
                     world[row] = [];
                     for (let col = 0; col < WORLD_WIDTH; col++) {
-                        if (row < 5) world[row][col] = BLOCK.AIR;  // cielo
-                        else if (row === 5) world[row][col] = BLOCK.GRASS;  // capa hierba
-                        else if (row < 9) world[row][col] = BLOCK.DIRT;   // tierra
-                        else world[row][col] = BLOCK.STONE;      // piedra
+                        world[row][col] = BLOCK.AIR;
                     }
                 }
-                // Añadir algunas variaciones
-                world[7][5] = BLOCK.STONE;
-                world[7][6] = BLOCK.STONE;
-                world[6][10] = BLOCK.GRASS;
+
+                // Generar altura y biomas
+                for (let col = 0; col < WORLD_WIDTH; col++) {
+                    // Ruido para altura (dos octavas)
+                    let nx = col / 15; // frecuencia
+                    let heightVal = noise2(nx, 0, 2, 0.7); // entre 0 y 1
+                    // Ruido para humedad (define bioma)
+                    let moisture = noise2(nx + 100, 0.5, 2, 0.5);
+
+                    // Determinar bioma
+                    let bioma;
+                    if (moisture < 0.3) bioma = 'desierto';
+                    else if (moisture < 0.7) bioma = 'bosque';
+                    else bioma = 'montaña';
+
+                    // Mapear altura a filas (0 = arriba, WORLD_HEIGHT-1 = abajo)
+                    // Altura base: 0-1 -> filas desde 10 hasta 25 (para que haya variedad)
+                    let baseRow = Math.floor(10 + heightVal * 15);
+                    baseRow = Math.min(WORLD_HEIGHT-5, Math.max(5, baseRow));
+
+                    // Rellenar columna según bioma
+                    for (let row = 0; row < WORLD_HEIGHT; row++) {
+                        if (row > baseRow) {
+                            // Capas subterráneas
+                            if (row > baseRow + 3) world[row][col] = BLOCK.STONE;
+                            else if (row > baseRow) world[row][col] = BLOCK.DIRT;
+                        } else if (row === baseRow) {
+                            // Superficie según bioma
+                            if (bioma === 'desierto') world[row][col] = BLOCK.SAND;
+                            else if (bioma === 'bosque') world[row][col] = BLOCK.GRASS;
+                            else if (bioma === 'montaña') {
+                                if (heightVal > 0.8) world[row][col] = BLOCK.SNOW;
+                                else world[row][col] = BLOCK.STONE;
+                            }
+                        } else {
+                            // Aire arriba
+                            world[row][col] = BLOCK.AIR;
+                        }
+                    }
+
+                    // Añadir árboles en bosque (solo si superficie es hierba y con probabilidad)
+                    if (bioma === 'bosque' && world[baseRow][col] === BLOCK.GRASS) {
+                        if (Math.random() < 0.2) { // 20% de probabilidad
+                            // Árbol simple: tronco de madera de 3-4 bloques, hojas encima
+                            let treeHeight = 3 + Math.floor(Math.random() * 2); // 3 o 4
+                            for (let h = 1; h <= treeHeight; h++) {
+                                if (baseRow - h >= 0) {
+                                    world[baseRow - h][col] = BLOCK.WOOD;
+                                }
+                            }
+                            // Hojas en la copa
+                            let leafRow = baseRow - treeHeight - 1;
+                            if (leafRow >= 0) {
+                                for (dx = -1; dx <= 1; dx++) {
+                                    for (dy = -1; dy <= 1; dy++) {
+                                        let nx = col + dx;
+                                        let ny = leafRow + dy;
+                                        if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
+                                            if (world[ny][nx] === BLOCK.AIR) {
+                                                world[ny][nx] = BLOCK.LEAF;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Añadir estructuras: aldea y mazmorra
+                placeVillage();
+                placeDungeon();
+            }
+
+            function placeVillage() {
+                // Buscar una zona plana en bioma bosque (varios bloques de hierba seguidos)
+                let villageX = -1;
+                for (let col = 5; col < WORLD_WIDTH-10; col++) {
+                    let baseRow = getSurfaceRow(col);
+                    if (baseRow === -1) continue;
+                    // Comprobar que los 5 bloques a la derecha también son hierba y superficie plana
+                    let flat = true;
+                    for (let offset = 0; offset < 5; offset++) {
+                        let r = getSurfaceRow(col + offset);
+                        if (r !== baseRow || world[baseRow][col+offset] !== BLOCK.GRASS) {
+                            flat = false;
+                            break;
+                        }
+                    }
+                    if (flat) {
+                        villageX = col;
+                        break;
+                    }
+                }
+                if (villageX === -1) return; // No se encontró sitio
+
+                let baseY = getSurfaceRow(villageX);
+                // Construir 3 casitas simples
+                for (let i = 0; i < 3; i++) {
+                    let startX = villageX + i * 4;
+                    if (startX + 4 >= WORLD_WIDTH) break;
+                    // Paredes de madera
+                    for (let x = startX; x < startX+3; x++) {
+                        for (let y = baseY-2; y <= baseY; y++) {
+                            if (y < 0 || y >= WORLD_HEIGHT) continue;
+                            if (y === baseY-2 || y === baseY || x === startX || x === startX+2) {
+                                if (world[y][x] === BLOCK.AIR || y === baseY) {
+                                    world[y][x] = BLOCK.WOOD;
+                                }
+                            }
+                        }
+                    }
+                    // Techo (simple)
+                    world[baseY-3][startX+1] = BLOCK.WOOD;
+                }
+            }
+
+            function placeDungeon() {
+                // Mazmorra subterránea en zona montañosa
+                // Buscar una columna con piedra cerca de la superficie
+                for (let attempt = 0; attempt < 50; attempt++) {
+                    let col = Math.floor(Math.random() * WORLD_WIDTH);
+                    let baseRow = getSurfaceRow(col);
+                    if (baseRow === -1) continue;
+                    // Debe haber piedra debajo
+                    if (world[baseRow+2][col] === BLOCK.STONE) {
+                        // Excavar una habitación
+                        let roomX = col;
+                        let roomY = baseRow + 3;
+                        if (roomY+3 >= WORLD_HEIGHT) continue;
+                        for (let dy = 0; dy < 3; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                let x = roomX + dx;
+                                let y = roomY + dy;
+                                if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+                                    world[y][x] = BLOCK.AIR; // vacío
+                                }
+                            }
+                        }
+                        // Paredes de piedra (opcional, ya lo es)
+                        // Añadir un cofre simulado con un bloque diferente? No, por simplicidad lo dejamos así.
+                        break;
+                    }
+                }
+            }
+
+            function getSurfaceRow(col) {
+                for (let row = 0; row < WORLD_HEIGHT; row++) {
+                    if (world[row][col] !== BLOCK.AIR) {
+                        return row;
+                    }
+                }
+                return -1;
             }
 
             // ---------- UTILIDADES ----------
@@ -283,7 +490,6 @@
                     rect.y < 0 || rect.y + rect.h > WORLD_HEIGHT * TILE_SIZE) {
                     return true;
                 }
-                // Colisión con bloques sólidos
                 const minCol = Math.floor(rect.x / TILE_SIZE);
                 const maxCol = Math.floor((rect.x + rect.w - 1) / TILE_SIZE);
                 const minRow = Math.floor(rect.y / TILE_SIZE);
@@ -342,7 +548,6 @@
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                // Dibujar mundo
                 const startCol = Math.floor(camera.x / TILE_SIZE);
                 const startRow = Math.floor(camera.y / TILE_SIZE);
                 const endCol = Math.ceil((camera.x + canvas.width) / TILE_SIZE);
@@ -423,6 +628,8 @@
                 let blockType = BLOCK.GRASS;
                 if (player.selectedSlot === 2) blockType = BLOCK.DIRT;
                 else if (player.selectedSlot === 3) blockType = BLOCK.STONE;
+                else if (player.selectedSlot === 4) blockType = BLOCK.SAND;
+                else if (player.selectedSlot === 5) blockType = BLOCK.WOOD;
 
                 if (player.inventory[blockType] <= 0) return false; // Sin bloques
 
@@ -469,6 +676,8 @@
                 count1.textContent = player.inventory[BLOCK.GRASS] || 0;
                 count2.textContent = player.inventory[BLOCK.DIRT] || 0;
                 count3.textContent = player.inventory[BLOCK.STONE] || 0;
+                count4.textContent = player.inventory[BLOCK.SAND] || 0;
+                count5.textContent = player.inventory[BLOCK.WOOD] || 0;
             }
 
             // ---------- EVENTOS DE RATÓN ----------
@@ -493,7 +702,6 @@
                 const tile = pixelToTile(mouseCanvasX + camera.x, mouseCanvasY + camera.y);
                 const col = tile.col, row = tile.row;
 
-                // Comprobar distancia
                 const dist = Math.sqrt(Math.pow(player.x - (col * TILE_SIZE + TILE_SIZE/2), 2) + 
                                       Math.pow(player.y - (row * TILE_SIZE + TILE_SIZE/2), 2)) / TILE_SIZE;
                 if (dist > REACH_DISTANCE) return;
@@ -533,7 +741,6 @@
                     remotePlayer.exists = true;
                 });
                 conn.on('data', (data) => {
-                    // Recibir mensajes
                     if (data.type === 'move') {
                         remotePlayer.x = data.x;
                         remotePlayer.y = data.y;
@@ -590,6 +797,18 @@
                 ctx = canvas.getContext('2d');
                 generateWorld();
                 
+                // Posicionar al jugador en un lugar seguro (sobre la superficie)
+                let spawnX = 10 * TILE_SIZE;
+                let spawnY = 0;
+                for (let row = 0; row < WORLD_HEIGHT; row++) {
+                    if (world[row][10] !== BLOCK.AIR) {
+                        spawnY = (row - 1) * TILE_SIZE;
+                        break;
+                    }
+                }
+                player.x = spawnX;
+                player.y = spawnY;
+
                 // Eventos
                 window.addEventListener('keydown', (e) => { keys[e.code] = true; });
                 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
@@ -597,11 +816,13 @@
                 canvas.addEventListener('mousedown', handleMouseDown);
                 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-                // Hotbar selección con teclas 1-3
+                // Hotbar selección con teclas 1-5
                 window.addEventListener('keydown', (e) => {
                     if (e.code === 'Digit1') { player.selectedSlot = 1; updateHotbarSelection(); }
                     if (e.code === 'Digit2') { player.selectedSlot = 2; updateHotbarSelection(); }
                     if (e.code === 'Digit3') { player.selectedSlot = 3; updateHotbarSelection(); }
+                    if (e.code === 'Digit4') { player.selectedSlot = 4; updateHotbarSelection(); }
+                    if (e.code === 'Digit5') { player.selectedSlot = 5; updateHotbarSelection(); }
                 });
 
                 function updateHotbarSelection() {
