@@ -2,74 +2,114 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Spore Lite - Editor de Criaturas</title>
+    <title>Spore HTML5 - Evolución Activa</title>
     <style>
-        body { background: #1a1a2e; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: radial-gradient(circle, #16213e 0%, #0f3460 100%); border: 2px solid #4ecca3; border-radius: 10px; cursor: crosshair; }
-        .controls { margin-top: 20px; background: #0f3460; padding: 15px; border-radius: 8px; display: flex; gap: 10px; }
-        button { background: #4ecca3; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #45b293; }
-        p { color: #95a5a6; }
+        body { background: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; overflow: hidden; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 10px; border: 1px solid #334155; pointer-events: none; }
+        #shop { position: absolute; bottom: 20px; display: flex; gap: 10px; background: #1e293b; padding: 15px; border-radius: 12px; }
+        canvas { display: block; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); }
+        button { background: #38bdf8; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #0f172a; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+        .stat { font-size: 1.2rem; margin-bottom: 5px; color: #fbbf24; }
     </style>
 </head>
 <body>
 
-    <h1>Editor de Micro-Especie</h1>
-    <canvas id="gameCanvas" width="800" height="500"></canvas>
-
-    <div class="controls">
-        <button onclick="addPart('eye')">Añadir Ojo</button>
-        <button onclick="addPart('fin')">Añadir Aleta (Velocidad)</button>
-        <button onclick="addPart('spike')">Añadir Espina (Ataque)</button>
-        <button onclick="resetCreature()">Reiniciar</button>
+    <div id="ui">
+        <div class="stat">ADN: <span id="dna-count">0</span></div>
+        <div id="diet-text">Dieta: Filtrador (Come de todo)</div>
+        <p style="font-size: 0.8rem; color: #94a3b8;">Mover: WASD | Compras: Botones</p>
     </div>
-    <p>Haz clic en el canvas para mover tu criatura. ¡Evoluciona!</p>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="shop">
+        <button onclick="buyPart('eye', 5)">Ojo (5 ADN)</button>
+        <button onclick="buyPart('fin', 10)">Aleta +Velocidad (10 ADN)</button>
+        <button onclick="buyPart('spike', 15)">Espina Carnívora (15 ADN)</button>
+        <button onclick="setDiet('herbivore')" style="background: #4ade80;">Ser Herbívoro</button>
+        <button onclick="setDiet('carnivore')" style="background: #f87171;">Ser Carnívoro</button>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        let creature = {
-            x: 400, y: 250,
-            targetX: 400, targetY: 250,
-            size: 30,
+        let dna = 0;
+        let foodArray = [];
+        const keys = {};
+        
+        let player = {
+            x: canvas.width/2, y: canvas.height/2,
+            size: 20, speed: 4, dna: 0,
+            diet: 'omnivore', // omnivore, herbivore, carnivore
             parts: [],
-            speed: 2
+            color: '#38bdf8'
         };
 
-        // Escuchar clics para mover
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            creature.targetX = e.clientX - rect.left;
-            creature.targetY = e.clientY - rect.top;
-        });
+        // Inputs
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-        function addPart(type) {
-            const angle = Math.random() * Math.PI * 2;
-            creature.parts.push({
-                type: type,
-                dist: creature.size * 0.8,
-                angle: angle
-            });
-            if(type === 'fin') creature.speed += 0.5;
+        function spawnFood() {
+            if (foodArray.length < 50) {
+                foodArray.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    type: Math.random() > 0.5 ? 'plant' : 'meat',
+                    size: 5
+                });
+            }
         }
 
-        function resetCreature() {
-            creature.parts = [];
-            creature.speed = 2;
+        function setDiet(type) {
+            player.diet = type;
+            player.color = type === 'herbivore' ? '#4ade80' : '#f87171';
+            document.getElementById('diet-text').innerText = `Dieta: ${type.toUpperCase()}`;
+        }
+
+        function buyPart(type, cost) {
+            if (dna >= cost) {
+                dna -= cost;
+                const angle = Math.random() * Math.PI * 2;
+                player.parts.push({ type, angle, dist: player.size });
+                if (type === 'fin') player.speed += 0.8;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('dna-count').innerText = Math.floor(dna);
         }
 
         function update() {
-            // Movimiento suave hacia el objetivo (Interpolación)
-            const dx = creature.targetX - creature.x;
-            const dy = creature.targetY - creature.y;
-            const distance = Math.sqrt(dx*dx + dy*dy);
+            // Movimiento WASD
+            if (keys['w']) player.y -= player.speed;
+            if (keys['s']) player.y += player.speed;
+            if (keys['a']) player.x -= player.speed;
+            if (keys['d']) player.x += player.speed;
 
-            if (distance > 5) {
-                creature.x += (dx / distance) * creature.speed;
-                creature.y += (dy / distance) * creature.speed;
-            }
+            // Colisiones con comida
+            foodArray = foodArray.filter(f => {
+                const dx = player.x - f.x;
+                const dy = player.y - f.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
 
+                if (distance < player.size + f.size) {
+                    if (player.diet === 'omnivore' || 
+                       (player.diet === 'herbivore' && f.type === 'plant') ||
+                       (player.diet === 'carnivore' && f.type === 'meat')) {
+                        dna += 1;
+                        updateUI();
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            if (Math.random() < 0.05) spawnFood();
             draw();
             requestAnimationFrame(update);
         }
@@ -77,37 +117,48 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar partes
-            creature.parts.forEach(part => {
-                const px = creature.x + Math.cos(part.angle) * part.dist;
-                const py = creature.y + Math.sin(part.angle) * part.dist;
+            // Dibujar Comida
+            foodArray.forEach(f => {
+                ctx.fillStyle = f.type === 'plant' ? '#4ade80' : '#f87171';
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.size, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Dibujar Partes del Jugador
+            player.parts.forEach(part => {
+                const px = player.x + Math.cos(part.angle) * player.size;
+                const py = player.y + Math.sin(part.angle) * player.size;
                 
                 if(part.type === 'eye') {
                     ctx.fillStyle = "white";
-                    ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = "black";
-                    ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
-                } 
-                else if(part.type === 'fin') {
-                    ctx.fillStyle = "#4ecca3";
-                    ctx.beginPath(); ctx.ellipse(px, py, 15, 5, part.angle, 0, Math.PI*2); ctx.fill();
-                }
-                else if(part.type === 'spike') {
-                    ctx.fillStyle = "#e94560";
-                    ctx.beginPath(); ctx.moveTo(px, py);
-                    ctx.lineTo(px + Math.cos(part.angle)*20, py + Math.sin(part.angle)*20);
+                    ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+                } else if(part.type === 'fin') {
+                    ctx.strokeStyle = player.color;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(player.x, player.y);
+                    ctx.lineTo(px + Math.cos(part.angle)*15, py + Math.sin(part.angle)*15);
                     ctx.stroke();
+                } else if(part.type === 'spike') {
+                    ctx.fillStyle = "#cbd5e1";
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px + Math.cos(part.angle)*20, py + Math.sin(part.angle)*20);
+                    ctx.lineTo(px + Math.cos(part.angle+0.5)*10, py + Math.sin(part.angle+0.5)*10);
+                    ctx.fill();
                 }
             });
 
-            // Dibujar cuerpo principal (Núcleo)
-            ctx.fillStyle = "#4ecca3";
+            // Cuerpo
+            ctx.fillStyle = player.color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = player.color;
             ctx.beginPath();
-            ctx.arc(creature.x, creature.y, creature.size, 0, Math.PI * 2);
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = "rgba(255,255,255,0.3)";
-            ctx.lineWidth = 5;
-            ctx.stroke();
+            ctx.shadowBlur = 0;
         }
 
         update();
