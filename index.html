@@ -1,16 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Madness HTML Arena</title>
+    <meta charset="UTF-8">
+    <title>Madness Combat: HTML Arena</title>
     <style>
-        body { margin: 0; background: #222; overflow: hidden; color: white; font-family: sans-serif; }
-        canvas { background: #444; display: block; margin: 20px auto; border: 3px solid #666; cursor: crosshair; }
-        .ui { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); }
+        body { margin: 0; background: #1a1a1a; color: #eee; font-family: 'Courier New', Courier, monospace; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        canvas { background: #333; border: 5px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: crosshair; margin-top: 10px; }
+        .stats { font-size: 20px; font-weight: bold; margin-top: 10px; text-transform: uppercase; }
+        .instructions { color: #888; font-size: 12px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <div class="ui">SALUD: <span id="hp">100</span> | ENEMIGOS: <span id="kills">0</span></div>
+    <div class="stats">HP: <span id="hp">100</span> | KILLS: <span id="kills">0</span> | ARMA: <span id="weapon">PISTOLA</span></div>
+    <div class="instructions">WASD: Mover | CLICK: Disparar | R: Reiniciar si mueres</div>
     <canvas id="gameCanvas"></canvas>
-    <script src="game.js"></script>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = 900;
+canvas.height = 600;
+
+// Configuración de Juego
+let gameActive = true;
+let player = {
+    x: 450, y: 300, size: 20, hp: 100, maxHp: 100,
+    speed: 3.5, angle: 0, kills: 0, weapon: "pistol"
+};
+
+let bullets = [];
+let enemies = [];
+let particles = []; // Sangre
+let keys = {};
+
+// Eventos
+window.addEventListener("keydown", e => {
+    keys[e.code] = true;
+    if(e.code === 'KeyR' && !gameActive) location.reload();
+});
+window.addEventListener("keyup", e => keys[e.code] = false);
+window.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    player.angle = Math.atan2(e.clientY - rect.top - player.y, e.clientX - rect.left - player.x);
+});
+window.addEventListener("mousedown", () => { if(gameActive) shoot(); });
+
+function createParticle(x, y) {
+    for(let i=0; i<8; i++) {
+        particles.push({
+            x: x, y: y,
+            vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+            life: 20, size: Math.random()*5
+        });
+    }
+}
+
+function shoot() {
+    const shootSound = () => { /* Aquí iría sonido */ };
+    let count = player.weapon === "shotgun" ? 5 : 1;
+    let spread = player.weapon === "shotgun" ? 0.3 : 0;
+
+    for(let i=0; i<count; i++) {
+        bullets.push({
+            x: player.x + Math.cos(player.angle)*20,
+            y: player.y + Math.sin(player.angle)*20,
+            vx: Math.cos(player.angle + (Math.random()-0.5)*spread) * 12,
+            vy: Math.sin(player.angle + (Math.random()-0.5)*spread) * 12,
+            owner: 'player'
+        });
+    }
+}
+
+function spawnEnemy() {
+    if(!gameActive) return;
+    let side = Math.floor(Math.random()*4);
+    let x, y;
+    if(side===0) { x=0; y=Math.random()*canvas.height; }
+    else if(side===1) { x=canvas.width; y=Math.random()*canvas.height; }
+    else if(side===2) { x=Math.random()*canvas.width; y=0; }
+    else { x=Math.random()*canvas.width; y=canvas.height; }
+    
+    enemies.push({ x: x, y: y, hp: 30, speed: 1.5 + Math.random() });
+}
+
+function drawAgent(x, y, angle, isEnemy) {
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // Cuerpo (Gris Madness)
+    ctx.fillStyle = isEnemy ? "#555" : "#777";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    
+    // Cabeza
+    ctx.beginPath();
+    ctx.arc(0, 0, 18, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    // La Cruz de la cara
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(-10, 0); ctx.lineTo(10, 0);
+    ctx.moveTo(0, -10); ctx.lineTo(0, 10);
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.stroke();
+
+    // Manos (Flotantes)
+    ctx.fillStyle = "#666";
+    ctx.beginPath(); ctx.arc(22, 15, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(22, -15, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    
+    ctx.restore();
+}
+
+function update() {
+    if(!gameActive) return;
+
+    // Movimiento Jugador
+    if (keys['KeyW'] && player.y > 0) player.y -= player.speed;
+    if (keys['KeyS'] && player.y < canvas.height) player.y += player.speed;
+    if (keys['KeyA'] && player.x > 0) player.x -= player.speed;
+    if (keys['KeyD'] && player.x < canvas.width) player.x += player.speed;
+
+    // Balas
+    bullets.forEach((b, i) => {
+        b.x += b.vx; b.y += b.vy;
+        if (b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) bullets.splice(i, 1);
+    });
+
+    // Partículas (Sangre)
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life--;
+        if(p.life <= 0) particles.splice(i,1);
+    });
+
+    // Enemigos
+    enemies.forEach((en, i) => {
+        let dx = player.x - en.x;
+        let dy = player.y - en.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        en.x += (dx/dist) * en.speed;
+        en.y += (dy/dist) * en.speed;
+
+        // Daño al jugador
+        if(dist < 30) {
+            player.hp -= 0.5;
+            document.getElementById("hp").innerText = Math.floor(player.hp);
+            if(player.hp <= 0) {
+                gameActive = false;
+                alert("HAS MUERTO. Kills: " + player.kills);
+            }
+        }
+
+        // Colisión Bala -> Enemigo
+        bullets.forEach((b, bi) => {
+            if (Math.hypot(b.x - en.x, b.y - en.y) < 20) {
+                en.hp -= 15;
+                createParticle(en.x, en.y);
+                bullets.splice(bi, 1);
+                if (en.hp <= 0) {
+                    enemies.splice(i, 1);
+                    player.kills++;
+                    document.getElementById("kills").innerText = player.kills;
+                    // Upgrade a escopeta a las 10 kills
+                    if(player.kills === 10) {
+                        player.weapon = "shotgun";
+                        document.getElementById("weapon").innerText = "ESCOPETA";
+                    }
+                }
+            }
+        });
+    });
+
+    draw();
+    requestAnimationFrame(update);
+}
+
+function draw() {
+    ctx.fillStyle = "#333";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar Suelo (Grid simple)
+    ctx.strokeStyle = "#3a3a3a";
+    for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+    for(let i=0; i<canvas.height; i+=50) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+
+    // Sangre en el suelo
+    ctx.fillStyle = "#800";
+    particles.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+    });
+
+    // Balas
+    ctx.fillStyle = "#ffd700";
+    bullets.forEach(b => ctx.fillRect(b.x, b.y, 8, 3));
+
+    // Personajes
+    enemies.forEach(en => drawAgent(en.x, en.y, Math.atan2(player.y-en.y, player.x-en.x), true));
+    drawAgent(player.x, player.y, player.angle, false);
+}
+
+// Iniciar
+setInterval(spawnEnemy, 1500);
+update();
+</script>
 </body>
 </html>
