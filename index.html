@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mini RPG Maker en HTML5</title>
+    <title>RPG Maker con Editor de Terreno y Tileset</title>
     <style>
         body {
             background: #1a1a2e;
@@ -10,199 +10,152 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
+            padding: 15px;
         }
         .game-container {
             background: #16213e;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
             text-align: center;
+            max-width: 600px;
         }
-        canvas {
+        h2 {
+            color: white;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 0 #0f3460;
+        }
+        canvas#gameCanvas {
             border: 4px solid #0f3460;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #0f3460;
             display: block;
-            margin-bottom: 15px;
+            margin: 0 auto 15px;
+            cursor: crosshair;
         }
-        .info {
-            color: #e94560;
-            font-size: 18px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #0f3460;
-            margin-top: 5px;
+        .toolbar {
+            background: #0f3460;
+            border-radius: 30px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .palette {
+            display: flex;
+            gap: 8px;
+            background: #1a1a2e;
+            padding: 8px 12px;
+            border-radius: 40px;
+        }
+        .tile-preview {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #16213e;
+        }
+        .tile-preview.selected {
+            border-color: #e94560;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #e94560;
+        }
+        .tile-preview img {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            border-radius: 6px;
+        }
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         button {
             background: #e94560;
             border: none;
             color: white;
-            font-size: 16px;
-            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 16px;
             border-radius: 30px;
             cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-            transition: transform 0.2s;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #a0223e;
         }
         button:hover {
-            transform: scale(1.05);
             background: #ff6b8b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #a0223e;
         }
-        p {
+        button.small {
+            padding: 5px 12px;
+            font-size: 13px;
+        }
+        .status {
+            color: #e94560;
+            font-weight: bold;
+            background: #0f3460;
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+        .checkbox-label {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+        }
+        #coords {
             color: #aaa;
-            font-size: 14px;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h2 style="color:white; margin-top:0;">🧙 RPG Maker Lite 🗡️</h2>
+        <h2>🗺️ RPG Maker - Editor de terreno</h2>
         <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div class="info" id="message">¡Usa las flechas para moverte!</div>
-        <button onclick="resetGame()">Reiniciar</button>
-        <p>❤️ Recoge el cofre dorado para ganar</p>
+
+        <div class="toolbar">
+            <div class="palette" id="palette"></div>
+            <div class="controls">
+                <button id="saveBtn" class="small">💾 Guardar</button>
+                <button id="loadBtn" class="small">📂 Cargar</button>
+                <button id="resetBtn" class="small">🔄 Reiniciar</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <label class="checkbox-label">
+                <input type="checkbox" id="editMode" checked> ✏️ Modo edición (clic en mapa)
+            </label>
+            <span id="message" class="status">🏃 Muévete con flechas</span>
+        </div>
+        <div id="coords">Posición ratón: -- , --</div>
     </div>
 
     <script>
-        // --- Configuración del mapa (10x10) ---
-        const MAP_SIZE = 10;
-        const TILE_SIZE = 40; // px
+        (function() {
+            // ---------- Constantes ----------
+            const MAP_SIZE = 10;
+            const TILE_SIZE = 40;
+            const TILE_TYPES = 4;  // 0: suelo, 1: pared, 2: cofre, 3: agua
 
-        // Definición de tipos de baldosa
-        const TILE = {
-            FLOOR: 0,
-            WALL: 1,
-            CHEST: 2
-        };
+            // Definición de tiles (sólidos: no se puede caminar)
+            const SOLID_TILES = [1, 3]; // pared y agua son sólidas
 
-        // Mapa: 0 = suelo, 1 = pared, 2 = cofre
-        const mapData = [
-            [1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,0,1,0,1],
-            [1,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,0,0,0,1],
-            [1,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,0,1,0,1,0,1],
-            [1,0,0,0,0,2,0,0,0,1],  // cofre en (5,7) (x,y)
-            [1,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        // Posición inicial del jugador (fila, columna)
-        let player = { x: 1, y: 1 };  // (columna, fila) en el mapa
-
-        // Variable para saber si el cofre fue recogido
-        let chestCollected = false;
-
-        // Referencia al canvas y al mensaje
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const messageEl = document.getElementById('message');
-
-        // --- Dibujar el mapa y el jugador ---
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Recorrer todas las celdas
-            for (let row = 0; row < MAP_SIZE; row++) {
-                for (let col = 0; col < MAP_SIZE; col++) {
-                    let x = col * TILE_SIZE;
-                    let y = row * TILE_SIZE;
-
-                    // Dibujar según tipo
-                    switch (mapData[row][col]) {
-                        case TILE.FLOOR:
-                            ctx.fillStyle = '#3a4e6b';
-                            break;
-                        case TILE.WALL:
-                            ctx.fillStyle = '#1e2a3a';
-                            break;
-                        case TILE.CHEST:
-                            ctx.fillStyle = '#f3c623'; // dorado
-                            break;
-                    }
-                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
-
-                    // Si es cofre, añadir un detalle
-                    if (mapData[row][col] === TILE.CHEST) {
-                        ctx.fillStyle = '#b8860b';
-                        ctx.beginPath();
-                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 8, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.fillStyle = '#ffd700';
-                        ctx.beginPath();
-                        ctx.arc(x + TILE_SIZE/2 - 2, y + TILE_SIZE/2 - 2, 3, 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
-                }
-            }
-
-            // Dibujar al jugador (un héroe)
-            const playerX = player.x * TILE_SIZE;
-            const playerY = player.y * TILE_SIZE;
-            ctx.fillStyle = '#e94560';
-            ctx.beginPath();
-            ctx.arc(playerX + TILE_SIZE/2, playerY + TILE_SIZE/2, 15, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(playerX + TILE_SIZE/2 - 4, playerY + TILE_SIZE/2 - 4, 3, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-
-        // --- Movimiento del jugador con colisiones ---
-        function movePlayer(dx, dy) {
-            const newX = player.x + dx;
-            const newY = player.y + dy;
-
-            // Verificar límites del mapa
-            if (newX < 0 || newX >= MAP_SIZE || newY < 0 || newY >= MAP_SIZE) return false;
-
-            // Verificar si la celda destino es pared
-            if (mapData[newY][newX] === TILE.WALL) {
-                messageEl.innerText = '¡Es una pared!';
-                return false;
-            }
-
-            // Verificar si es cofre y no ha sido recogido
-            if (mapData[newY][newX] === TILE.CHEST && !chestCollected) {
-                chestCollected = true;
-                mapData[newY][newX] = TILE.FLOOR;  // quitar cofre del mapa
-                messageEl.innerText = '🎉 ¡Encontraste el cofre! ¡Victoria! 🎉';
-                player.x = newX;
-                player.y = newY;
-                drawGame();
-                return true;
-            }
-
-            // Movimiento normal
-            player.x = newX;
-            player.y = newY;
-            messageEl.innerText = 'Sigues explorando...';
-            drawGame();
-            return true;
-        }
-
-        // --- Control por teclado ---
-        document.addEventListener('keydown', (e) => {
-            // Prevenir scroll con las flechas
-            if (e.key.startsWith('Arrow')) e.preventDefault();
-
-            switch (e.key) {
-                case 'ArrowUp': movePlayer(0, -1); break;
-                case 'ArrowDown': movePlayer(0, 1); break;
-                case 'ArrowLeft': movePlayer(-1, 0); break;
-                case 'ArrowRight': movePlayer(1, 0); break;
-            }
-        });
-
-        // --- Reiniciar juego ---
-        function resetGame() {
-            // Restaurar mapa original
-            const originalMap = [
+            // Mapa inicial (10x10)
+            const INITIAL_MAP = [
                 [1,1,1,1,1,1,1,1,1,1],
                 [1,0,0,0,0,0,0,0,0,1],
                 [1,0,1,1,0,1,0,1,0,1],
@@ -210,21 +163,243 @@
                 [1,0,1,0,1,1,0,0,0,1],
                 [1,0,0,0,0,0,0,1,0,1],
                 [1,0,1,1,0,1,0,1,0,1],
-                [1,0,0,0,0,2,0,0,0,1],
+                [1,0,0,0,0,2,0,0,0,1],  // cofre en (5,7)
                 [1,0,0,0,0,0,0,0,0,1],
                 [1,1,1,1,1,1,1,1,1,1]
             ];
-            for (let i = 0; i < MAP_SIZE; i++) {
-                mapData[i] = originalMap[i].slice();
-            }
-            player = { x: 1, y: 1 };
-            chestCollected = false;
-            messageEl.innerText = '¡Usa las flechas para moverte!';
-            drawGame();
-        }
 
-        // Dibujar la escena inicial
-        drawGame();
+            // Copia del mapa editable
+            let mapData = JSON.parse(JSON.stringify(INITIAL_MAP));
+
+            // Jugador (col, fila)
+            let player = { x: 1, y: 1 };
+
+            // Tile seleccionado para edición (por defecto suelo)
+            let selectedTile = 0;
+
+            // Referencias DOM
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const messageEl = document.getElementById('message');
+            const coordsEl = document.getElementById('coords');
+            const editModeCheck = document.getElementById('editMode');
+
+            // ---------- Generar tileset (sprite sheet) en un canvas oculto ----------
+            const tilesetCanvas = document.createElement('canvas');
+            tilesetCanvas.width = TILE_SIZE * TILE_TYPES;
+            tilesetCanvas.height = TILE_SIZE;
+            const tCtx = tilesetCanvas.getContext('2d');
+
+            // Dibujar cada tile
+            function drawTileset() {
+                // Tile 0: Suelo (hierba)
+                tCtx.fillStyle = '#4caf50';
+                tCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+                tCtx.fillStyle = '#2e7d32';
+                for (let i = 0; i < 5; i++) {
+                    tCtx.beginPath();
+                    tCtx.arc(5 + i*8, 10 + (i%2)*15, 3, 0, 2*Math.PI);
+                    tCtx.fill();
+                }
+
+                // Tile 1: Pared (piedra)
+                tCtx.fillStyle = '#5d6d7e';
+                tCtx.fillRect(40, 0, TILE_SIZE, TILE_SIZE);
+                tCtx.fillStyle = '#2e4053';
+                for (let i = 0; i < 4; i++) {
+                    tCtx.fillRect(45 + i*8, 5, 4, 30);
+                }
+
+                // Tile 2: Cofre
+                tCtx.fillStyle = '#b86f2c';
+                tCtx.fillRect(80, 10, TILE_SIZE, 20);
+                tCtx.fillStyle = '#f1c40f';
+                tCtx.fillRect(85, 5, 30, 10);
+                tCtx.fillStyle = '#000';
+                tCtx.beginPath();
+                tCtx.arc(100, 10, 3, 0, 2*Math.PI);
+                tCtx.fill();
+
+                // Tile 3: Agua
+                tCtx.fillStyle = '#3498db';
+                tCtx.fillRect(120, 0, TILE_SIZE, TILE_SIZE);
+                tCtx.fillStyle = '#2980b9';
+                for (let i = 0; i < 3; i++) {
+                    tCtx.beginPath();
+                    tCtx.arc(130 + i*12, 15 + i*8, 6, 0, Math.PI, true);
+                    tCtx.fill();
+                }
+            }
+            drawTileset();
+
+            // ---------- Actualizar paleta visual ----------
+            const paletteDiv = document.getElementById('palette');
+            function buildPalette() {
+                paletteDiv.innerHTML = '';
+                for (let i = 0; i < TILE_TYPES; i++) {
+                    const preview = document.createElement('div');
+                    preview.className = 'tile-preview' + (i === selectedTile ? ' selected' : '');
+                    preview.dataset.tile = i;
+
+                    // Crear un canvas pequeño para mostrar el tile
+                    const tileImg = document.createElement('canvas');
+                    tileImg.width = TILE_SIZE;
+                    tileImg.height = TILE_SIZE;
+                    const imgCtx = tileImg.getContext('2d');
+                    imgCtx.drawImage(tilesetCanvas, i*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, 0, 0, TILE_SIZE, TILE_SIZE);
+                    preview.appendChild(tileImg);
+
+                    preview.addEventListener('click', () => {
+                        selectedTile = i;
+                        document.querySelectorAll('.tile-preview').forEach(el => el.classList.remove('selected'));
+                        preview.classList.add('selected');
+                    });
+                    paletteDiv.appendChild(preview);
+                }
+            }
+            buildPalette();
+
+            // ---------- Dibujar el mapa completo con tileset ----------
+            function drawGame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let row = 0; row < MAP_SIZE; row++) {
+                    for (let col = 0; col < MAP_SIZE; col++) {
+                        const tile = mapData[row][col];
+                        const sx = tile * TILE_SIZE;
+                        ctx.drawImage(tilesetCanvas, sx, 0, TILE_SIZE, TILE_SIZE, col*TILE_SIZE, row*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+
+                // Dibujar jugador
+                const px = player.x * TILE_SIZE;
+                const py = player.y * TILE_SIZE;
+                ctx.fillStyle = '#e94560';
+                ctx.beginPath();
+                ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 15, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(px + TILE_SIZE/2 - 5, py + TILE_SIZE/2 - 5, 4, 0, 2*Math.PI);
+                ctx.fill();
+            }
+
+            // ---------- Lógica de movimiento ----------
+            function movePlayer(dx, dy) {
+                const newX = player.x + dx;
+                const newY = player.y + dy;
+
+                // Límites
+                if (newX < 0 || newX >= MAP_SIZE || newY < 0 || newY >= MAP_SIZE) {
+                    messageEl.innerText = '🚧 Fin del mundo';
+                    return;
+                }
+
+                const destTile = mapData[newY][newX];
+
+                // Sólido?
+                if (SOLID_TILES.includes(destTile)) {
+                    messageEl.innerText = destTile === 1 ? '🧱 Pared' : '💧 Agua';
+                    return;
+                }
+
+                // Cofre? -> recoger y convertir en suelo
+                if (destTile === 2) {
+                    mapData[newY][newX] = 0;  // se vuelve suelo
+                    messageEl.innerText = '✨ ¡Tesoro encontrado! ✨';
+                } else {
+                    messageEl.innerText = '🏃 Explorando...';
+                }
+
+                // Mover jugador
+                player.x = newX;
+                player.y = newY;
+                drawGame();
+            }
+
+            // ---------- Evento teclado ----------
+            window.addEventListener('keydown', (e) => {
+                if (e.key.startsWith('Arrow')) e.preventDefault();
+                switch (e.key) {
+                    case 'ArrowUp': movePlayer(0, -1); break;
+                    case 'ArrowDown': movePlayer(0, 1); break;
+                    case 'ArrowLeft': movePlayer(-1, 0); break;
+                    case 'ArrowRight': movePlayer(1, 0); break;
+                }
+            });
+
+            // ---------- Edición con clic (si modo activado) ----------
+            canvas.addEventListener('click', (e) => {
+                if (!editModeCheck.checked) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+
+                const col = Math.floor(mouseX / TILE_SIZE);
+                const row = Math.floor(mouseY / TILE_SIZE);
+
+                if (col >= 0 && col < MAP_SIZE && row >= 0 && row < MAP_SIZE) {
+                    // No permitir colocar tile sólido encima del jugador
+                    if (row === player.y && col === player.x && SOLID_TILES.includes(selectedTile)) {
+                        messageEl.innerText = '❌ No puedes bloquear al jugador';
+                        return;
+                    }
+                    mapData[row][col] = selectedTile;
+                    drawGame();
+                    messageEl.innerText = `Tile ${selectedTile} colocado en (${col}, ${row})`;
+                }
+            });
+
+            // Mostrar coordenadas del ratón
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+                const col = Math.floor(mouseX / TILE_SIZE);
+                const row = Math.floor(mouseY / TILE_SIZE);
+                if (col >= 0 && col < MAP_SIZE && row >= 0 && row < MAP_SIZE) {
+                    coordsEl.innerText = `Posición: (${col}, ${row}) | Tile: ${mapData[row][col]}`;
+                } else {
+                    coordsEl.innerText = 'Posición: fuera del mapa';
+                }
+            });
+
+            // ---------- Botones de persistencia ----------
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                localStorage.setItem('rpgMap', JSON.stringify(mapData));
+                localStorage.setItem('rpgPlayer', JSON.stringify(player));
+                messageEl.innerText = '💾 Partida guardada';
+            });
+
+            document.getElementById('loadBtn').addEventListener('click', () => {
+                const savedMap = localStorage.getItem('rpgMap');
+                const savedPlayer = localStorage.getItem('rpgPlayer');
+                if (savedMap && savedPlayer) {
+                    mapData = JSON.parse(savedMap);
+                    player = JSON.parse(savedPlayer);
+                    drawGame();
+                    messageEl.innerText = '📂 Partida cargada';
+                } else {
+                    messageEl.innerText = '⚠️ No hay datos guardados';
+                }
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                mapData = JSON.parse(JSON.stringify(INITIAL_MAP));
+                player = { x: 1, y: 1 };
+                drawGame();
+                messageEl.innerText = '🔄 Mapa reiniciado';
+            });
+
+            // Dibujar inicial
+            drawGame();
+            messageEl.innerText = '🏃 Muévete con flechas';
+        })();
     </script>
 </body>
 </html>
