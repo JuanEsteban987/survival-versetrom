@@ -2,29 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Madness Combat: Arena Waves</title>
+    <title>Madness Combat: Arena Final</title>
     <style>
-        body { margin: 0; background: #1a1a1a; color: #eee; font-family: 'Courier New', monospace; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: #333; border: 5px solid #555; cursor: crosshair; }
-        .hud { width: 900; display: flex; justify-content: space-between; padding: 10px; background: #222; border: 2px solid #444; width: 880px; }
-        .shop { position: absolute; top: 20%; background: rgba(0,0,0,0.9); padding: 20px; border: 2px solid #800; display: none; text-align: center; }
-        .red { color: #ff4444; }
+        body { margin: 0; background: #111; color: #eee; font-family: 'Courier New', monospace; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        canvas { background: #2b2b2b; border: 4px solid #444; cursor: crosshair; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .hud { width: 900px; display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 2px solid #800; }
+        .shop { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,20,0.95); padding: 30px; border: 3px solid #800; display: none; text-align: center; z-index: 10; min-width: 300px; }
+        .red { color: #ff4444; text-shadow: 1px 1px 2px black; }
         .gold { color: #ffd700; }
+        .item { margin: 10px 0; font-size: 18px; }
     </style>
 </head>
 <body>
     <div class="hud">
-        <div>HP: <span id="hp" class="red">100</span> | PUNTOS: $<span id="money" class="gold">0</span></div>
+        <div>SALUD: <span id="hp" class="red">100</span> | DINERO: $<span id="money" class="gold">0</span></div>
         <div>OLEADA: <span id="wave">1</span> | ARMA: <span id="weaponName">PUÑOS</span></div>
     </div>
     
     <div id="shopUI" class="shop">
-        <h2 class="red">TIENDA DE NEVADA</h2>
-        <p>Presiona el número para comprar:</p>
-        <p>[1] CUCHILLO - $50</p>
-        <p>[2] PISTOLA - $150</p>
-        <p>[3] ESCOPETA - $400</p>
-        <p>--- Presiona <b>ESPACIO</b> para iniciar siguiente oleada ---</p>
+        <h1 class="red">EQUIPAMIENTO NEVADA</h1>
+        <div class="item">[1] CUCHILLO ($50)</div>
+        <div class="item">[2] PISTOLA ($150)</div>
+        <div class="item">[3] ESCOPETA ($400)</div>
+        <div class="item">[4] BOTIQUÍN +50 HP ($80)</div>
+        <hr style="border-color:#444">
+        <p>Presiona <b>[ESPACIO]</b> para la siguiente oleada</p>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -34,30 +36,29 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 900; canvas.height = 600;
 
-// Configuración del Jugador y Armas
-let player = { x: 450, y: 300, hp: 100, money: 0, angle: 0, speed: 4 };
-let weapons = {
-    "punos": { name: "PUÑOS", range: 40, damage: 10, type: "melee", price: 0 },
-    "cuchillo": { name: "CUCHILLO", range: 60, damage: 25, type: "melee", price: 50 },
-    "pistola": { name: "PISTOLA", range: 1000, damage: 20, type: "ranged", price: 150 },
-    "escopeta": { name: "ESCOPETA", range: 1000, damage: 15, type: "ranged", price: 400 }
+// Configuración de Armas
+const weapons = {
+    punos: { name: "PUÑOS", range: 50, damage: 12, type: "melee", spread: 0, bullets: 1 },
+    cuchillo: { name: "CUCHILLO", range: 75, damage: 35, type: "melee", spread: 0, bullets: 1 },
+    pistola: { name: "PISTOLA", range: 1000, damage: 25, type: "ranged", spread: 0.05, bullets: 1 },
+    escopeta: { name: "ESCOPETA", range: 1000, damage: 18, type: "ranged", spread: 0.3, bullets: 6 }
 };
-let currentWep = weapons.punos;
 
-// Estado del Juego
+// Estado Global
+let player = { x: 450, y: 300, hp: 100, money: 0, angle: 0, speed: 4.2, weapon: weapons.punos };
 let enemies = []; let bullets = []; let particles = [];
-let wave = 1; let enemiesLeftInWave = 0;
-let inShop = false;
+let wave = 1; let enemiesToSpawn = 0; let inShop = false;
 let keys = {};
 
-// Controles
+// Input
 window.addEventListener("keydown", e => {
     keys[e.code] = true;
     if(e.code === 'Space' && inShop) startWave();
     if(inShop) {
-        if(e.key === '1' && player.money >= 50) { player.money -= 50; currentWep = weapons.cuchillo; }
-        if(e.key === '2' && player.money >= 150) { player.money -= 150; currentWep = weapons.pistola; }
-        if(e.key === '3' && player.money >= 400) { player.money -= 400; currentWep = weapons.escopeta; }
+        if(e.key === '1' && player.money >= 50) { player.money -= 50; player.weapon = weapons.cuchillo; }
+        if(e.key === '2' && player.money >= 150) { player.money -= 150; player.weapon = weapons.pistola; }
+        if(e.key === '3' && player.money >= 400) { player.money -= 400; player.weapon = weapons.escopeta; }
+        if(e.key === '4' && player.money >= 80) { player.money -= 80; player.hp = Math.min(100, player.hp + 50); }
         updateHUD();
     }
 });
@@ -69,127 +70,180 @@ window.addEventListener("mousemove", e => {
 window.addEventListener("mousedown", () => { if(!inShop) attack(); });
 
 function updateHUD() {
-    document.getElementById("hp").innerText = Math.floor(player.hp);
+    document.getElementById("hp").innerText = Math.max(0, Math.floor(player.hp));
     document.getElementById("money").innerText = player.money;
     document.getElementById("wave").innerText = wave;
-    document.getElementById("weaponName").innerText = currentWep.name;
+    document.getElementById("weaponName").innerText = player.weapon.name;
 }
 
-function attack() {
-    if(currentWep.type === "ranged") {
-        let count = currentWep.name === "ESCOPETA" ? 5 : 1;
-        for(let i=0; i<count; i++) {
-            bullets.push({
-                x: player.x, y: player.y,
-                vx: Math.cos(player.angle + (Math.random()-0.5)*0.2) * 15,
-                vy: Math.sin(player.angle + (Math.random()-0.5)*0.2) * 15
-            });
-        }
-    } else {
-        // Ataque Melee
-        enemies.forEach(en => {
-            let d = Math.hypot(en.x - player.x, en.y - player.y);
-            if(d < currentWep.range) {
-                en.hp -= currentWep.damage;
-                createBlood(en.x, en.y);
-            }
+function createBlood(x, y, count = 6) {
+    for(let i=0; i<count; i++) {
+        particles.push({
+            x, y, 
+            vx: (Math.random()-0.5)*10, 
+            vy: (Math.random()-0.5)*10, 
+            life: 30 + Math.random()*20,
+            size: 2 + Math.random()*4
         });
     }
 }
 
-function createBlood(x, y) {
-    for(let i=0; i<5; i++) particles.push({x, y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 15});
+function attack() {
+    if(player.weapon.type === "ranged") {
+        for(let i=0; i<player.weapon.bullets; i++) {
+            bullets.push({
+                x: player.x + Math.cos(player.angle)*20,
+                y: player.y + Math.sin(player.angle)*20,
+                vx: Math.cos(player.angle + (Math.random()-0.5)*player.weapon.spread) * 15,
+                vy: Math.sin(player.angle + (Math.random()-0.5)*player.weapon.spread) * 15,
+                damage: player.weapon.damage
+            });
+        }
+    } else {
+        // Lógica Melee
+        enemies.forEach(en => {
+            let d = Math.hypot(en.x - player.x, en.y - player.y);
+            if(d < player.weapon.range) {
+                en.hp -= player.weapon.damage;
+                en.x += Math.cos(player.angle) * 15; // Empuje
+                en.y += Math.sin(player.angle) * 15;
+                createBlood(en.x, en.y, 8);
+            }
+        });
+    }
 }
 
 function startWave() {
     inShop = false;
     document.getElementById("shopUI").style.display = "none";
-    enemiesLeftInWave = 3 + (wave * 2);
-    for(let i=0; i<enemiesLeftInWave; i++) {
-        setTimeout(spawnEnemy, i * 1000);
-    }
+    enemiesToSpawn = 4 + (wave * 2);
+    let interval = setInterval(() => {
+        if(enemiesToSpawn <= 0) { clearInterval(interval); return; }
+        spawnEnemy();
+        enemiesToSpawn--;
+    }, 800);
 }
 
 function spawnEnemy() {
-    enemies.push({ x: Math.random()*canvas.width, y: Math.random() < 0.5 ? 0 : canvas.height, hp: 30 + (wave*5) });
+    let edge = Math.floor(Math.random()*4);
+    let x, y;
+    if(edge === 0) { x = Math.random()*canvas.width; y = -30; }
+    else if(edge === 1) { x = Math.random()*canvas.width; y = canvas.height+30; }
+    else if(edge === 2) { x = -30; y = Math.random()*canvas.height; }
+    else { x = canvas.width+30; y = Math.random()*canvas.height; }
+    
+    enemies.push({ x, y, hp: 40 + (wave*10), maxHp: 40 + (wave*10), speed: 1.8 + (wave*0.1) });
+}
+
+function drawAgent(x, y, ang, isEnemy, hp, maxHp) {
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // Sombras
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.beginPath(); ctx.ellipse(0, 25, 20, 10, 0, 0, Math.PI*2); ctx.fill();
+
+    // Cuerpo
+    ctx.fillStyle = isEnemy ? "#555" : "#888";
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    
+    // Cruz Madness
+    ctx.save();
+    ctx.rotate(ang);
+    ctx.strokeStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath(); ctx.moveTo(-10,0); ctx.lineTo(10,0); ctx.moveTo(0,-10); ctx.lineTo(0,10); ctx.stroke();
+    // Manos
+    ctx.fillStyle = isEnemy ? "#444" : "#777";
+    ctx.beginPath(); ctx.arc(25, 15, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(25, -15, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    // Barra de Vida (solo enemigos)
+    if(isEnemy) {
+        ctx.fillStyle = "#000"; ctx.fillRect(-15, -30, 30, 5);
+        ctx.fillStyle = "#f00"; ctx.fillRect(-15, -30, (hp/maxHp)*30, 5);
+    }
+    ctx.restore();
 }
 
 function update() {
-    if(inShop) return;
+    if(!inShop) {
+        if (keys['KeyW']) player.y -= player.speed;
+        if (keys['KeyS']) player.y += player.speed;
+        if (keys['KeyA']) player.x -= player.speed;
+        if (keys['KeyD']) player.x += player.speed;
 
-    if (keys['KeyW']) player.y -= player.speed;
-    if (keys['KeyS']) player.y += player.speed;
-    if (keys['KeyA']) player.x -= player.speed;
-    if (keys['KeyD']) player.x += player.speed;
+        bullets.forEach((b, i) => {
+            b.x += b.vx; b.y += b.vy;
+            if(b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) bullets.splice(i,1);
+            enemies.forEach((en, ei) => {
+                if(Math.hypot(b.x-en.x, b.y-en.y) < 22) {
+                    en.hp -= b.damage;
+                    createBlood(en.x, en.y, 4);
+                    bullets.splice(i, 1);
+                }
+            });
+        });
 
-    bullets.forEach((b, i) => {
-        b.x += b.vx; b.y += b.vy;
-        enemies.forEach((en, ei) => {
-            if(Math.hypot(b.x-en.x, b.y-en.y) < 20) {
-                en.hp -= currentWep.damage;
-                createBlood(en.x, en.y);
-                bullets.splice(i, 1);
+        enemies.forEach((en, i) => {
+            let dx = player.x - en.x, dy = player.y - en.y;
+            let dist = Math.hypot(dx, dy);
+            en.x += (dx/dist) * en.speed;
+            en.y += (dy/dist) * en.speed;
+
+            if(dist < 35) {
+                player.hp -= 0.15;
+                updateHUD();
+            }
+
+            if(en.hp <= 0) {
+                createBlood(en.x, en.y, 15);
+                enemies.splice(i, 1);
+                player.money += 25;
+                updateHUD();
             }
         });
-    });
 
-    enemies.forEach((en, i) => {
-        let dx = player.x - en.x, dy = player.y - en.y;
-        let dist = Math.hypot(dx, dy);
-        en.x += (dx/dist) * 2; en.y += (dy/dist) * 2;
-
-        if(dist < 30) player.hp -= 0.2;
-
-        if(en.hp <= 0) {
-            enemies.splice(i, 1);
-            player.money += 20;
-            updateHUD();
+        if(enemies.length === 0 && enemiesToSpawn <= 0 && !inShop) {
+            inShop = true;
+            wave++;
+            document.getElementById("shopUI").style.display = "block";
         }
-    });
 
-    if(enemies.length === 0 && enemiesLeftInWave <= 0 && !inShop) {
-        inShop = true;
-        wave++;
-        document.getElementById("shopUI").style.display = "block";
+        if(player.hp <= 0) {
+            alert("HAS CAÍDO EN NEVADA. Oleadas sobrevividas: " + (wave-1));
+            location.reload();
+        }
     }
-
-    if(player.hp <= 0) { alert("GAME OVER"); location.reload(); }
 
     draw();
     requestAnimationFrame(update);
 }
 
-function drawAgent(x, y, ang, color) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.fillStyle = color;
-    ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = "black"; ctx.stroke();
-    // Cara
-    ctx.rotate(ang);
-    ctx.beginPath(); ctx.moveTo(-10,0); ctx.lineTo(10,0); ctx.moveTo(0,-10); ctx.lineTo(0,10); ctx.stroke();
-    // Manos
-    ctx.fillStyle = "#666";
-    ctx.beginPath(); ctx.arc(25, 15, 6, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(25, -15, 6, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
-}
-
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Sangre
-    ctx.fillStyle = "red";
+    ctx.fillStyle = "#2b2b2b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Grid de fondo
+    ctx.strokeStyle = "#333";
+    for(let i=0; i<canvas.width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+
+    // Sangre persistente (partículas que mueren lento)
     particles.forEach((p, i) => {
-        ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
-        p.x += p.vx; p.y += p.vy; p.life--;
+        ctx.fillStyle = `rgba(150, 0, 0, ${p.life/50})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+        if(!inShop) { p.x += p.vx; p.y += p.vy; p.vx *= 0.9; p.vy *= 0.9; p.life--; }
         if(p.life <= 0) particles.splice(i, 1);
     });
-    // Balas
-    ctx.fillStyle = "yellow";
-    bullets.forEach(b => ctx.fillRect(b.x, b.y, 5, 5));
-    // Personajes
-    enemies.forEach(en => drawAgent(en.x, en.y, Math.atan2(player.y-en.y, player.x-en.x), "#555"));
-    drawAgent(player.x, player.y, player.angle, "#999");
+
+    bullets.forEach(b => {
+        ctx.fillStyle = "#ffd700";
+        ctx.fillRect(b.x, b.y, 7, 3);
+    });
+
+    enemies.forEach(en => drawAgent(en.x, en.y, Math.atan2(player.y-en.y, player.x-en.x), true, en.hp, en.maxHp));
+    drawAgent(player.x, player.y, player.angle, false);
 }
 
 updateHUD();
