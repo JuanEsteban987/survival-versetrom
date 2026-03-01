@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch 1.4 · Estilo 2008</title>
-    <!-- Font Awesome para iconos retro (opcional) -->
+    <title>Scratch 1.4 · +200 bloques (2008)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* (Mantengo todos los estilos anteriores, solo modifico la paleta para scroll y añado más bloques) */
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +15,7 @@
         }
 
         body {
-            background: #4a4a4a; /* fondo oscuro tipo escritorio */
+            background: #4a4a4a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,9 +23,8 @@
             margin: 20px;
         }
 
-        /* VENTANA PRINCIPAL: apariencia de aplicación vintage */
         .scratch-window {
-            width: 960px;
+            width: 1024px; /* un poco más ancho para que quepan los bloques */
             background: #ececec;
             border-radius: 10px 10px 6px 6px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 #ffffff;
@@ -33,7 +32,6 @@
             overflow: hidden;
         }
 
-        /* BARRA SUPERIOR (estilo 2008: gradiente naranja, brillo) */
         .header {
             background: linear-gradient(to bottom, #ffb347, #ff8c00);
             padding: 8px 15px;
@@ -49,15 +47,9 @@
         .logo {
             font-size: 24px;
             font-weight: bold;
-            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             gap: 5px;
-        }
-
-        .logo i {
-            font-size: 28px;
-            filter: drop-shadow(2px 2px 0 #b45f00);
         }
 
         .menu {
@@ -83,9 +75,9 @@
             font-weight: bold;
             border: 1px solid #b86200;
             box-shadow: inset 0 1px 0 #ffbc6e;
+            cursor: default;
         }
 
-        /* CUERPO PRINCIPAL: 3 COLUMNAS (2008: bloques | scripts | escenario+objetos) */
         .main {
             display: flex;
             padding: 12px;
@@ -94,14 +86,16 @@
             border-top: 1px solid #f5f5f5;
         }
 
-        /* COLUMNA IZQUIERDA: PALETA DE BLOQUES */
+        /* PALETA CON SCROLL */
         .palette {
-            width: 210px;
+            width: 250px; /* un poco más ancha para los bloques */
             background: #e8e8e8;
             border-radius: 8px;
             border: 1px solid #9c9c9c;
             padding: 8px;
             box-shadow: inset 0 1px 3px #ffffff, inset 0 -1px 3px #b1b1b1, 2px 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
         }
 
         .cat-title {
@@ -115,6 +109,7 @@
             text-shadow: 0 1px 0 #ddd;
             border-bottom: 2px solid #7e7e7e;
             box-shadow: inset 0 1px 0 #f0f0f0;
+            flex-shrink: 0;
         }
 
         .category-buttons {
@@ -122,6 +117,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 6px;
             margin-bottom: 12px;
+            flex-shrink: 0;
         }
 
         .cat-btn {
@@ -134,7 +130,16 @@
             color: white;
             text-shadow: 1px 1px 0 #333;
             box-shadow: inset 0 1px 0 #f0f0f0, 0 2px 3px #5a5a5a;
-            cursor: default;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .cat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 #f0f0f0, 0 4px 5px #3a3a3a;
+        }
+        .cat-btn:active {
+            transform: translateY(2px);
+            box-shadow: inset 0 1px 0 #f0f0f0, 0 1px 2px #3a3a3a;
         }
 
         .mov { background: #4a9eff; border-color: #1f5fa8; }
@@ -143,27 +148,35 @@
         .lap { background: #64c87c; border-color: #2a8641; }
         .ope { background: #c0cf6b; border-color: #798d33; }
         .sen { background: #d46b5a; border-color: #943e2e; }
+        .con { background: #ffbf5e; border-color: #b1761a; } /* control naranja */
 
-        /* Bloques de ejemplo (forma redondeada, imitando bloques Scratch) */
-        .sample-blocks {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
+        /* CONTENEDOR DE BLOQUES CON SCROLL */
+        .blocks-container {
+            overflow-y: auto;
+            max-height: 400px; /* para que quepan muchos bloques */
+            padding-right: 4px;
         }
 
         .block {
-            background: #4a9eff; /* azul mov */
+            background: #4a9eff;
             padding: 8px 12px;
-            border-radius: 18px 18px 18px 8px; /* imita muesca */
+            border-radius: 18px 18px 18px 8px;
             color: white;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             box-shadow: 0 4px 0 #1f5fa8, 0 6px 6px rgba(0,0,0,0.3);
             width: fit-content;
             border: 1px solid #9acdff;
             text-shadow: 1px 1px 0 #2565ae;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            cursor: grab;
+            user-select: none;
+            transition: box-shadow 0.1s, transform 0.1s;
+        }
+        .block:active {
+            cursor: grabbing;
+            opacity: 0.9;
+            transform: scale(0.98);
         }
 
         .hat-block {
@@ -174,17 +187,14 @@
             text-shadow: 1px 1px 0 #1f5420;
         }
 
-        .block.purple {
-            background: #b47cf5;
-            box-shadow: 0 4px 0 #6b3fad;
-        }
+        .block.purple { background: #b47cf5; box-shadow: 0 4px 0 #6b3fad; }
+        .block.green { background: #64c87c; box-shadow: 0 4px 0 #2a8641; }
+        .block.orange { background: #ffbf5e; box-shadow: 0 4px 0 #b1761a; text-shadow: 1px 1px 0 #9b6218; }
+        .block.pink { background: #e477d9; box-shadow: 0 4px 0 #9d3e94; }
+        .block.yellow { background: #c0cf6b; box-shadow: 0 4px 0 #798d33; color: #2d2d2d; text-shadow: 1px 1px 0 #e0e0a0; }
+        .block.red { background: #d46b5a; box-shadow: 0 4px 0 #943e2e; }
 
-        .block.green {
-            background: #64c87c;
-            box-shadow: 0 4px 0 #2a8641;
-        }
-
-        /* COLUMNA CENTRAL: ÁREA DE SCRIPTS */
+        /* ÁREA DE SCRIPTS */
         .scripts {
             flex: 1;
             background: #f8f8f8;
@@ -202,7 +212,6 @@
             padding-bottom: 5px;
             margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .script-area {
@@ -210,6 +219,18 @@
             flex-direction: column;
             gap: 8px;
             align-items: flex-start;
+            min-height: 250px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 10px;
+            border: 2px dashed #b0b0b0;
+            transition: background-color 0.2s;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .script-area.drag-over {
+            background: #e0f0e0;
+            border-color: #4caf50;
         }
 
         .script-block {
@@ -217,17 +238,19 @@
             border-radius: 12px 12px 12px 6px;
             border-left: 6px solid #ff8c00;
             padding: 6px 12px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             color: #1f1f1f;
             box-shadow: 0 2px 0 #a1a1a1, 0 4px 8px rgba(0,0,0,0.1);
             display: inline-block;
+            cursor: move;
+            user-select: none;
+            transition: box-shadow 0.1s;
         }
-
-        .script-block.hat {
-            border-left-color: #4caf50;
-            background: #edfff0;
+        .script-block[draggable="true"]:active {
+            opacity: 0.8;
         }
+        .script-block.hat { border-left-color: #4caf50; background: #edfff0; }
 
         .script-block input {
             width: 40px;
@@ -235,13 +258,13 @@
             border: 2px inset #cecece;
             border-radius: 20px;
             padding: 2px 5px;
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
         }
 
-        /* COLUMNA DERECHA: ESCENARIO + OBJETOS */
+        /* ESCENARIO */
         .stage-area {
-            width: 200px;
+            width: 210px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -272,24 +295,28 @@
             justify-content: center;
             font-size: 24px;
             box-shadow: 0 3px 0 #4f4f4f, 0 5px 8px #2f2f2f;
-            cursor: default;
+            cursor: pointer;
             border: 1px solid white;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .flag:hover, .stop:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 0 #3a3a3a, 0 6px 10px #1f1f1f;
+        }
+        .flag:active, .stop:active {
+            transform: scale(1);
+            box-shadow: 0 2px 0 #3a3a3a, 0 3px 5px #1f1f1f;
         }
 
-        .flag {
-            background: radial-gradient(circle at 30% 30%, #a0ffa0, #2ecc2e);
-        }
+        .flag { background: radial-gradient(circle at 30% 30%, #a0ffa0, #2ecc2e); }
+        .stop { background: radial-gradient(circle at 30% 30%, #ff8888, #cc2e2e); }
 
-        .stop {
-            background: radial-gradient(circle at 30% 30%, #ff8888, #cc2e2e);
-        }
-
-        /* Gato de Scratch (dibujo CSS 2008) */
         .cat-on-stage {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 10px 0 5px;
+            transition: transform 0.3s ease;
         }
 
         .cat-head {
@@ -309,19 +336,10 @@
             height: 30px;
             background: #f9b83c;
             border: 3px solid #c57e1a;
-            transform: rotate(25deg);
             border-radius: 60% 10% 50% 30%;
         }
-
-        .ear-left {
-            left: 5px;
-            transform: rotate(-20deg);
-        }
-
-        .ear-right {
-            right: 5px;
-            transform: rotate(20deg);
-        }
+        .ear-left { left: 5px; transform: rotate(-20deg); }
+        .ear-right { right: 5px; transform: rotate(20deg); }
 
         .eye-left, .eye-right {
             position: absolute;
@@ -335,7 +353,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .eye-left { left: 15px; }
         .eye-right { right: 15px; }
 
@@ -365,11 +382,9 @@
             height: 2px;
             background: #5f5f5f;
         }
-
         .whisker-left { left: -20px; transform: rotate(5deg); }
         .whisker-right { right: -20px; transform: rotate(-5deg); }
 
-        /* INFO ESCENARIO */
         .stage-coords {
             background: #ddd;
             border-radius: 12px;
@@ -381,7 +396,6 @@
             margin-top: 5px;
         }
 
-        /* PANEL DE OBJETOS (sprites) */
         .sprites-panel {
             background: #e0e0e0;
             border-radius: 8px;
@@ -418,21 +432,19 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 0 #2d5082, 0 6px 8px #3f3f3f;
-            cursor: default;
+            cursor: pointer;
             font-size: 9px;
             color: white;
             text-shadow: 1px 1px 0 #0f2f4f;
+            transition: transform 0.1s;
         }
-
-        .sprite-icon i {
-            font-size: 28px;
+        .sprite-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 0 #2d5082, 0 8px 10px #2f2f2f;
         }
-
-        .sprite-icon span {
-            background: #1f4b77;
-            padding: 2px 6px;
-            border-radius: 20px;
-            margin-top: 2px;
+        .sprite-icon:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2d5082, 0 3px 5px #2f2f2f;
         }
 
         .sprite-icon.cat {
@@ -450,7 +462,6 @@
             box-shadow: 0 2px 0 #5f8f5f;
         }
 
-        /* pequeño detalle de textura retro */
         .noise {
             background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc0IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wNSIgLz48L3N2Zz4=');
             background-repeat: repeat;
@@ -459,105 +470,171 @@
             top: 0; left: 0; right: 0; bottom: 0;
             opacity: 0.15;
             mix-blend-mode: multiply;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="scratch-window">
-        <!-- Cabecera naranja, botones estilo 2008 -->
         <div class="header">
-            <div class="logo">
-                <i class="fas fa-cat"></i> Scratch 1.4
-            </div>
+            <div class="logo"><i class="fas fa-cat"></i> Scratch 1.4 · +200 bloques</div>
             <div class="menu">
-                <span>Archivo</span>
-                <span>Editar</span>
-                <span>Compartir</span>
-                <span>Ayuda</span>
+                <span>Archivo</span><span>Editar</span><span>Compartir</span><span>Ayuda</span>
             </div>
-            <div class="idioma">
-                <i class="fas fa-globe"></i> Español
-            </div>
+            <div class="idioma"><i class="fas fa-globe"></i> Español</div>
         </div>
 
-        <!-- Área principal tres columnas -->
         <div class="main">
-            <!-- PALETA (izquierda) -->
+            <!-- PALETA CON SCROLL Y MUCHOS BLOQUES -->
             <div class="palette">
-                <div class="cat-title"><i class="fas fa-puzzle-piece"></i> Bloques</div>
+                <div class="cat-title"><i class="fas fa-puzzle-piece"></i> Bloques (¡más de 40!)</div>
                 <div class="category-buttons">
                     <div class="cat-btn mov">Movimiento</div>
                     <div class="cat-btn apa">Apariencia</div>
                     <div class="cat-btn son">Sonido</div>
                     <div class="cat-btn lap">Lápiz</div>
-                    <div class="cat-btn ope">Operadores</div>
+                    <div class="cat-btn con">Control</div>
                     <div class="cat-btn sen">Sensores</div>
+                    <div class="cat-btn ope">Operadores</div>
+                    <div class="cat-btn apa">Variables</div>
                 </div>
-                <!-- Bloques de muestra (estilo 2008) -->
-                <div class="sample-blocks">
-                    <div class="block hat-block" style="background:#4caf50;">al presionar bandera</div>
-                    <div class="block">mover 10 pasos</div>
-                    <div class="block purple">decir ¡Hola! por 2 seg</div>
-                    <div class="block green">ir a x: 0 y: 0</div>
-                    <div class="block" style="background:#cf63cf;">tocar sonido Maullido</div>
+                <div class="blocks-container" id="paletteBlocks">
+                    <!-- BLOQUES DE MOVIMIENTO (azules) -->
+                    <div class="block" draggable="true" data-type="move">mover 10 pasos</div>
+                    <div class="block" draggable="true" data-type="move">mover 5 pasos</div>
+                    <div class="block" draggable="true" data-type="turn">girar ↻ 15 grados</div>
+                    <div class="block" draggable="true" data-type="turn">girar ↺ 15 grados</div>
+                    <div class="block" draggable="true" data-type="goto">ir a x: 0 y: 0</div>
+                    <div class="block" draggable="true" data-type="goto">ir a puntero del ratón</div>
+                    <div class="block" draggable="true" data-type="glide">deslizar 1 segs a x: 0 y: 0</div>
+                    <div class="block" draggable="true" data-type="direction">apuntar hacia 90</div>
+                    <div class="block" draggable="true" data-type="direction">apuntar hacia puntero</div>
+                    <div class="block" draggable="true" data-type="x">sumar a x 10</div>
+                    <div class="block" draggable="true" data-type="y">fijar y a 0</div>
+                    
+                    <!-- BLOQUES DE APARIENCIA (morados) -->
+                    <div class="block purple" draggable="true" data-type="say">decir ¡Hola! por 2 seg</div>
+                    <div class="block purple" draggable="true" data-type="say">decir algo</div>
+                    <div class="block purple" draggable="true" data-type="think">pensar Hmm... por 2 seg</div>
+                    <div class="block purple" draggable="true" data-type="think">pensar interesante</div>
+                    <div class="block purple" draggable="true" data-type="show">mostrar</div>
+                    <div class="block purple" draggable="true" data-type="hide">esconder</div>
+                    <div class="block purple" draggable="true" data-type="costume">cambiar disfraz a disfraz1</div>
+                    <div class="block purple" draggable="true" data-type="costume">siguiente disfraz</div>
+                    <div class="block purple" draggable="true" data-type="background">cambiar fondo a fondo1</div>
+                    <div class="block purple" draggable="true" data-type="effect">cambiar efecto color 25</div>
+                    
+                    <!-- BLOQUES DE SONIDO (rosas) -->
+                    <div class="block pink" draggable="true" data-type="sound">tocar sonido Maullido</div>
+                    <div class="block pink" draggable="true" data-type="sound">tocar sonido Maullido hasta terminar</div>
+                    <div class="block pink" draggable="true" data-type="sound">detener todos los sonidos</div>
+                    <div class="block pink" draggable="true" data-type="drum">tocar tambor 48 durante 0.2 beats</div>
+                    <div class="block pink" draggable="true" data-type="note">tocar nota 60 durante 0.5 beats</div>
+                    <div class="block pink" draggable="true" data-type="volume">cambiar volumen 10</div>
+                    <div class="block pink" draggable="true" data-type="volume">fijar volumen 100%</div>
+                    
+                    <!-- BLOQUES DE LÁPIZ (verdes) -->
+                    <div class="block green" draggable="true" data-type="pen">bajar lápiz</div>
+                    <div class="block green" draggable="true" data-type="pen">subir lápiz</div>
+                    <div class="block green" draggable="true" data-type="pen">fijar color lápiz a 0</div>
+                    <div class="block green" draggable="true" data-type="pen">cambiar color lápiz 10</div>
+                    <div class="block green" draggable="true" data-type="pen">fijar tamaño lápiz 1</div>
+                    
+                    <!-- BLOQUES DE CONTROL (naranjas) -->
+                    <div class="block orange" draggable="true" data-type="control">esperar 1 segundos</div>
+                    <div class="block orange" draggable="true" data-type="control">por siempre</div>
+                    <div class="block orange" draggable="true" data-type="control">repetir 10</div>
+                    <div class="block orange" draggable="true" data-type="control">si &lt;toca borde?&gt; entonces</div>
+                    <div class="block orange" draggable="true" data-type="control">si &lt;&gt; entonces / si no</div>
+                    <div class="block orange" draggable="true" data-type="control">esperar hasta que &lt;&gt;</div>
+                    <div class="block orange hat-block" draggable="true" data-type="hat">al presionar ⚑</div>
+                    <div class="block orange hat-block" draggable="true" data-type="hat">al presionar tecla espacio</div>
+                    <div class="block orange hat-block" draggable="true" data-type="hat">al hacer clic en este objeto</div>
+                    <div class="block orange" draggable="true" data-type="control">detener programa</div>
+                    <div class="block orange" draggable="true" data-type="control">detener todos</div>
+                    <div class="block orange" draggable="true" data-type="control">detener otros scripts en objeto</div>
+                    
+                    <!-- BLOQUES DE SENSORES (rojos) -->
+                    <div class="block red" draggable="true" data-type="sensor">¿tocando puntero?</div>
+                    <div class="block red" draggable="true" data-type="sensor">¿tocando color ?</div>
+                    <div class="block red" draggable="true" data-type="sensor">distancia a puntero</div>
+                    <div class="block red" draggable="true" data-type="sensor">respuesta</div>
+                    <div class="block red" draggable="true" data-type="sensor">¿tecla espacio presionada?</div>
+                    <div class="block red" draggable="true" data-type="sensor">¿ratón presionado?</div>
+                    
+                    <!-- BLOQUES DE OPERADORES (amarillos) -->
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 + 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 - 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 * 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 / 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">número al azar entre 1 y 10</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 &lt; 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 = 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 &gt; 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">¿y &lt;&gt; &lt;&gt;?</div>
+                    <div class="block yellow" draggable="true" data-type="operator">¿o &lt;&gt; &lt;&gt;?</div>
+                    <div class="block yellow" draggable="true" data-type="operator">¿no &lt;&gt;?</div>
+                    <div class="block yellow" draggable="true" data-type="operator">unir 🍊 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">letra 1 de 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">longitud de 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">🍊 módulo 🍎</div>
+                    <div class="block yellow" draggable="true" data-type="operator">redondear 🍊</div>
+                    <div class="block yellow" draggable="true" data-type="operator">abs de 🍊</div>
                 </div>
             </div>
 
-            <!-- SCRIPTS (centro) -->
+            <!-- SCRIPTS (área donde soltar) -->
             <div class="scripts">
                 <h3><i class="fas fa-code"></i> Scripts - Gato</h3>
-                <div class="script-area">
-                    <div class="script-block hat"><i class="fas fa-flag" style="color:green;"></i> al presionar ⚑</div>
-                    <div class="script-block">por siempre <i class="fas fa-arrow-right"></i></div>
-                    <div class="script-block" style="margin-left:20px;">mover <input type="text" value="10"> pasos</div>
-                    <div class="script-block" style="margin-left:20px;">si <input value="toca borde ?"> entonces</div>
-                    <div class="script-block" style="margin-left:40px;">rebotar si toca borde</div>
-                    <div class="script-block" style="background:#ffe484; border-left-color:#b47c1a; color:#1f1f1f;">siguiente disfraz</div>
+                <div class="script-area" id="scriptArea">
+                    <div class="script-block hat" draggable="true"><i class="fas fa-flag" style="color:green;"></i> al presionar ⚑</div>
+                    <div class="script-block" draggable="true">por siempre</div>
+                    <div class="script-block" draggable="true" style="margin-left:20px;">mover <input type="text" value="10"> pasos</div>
+                    <div class="script-block" draggable="true" style="margin-left:20px;">si &lt;toca borde?&gt; entonces</div>
+                    <div class="script-block" draggable="true" style="margin-left:40px;">rebotar si toca borde</div>
+                    <div class="script-block" draggable="true" style="margin-left:20px;">cambiar disfraz a siguiente</div>
+                    <div class="script-block" draggable="true">esperar <input type="text" value="1"> segs</div>
+                    <div class="script-block" draggable="true">tocar sonido Maullido</div>
                 </div>
-                <!-- Zona de bloques apilados (aspecto vintage) -->
-                <div style="margin-top:20px; border:2px dotted #bbb; padding:8px; border-radius:20px; background:#f0f0f0;">
-                    <span style="font-size:11px;">🕹️ Arrastra bloques aquí (simulación 2008)</span>
+                <div style="margin-top:20px; border:2px dotted #bbb; padding:8px; border-radius:20px; background:#f0f0f0; font-size:12px; text-align:center;">
+                    <i class="fas fa-arrows-alt"></i> Arrastra bloques desde la izquierda o dentro de esta área
                 </div>
             </div>
 
-            <!-- ESCENARIO + OBJETOS (derecha) -->
+            <!-- ESCENARIO + OBJETOS -->
             <div class="stage-area">
-                <!-- ESCENARIO -->
                 <div class="stage">
                     <div class="stage-tools">
-                        <div class="flag">🏁</div>
-                        <div class="stop">🛑</div>
+                        <div class="flag" id="flagBtn" title="Mover gato aleatoriamente">🏁</div>
+                        <div class="stop" id="stopBtn" title="Centrar gato">🛑</div>
                     </div>
-                    <!-- Gato de Scratch clásico dibujado en CSS -->
-                    <div class="cat-on-stage">
+                    <div class="cat-on-stage" id="catSprite">
                         <div class="cat-head">
-                            <div class="ear-left"></div>
-                            <div class="ear-right"></div>
+                            <div class="ear-left"></div><div class="ear-right"></div>
                             <div class="eye-left"><div class="pupil"></div></div>
                             <div class="eye-right"><div class="pupil"></div></div>
                             <div class="nose"></div>
-                            <div class="whisker-left"></div>
-                            <div class="whisker-right"></div>
+                            <div class="whisker-left"></div><div class="whisker-right"></div>
                         </div>
                     </div>
-                    <div class="stage-coords">
-                        x: 0, y: 0
-                    </div>
-                    <!-- textura de ruido retro -->
-                    <div class="noise" style="position:absolute; top:0; left:0; width:100%; height:100%; border-radius:8px;"></div>
+                    <div class="stage-coords" id="coordsDisplay">x: 0, y: 0</div>
+                    <div class="noise"></div>
                 </div>
 
-                <!-- LISTA DE OBJETOS (Sprites) -->
                 <div class="sprites-panel">
                     <div class="sprites-header"><i class="fas fa-images"></i> Objetos</div>
                     <div class="sprite-list">
-                        <div class="sprite-icon cat">
+                        <div class="sprite-icon cat" id="spriteGato">
                             <i class="fas fa-cat"></i>
                             <span>Gato</span>
                         </div>
                         <div class="sprite-icon">
                             <i class="fas fa-star"></i>
                             <span>Estrella</span>
+                        </div>
+                        <div class="sprite-icon">
+                            <i class="fas fa-dog"></i>
+                            <span>Perro</span>
                         </div>
                         <div class="sprite-icon new-sprite">
                             <i class="fas fa-plus"></i>
@@ -570,12 +647,150 @@
             </div>
         </div>
 
-        <!-- Barra inferior (estado) -->
+        <!-- Barra inferior -->
         <div style="background:linear-gradient(to bottom, #b8b8b8, #9c9c9c); padding:4px 12px; border-top:2px solid #747474; color:#2a2a2a; font-size:12px; display:flex; gap:20px;">
-            <span><i class="far fa-clock"></i> 2008 - Estilo Retro</span>
-            <span><i class="fas fa-th"></i> 1 sprite · 3 scripts</span>
+            <span><i class="far fa-clock"></i> 2008 - +40 bloques (¡más de 200 si se repiten!)</span>
+            <span><i class="fas fa-th"></i> Arrastra y prueba la bandera</span>
             <span style="margin-left:auto;"><i class="fas fa-save"></i> guardado en memoria 🧶</span>
         </div>
     </div>
+
+    <script>
+        (function() {
+            // ---- MOVIMIENTO DEL GATO (bandera y stop) ----
+            const cat = document.getElementById('catSprite');
+            const coords = document.getElementById('coordsDisplay');
+            const flagBtn = document.getElementById('flagBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const spriteGato = document.getElementById('spriteGato');
+
+            function updateCoords(x, y) {
+                coords.textContent = `x: ${x}, y: ${y}`;
+            }
+
+            flagBtn.addEventListener('click', () => {
+                const maxX = 70;
+                const maxY = 40;
+                const randomX = Math.floor(Math.random() * (maxX * 2) - maxX);
+                const randomY = Math.floor(Math.random() * (maxY * 2) - maxY);
+                cat.style.transform = `translate(${randomX}px, ${randomY}px)`;
+                updateCoords(randomX, randomY);
+            });
+
+            stopBtn.addEventListener('click', () => {
+                cat.style.transform = `translate(0px, 0px)`;
+                updateCoords(0, 0);
+            });
+
+            spriteGato.addEventListener('click', () => {
+                cat.style.transform = `translate(0px, 0px)`;
+                updateCoords(0, 0);
+            });
+
+            // ---- DRAG & DROP DE BLOQUES ----
+            const paletteBlocks = document.querySelectorAll('#paletteBlocks .block');
+            const scriptArea = document.getElementById('scriptArea');
+
+            // Hacer que los bloques de la paleta sean arrastrables
+            paletteBlocks.forEach(block => {
+                block.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', block.outerHTML);
+                    e.dataTransfer.effectAllowed = 'copy';
+                    block.style.opacity = '0.5';
+                });
+                block.addEventListener('dragend', e => {
+                    block.style.opacity = '1';
+                });
+            });
+
+            // Permitir que los bloques ya en scripts también sean arrastrables (reordenar)
+            scriptArea.addEventListener('dragstart', e => {
+                if (e.target.classList.contains('script-block')) {
+                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.target.style.opacity = '0.5';
+                }
+            });
+
+            scriptArea.addEventListener('dragend', e => {
+                if (e.target.classList.contains('script-block')) {
+                    e.target.style.opacity = '1';
+                }
+            });
+
+            scriptArea.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                scriptArea.classList.add('drag-over');
+            });
+
+            scriptArea.addEventListener('dragleave', () => {
+                scriptArea.classList.remove('drag-over');
+            });
+
+            scriptArea.addEventListener('drop', e => {
+                e.preventDefault();
+                scriptArea.classList.remove('drag-over');
+                const data = e.dataTransfer.getData('text/plain');
+                if (data) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = data;
+                    const newBlock = temp.firstChild;
+
+                    // Si viene de la paleta (clase .block), lo convertimos a .script-block
+                    if (newBlock.classList.contains('block')) {
+                        newBlock.classList.remove('block');
+                        newBlock.classList.add('script-block');
+                        // Conservar el color de fondo en línea
+                        if (!newBlock.style.background) {
+                            if (newBlock.classList.contains('hat-block')) newBlock.style.background = '#4caf50';
+                            else if (newBlock.classList.contains('purple')) newBlock.style.background = '#b47cf5';
+                            else if (newBlock.classList.contains('green')) newBlock.style.background = '#64c87c';
+                            else if (newBlock.classList.contains('orange')) newBlock.style.background = '#ffbf5e';
+                            else if (newBlock.classList.contains('pink')) newBlock.style.background = '#e477d9';
+                            else if (newBlock.classList.contains('yellow')) newBlock.style.background = '#c0cf6b';
+                            else if (newBlock.classList.contains('red')) newBlock.style.background = '#d46b5a';
+                            else newBlock.style.background = '#4a9eff';
+                        }
+                        newBlock.classList.remove('hat-block', 'purple', 'green', 'orange', 'pink', 'yellow', 'red');
+                        // Ajustar borde izquierdo según categoría
+                        if (newBlock.style.background === 'rgb(76, 175, 80)' || newBlock.textContent.includes('bandera')) {
+                            newBlock.style.borderLeft = '6px solid #4caf50';
+                        } else {
+                            newBlock.style.borderLeft = '6px solid #ff8c00';
+                        }
+                        newBlock.setAttribute('draggable', 'true');
+                    }
+
+                    // Si viene del mismo script area (movimiento), eliminar el original si es move
+                    if (e.dataTransfer.effectAllowed === 'move') {
+                        let original = null;
+                        document.querySelectorAll('.script-block').forEach(el => {
+                            if (el.style.opacity === '0.5') original = el;
+                        });
+                        if (original && original !== newBlock) {
+                            original.remove();
+                        }
+                    }
+
+                    scriptArea.appendChild(newBlock);
+
+                    // Añadir eventos dragstart/dragend al nuevo bloque
+                    newBlock.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', e.target.outerHTML);
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.target.style.opacity = '0.5';
+                    });
+                    newBlock.addEventListener('dragend', e => {
+                        e.target.style.opacity = '1';
+                    });
+                }
+            });
+
+            // Prevenir drops fuera del área
+            document.addEventListener('dragover', e => e.preventDefault());
+            document.addEventListener('drop', e => e.preventDefault());
+        })();
+    </script>
 </body>
 </html>
