@@ -3,692 +3,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Scratch: Bloques y Creador de Sprites</title>
+    <title>Windows 95 · Mini Google & Bloc de notas</title>
     <style>
         * {
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-            user-select: none;
-        }
-        body {
-            background: #4d4d4d;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Evita seleccionar texto al arrastrar */
+            font-family: 'Segoe UI', 'Arial', sans-serif;
         }
-        .scratch-container {
-            width: 1100px;
-            max-width: 100%;
-            background: #f0f0f0;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            background: #008080; /* color clásico de fondo de Windows 95 */
         }
-        h1 {
-            margin: 0 0 15px 0;
-            color: #4d4d4d;
-            font-size: 28px;
-            text-align: center;
-            letter-spacing: 2px;
-            background: #ffd966;
-            padding: 10px;
-            border-radius: 40px;
+
+        /* Escritorio */
+        .desktop {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #3a6ea5; /* color por defecto (azul teclado) */
+            background-size: cover;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
         }
-        .main-panels {
-            display: grid;
-            grid-template-columns: 250px 1fr 250px;
+
+        /* Iconos del escritorio */
+        .icons-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-bottom: 20px;
+            z-index: 5;
         }
-        /* Panel izquierdo - Bloques */
-        .blocks-panel {
-            background: #e5e5e5;
-            border-radius: 15px;
-            padding: 10px;
-            box-shadow: inset 0 0 5px #aaa;
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 75px;
+            cursor: pointer;
+            color: white;
+            text-shadow: 1px 1px 0 #000;
+            font-size: 12px;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 3px;
         }
-        .categories {
+
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid #fff;
+            padding: 4px 0;
+        }
+
+        .icon-img {
+            font-size: 32px;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+        }
+
+        /* Ventanas (estilo Windows 95) */
+        .window {
+            position: absolute;
+            min-width: 260px;
+            min-height: 180px;
+            background: #c0c0c0; /* gris clásico */
+            border: 3px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            display: none; /* ocultas por defecto */
+            z-index: 10;
+            font-size: 14px;
+        }
+
+        .window.active-window {
+            z-index: 100; /* se actualiza con JS */
+        }
+
+        .title-bar {
+            background: #000080; /* azul marino */
+            color: white;
+            padding: 4px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 13px;
+            border: 1px solid #c0c0c0;
+            border-bottom: 2px solid #404040;
+        }
+
+        .title-bar:active {
+            cursor: grabbing;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .close-btn {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+            width: 22px;
+            height: 22px;
+            text-align: center;
+            line-height: 18px;
+            cursor: pointer;
+        }
+
+        .close-btn:active {
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+        }
+
+        .window-content {
+            padding: 15px 12px;
+            background: #c0c0c0;
+            border: 2px solid #c0c0c0;
+            border-top: none;
+        }
+
+        /* Barra de tareas */
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: #c0c0c0;
+            border-top: 3px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            z-index: 200;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+        }
+
+        .start-btn {
+            background: #c0c0c0;
+            border: 3px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            padding: 5px 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .start-btn:active {
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+        }
+
+        .taskbar-time {
+            margin-left: auto;
+            background: #a0a0a0;
+            border: 2px solid;
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+            padding: 5px 12px;
+            font-size: 13px;
+        }
+
+        /* Estilos para el mini google */
+        .google-logo {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #000080;
+            letter-spacing: -1px;
+        }
+        .google-logo span:nth-child(1) { color: #4285F4; }
+        .google-logo span:nth-child(2) { color: #EA4335; }
+        .google-logo span:nth-child(3) { color: #FBBC05; }
+        .google-logo span:nth-child(4) { color: #34A853; }
+
+        .search-box {
             display: flex;
             gap: 5px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        .category-btn {
+        .search-box input {
             flex: 1;
-            background: #c4c4c4;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 0;
+            border: 2px solid;
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+            padding: 5px;
+            outline: none;
+        }
+        .search-box button {
+            background: #c0c0c0;
+            border: 3px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            padding: 5px 10px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            color: white;
-            text-shadow: 1px 1px 0 #00000030;
         }
-        .category-btn.active {
-            border: 2px solid white;
-            box-shadow: 0 0 0 2px #4d4d4d;
+        .search-box button:active {
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
         }
-        .category-btn[data-cat="motion"] { background: #4a6cd4; }
-        .category-btn[data-cat="looks"] { background: #9b4f96; }
-        .category-btn[data-cat="sound"] { background: #d45d4a; }
-        
-        .blocks-container {
+        .fake-results {
             background: white;
-            border-radius: 15px;
-            padding: 15px;
-            min-height: 400px;
-            box-shadow: inset 0 0 5px #ccc;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            border: 2px solid;
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+            padding: 8px;
+            min-height: 60px;
+            font-size: 12px;
         }
-        .block {
-            padding: 12px 15px;
-            border-radius: 30px 8px 8px 30px; /* forma de bloque tipo pieza */
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: 0.1s;
-            position: relative;
-            border-left: 8px solid rgba(0,0,0,0.2);
-        }
-        .block:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
-        }
-        .block.motion { background: #4a6cd4; }
-        .block.looks { background: #9b4f96; }
-        .block.sound { background: #d45d4a; }
-        
-        /* Panel central - Script */
-        .script-panel {
-            background: #e0e0e0;
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: inset 0 0 8px #888;
-        }
-        .script-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            background: #f5f5f5;
-            padding: 8px 15px;
-            border-radius: 40px;
-            align-items: center;
-        }
-        .run-btn {
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 25px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 3px 0 #2e7d32;
-        }
-        .run-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #2e7d32;
-        }
-        .reset-pos-btn {
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 5px 15px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .script-area {
+
+        /* Bloc de notas */
+        .notepad textarea {
+            width: 100%;
+            height: 150px;
+            border: 2px solid;
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
             background: white;
-            border-radius: 15px;
-            flex: 1;
-            min-height: 350px;
-            padding: 15px;
-            overflow-y: auto;
-            box-shadow: inset 0 0 5px #aaa;
+            padding: 5px;
+            font-family: 'Courier New', monospace;
+            resize: none;
         }
-        .script-item {
-            background: #ffd966;
-            border-radius: 20px;
-            padding: 8px 12px;
+
+        /* Cambiar fondo - paleta */
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        .color-swatch {
+            width: 50px;
+            height: 40px;
+            border: 3px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            cursor: pointer;
+        }
+        .color-swatch:active {
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-right-color: #f0f0f0;
+            border-bottom-color: #f0f0f0;
+        }
+        .swatch-azul { background: #3a6ea5; }
+        .swatch-verde { background: #2e7d32; }
+        .swatch-rojo { background: #8b0000; }
+        .swatch-gris { background: #6b6b6b; }
+        .swatch-teal { background: #008080; }
+        .swatch-lila { background: #5e35b1; }
+
+        .info-text {
+            font-size: 12px;
             margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            border-left: 8px solid #d4a017;
-            box-shadow: 0 2px 0 #b98f12;
-        }
-        .remove-block {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #a12b2b;
-        }
-        .remove-block:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-        
-        /* Panel derecho - Escenario */
-        .stage-panel {
-            background: #e5e5e5;
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: inset 0 0 5px #aaa;
-        }
-        .stage {
-            width: 220px;
-            height: 220px;
-            background: #c6e9ff;
-            border-radius: 20px;
-            box-shadow: 0 0 0 4px #b0b0b0;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        #stageCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .sprite-info {
-            font-weight: bold;
-            background: #f5f5f5;
-            padding: 8px 15px;
-            border-radius: 40px;
-            width: 100%;
             text-align: center;
         }
-        
-        /* Editor de sprites */
-        .sprite-editor {
-            background: #d9d9d9;
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
-        .pixel-canvas-container {
-            text-align: center;
-        }
-        #pixelCanvas {
-            width: 160px;
-            height: 160px;
-            image-rendering: pixelated;
-            border: 3px solid #4d4d4d;
-            border-radius: 10px;
-            background: white;
-            cursor: crosshair;
-        }
-        .pixel-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            min-width: 150px;
-        }
-        .color-picker {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .color-option {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px black;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .color-option.selected {
-            border: 4px solid #ffdd00;
-            transform: scale(1.1);
-        }
-        .editor-btn {
-            background: #4d4d4d;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 3px 0 #2d2d2d;
-        }
-        .editor-btn:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-        footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #aaa;
-            font-size: 14px;
-        }
+
+        /* Posiciones predefinidas para ventanas (para no abrirse superpuestas) */
+        #windowGoogle { top: 60px; left: 120px; }
+        #windowNotepad { top: 150px; left: 350px; }
+        #windowFondo { top: 250px; left: 200px; }
     </style>
+    <!-- FontAwesome para iconos opcionales (solo por estilo) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="scratch-container">
-        <h1>⚡ MINI SCRATCH ⚡</h1>
-        
-        <div class="main-panels">
-            <!-- Panel de bloques izquierdo -->
-            <div class="blocks-panel">
-                <div class="categories">
-                    <button class="category-btn active" data-cat="motion">Movimiento</button>
-                    <button class="category-btn" data-cat="looks">Apariencia</button>
-                    <button class="category-btn" data-cat="sound">Sonido</button>
-                </div>
-                <div class="blocks-container" id="blocksContainer">
-                    <!-- Bloques de movimiento por defecto -->
-                    <div class="block motion" data-block='{"type":"move","value":10}'>mover 10 pasos</div>
-                    <div class="block motion" data-block='{"type":"turn","value":15}'>girar 15 grados</div>
-                    <div class="block motion" data-block='{"type":"move","value":-10}'>mover -10 pasos</div>
-                </div>
+    <div class="desktop" id="desktop">
+        <!-- Iconos del escritorio -->
+        <div class="icons-container">
+            <div class="desktop-icon" data-window="google">
+                <div class="icon-img"><i class="fab fa-google"></i>🌐</div>
+                <span>Mini Google</span>
             </div>
-            
-            <!-- Panel central: script -->
-            <div class="script-panel">
-                <div class="script-header">
-                    <span>🧩 MIS BLOQUES</span>
-                    <button class="run-btn" id="runScriptBtn">▶ EJECUTAR</button>
-                    <button class="reset-pos-btn" id="resetPosBtn">↺ reiniciar</button>
-                </div>
-                <div class="script-area" id="scriptArea">
-                    <!-- Aquí se agregarán los bloques seleccionados -->
-                </div>
+            <div class="desktop-icon" data-window="notepad">
+                <div class="icon-img"><i class="fas fa-sticky-note"></i>📝</div>
+                <span>Bloc de notas</span>
             </div>
-            
-            <!-- Panel derecho: escenario -->
-            <div class="stage-panel">
-                <div class="stage">
-                    <canvas id="stageCanvas" width="220" height="220"></canvas>
-                </div>
-                <div class="sprite-info" id="spriteCoords">x: 100, y: 100</div>
+            <div class="desktop-icon" data-window="fondo">
+                <div class="icon-img"><i class="fas fa-palette"></i>🖼️</div>
+                <span>Cambiar fondo</span>
             </div>
         </div>
-        
-        <!-- Editor de sprites (pixel art) -->
-        <div class="sprite-editor">
-            <div class="pixel-canvas-container">
-                <canvas id="pixelCanvas" width="160" height="160"></canvas>
-                <p style="margin:5px 0 0; font-weight:bold;">✏️ Editor 16x16</p>
-            </div>
-            <div class="pixel-controls">
-                <div class="color-picker" id="colorPicker">
-                    <div class="color-option selected" style="background:#000000;" data-color="#000000"></div>
-                    <div class="color-option" style="background:#ff4d4d;" data-color="#ff4d4d"></div>
-                    <div class="color-option" style="background:#4d4dff;" data-color="#4d4dff"></div>
-                    <div class="color-option" style="background:#4dff4d;" data-color="#4dff4d"></div>
-                    <div class="color-option" style="background:#ffff4d;" data-color="#ffff4d"></div>
-                    <div class="color-option" style="background:#ffffff;" data-color="#ffffff"></div>
+
+        <!-- Ventanas (emulando aplicaciones) -->
+        <!-- Mini Google -->
+        <div class="window" id="windowGoogle">
+            <div class="title-bar">
+                <span>Mini Google</span>
+                <div class="window-controls">
+                    <span class="close-btn" data-window="google">✕</span>
                 </div>
-                <button class="editor-btn" id="clearSpriteBtn">Limpiar todo</button>
-                <button class="editor-btn" id="fillSpriteBtn">Rellenar fondo</button>
-                <p style="font-size:13px; margin:5px 0;">Click y arrastra para dibujar</p>
+            </div>
+            <div class="window-content">
+                <div class="google-logo">
+                    <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="googleInput" placeholder="Buscar en Google...">
+                    <button id="googleSearchBtn">Buscar</button>
+                </div>
+                <div class="fake-results" id="googleResults">
+                    Resultados simulados: escribe y presiona buscar.
+                </div>
+                <div style="font-size:11px; margin-top:6px; color:#333;">* Simulación lúdica</div>
             </div>
         </div>
-        <footer>🧪 Bloques interactivos • Editor de píxeles • Ejecuta tu script</footer>
+
+        <!-- Bloc de notas -->
+        <div class="window" id="windowNotepad">
+            <div class="title-bar">
+                <span>Bloc de notas - sin título</span>
+                <div class="window-controls">
+                    <span class="close-btn" data-window="notepad">✕</span>
+                </div>
+            </div>
+            <div class="window-content notepad">
+                <textarea>Escribe algo aquí... 📄&#10;Este bloc es funcional.&#10;¡Prueba a escribir!</textarea>
+            </div>
+        </div>
+
+        <!-- Cambiar fondo de pantalla -->
+        <div class="window" id="windowFondo">
+            <div class="title-bar">
+                <span>Cambiar fondo de campaña</span>
+                <div class="window-controls">
+                    <span class="close-btn" data-window="fondo">✕</span>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="info-text">Selecciona un color para el escritorio:</div>
+                <div class="color-palette">
+                    <div class="color-swatch swatch-azul" data-color="#3a6ea5" title="Azul clásico"></div>
+                    <div class="color-swatch swatch-verde" data-color="#2e7d32" title="Verde"></div>
+                    <div class="color-swatch swatch-rojo" data-color="#8b0000" title="Rojo"></div>
+                    <div class="color-swatch swatch-gris" data-color="#6b6b6b" title="Gris"></div>
+                    <div class="color-swatch swatch-teal" data-color="#008080" title="Verde azulado"></div>
+                    <div class="color-swatch swatch-lila" data-color="#5e35b1" title="Púrpura"></div>
+                </div>
+                <p style="font-size:11px; margin-top:12px;">* También puedes pegar un URL de imagen (simulado)</p>
+                <!-- Mini input para simular imagen -->
+                <div style="display:flex; gap:4px; margin-top:5px;">
+                    <input type="text" id="imgUrlInput" placeholder="URL de imagen (simulado)" style="width:70%; border:2px inset #aaa;">
+                    <button id="setImgBtn" style="border:2px outset #ccc; background:#c0c0c0;">Aplicar</button>
+                </div>
+                <div style="font-size:10px; margin-top:5px;">(Escribe cualquier texto y aplica, simula cambio)</div>
+            </div>
+        </div>
+
+        <!-- Barra de tareas (solo decorativa) -->
+        <div class="taskbar">
+            <div class="start-btn" id="startBtn">
+                <i class="fas fa-windows"></i> Inicio
+            </div>
+            <!-- Bandeja del sistema y reloj -->
+            <div class="taskbar-time" id="clock">--:-- --</div>
+        </div>
     </div>
 
     <script>
         (function() {
-            // ---------- CONSTANTES Y ESTADO ----------
-            const STAGE_WIDTH = 220, STAGE_HEIGHT = 220;
-            const SPRITE_SIZE = 40; // tamaño del sprite en stage (píxeles)
-            
-            // Estado del sprite
-            let spriteX = 100, spriteY = 100; // posición centro del sprite en stage
-            let direction = 90; // grados, no usado realmente pero por si acaso
-            let spriteMatrix = []; // 16x16 colores (hex string)
-            
-            // Script: lista de bloques
-            let scriptBlocks = [];
-            
-            // Para dibujo en pixel editor
-            let selectedColor = '#000000';
-            let isDrawing = false;
-            let pixelSize = 10; // cada pixel 10x10 en canvas de 160
-            
-            // Ejecución de script
-            let isRunning = false;
-            let executionTimer = null;
-            
-            // Referencias DOM
-            const stageCanvas = document.getElementById('stageCanvas');
-            const stageCtx = stageCanvas.getContext('2d');
-            const pixelCanvas = document.getElementById('pixelCanvas');
-            const pixelCtx = pixelCanvas.getContext('2d');
-            const scriptArea = document.getElementById('scriptArea');
-            const blocksContainer = document.getElementById('blocksContainer');
-            const categoryBtns = document.querySelectorAll('.category-btn');
-            const runBtn = document.getElementById('runScriptBtn');
-            const resetPosBtn = document.getElementById('resetPosBtn');
-            const spriteCoords = document.getElementById('spriteCoords');
-            const colorOptions = document.querySelectorAll('.color-option');
-            const clearBtn = document.getElementById('clearSpriteBtn');
-            const fillBtn = document.getElementById('fillSpriteBtn');
-            
-            // ---------- INICIALIZAR MATRIZ DEL SPRITE (forma por defecto) ----------
-            function initSpriteMatrix() {
-                // Por defecto: un muñeco simple (gato naranja imaginario)
-                for (let y = 0; y < 16; y++) {
-                    spriteMatrix[y] = [];
-                    for (let x = 0; x < 16; x++) {
-                        // forma de círculo/cabeza
-                        let dx = x - 7.5, dy = y - 7.5;
-                        let dist = Math.sqrt(dx*dx + dy*dy);
-                        if (dist < 5) spriteMatrix[y][x] = '#ffa64d'; // naranja
-                        else if (dist < 6) spriteMatrix[y][x] = '#4d4d4d'; // contorno gris
-                        else spriteMatrix[y][x] = '#ffffff'; // fondo blanco
-                    }
-                }
-                // Ojos
-                spriteMatrix[5][5] = '#000000';
-                spriteMatrix[5][10] = '#000000';
-                // Bigotes...
-                spriteMatrix[8][3] = '#000000'; spriteMatrix[8][4] = '#000000'; spriteMatrix[8][11] = '#000000'; spriteMatrix[8][12] = '#000000';
+            // ----- Elementos del DOM -----
+            const desktop = document.getElementById('desktop');
+            const windows = document.querySelectorAll('.window');
+            const icons = document.querySelectorAll('.desktop-icon');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            const googleSearchBtn = document.getElementById('googleSearchBtn');
+            const googleInput = document.getElementById('googleInput');
+            const googleResults = document.getElementById('googleResults');
+            const colorSwatches = document.querySelectorAll('.color-swatch');
+            const setImgBtn = document.getElementById('setImgBtn');
+            const imgUrlInput = document.getElementById('imgUrlInput');
+            const startBtn = document.getElementById('startBtn');
+            const clockDiv = document.getElementById('clock');
+
+            // Variables para el arrastre
+            let draggingWindow = null;
+            let offsetX = 0, offsetY = 0;
+            let maxZ = 50; // para capas
+
+            // ----- Funciones de utilidad -----
+            function bringToFront(win) {
+                maxZ++;
+                win.style.zIndex = maxZ;
             }
-            initSpriteMatrix();
-            
-            // ---------- DIBUJAR SPRITE EN STAGE (escalado) ----------
-            function drawStage() {
-                stageCtx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
-                // Dibujar fondo tipo grid (opcional)
-                stageCtx.fillStyle = '#c6e9ff';
-                stageCtx.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
-                
-                // Dibujar sprite desde matriz (escalado a SPRITE_SIZE x SPRITE_SIZE)
-                let cellSize = SPRITE_SIZE / 16;
-                for (let y = 0; y < 16; y++) {
-                    for (let x = 0; x < 16; x++) {
-                        let color = spriteMatrix[y][x];
-                        stageCtx.fillStyle = color;
-                        stageCtx.fillRect(spriteX - SPRITE_SIZE/2 + x * cellSize, spriteY - SPRITE_SIZE/2 + y * cellSize, cellSize+0.1, cellSize+0.1); // +0.1 para evitar bordes
-                    }
-                }
-                
-                // Dibujar pequeño punto de referencia
-                stageCtx.fillStyle = '#ff0000';
-                stageCtx.beginPath();
-                stageCtx.arc(spriteX, spriteY, 3, 0, 2*Math.PI);
-                stageCtx.fill();
-                
-                // Actualizar coordenadas en pantalla
-                spriteCoords.innerText = `x: ${Math.round(spriteX)}, y: ${Math.round(spriteY)}`;
-            }
-            
-            // ---------- DIBUJAR EDITOR DE PÍXELES (16x16) ----------
-            function drawPixelEditor() {
-                for (let y = 0; y < 16; y++) {
-                    for (let x = 0; x < 16; x++) {
-                        pixelCtx.fillStyle = spriteMatrix[y][x];
-                        pixelCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-                    }
-                }
-                // Dibujar rejilla
-                pixelCtx.strokeStyle = '#cccccc';
-                pixelCtx.lineWidth = 0.5;
-                for (let i = 0; i <= 16; i++) {
-                    pixelCtx.beginPath();
-                    pixelCtx.moveTo(i * pixelSize, 0);
-                    pixelCtx.lineTo(i * pixelSize, 160);
-                    pixelCtx.stroke();
-                    pixelCtx.beginPath();
-                    pixelCtx.moveTo(0, i * pixelSize);
-                    pixelCtx.lineTo(160, i * pixelSize);
-                    pixelCtx.stroke();
+
+            // Mostrar una ventana (si está oculta) y traer al frente
+            function openWindow(winId) {
+                const win = document.getElementById(winId);
+                if (win) {
+                    win.style.display = 'block';
+                    bringToFront(win);
                 }
             }
-            
-            // ---------- ACTUALIZAR AMBOS ----------
-            function updateAll() {
-                drawPixelEditor();
-                drawStage();
+
+            function closeWindow(winId) {
+                const win = document.getElementById(`window${winId.charAt(0).toUpperCase() + winId.slice(1)}`); // windowGoogle, windowNotepad, windowFondo
+                if (win) {
+                    win.style.display = 'none';
+                }
             }
-            
-            // ---------- EVENTOS DEL EDITOR DE PÍXELES ----------
-            function handlePixelDraw(e) {
-                if (!isDrawing && e.type !== 'mousedown') return;
+
+            // ----- Inicializar arrastre en las barras de título -----
+            const titleBars = document.querySelectorAll('.title-bar');
+            titleBars.forEach(bar => {
+                const win = bar.closest('.window');
+                // Evento para iniciar arrastre
+                bar.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Evita seleccionar texto
+                    draggingWindow = win;
+                    bringToFront(win);
+                    // Calcula offset del mouse respecto a la esquina de la ventana
+                    const rect = win.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                });
+            });
+
+            // Al mover el mouse en toda la ventana
+            window.addEventListener('mousemove', (e) => {
+                if (!draggingWindow) return;
                 e.preventDefault();
-                const rect = pixelCanvas.getBoundingClientRect();
-                const scaleX = pixelCanvas.width / rect.width;
-                const scaleY = pixelCanvas.height / rect.height;
-                
-                let mouseX = (e.clientX - rect.left) * scaleX;
-                let mouseY = (e.clientY - rect.top) * scaleY;
-                
-                let gridX = Math.floor(mouseX / pixelSize);
-                let gridY = Math.floor(mouseY / pixelSize);
-                if (gridX >= 0 && gridX < 16 && gridY >= 0 && gridY < 16) {
-                    spriteMatrix[gridY][gridX] = selectedColor;
-                    updateAll();
-                }
-            }
-            
-            pixelCanvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                handlePixelDraw(e);
+                // Calcular nueva posición
+                let newLeft = e.clientX - offsetX;
+                let newTop = e.clientY - offsetY;
+
+                // Limitar dentro del viewport (opcional, para no perder ventana)
+                const winRect = draggingWindow.getBoundingClientRect();
+                const maxX = window.innerWidth - winRect.width - 5;
+                const maxY = window.innerHeight - winRect.height - 45; // deja espacio para la barra
+                newLeft = Math.min(Math.max(0, newLeft), maxX);
+                newTop = Math.min(Math.max(0, newTop), maxY);
+
+                draggingWindow.style.left = newLeft + 'px';
+                draggingWindow.style.top = newTop + 'px';
             });
-            pixelCanvas.addEventListener('mousemove', handlePixelDraw);
-            pixelCanvas.addEventListener('mouseup', () => { isDrawing = false; });
-            pixelCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
-            
-            // Color picker
-            colorOptions.forEach(opt => {
-                opt.addEventListener('click', () => {
-                    colorOptions.forEach(o => o.classList.remove('selected'));
-                    opt.classList.add('selected');
-                    selectedColor = opt.dataset.color;
-                });
+
+            window.addEventListener('mouseup', () => {
+                draggingWindow = null;
             });
-            
-            clearBtn.addEventListener('click', () => {
-                for (let y = 0; y < 16; y++) {
-                    for (let x = 0; x < 16; x++) {
-                        spriteMatrix[y][x] = '#ffffff';
+
+            // Traer al frente al hacer click en cualquier parte de la ventana (excepto botón cerrar)
+            windows.forEach(win => {
+                win.addEventListener('mousedown', (e) => {
+                    // Si el click no viene del botón cerrar (para evitar conflicto)
+                    if (!e.target.classList.contains('close-btn')) {
+                        bringToFront(win);
                     }
-                }
-                updateAll();
-            });
-            
-            fillBtn.addEventListener('click', () => {
-                for (let y = 0; y < 16; y++) {
-                    for (let x = 0; x < 16; x++) {
-                        spriteMatrix[y][x] = selectedColor;
-                    }
-                }
-                updateAll();
-            });
-            
-            // ---------- CAMBIAR CATEGORÍAS DE BLOQUES ----------
-            const blocksByCategory = {
-                motion: [
-                    { text: 'mover 10 pasos', data: { type: 'move', value: 10 } },
-                    { text: 'girar 15 grados', data: { type: 'turn', value: 15 } },
-                    { text: 'mover -10 pasos', data: { type: 'move', value: -10 } }
-                ],
-                looks: [
-                    { text: 'decir Hola', data: { type: 'say', message: 'Hola' } },
-                    { text: 'pensar Mmm...', data: { type: 'think', message: 'Mmm...' } }
-                ],
-                sound: [
-                    { text: 'tocar sonido Pop', data: { type: 'sound', sound: 'pop' } }
-                ]
-            };
-            
-            function loadCategory(cat) {
-                blocksContainer.innerHTML = '';
-                blocksByCategory[cat].forEach(block => {
-                    let blockDiv = document.createElement('div');
-                    blockDiv.className = `block ${cat}`;
-                    blockDiv.setAttribute('data-block', JSON.stringify(block.data));
-                    blockDiv.textContent = block.text;
-                    blocksContainer.appendChild(blockDiv);
-                });
-            }
-            
-            categoryBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    categoryBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    loadCategory(btn.dataset.cat);
                 });
             });
-            
-            // ---------- AÑADIR BLOQUE AL SCRIPT (al hacer click en bloque) ----------
-            blocksContainer.addEventListener('click', (e) => {
-                const block = e.target.closest('.block');
-                if (!block) return;
-                const blockData = JSON.parse(block.dataset.block);
-                scriptBlocks.push(blockData);
-                renderScript();
-            });
-            
-            // Renderizar lista de bloques en scriptArea
-            function renderScript() {
-                scriptArea.innerHTML = '';
-                scriptBlocks.forEach((block, index) => {
-                    let text = '';
-                    if (block.type === 'move') text = `mover ${block.value} pasos`;
-                    else if (block.type === 'turn') text = `girar ${block.value} grados`;
-                    else if (block.type === 'say') text = `decir "${block.message}"`;
-                    else if (block.type === 'think') text = `pensar "${block.message}"`;
-                    else if (block.type === 'sound') text = `sonido: ${block.sound}`;
-                    
-                    let item = document.createElement('div');
-                    item.className = 'script-item';
-                    item.innerHTML = `${text} <button class="remove-block" data-index="${index}">✖</button>`;
-                    scriptArea.appendChild(item);
+
+            // ----- Abrir ventanas desde iconos -----
+            icons.forEach(icon => {
+                icon.addEventListener('dblclick', (e) => { // Doble click más realista
+                    const targetWindow = icon.dataset.window; // google, notepad, fondo
+                    if (targetWindow === 'google') openWindow('windowGoogle');
+                    if (targetWindow === 'notepad') openWindow('windowNotepad');
+                    if (targetWindow === 'fondo') openWindow('windowFondo');
                 });
-                
-                // Añadir eventos a botones de eliminar
-                document.querySelectorAll('.remove-block').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const index = btn.dataset.index;
-                        scriptBlocks.splice(index, 1);
-                        renderScript();
-                    });
+                // También con un click (opcional, pero doble click es más clásico)
+                icon.addEventListener('click', (e) => {
+                    // Simple click también abre para facilitar
+                    const targetWindow = icon.dataset.window;
+                    if (targetWindow === 'google') openWindow('windowGoogle');
+                    if (targetWindow === 'notepad') openWindow('windowNotepad');
+                    if (targetWindow === 'fondo') openWindow('windowFondo');
                 });
-            }
-            
-            // ---------- EJECUTAR SCRIPT ----------
-            function stopExecution() {
-                if (executionTimer) {
-                    clearTimeout(executionTimer);
-                    executionTimer = null;
-                }
-                isRunning = false;
-            }
-            
-            function runNextBlock(index) {
-                if (!isRunning) return;
-                if (index >= scriptBlocks.length) {
-                    isRunning = false;
-                    return;
-                }
-                
-                const block = scriptBlocks[index];
-                // Acción según tipo
-                switch (block.type) {
-                    case 'move':
-                        spriteX += block.value;
-                        // Mantener dentro del stage (con margen)
-                        spriteX = Math.max(SPRITE_SIZE/2, Math.min(STAGE_WIDTH - SPRITE_SIZE/2, spriteX));
-                        spriteY = Math.max(SPRITE_SIZE/2, Math.min(STAGE_HEIGHT - SPRITE_SIZE/2, spriteY));
-                        drawStage();
-                        break;
-                    case 'turn':
-                        direction = (direction + block.value) % 360;
-                        // No hay rotación visible, pero podemos mostrar algo
-                        break;
-                    case 'say':
-                        // dibujar bocadillo rápido
-                        stageCtx.fillStyle = 'white';
-                        stageCtx.strokeStyle = 'black';
-                        stageCtx.lineWidth = 2;
-                        stageCtx.beginPath();
-                        stageCtx.ellipse(spriteX + 30, spriteY - 25, 30, 18, 0, 0, 2*Math.PI);
-                        stageCtx.fill();
-                        stageCtx.stroke();
-                        stageCtx.fillStyle = 'black';
-                        stageCtx.font = 'bold 14px Arial';
-                        stageCtx.fillText(block.message, spriteX + 15, spriteY - 22);
-                        break;
-                    case 'think':
-                        stageCtx.fillStyle = 'white';
-                        stageCtx.strokeStyle = 'black';
-                        stageCtx.beginPath();
-                        stageCtx.ellipse(spriteX + 25, spriteY - 30, 25, 15, 0, 0, 2*Math.PI);
-                        stageCtx.fill();
-                        stageCtx.stroke();
-                        stageCtx.fillStyle = 'black';
-                        stageCtx.font = 'bold 14px Arial';
-                        stageCtx.fillText(block.message, spriteX + 10, spriteY - 28);
-                        break;
-                    case 'sound':
-                        // Beep simple
-                        try {
-                            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                            const oscillator = audioCtx.createOscillator();
-                            const gainNode = audioCtx.createGain();
-                            oscillator.connect(gainNode);
-                            gainNode.connect(audioCtx.destination);
-                            oscillator.frequency.value = 440;
-                            gainNode.gain.value = 0.1;
-                            oscillator.start();
-                            oscillator.stop(audioCtx.currentTime + 0.2);
-                        } catch (e) {}
-                        break;
-                }
-                
-                // Esperar un poco antes del siguiente bloque
-                executionTimer = setTimeout(() => {
-                    runNextBlock(index + 1);
-                }, 500);
-            }
-            
-            runBtn.addEventListener('click', () => {
-                if (isRunning) {
-                    stopExecution();
-                }
-                isRunning = true;
-                runNextBlock(0);
             });
-            
-            resetPosBtn.addEventListener('click', () => {
-                spriteX = 100;
-                spriteY = 100;
-                direction = 90;
-                drawStage();
+
+            // ----- Cerrar ventanas con botón X -----
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evita que el click llegue al title bar o ventana
+                    const winId = btn.dataset.window; // google, notepad, fondo
+                    closeWindow(winId);
+                });
             });
-            
-            // ---------- INICIALIZAR TODO ----------
-            updateAll();
-            renderScript();
+
+            // ----- Funcionalidad Mini Google (simulada) -----
+            googleSearchBtn.addEventListener('click', () => {
+                const query = googleInput.value.trim();
+                if (query === '') {
+                    googleResults.innerText = '🔍 Escribe algo para buscar.';
+                } else {
+                    googleResults.innerHTML = `🔍 <strong>Resultados simulados para:</strong> "${query}"<br>📄 Página 1 - Aquí verías enlaces de ejemplo.<br>🌐 Esta es una simulación lúdica del mini Google.`;
+                }
+            });
+            googleInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    googleSearchBtn.click();
+                }
+            });
+
+            // ----- Cambiar fondo de pantalla (colores sólidos) -----
+            colorSwatches.forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const color = swatch.dataset.color;
+                    desktop.style.background = color;
+                });
+            });
+
+            // Simular cambio con URL (aunque no cargamos imagen real, solo cambiamos a un color gris claro)
+            setImgBtn.addEventListener('click', () => {
+                const url = imgUrlInput.value.trim();
+                if (url !== '') {
+                    // Simulación: mostramos un mensaje y cambiamos a un color neutro
+                    desktop.style.background = '#6b6b6b'; // gris
+                    alert('Modo simulación: cambiar fondo por imagen no está implementado. Se ha aplicado un color gris.\n(En un emulador real se podría cargar una URL)');
+                } else {
+                    alert('Escribe una URL ficticia para simular.');
+                }
+            });
+
+            // ----- Reloj de la barra de tareas -----
+            function updateClock() {
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // la 0 es 12 AM
+                clockDiv.innerText = `${hours}:${minutes} ${ampm}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // ----- Botón Inicio (decorativo con un mensaje) -----
+            startBtn.addEventListener('click', () => {
+                alert('Inicio de Windows 95 (simulación)\n\nPuedes abrir las apps con doble click en los iconos.');
+            });
+
+            // ----- Posiciones iniciales aleatorias ligeramente para no solaparse tanto (pero ya tienen top/left en CSS) -----
+            // Ajustamos un poco más para que no se abran una encima de otra
+            document.getElementById('windowGoogle').style.top = '70px';
+            document.getElementById('windowGoogle').style.left = '120px';
+            document.getElementById('windowNotepad').style.top = '170px';
+            document.getElementById('windowNotepad').style.left = '400px';
+            document.getElementById('windowFondo').style.top = '260px';
+            document.getElementById('windowFondo').style.left = '250px';
+
+            // Pequeño detalle: abrir una ventana de bienvenida (opcional)
+            // Abrimos el bloc de notas al cargar para que se vea actividad
+            setTimeout(() => {
+                openWindow('windowNotepad');
+                // también abrimos el google como ejemplo
+                openWindow('windowGoogle');
+            }, 200);
         })();
     </script>
 </body>
