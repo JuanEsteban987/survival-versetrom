@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Easy Pro 2008 · sintaxis limpia</title>
+    <title>Easy Pro 2008 · con variables, if y rotate</title>
     <style>
         /* ===== ESTÉTICA 2008 (sin cambios) ===== */
         * {
@@ -232,13 +232,20 @@
         <div class="code-panel">
             <div class="panel-label">✎ editar código (sin paréntesis)</div>
             <textarea id="codeArea" spellcheck="false">
+// Ejemplo con variables, if y rotate
+varcreate puntuacion
+varset puntuacion 10
 createobj nave Cubo #2288ff
-createobj enemigo Circulo #dd4422
-tp nave 200 300
-mov enemigo 40 -15
-createobj powerup Circulo gold
-tp powerup 80 80
-input a
+createobj asteroide Circulo #aa5533
+tp asteroide 300 200
+
+if puntuacion > 5
+  tp nave 100 100
+  rotate nave 45
+else
+  tp nave 300 300
+  rotate nave -45
+
 input espacio
 finish</textarea>
 
@@ -249,7 +256,7 @@ finish</textarea>
             </div>
 
             <div class="log-console" id="logConsole">
-                > Easy Pro 2008 listo. Comandos sin paréntesis ni comillas.
+                > Easy Pro 2008 listo. Comandos: varcreate, varset, if, else, rotate...
             </div>
         </div>
 
@@ -269,16 +276,22 @@ finish</textarea>
     </div>
 
     <div class="footer-note">
-        ⚡ comandos: createobj nombre forma color | mov nombre dx dy | tp nombre x y | input tecla | finish
+        ⚡ comandos: varcreate nombre | varset nombre valor | if var operador valor comando [else comando] | rotate objeto grados | finish
     </div>
 </div>
 
 <script>
     (function() {
-        // Motor Easy Pro 2008 - sintaxis limpia
+        // Motor Easy Pro 2008 - con variables, if, rotate
         let objetos = [];
-        // Mapa de teclas para input (tecla -> función a ejecutar)
-        let keyActions = {};
+        let variables = {};          // almacén de variables (nombre -> valor numérico)
+        let keyActions = {};          // para input
+
+        // Para manejar if/else de forma simple (siguiente comando)
+        let ifPending = false;        // indica que estamos dentro de un if que se evaluó
+        let ifResult = false;         // resultado de la condición del if actual
+        let elsePending = false;      // indica que acabamos de encontrar un else y esperamos comando
+        let skipElse = false;         // para saber si debemos saltar el comando del else
 
         const canvas = document.getElementById('stageCanvas');
         const ctx = canvas.getContext('2d');
@@ -303,7 +316,7 @@ finish</textarea>
             }
             let html = '';
             objetos.forEach(obj => {
-                html += `<li style="border-left-color: ${obj.color};">${obj.name} · ${obj.shape} · ${obj.color} · (${obj.x}, ${obj.y})</li>`;
+                html += `<li style="border-left-color: ${obj.color};">${obj.name} · ${obj.shape} · rot:${obj.rotation || 0}° · (${obj.x},${obj.y})</li>`;
             });
             objectList.innerHTML = html;
         }
@@ -311,20 +324,28 @@ finish</textarea>
         function renderizar() {
             ctx.clearRect(0, 0, 400, 400);
             objetos.forEach(obj => {
+                ctx.save();
+                // Trasladar al centro del objeto y rotar
+                ctx.translate(obj.x, obj.y);
+                if (obj.rotation) {
+                    ctx.rotate(obj.rotation * Math.PI / 180);
+                }
                 ctx.fillStyle = obj.color;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = 2.5;
 
                 if (obj.shape === 'Cubo') {
-                    ctx.fillRect(obj.x - 20, obj.y - 20, 40, 40);
-                    ctx.strokeRect(obj.x - 20, obj.y - 20, 40, 40);
+                    ctx.fillRect(-20, -20, 40, 40);
+                    ctx.strokeRect(-20, -20, 40, 40);
                 } else if (obj.shape === 'Circulo') {
                     ctx.beginPath();
-                    ctx.arc(obj.x, obj.y, 20, 0, Math.PI * 2);
+                    ctx.arc(0, 0, 20, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                 }
+                ctx.restore();
 
+                // Dibujar nombre sin rotación (siempre horizontal)
                 ctx.font = 'bold 11px "Courier New", monospace';
                 ctx.fillStyle = '#111111';
                 ctx.fillText(obj.name, obj.x - 15, obj.y - 25);
@@ -338,35 +359,209 @@ finish</textarea>
             return objetos.find(obj => obj.name === nombre);
         }
 
-        // ===== NUEVO PARSER: sin paréntesis ni comillas =====
+        // ===== PARSER: separa por espacios =====
         function parsearComando(linea) {
             linea = linea.trim();
             if (linea === '' || linea.startsWith('//')) return null;
-
-            let partes = linea.split(/\s+/); // separa por espacios
+            let partes = linea.split(/\s+/);
             if (partes.length === 0) return null;
             let comando = partes[0].toLowerCase();
             let argumentos = partes.slice(1);
             return { comando, argumentos };
         }
 
-        // ===== MANEJADOR DE TECLADO =====
-        function manejarTecla(e) {
-            let tecla = e.key.toLowerCase();
-            if (keyActions[tecla]) {
-                keyActions[tecla](); // ejecutar acción asociada
+        // ===== EVALUAR CONDICIÓN =====
+        // formato: if variable operador valor
+        // operadores: =, <, >, <=, >=, <>
+        function evaluarCondicion(argumentos) {
+            if (argumentos.length < 3) {
+                logMessage('❌ if: necesita variable operador valor');
+                return null;
+            }
+            let varName = argumentos[0];
+            let operador = argumentos[1];
+            let valorStr = argumentos[2];
+
+            // Obtener valor de la variable
+            if (!(varName in variables)) {
+                logMessage(`❌ if: variable "${varName}" no existe`);
+                return null;
+            }
+            let varVal = variables[varName];
+            let valorNum = parseFloat(valorStr);
+            if (isNaN(valorNum)) {
+                // Si no es número, quizás es otra variable
+                if (valorStr in variables) {
+                    valorNum = variables[valorStr];
+                } else {
+                    logMessage(`❌ if: valor no numérico o variable no existente: ${valorStr}`);
+                    return null;
+                }
+            }
+
+            switch (operador) {
+                case '=': return varVal === valorNum;
+                case '<': return varVal < valorNum;
+                case '>': return varVal > valorNum;
+                case '<=': return varVal <= valorNum;
+                case '>=': return varVal >= valorNum;
+                case '<>': return varVal !== valorNum;
+                default:
+                    logMessage(`❌ if: operador desconocido "${operador}"`);
+                    return null;
             }
         }
 
-        // Añadir listener global de teclado
-        document.addEventListener('keydown', manejarTecla);
-
-        // ===== EJECUTOR DE COMANDOS =====
+        // ===== EJECUTAR COMANDO (con soporte para if/else) =====
         function ejecutarComando(parsed) {
             if (!parsed) return false;
             const { comando, argumentos } = parsed;
 
-            if (comando === 'createobj') {
+            // Manejo de if/else (estado)
+            if (ifPending) {
+                // Estamos dentro de un if: el resultado ya está en ifResult
+                if (ifResult) {
+                    // Ejecutamos el comando actual (es el del then)
+                    // Luego desactivamos ifPending, y si hay else lo saltamos
+                    ifPending = false;
+                    // Pero necesitamos marcar que el siguiente else debe ser ignorado si no se cumple
+                    // En su lugar, usaremos elsePending para saber si debemos saltar
+                    // Tras ejecutar then, queremos que el próximo else sea ignorado
+                    skipElse = true;  // indica que si aparece un else, lo saltamos
+                    return ejecutarComandoNormal(parsed); // ejecuta el comando then
+                } else {
+                    // Condición falsa: no ejecutamos este comando, pero debemos esperar un else
+                    ifPending = false;
+                    elsePending = true;  // esperamos un else para ejecutar su comando
+                    return true; // comando omitido
+                }
+            }
+
+            if (elsePending) {
+                // Estamos esperando un else; si el comando actual es 'else', lo procesamos
+                if (comando === 'else') {
+                    elsePending = false;
+                    // Si skipElse está true, significa que el then se ejecutó y debemos ignorar el else
+                    if (skipElse) {
+                        skipElse = false;
+                        // no hacemos nada
+                        return true;
+                    } else {
+                        // El then no se ejecutó (if falso), entonces el comando después de else debe ejecutarse
+                        // Pero ese comando es la línea siguiente, que aún no hemos procesado.
+                        // Establecemos un flag para que el siguiente comando (el que sigue a else) se ejecute
+                        ifPending = false;
+                        // Dejamos que el siguiente comando se ejecute normalmente, pero necesitamos marcarlo
+                        // Usamos un flag 'executeElse' para que el próximo comando se ejecute sin importar qué
+                        // pero solo uno. Lo haremos con una variable temporal.
+                        window._executeNextElse = true;
+                        return true;
+                    }
+                } else {
+                    // Si no es 'else', significa que no hay else, entonces simplemente ejecutamos normalmente? 
+                    // Pero según nuestra lógica, tras un if falso, si no hay else, no se ejecuta nada.
+                    // Reiniciamos elsePending y skipElse, y no ejecutamos este comando.
+                    elsePending = false;
+                    skipElse = false;
+                    // No ejecutamos el comando
+                    logMessage(`⏭ (if falso, sin else, se omite: ${comando})`);
+                    return true;
+                }
+            }
+
+            if (window._executeNextElse) {
+                window._executeNextElse = false;
+                // Este comando debe ejecutarse (es el que sigue a else)
+                return ejecutarComandoNormal(parsed);
+            }
+
+            // Comando normal (sin if/else pendiente)
+            return ejecutarComandoNormal(parsed);
+        }
+
+        // Ejecución real de cada comando (sin lógica de flujo)
+        function ejecutarComandoNormal(parsed) {
+            const { comando, argumentos } = parsed;
+
+            if (comando === 'varcreate') {
+                if (argumentos.length < 1) {
+                    logMessage('❌ varcreate: necesita nombre');
+                    return false;
+                }
+                let nombre = argumentos[0];
+                if (nombre in variables) {
+                    logMessage(`❌ varcreate: variable "${nombre}" ya existe`);
+                    return false;
+                }
+                variables[nombre] = 0;
+                logMessage(`📊 variable "${nombre}" creada con valor 0`);
+                return true;
+            }
+            else if (comando === 'varset') {
+                if (argumentos.length < 2) {
+                    logMessage('❌ varset: necesita nombre y valor');
+                    return false;
+                }
+                let nombre = argumentos[0];
+                let valor = parseFloat(argumentos[1]);
+                if (isNaN(valor)) {
+                    // Si no es número, puede ser otra variable
+                    if (argumentos[1] in variables) {
+                        valor = variables[argumentos[1]];
+                    } else {
+                        logMessage(`❌ varset: valor no numérico o variable no existente: ${argumentos[1]}`);
+                        return false;
+                    }
+                }
+                if (!(nombre in variables)) {
+                    logMessage(`❌ varset: variable "${nombre}" no existe`);
+                    return false;
+                }
+                variables[nombre] = valor;
+                logMessage(`📊 variable "${nombre}" = ${valor}`);
+                return true;
+            }
+            else if (comando === 'if') {
+                // Evaluar condición
+                let condicion = evaluarCondicion(argumentos);
+                if (condicion === null) return false;
+                // Establecer estado para el próximo comando
+                ifPending = true;
+                ifResult = condicion;
+                skipElse = false;   // reset
+                elsePending = false;
+                window._executeNextElse = false;
+                logMessage(`🔍 if: ${condicion ? 'verdadero' : 'falso'}`);
+                return true;
+            }
+            else if (comando === 'else') {
+                // El comando else ya es manejado en ejecutarComando (flujo)
+                // Aquí no debería llegar directamente porque lo capturamos antes
+                logMessage('❌ else inesperado (sin if previo)');
+                return false;
+            }
+            else if (comando === 'rotate') {
+                if (argumentos.length < 2) {
+                    logMessage('❌ rotate: necesita objeto y grados');
+                    return false;
+                }
+                let nombre = argumentos[0];
+                let grados = parseFloat(argumentos[1]);
+                if (isNaN(grados)) {
+                    logMessage('❌ rotate: grados debe ser número');
+                    return false;
+                }
+                let obj = encontrarObj(nombre);
+                if (!obj) {
+                    logMessage(`❌ rotate: objeto "${nombre}" no existe`);
+                    return false;
+                }
+                obj.rotation = grados;
+                logMessage(`🔄 "${nombre}" rotado a ${grados}°`);
+                renderizar();
+                return true;
+            }
+            else if (comando === 'createobj') {
                 if (argumentos.length < 3) {
                     logMessage('❌ createobj: necesita: nombre forma color');
                     return false;
@@ -385,7 +580,8 @@ finish</textarea>
                     shape: forma,
                     color: color,
                     x: 200,
-                    y: 200
+                    y: 200,
+                    rotation: 0
                 });
                 logMessage(`✅ objeto "${nombre}" creado (${forma}, ${color}) en (200,200)`);
                 renderizar();
@@ -439,23 +635,26 @@ finish</textarea>
             }
             else if (comando === 'input') {
                 if (argumentos.length < 1) {
-                    logMessage('❌ input: necesita una tecla (ej: input a)');
+                    logMessage('❌ input: necesita una tecla');
                     return false;
                 }
                 const tecla = argumentos[0].toLowerCase();
-                // Asociar acción a la tecla (mostrar mensaje)
                 keyActions[tecla] = () => {
                     logMessage(`⌨️ Tecla "${tecla}" presionada`);
                 };
-                logMessage(`🎹 Tecla "${tecla}" registrada para input`);
+                logMessage(`🎹 Tecla "${tecla}" registrada`);
                 return true;
             }
             else if (comando === 'finish') {
-                // Reinicia el escenario y limpia las teclas
                 objetos = [];
+                variables = {};
                 keyActions = {};
+                ifPending = false;
+                elsePending = false;
+                skipElse = false;
+                window._executeNextElse = false;
                 renderizar();
-                logMessage('🏁 Finish: escenario reiniciado y teclas limpiadas');
+                logMessage('🏁 Finish: todo reiniciado');
                 return true;
             }
             else {
@@ -467,6 +666,12 @@ finish</textarea>
         function ejecutarTodo() {
             const codigo = codeArea.value;
             const lineas = codigo.split('\n');
+            // Reiniciamos flags de flujo
+            ifPending = false;
+            elsePending = false;
+            skipElse = false;
+            window._executeNextElse = false;
+
             lineas.forEach(linea => {
                 const parsed = parsearComando(linea);
                 if (parsed) {
@@ -481,36 +686,48 @@ finish</textarea>
 
         function reiniciarEscenario() {
             objetos = [];
+            variables = {};
             keyActions = {};
+            ifPending = false;
+            elsePending = false;
+            skipElse = false;
+            window._executeNextElse = false;
             renderizar();
-            logMessage('🔄 Escenario y teclas reiniciados.');
+            logMessage('🔄 Todo reiniciado.');
         }
 
         function cargarEjemplos() {
-            codeArea.value = `createobj heroe Cubo #3a6ea5
-createobj villano Circulo #b0302a
-tp heroe 120 200
-tp villano 280 200
-createobj estrella Circulo gold
-tp estrella 200 90
-mov villano 0 50
-input flechaArriba
+            codeArea.value = `// Demo completo
+varcreate puntuacion
+varset puntuacion 10
+createobj nave Cubo #3a6ea5
+createobj enemigo Circulo #b0302a
+tp enemigo 300 200
+rotate nave 30
+
+if puntuacion > 5
+  tp nave 100 100
+  rotate nave 45
+else
+  tp nave 300 300
+  rotate nave -45
+
+input a
 input espacio
-// finish para limpiar`;
-            logMessage('📂 Ejemplos cargados (sintaxis sin paréntesis)');
+finish`;
+            logMessage('📂 Ejemplos cargados');
         }
 
-        // Demo inicial con objetos visibles
         function demoInicial() {
             objetos = [
-                { name: 'demoCuad', shape: 'Cubo', color: '#1070c0', x: 150, y: 150 },
-                { name: 'demoCirc', shape: 'Circulo', color: '#c05030', x: 260, y: 280 }
+                { name: 'demoCuad', shape: 'Cubo', color: '#1070c0', x: 150, y: 150, rotation: 15 },
+                { name: 'demoCirc', shape: 'Circulo', color: '#c05030', x: 260, y: 280, rotation: 0 }
             ];
+            variables = { puntuacion: 5 };
             renderizar();
-            logMessage('⚡ Easy Pro 2008 listo. Objetos de demostración.');
+            logMessage('⚡ Easy Pro 2008 listo. Variables y objetos de demo.');
         }
 
-        // Botones
         document.getElementById('runBtn').addEventListener('click', () => {
             logMessage('📟 --- EJECUTANDO COMANDOS ---');
             ejecutarTodo();
@@ -526,6 +743,14 @@ input espacio
 
         demoInicial();
         renderizar();
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            let tecla = e.key.toLowerCase();
+            if (keyActions[tecla]) {
+                keyActions[tecla]();
+            }
+        });
     })();
 </script>
 </body>
