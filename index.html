@@ -2,683 +2,546 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RPG Maker Completo - Tilesets, Tamaño, Vida y Equipo</title>
+    <title>Easy Pro 2008 · programación visual con texto</title>
     <style>
+        /* ===== ESTÉTICA 2008 ===== 
+           degradados, bordes con relieve, sombras pixeladas, Windows XP vibes */
         * {
             box-sizing: border-box;
-            user-select: none;
+            margin: 0;
         }
+
         body {
-            background: #1a1a2e;
+            background: #1f3a5f; /* azul oscuro de fondo tipo pantalla CRT */
+            font-family: 'Tahoma', 'Verdana', 'Arial', sans-serif;
+            padding: 25px 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 15px;
+            margin: 0;
         }
-        .game-container {
-            background: #16213e;
-            padding: 25px;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-            max-width: 1100px;
-            width: fit-content;
+
+        /* contenedor principal – parece un monitor de la época */
+        .computer {
+            width: 1050px;
+            background: #d0d0d0; /* plateado base */
+            border: 5px ridge #e0e0e0;
+            border-radius: 12px 12px 8px 8px;
+            padding: 20px 20px 15px 20px;
+            box-shadow: 8px 8px 0px #0a1e30, inset 2px 2px 5px #f0f0f0;
         }
-        h2 {
+
+        /* cabecera grandota – como los programas de 2008 */
+        .top-bar {
+            background: linear-gradient(180deg, #1040a0, #002070);
+            border: 3px ridge #3070d0;
+            padding: 8px 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 2px 2px 8px #80a0ff, inset -2px -2px 5px #001030;
             color: white;
-            margin: 0 0 15px 0;
-            text-align: center;
-            font-size: 28px;
-            text-shadow: 3px 3px 0 #0f3460;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
         }
-        .main-panel {
+        .title {
+            font-size: 58px;
+            font-weight: bold;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            letter-spacing: 3px;
+            text-shadow: 4px 4px 0px #0f0f0f, 6px 6px 0px #303030;
+            color: #ffffb0;
+            line-height: 1;
+        }
+        .year {
+            font-size: 28px;
+            background: #c0c000;
+            color: #202020;
+            border: 3px inset #f0f000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-style: italic;
+            box-shadow: 0 0 0 2px #808080;
+            border-radius: 30px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* área de trabajo de 2 columnas */
+        .workspace {
             display: flex;
             gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            margin-top: 10px;
         }
-        .canvas-area {
-            background: #0f3460;
+
+        /* panel izquierdo – código fuente */
+        .code-panel {
+            flex: 1;
+            background: #bebebe; /* gris ventana */
+            border: 4px inset #fcfcfc;
             padding: 15px;
-            border-radius: 20px;
+            box-shadow: inset 3px 3px 8px #707070, inset -3px -3px 8px #e0e0e0;
         }
-        canvas#gameCanvas {
-            display: block;
-            border: 3px solid #e94560;
-            border-radius: 12px;
-            background: #0f3460;
-            cursor: crosshair;
-            image-rendering: pixelated;
-            width: 100%;
-            height: auto;
-        }
-        .sidebar {
-            background: #0f3460;
-            border-radius: 20px;
-            padding: 20px;
-            min-width: 280px;
-            color: white;
-        }
-        .section {
-            background: #1a1a2e;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .section h3 {
-            margin: 0 0 12px 0;
-            color: #e94560;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .palette {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin: 10px 0;
-            background: #16213e;
-            padding: 12px;
-            border-radius: 30px;
-        }
-        .tile-item {
-            width: 48px;
-            height: 48px;
-            border: 3px solid transparent;
-            border-radius: 10px;
-            cursor: pointer;
-            background: #0f3460;
-            transition: 0.15s;
-            image-rendering: pixelated;
-        }
-        .tile-item.selected {
-            border-color: #e94560;
-            transform: scale(1.1);
-            box-shadow: 0 0 12px #e94560;
-        }
-        .tile-item img {
-            width: 100%;
-            height: 100%;
-            border-radius: 6px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #aaa;
-        }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 8px 12px;
-            background: #16213e;
-            border: 2px solid #e94560;
-            border-radius: 30px;
-            color: white;
+
+        .panel-label {
             font-weight: bold;
-            outline: none;
+            font-size: 20px;
+            color: #202020;
+            background: linear-gradient(90deg, #c0c0c0, #a0a0a0);
+            padding: 5px 15px;
+            border: 3px outset #e0e0e0;
+            margin-bottom: 15px;
+            display: inline-block;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        .input-group input[type=number] {
-            -moz-appearance: textfield;
+
+        textarea {
+            width: 100%;
+            height: 260px;
+            background: #ffffcc; /* amarillo claro, como pantallas viejas */
+            border: 4px inset #8a8a8a;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #001080;
+            padding: 12px;
+            line-height: 1.4;
+            resize: vertical;
+            box-shadow: inset 2px 2px 10px #404040;
         }
-        .radio-group {
+
+        .button-group {
+            margin-top: 20px;
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
         }
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #16213e;
-            padding: 6px 15px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-        .radio-group input[type=radio] {
-            accent-color: #e94560;
-            width: 16px;
-            height: 16px;
-        }
-        .hp-bar {
-            background: #2a2a3a;
-            height: 20px;
-            border-radius: 30px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .hp-fill {
-            height: 100%;
-            background: #e94560;
-            width: 100%;
-            transition: width 0.3s;
-        }
-        .button-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        button {
-            background: #e94560;
-            border: none;
-            color: white;
+
+        /* botones con relieve XP */
+        .btn {
+            background: linear-gradient(180deg, #f0f0f0, #b0b0b0);
+            border: 4px outset #ffffff;
+            color: #101010;
+            font-size: 18px;
             font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 40px;
+            padding: 8px 24px;
             cursor: pointer;
-            transition: 0.2s;
-            border-bottom: 3px solid #a0223e;
-            font-size: 14px;
+            font-family: 'Tahoma', sans-serif;
+            box-shadow: 3px 3px 0px #404040;
+            transition: 0.05s linear;
         }
-        button:hover {
-            background: #ff6b8b;
-            transform: translateY(-2px);
-            border-bottom-width: 5px;
+        .btn:hover {
+            background: linear-gradient(180deg, #ffffe0, #c0c0c0);
+            border-color: #fffff0;
         }
-        .enemy-list {
-            max-height: 150px;
-            overflow-y: auto;
-            background: #16213e;
-            border-radius: 15px;
+        .btn:active {
+            border: 4px inset #808080;
+            box-shadow: 1px 1px 0px #202020;
+            transform: translate(2px, 2px);
+        }
+
+        /* panel derecho – escenario tipo scratch + lista objetos */
+        .stage-panel {
+            flex: 1;
+            background: #bebebe;
+            border: 4px inset #fcfcfc;
+            padding: 15px;
+            box-shadow: inset 3px 3px 8px #707070, inset -3px -3px 8px #e0e0e0;
+        }
+
+        .canvas-wrapper {
+            background: #8f8f8f;
+            border: 6px inset #5a5a5a;
             padding: 8px;
-        }
-        .enemy-item {
-            background: #0f3460;
-            padding: 5px 10px;
-            margin: 5px 0;
-            border-radius: 30px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center;
         }
-        .status-text {
-            background: #1a1a2e;
-            padding: 8px 15px;
-            border-radius: 40px;
-            color: #e94560;
+
+        canvas {
+            width: 400px;
+            height: 400px;
+            background: #ffffff;
+            border: 2px solid #303030;
+            display: block;
+            image-rendering: crisp-edges; /* toque retro */
+        }
+
+        .object-panel {
+            margin-top: 20px;
+            background: #c8c8c8;
+            border: 4px inset #ececec;
+            padding: 10px;
+            max-height: 170px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .object-title {
+            background: #a0a0a0;
+            border: 2px outset #d0d0d0;
+            padding: 4px 10px;
+            margin-bottom: 8px;
             font-weight: bold;
             text-align: center;
+            color: #202020;
+        }
+
+        .object-list {
+            list-style: none;
+            padding: 2px;
+        }
+        .object-list li {
+            border-bottom: 1px dashed #404040;
+            padding: 5px 0px 5px 10px;
+            background: #e0e0e0;
+            margin-bottom: 3px;
+            border-left: 6px solid #202020;
+        }
+
+        /* consola de salida / log */
+        .log-console {
+            background: #1a1a1a;
+            color: #3aff99; /* verde fosforito */
+            font-family: 'Courier New', monospace;
+            border: 5px inset #707070;
+            padding: 10px;
+            margin-top: 25px;
+            height: 100px;
+            overflow-y: auto;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px #00cc66;
+            border-radius: 0px;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 15px;
+            color: #dfdfdf;
+            text-shadow: 2px 2px 0 #0a1e30;
+            font-size: 16px;
+            font-weight: bold;
+            border-top: 2px groove #a0a0a0;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h2>⚔️ RPG MAKER DELUXE ⚔️</h2>
-        <div class="main-panel">
-            <div class="canvas-area">
-                <canvas id="gameCanvas" width="640" height="640"></canvas>
-                <div class="status-text" id="message">Haz clic en un enemigo para atacar</div>
+<div class="computer">
+    <!-- Cabezal Easy Pro 2008 -->
+    <div class="top-bar">
+        <span class="title">EASY PRO</span>
+        <span class="year">est. 2008</span>
+    </div>
+
+    <div class="workspace">
+        <!-- COLUMNA IZQUIERDA: editor de comandos -->
+        <div class="code-panel">
+            <div class="panel-label">✎ editar código</div>
+            <textarea id="codeArea" spellcheck="false">
+(createobj:"nave":"Cubo":"#2288ff")
+(createobj:"enemigo":"Circulo":"#dd4422")
+(tp:"nave":"200":"300")
+(mov:"enemigo":"40":"-15")
+(createobj:"powerup":"Circulo":"gold")
+(tp:"powerup":"80":"80")</textarea>
+
+            <div class="button-group">
+                <button class="btn" id="runBtn">▶ ejecutar</button>
+                <button class="btn" id="resetBtn">⟲ reiniciar</button>
+                <button class="btn" id="exampleBtn">📁 ejemplos</button>
             </div>
-            <div class="sidebar">
-                <div class="section">
-                    <h3>🎨 Tileset personalizado</h3>
-                    <input type="file" id="tilesetUpload" accept="image/*">
-                    <div class="palette" id="tilePalette"></div>
-                    <p style="font-size:12px; color:#aaa;">Imagen dividida en tiles de 32x32</p>
-                </div>
 
-                <div class="section">
-                    <h3>🌍 Tamaño del mundo</h3>
-                    <div class="input-group">
-                        <label>Ancho (2-20)</label>
-                        <input type="number" id="mapWidth" min="2" max="20" value="10">
-                    </div>
-                    <div class="input-group">
-                        <label>Alto (2-20)</label>
-                        <input type="number" id="mapHeight" min="2" max="20" value="10">
-                    </div>
-                    <button id="resizeBtn">Redimensionar</button>
-                </div>
+            <!-- consola con mensajes (tipo output) -->
+            <div class="log-console" id="logConsole">
+                > Easy Pro 2008 listo. Ingresa comandos.
+            </div>
+        </div>
 
-                <div class="section">
-                    <h3>❤️ Vida del jugador</h3>
-                    <div class="input-group">
-                        <label>Vida base</label>
-                        <input type="number" id="playerHpBase" min="10" max="200" value="50">
-                    </div>
-                    <div class="hp-bar">
-                        <div id="playerHpBar" class="hp-fill" style="width:100%"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span id="playerHpCurrent">50</span> / <span id="playerHpMax">50</span>
-                    </div>
-                    <button id="healBtn">🩹 Curar al jugador</button>
-                </div>
+        <!-- COLUMNA DERECHA: escenario + lista objetos -->
+        <div class="stage-panel">
+            <div class="panel-label">🎬 escenario</div>
+            <div class="canvas-wrapper">
+                <canvas id="stageCanvas" width="400" height="400"></canvas>
+            </div>
 
-                <div class="section">
-                    <h3>🗡️ Equipamiento</h3>
-                    <div class="radio-group" id="weaponGroup">
-                        <label><input type="radio" name="weapon" value="sword" checked> 🗡️ Espada (10-15)</label>
-                        <label><input type="radio" name="weapon" value="bow"> 🏹 Arco (8-12)</label>
-                        <label><input type="radio" name="weapon" value="fist"> 👊 Puño (4-8)</label>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h3>👾 Enemigos vivos</h3>
-                    <div id="enemyList" class="enemy-list"></div>
-                    <div class="button-row">
-                        <button id="saveBtn">💾 Guardar</button>
-                        <button id="loadBtn">📂 Cargar</button>
-                        <button id="resetBtn">🔄 Reiniciar</button>
-                    </div>
-                </div>
+            <div class="object-panel">
+                <div class="object-title">📦 objetos activos</div>
+                <ul class="object-list" id="objectList">
+                    <li style="color:#404040;">(ningún objeto)</li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <script>
-        (function(){
-            // --- Configuración base ---
-            const TILE_SIZE = 32;            // Tamaño fijo de tile para el tileset
-            let mapWidth = 10, mapHeight = 10; // Tamaño actual del mapa
-            let mapData = [];                  // Matriz de tiles (solo IDs)
-            let player = { x: 1, y: 1 };        // Posición inicial
-            let playerHp = 50, playerMaxHp = 50;
-            let enemies = [];                   // { x, y, hp, maxHp }
+    <!-- footer vintage -->
+    <div class="footer-note">
+        ⚡ programación con texto · comandos: (createobj:"nom":"Cubo/Circulo":"color") (mov:"obj":"X":"Y") (tp:"obj":"X":"Y")
+    </div>
+</div>
 
-            // Tiles especiales: (puedes ampliar)
-            const TILE_EMPTY = 0;    // Suelo transitable
-            const TILE_WALL = 1;      // Pared (sólida)
-            const TILE_CHEST = 2;      // Cofre (al tocarlo da item)
-            const TILE_ENEMY = 3;      // Enemigo (combate)
+<script>
+    (function() {
+        // ========== MOTOR EASY PRO 2008 ==========
+        // almacén de objetos
+        let objetos = [];
 
-            // Sólidos
-            const SOLID_TILES = [TILE_WALL];
+        // referencias DOM
+        const canvas = document.getElementById('stageCanvas');
+        const ctx = canvas.getContext('2d');
+        const codeArea = document.getElementById('codeArea');
+        const logDiv = document.getElementById('logConsole');
+        const objectList = document.getElementById('objectList');
 
-            // Armas y daño (mín, máx)
-            const weapons = {
-                sword: { name: 'Espada', min:10, max:15 },
-                bow:   { name: 'Arco',   min:8,  max:12 },
-                fist:  { name: 'Puño',   min:4,  max:8 }
-            };
-            let currentWeapon = 'sword';
-
-            // Tileset (imagen)
-            let tilesetImage = null;
-            let tileCount = 4; // Por defecto 4 tiles (suelo, pared, cofre, enemigo) pero se ampliará
-
-            // Referencias DOM
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const messageEl = document.getElementById('message');
-            const playerHpCurrentSpan = document.getElementById('playerHpCurrent');
-            const playerHpMaxSpan = document.getElementById('playerHpMax');
-            const playerHpBar = document.getElementById('playerHpBar');
-            const enemyListDiv = document.getElementById('enemyList');
-
-            // Inicializar mapa por defecto (10x10 con bordes)
-            function createDefaultMap(w, h) {
-                const newMap = [];
-                for (let row = 0; row < h; row++) {
-                    const rowData = [];
-                    for (let col = 0; col < w; col++) {
-                        if (row === 0 || row === h-1 || col === 0 || col === w-1) {
-                            rowData.push(TILE_WALL); // bordes pared
-                        } else {
-                            rowData.push(TILE_EMPTY);
-                        }
-                    }
-                    newMap.push(rowData);
-                }
-                // Colocar un cofre y un enemigo de ejemplo
-                if (w > 3 && h > 3) {
-                    newMap[3][3] = TILE_CHEST;
-                    newMap[5][5] = TILE_ENEMY;
-                    enemies.push({ x:5, y:5, hp:25, maxHp:25 });
-                }
-                return newMap;
+        // helper para mensajes en consola (formato retro)
+        function logMessage(msg) {
+            const p = document.createElement('div');
+            p.textContent = '> ' + msg;
+            logDiv.appendChild(p);
+            // mantener últimas 8 líneas aprox
+            if (logDiv.children.length > 9) {
+                logDiv.removeChild(logDiv.children[0]);
             }
-            mapData = createDefaultMap(mapWidth, mapHeight);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
 
-            // Actualizar canvas size
-            function resizeCanvas() {
-                canvas.width = mapWidth * TILE_SIZE;
-                canvas.height = mapHeight * TILE_SIZE;
-                drawGame();
+        // actualiza la lista de objetos en UI
+        function actualizarListaObjetos() {
+            if (objetos.length === 0) {
+                objectList.innerHTML = '<li style="color:#404040;">(ningún objeto)</li>';
+                return;
             }
-
-            // --- Cargar tileset desde archivo ---
-            document.getElementById('tilesetUpload').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        tilesetImage = img;
-                        // Calcular número de tiles (ancho de imagen / TILE_SIZE)
-                        const cols = Math.floor(img.width / TILE_SIZE);
-                        tileCount = cols;
-                        buildPalette();
-                        drawGame();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+            let html = '';
+            objetos.forEach(obj => {
+                // ítem con borde del color del objeto
+                html += `<li style="border-left-color: ${obj.color};">${obj.name} · ${obj.shape} · ${obj.color} · (${obj.x}, ${obj.y})</li>`;
             });
+            objectList.innerHTML = html;
+        }
 
-            // Construir paleta de tiles
-            function buildPalette() {
-                const palette = document.getElementById('tilePalette');
-                palette.innerHTML = '';
-                const count = tileCount || 4; // mínimo 4 tiles por defecto
-                for (let i = 0; i < count; i++) {
-                    const div = document.createElement('div');
-                    div.className = 'tile-item' + (i === 0 ? ' selected' : '');
-                    div.dataset.tile = i;
-                    const canvasTile = document.createElement('canvas');
-                    canvasTile.width = TILE_SIZE;
-                    canvasTile.height = TILE_SIZE;
-                    const tCtx = canvasTile.getContext('2d');
-                    if (tilesetImage) {
-                        tCtx.drawImage(tilesetImage, i*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, 0, 0, TILE_SIZE, TILE_SIZE);
-                    } else {
-                        // Dibujar tiles por defecto
-                        tCtx.fillStyle = ['#4caf50','#5d6d7e','#f3c623','#e94560'][i % 4];
-                        tCtx.fillRect(0,0,TILE_SIZE,TILE_SIZE);
-                        tCtx.fillStyle = 'black';
-                        tCtx.font = 'bold 16px monospace';
-                        tCtx.fillText(i, 5, 22);
-                    }
-                    div.appendChild(canvasTile);
-                    div.addEventListener('click', () => {
-                        document.querySelectorAll('.tile-item').forEach(el => el.classList.remove('selected'));
-                        div.classList.add('selected');
-                    });
-                    palette.appendChild(div);
-                }
-            }
+        // dibujar todo el escenario
+        function renderizar() {
+            ctx.clearRect(0, 0, 400, 400);
+            objetos.forEach(obj => {
+                ctx.fillStyle = obj.color;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2.5;
 
-            // Obtener tile seleccionado
-            function getSelectedTile() {
-                const selected = document.querySelector('.tile-item.selected');
-                return selected ? parseInt(selected.dataset.tile) : 0;
-            }
-
-            // --- Dibujado del mapa ---
-            function drawGame() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // Dibujar tiles
-                for (let row = 0; row < mapHeight; row++) {
-                    for (let col = 0; col < mapWidth; col++) {
-                        const tileId = mapData[row][col];
-                        const x = col * TILE_SIZE;
-                        const y = row * TILE_SIZE;
-                        if (tilesetImage && tileId < tileCount) {
-                            ctx.drawImage(tilesetImage, tileId*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-                        } else {
-                            // Fallback
-                            ctx.fillStyle = ['#4caf50','#5d6d7e','#f3c623','#e94560'][tileId % 4] || '#aaa';
-                            ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
-                        }
-                    }
+                if (obj.shape === 'Cubo') {
+                    // cuadrado de 40x40 centrado
+                    ctx.fillRect(obj.x - 20, obj.y - 20, 40, 40);
+                    ctx.strokeRect(obj.x - 20, obj.y - 20, 40, 40);
+                } else if (obj.shape === 'Circulo') {
+                    // círculo radio 20
+                    ctx.beginPath();
+                    ctx.arc(obj.x, obj.y, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
                 }
 
-                // Dibujar jugador
-                ctx.fillStyle = '#e94560';
-                ctx.beginPath();
-                ctx.arc(player.x * TILE_SIZE + TILE_SIZE/2, player.y * TILE_SIZE + TILE_SIZE/2, TILE_SIZE/2-4, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(player.x * TILE_SIZE + TILE_SIZE/2 - 4, player.y * TILE_SIZE + TILE_SIZE/2 - 4, 5, 0, 2*Math.PI);
-                ctx.fill();
+                // nombre del objeto (estilo 8 bits)
+                ctx.font = 'bold 11px "Courier New", monospace';
+                ctx.fillStyle = '#111111';
+                ctx.fillText(obj.name, obj.x - 15, obj.y - 25);
+                ctx.fillStyle = '#FFFFF0';
+                ctx.fillText(obj.name, obj.x - 16, obj.y - 26); // sombra rápida
+            });
+            actualizarListaObjetos();
+        }
 
-                // Dibujar vidas de enemigos (si existen)
-                enemies.forEach(e => {
-                    const ex = e.x * TILE_SIZE, ey = e.y * TILE_SIZE;
-                    ctx.fillStyle = '#ff0000';
-                    ctx.fillRect(ex, ey-8, TILE_SIZE * (e.hp/e.maxHp), 4);
+        // buscar objeto por nombre (devuelve índice y objeto)
+        function encontrarObj(nombre) {
+            for (let i = 0; i < objetos.length; i++) {
+                if (objetos[i].name === nombre) return objetos[i];
+            }
+            return null;
+        }
+
+        // ========== PARSER DE COMANDOS (estilo Easy Pro) ==========
+        function parsearComando(linea) {
+            linea = linea.trim();
+            if (linea === '' || linea.startsWith('//')) return null;
+
+            // quitamos paréntesis envolventes si existen
+            if (linea.startsWith('(') && linea.endsWith(')')) {
+                linea = linea.slice(1, -1).trim();
+            }
+
+            // separamos por ':' pero respetando que los argumentos pueden estar entrecomillados
+            // método casero pero efectivo para este caso (asumimos que no hay ':' dentro de comillas)
+            let partes = linea.split(':');
+            if (partes.length < 1) return null;
+
+            let comando = partes[0].trim();
+            let argumentos = [];
+
+            for (let i = 1; i < partes.length; i++) {
+                let arg = partes[i].trim();
+                // eliminar comillas dobles del inicio y final si existen
+                if (arg.startsWith('"') && arg.endsWith('"')) {
+                    arg = arg.slice(1, -1);
+                }
+                argumentos.push(arg);
+            }
+            return { comando, argumentos };
+        }
+
+        // ejecutar un comando ya parseado
+        function ejecutarComando(parsed) {
+            if (!parsed) return false;
+            const { comando, argumentos } = parsed;
+
+            if (comando === 'createobj') {
+                // createobj:"name":"Forma(Cubo,Circulo)":"color"
+                if (argumentos.length < 3) {
+                    logMessage('❌ createobj: necesito 3 args: nombre, forma (Cubo/Circulo), color');
+                    return false;
+                }
+                const [nombre, forma, color] = argumentos;
+                if (forma !== 'Cubo' && forma !== 'Circulo') {
+                    logMessage(`❌ createobj: forma debe ser "Cubo" o "Circulo" (recibí: ${forma})`);
+                    return false;
+                }
+                if (encontrarObj(nombre)) {
+                    logMessage(`❌ createobj: ya existe un objeto llamado "${nombre}"`);
+                    return false;
+                }
+                // posición inicial por defecto: centro del escenario
+                objetos.push({
+                    name: nombre,
+                    shape: forma,
+                    color: color,
+                    x: 200,
+                    y: 200
                 });
-
-                updateUI();
+                logMessage(`✅ objeto "${nombre}" creado (${forma}, ${color}) en (200,200)`);
+                renderizar();
+                return true;
             }
-
-            // --- Movimiento del jugador (teclado) ---
-            function movePlayer(dx, dy) {
-                const nx = player.x + dx;
-                const ny = player.y + dy;
-                if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) {
-                    messageEl.innerText = '¡Límite del mundo!';
-                    return;
+            else if (comando === 'mov') {
+                // mov:"obj":"X":"Y"  → movimiento relativo
+                if (argumentos.length < 3) {
+                    logMessage('❌ mov: necesito 3 args: nombre, X, Y');
+                    return false;
                 }
-                const tile = mapData[ny][nx];
-                if (SOLID_TILES.includes(tile)) {
-                    messageEl.innerText = '¡Obstáculo!';
-                    return;
+                const [nombre, xStr, yStr] = argumentos;
+                const obj = encontrarObj(nombre);
+                if (!obj) {
+                    logMessage(`❌ mov: objeto "${nombre}" no existe`);
+                    return false;
                 }
-
-                // Interacción con cofre
-                if (tile === TILE_CHEST) {
-                    mapData[ny][nx] = TILE_EMPTY;
-                    messageEl.innerText = '¡Has encontrado una poción! +10 vida';
-                    playerHp = Math.min(playerHp + 10, playerMaxHp);
+                const dx = parseFloat(xStr);
+                const dy = parseFloat(yStr);
+                if (isNaN(dx) || isNaN(dy)) {
+                    logMessage('❌ mov: X e Y deben ser números');
+                    return false;
                 }
+                obj.x += dx;
+                obj.y += dy;
+                logMessage(`🚚 "${nombre}" se movió a (${obj.x},${obj.y})`);
+                renderizar();
+                return true;
+            }
+            else if (comando === 'tp') {
+                // tp:"obj":"X":"Y"  → teleport (absoluto)
+                if (argumentos.length < 3) {
+                    logMessage('❌ tp: necesito 3 args: nombre, X, Y');
+                    return false;
+                }
+                const [nombre, xStr, yStr] = argumentos;
+                const obj = encontrarObj(nombre);
+                if (!obj) {
+                    logMessage(`❌ tp: objeto "${nombre}" no existe`);
+                    return false;
+                }
+                const newX = parseFloat(xStr);
+                const newY = parseFloat(yStr);
+                if (isNaN(newX) || isNaN(newY)) {
+                    logMessage('❌ tp: X e Y deben ser números');
+                    return false;
+                }
+                obj.x = newX;
+                obj.y = newY;
+                logMessage(`📞 "${nombre}" teleportado a (${obj.x},${obj.y})`);
+                renderizar();
+                return true;
+            }
+            else {
+                logMessage(`⚠️ comando desconocido: "${comando}"`);
+                return false;
+            }
+        }
 
-                // Mover jugador
-                player.x = nx;
-                player.y = ny;
-
-                // Comprobar si hay enemigo en la nueva posición? (podríamos hacer combate automático, pero mejor manual)
-                const enemyHere = enemies.find(e => e.x === nx && e.y === ny);
-                if (enemyHere) {
-                    messageEl.innerText = `¡Enemigo! HP: ${enemyHere.hp}. Haz clic sobre él para atacar.`;
+        // ejecutar todas las líneas del área de texto
+        function ejecutarTodo() {
+            const codigo = codeArea.value;
+            const lineas = codigo.split('\n');
+            lineas.forEach(linea => {
+                const parsed = parsearComando(linea);
+                if (parsed) {
+                    ejecutarComando(parsed);
                 } else {
-                    messageEl.innerText = 'Usa las flechas para moverte';
-                }
-                drawGame();
-            }
-
-            // --- Ataque a enemigo (por clic) ---
-            function attackEnemy(enemy) {
-                if (enemy.hp <= 0) return;
-                const weapon = weapons[currentWeapon];
-                const damage = Math.floor(Math.random() * (weapon.max - weapon.min + 1)) + weapon.min;
-                enemy.hp -= damage;
-                messageEl.innerText = `¡${weapon.name} causó ${damage} de daño!`;
-                if (enemy.hp <= 0) {
-                    // Eliminar enemigo
-                    enemies = enemies.filter(e => e !== enemy);
-                    mapData[enemy.y][enemy.x] = TILE_EMPTY; // convertir a suelo
-                    messageEl.innerText = '¡Enemigo derrotado!';
-                }
-                drawGame();
-            }
-
-            // --- Evento clic en canvas (ataque o edición) ---
-            canvas.addEventListener('click', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const mx = (e.clientX - rect.left) * scaleX;
-                const my = (e.clientY - rect.top) * scaleY;
-                const col = Math.floor(mx / TILE_SIZE);
-                const row = Math.floor(my / TILE_SIZE);
-                if (col < 0 || col >= mapWidth || row < 0 || row >= mapHeight) return;
-
-                // Si el checkbox de edición no existe, por defecto: si hay enemigo, atacar; sino, en modo edición (pero nosotros no tenemos modo edición ahora; decidimos: SIEMPRE edición con tile seleccionado? Mejor: botón modo edición. Añadamos un toggle rápido.
-                // Por simplicidad, añadiremos un estado "modoEdicion" con tecla E o botón.
-                // Pero para no complicar, asumimos que si hay un enemigo en esa celda, atacamos; si no, editamos.
-                const enemy = enemies.find(e => e.x === col && e.y === row);
-                if (enemy) {
-                    attackEnemy(enemy);
-                } else {
-                    // Modo edición: colocar tile seleccionado
-                    const tile = getSelectedTile();
-                    // No permitir poner sólido sobre jugador
-                    if (row === player.y && col === player.x && SOLID_TILES.includes(tile)) {
-                        messageEl.innerText = 'No puedes bloquear al jugador';
-                        return;
-                    }
-                    // Si se coloca un enemigo, crear entidad
-                    if (tile === TILE_ENEMY) {
-                        // Evitar duplicados
-                        if (!enemies.some(e => e.x === col && e.y === row)) {
-                            enemies.push({ x:col, y:row, hp:25, maxHp:25 });
-                        }
-                    } else {
-                        // Si se quita un enemigo de esa celda, eliminarlo de enemies
-                        if (mapData[row][col] === TILE_ENEMY) {
-                            enemies = enemies.filter(e => !(e.x === col && e.y === row));
-                        }
-                    }
-                    mapData[row][col] = tile;
-                    drawGame();
-                }
-            });
-
-            // Teclado
-            window.addEventListener('keydown', (e) => {
-                if (e.key.startsWith('Arrow')) {
-                    e.preventDefault();
-                    switch(e.key) {
-                        case 'ArrowUp': movePlayer(0, -1); break;
-                        case 'ArrowDown': movePlayer(0, 1); break;
-                        case 'ArrowLeft': movePlayer(-1, 0); break;
-                        case 'ArrowRight': movePlayer(1, 0); break;
+                    // línea vacía o comentario, no mostrar error
+                    if (linea.trim() !== '' && !linea.trim().startsWith('//')) {
+                        logMessage(`⏭ línea ignorada (formato?): "${linea.trim()}"`);
                     }
                 }
             });
+        }
 
-            // --- Actualizar interfaz (vidas, lista enemigos) ---
-            function updateUI() {
-                playerHpCurrentSpan.innerText = playerHp;
-                playerHpMaxSpan.innerText = playerMaxHp;
-                playerHpBar.style.width = (playerHp / playerMaxHp * 100) + '%';
+        // reiniciar escenario (borrar todos los objetos)
+        function reiniciarEscenario() {
+            objetos = [];
+            renderizar();
+            logMessage('🔄 Escenario reiniciado. Todos los objetos han sido borrados.');
+        }
 
-                enemyListDiv.innerHTML = '';
-                enemies.forEach(e => {
-                    const div = document.createElement('div');
-                    div.className = 'enemy-item';
-                    div.innerHTML = `<span>👾 (${e.x},${e.y})</span> <span>❤️ ${e.hp}/${e.maxHp}</span>`;
-                    enemyListDiv.appendChild(div);
-                });
-            }
+        // cargar un set de ejemplos en el editor (sin ejecutar)
+        function cargarEjemplos() {
+            codeArea.value = `(createobj:"heroe":"Cubo":"#3a6ea5")
+(createobj:"villano":"Circulo":"#b0302a")
+(tp:"heroe":"120":"200")
+(tp:"villano":"280":"200")
+(createobj:"estrella":"Circulo":"gold")
+(tp:"estrella":"200":"90")
+(mov:"villano":"0":"50")
+// puedes añadir más comandos...`;
+            logMessage('📂 Ejemplos cargados en el editor. Pulsa "ejecutar" para probarlos.');
+        }
 
-            // --- Cambiar tamaño del mundo ---
-            document.getElementById('resizeBtn').addEventListener('click', () => {
-                const newW = parseInt(document.getElementById('mapWidth').value);
-                const newH = parseInt(document.getElementById('mapHeight').value);
-                if (newW < 2 || newW > 20 || newH < 2 || newH > 20) return;
+        // inicializar con algunos objetos por defecto para que no esté vacío
+        function demoInicial() {
+            objetos = [
+                { name: 'demoCuad', shape: 'Cubo', color: '#1070c0', x: 150, y: 150 },
+                { name: 'demoCirc', shape: 'Circulo', color: '#c05030', x: 260, y: 280 }
+            ];
+            renderizar();
+            logMessage('⚡ Easy Pro 2008 iniciado. Objetos de demostración en escenario.');
+        }
 
-                // Crear nuevo mapa con bordes
-                const newMap = [];
-                for (let row = 0; row < newH; row++) {
-                    const rowData = [];
-                    for (let col = 0; col < newW; col++) {
-                        if (row === 0 || row === newH-1 || col === 0 || col === newW-1) {
-                            rowData.push(TILE_WALL);
-                        } else {
-                            rowData.push(TILE_EMPTY);
-                        }
-                    }
-                    newMap.push(rowData);
-                }
+        // eventos de botones
+        document.getElementById('runBtn').addEventListener('click', () => {
+            logMessage('📟 --- EJECUTANDO COMANDOS ---');
+            ejecutarTodo();
+        });
 
-                // Copiar datos antiguos si encajan
-                for (let r = 0; r < Math.min(mapHeight, newH); r++) {
-                    for (let c = 0; c < Math.min(mapWidth, newW); c++) {
-                        if (!(r === 0 || r === newH-1 || c === 0 || c === newW-1)) {
-                            newMap[r][c] = mapData[r][c];
-                        }
-                    }
-                }
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            reiniciarEscenario();
+        });
 
-                // Ajustar posición jugador
-                if (player.x >= newW-1) player.x = newW-2;
-                if (player.y >= newH-1) player.y = newH-2;
+        document.getElementById('exampleBtn').addEventListener('click', () => {
+            cargarEjemplos();
+        });
 
-                // Filtrar enemigos fuera del nuevo mapa
-                enemies = enemies.filter(e => e.x < newW-1 && e.y < newH-1 && e.x > 0 && e.y > 0);
+        // arranque
+        demoInicial();
 
-                mapData = newMap;
-                mapWidth = newW;
-                mapHeight = newH;
-                resizeCanvas();
-                drawGame();
-            });
-
-            // --- Cambiar vida base ---
-            document.getElementById('playerHpBase').addEventListener('input', (e) => {
-                const val = parseInt(e.target.value);
-                if (val > 0) {
-                    playerMaxHp = val;
-                    playerHp = Math.min(playerHp, playerMaxHp);
-                    drawGame();
-                }
-            });
-
-            // --- Curar ---
-            document.getElementById('healBtn').addEventListener('click', () => {
-                playerHp = playerMaxHp;
-                drawGame();
-            });
-
-            // --- Selección de arma ---
-            document.querySelectorAll('input[name=weapon]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    currentWeapon = e.target.value;
-                });
-            });
-
-            // --- Guardar / Cargar / Reiniciar ---
-            document.getElementById('saveBtn').addEventListener('click', () => {
-                const save = {
-                    map: mapData,
-                    player: player,
-                    playerHp, playerMaxHp,
-                    enemies,
-                    mapWidth, mapHeight
-                };
-                localStorage.setItem('rpgSave', JSON.stringify(save));
-                messageEl.innerText = 'Partida guardada';
-            });
-
-            document.getElementById('loadBtn').addEventListener('click', () => {
-                const saved = localStorage.getItem('rpgSave');
-                if (!saved) return;
-                const data = JSON.parse(saved);
-                mapData = data.map;
-                player = data.player;
-                playerHp = data.playerHp;
-                playerMaxHp = data.playerMaxHp;
-                enemies = data.enemies || [];
-                mapWidth = data.mapWidth;
-                mapHeight = data.mapHeight;
-                document.getElementById('mapWidth').value = mapWidth;
-                document.getElementById('mapHeight').value = mapHeight;
-                document.getElementById('playerHpBase').value = playerMaxHp;
-                resizeCanvas();
-                drawGame();
-                messageEl.innerText = 'Partida cargada';
-            });
-
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                mapWidth = 10; mapHeight = 10;
-                document.getElementById('mapWidth').value = 10;
-                document.getElementById('mapHeight').value = 10;
-                mapData = createDefaultMap(10,10);
-                player = { x:1, y:1 };
-                playerMaxHp = 50; playerHp = 50;
-                document.getElementById('playerHpBase').value = 50;
-                enemies = [{ x:5, y:5, hp:25, maxHp:25 }];
-                resizeCanvas();
-                drawGame();
-            });
-
-            // Inicial
-            buildPalette();
-            resizeCanvas();
-            drawGame();
-        })();
-    </script>
+        // render inicial (por si acaso)
+        renderizar();
+    })();
+</script>
 </body>
 </html>
