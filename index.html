@@ -2,403 +2,682 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>RPG Maker con Editor de Terreno y Tileset</title>
+    <title>RPG Maker Completo - Tilesets, Tamaño, Vida y Equipo</title>
     <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
         body {
             background: #1a1a2e;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 15px;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 15px;
         }
         .game-container {
             background: #16213e;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            text-align: center;
-            max-width: 600px;
+            padding: 25px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            max-width: 1100px;
+            width: fit-content;
         }
         h2 {
             color: white;
-            margin: 0 0 10px 0;
-            text-shadow: 2px 2px 0 #0f3460;
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-size: 28px;
+            text-shadow: 3px 3px 0 #0f3460;
+        }
+        .main-panel {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .canvas-area {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 20px;
         }
         canvas#gameCanvas {
-            border: 4px solid #0f3460;
-            border-radius: 10px;
-            background: #0f3460;
             display: block;
-            margin: 0 auto 15px;
-            cursor: crosshair;
-        }
-        .toolbar {
+            border: 3px solid #e94560;
+            border-radius: 12px;
             background: #0f3460;
-            border-radius: 30px;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            width: 100%;
+            height: auto;
+        }
+        .sidebar {
+            background: #0f3460;
+            border-radius: 20px;
+            padding: 20px;
+            min-width: 280px;
+            color: white;
+        }
+        .section {
+            background: #1a1a2e;
+            border-radius: 15px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            margin: 0 0 12px 0;
+            color: #e94560;
+            font-size: 18px;
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
+            gap: 8px;
         }
         .palette {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
-            background: #1a1a2e;
-            padding: 8px 12px;
-            border-radius: 40px;
-        }
-        .tile-preview {
-            width: 40px;
-            height: 40px;
-            border: 3px solid transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
+            justify-content: center;
+            margin: 10px 0;
             background: #16213e;
+            padding: 12px;
+            border-radius: 30px;
         }
-        .tile-preview.selected {
+        .tile-item {
+            width: 48px;
+            height: 48px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #0f3460;
+            transition: 0.15s;
+            image-rendering: pixelated;
+        }
+        .tile-item.selected {
             border-color: #e94560;
             transform: scale(1.1);
-            box-shadow: 0 0 10px #e94560;
+            box-shadow: 0 0 12px #e94560;
         }
-        .tile-preview img {
+        .tile-item img {
             width: 100%;
             height: 100%;
-            image-rendering: pixelated;
             border-radius: 6px;
         }
-        .controls {
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #aaa;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px 12px;
+            background: #16213e;
+            border: 2px solid #e94560;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            outline: none;
+        }
+        .input-group input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #16213e;
+            padding: 6px 15px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .radio-group input[type=radio] {
+            accent-color: #e94560;
+            width: 16px;
+            height: 16px;
+        }
+        .hp-bar {
+            background: #2a2a3a;
+            height: 20px;
+            border-radius: 30px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .hp-fill {
+            height: 100%;
+            background: #e94560;
+            width: 100%;
+            transition: width 0.3s;
+        }
+        .button-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
+            margin-top: 15px;
         }
         button {
             background: #e94560;
             border: none;
             color: white;
-            font-size: 14px;
             font-weight: bold;
             padding: 8px 16px;
-            border-radius: 30px;
+            border-radius: 40px;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 0 #a0223e;
+            border-bottom: 3px solid #a0223e;
+            font-size: 14px;
         }
         button:hover {
             background: #ff6b8b;
             transform: translateY(-2px);
-            box-shadow: 0 6px 0 #a0223e;
+            border-bottom-width: 5px;
         }
-        button.small {
-            padding: 5px 12px;
-            font-size: 13px;
+        .enemy-list {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #16213e;
+            border-radius: 15px;
+            padding: 8px;
         }
-        .status {
+        .enemy-item {
+            background: #0f3460;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-text {
+            background: #1a1a2e;
+            padding: 8px 15px;
+            border-radius: 40px;
             color: #e94560;
             font-weight: bold;
-            background: #0f3460;
-            padding: 8px 16px;
-            border-radius: 30px;
-            display: inline-block;
-        }
-        .checkbox-label {
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 15px;
-        }
-        #coords {
-            color: #aaa;
-            font-size: 13px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h2>🗺️ RPG Maker - Editor de terreno</h2>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <h2>⚔️ RPG MAKER DELUXE ⚔️</h2>
+        <div class="main-panel">
+            <div class="canvas-area">
+                <canvas id="gameCanvas" width="640" height="640"></canvas>
+                <div class="status-text" id="message">Haz clic en un enemigo para atacar</div>
+            </div>
+            <div class="sidebar">
+                <div class="section">
+                    <h3>🎨 Tileset personalizado</h3>
+                    <input type="file" id="tilesetUpload" accept="image/*">
+                    <div class="palette" id="tilePalette"></div>
+                    <p style="font-size:12px; color:#aaa;">Imagen dividida en tiles de 32x32</p>
+                </div>
 
-        <div class="toolbar">
-            <div class="palette" id="palette"></div>
-            <div class="controls">
-                <button id="saveBtn" class="small">💾 Guardar</button>
-                <button id="loadBtn" class="small">📂 Cargar</button>
-                <button id="resetBtn" class="small">🔄 Reiniciar</button>
+                <div class="section">
+                    <h3>🌍 Tamaño del mundo</h3>
+                    <div class="input-group">
+                        <label>Ancho (2-20)</label>
+                        <input type="number" id="mapWidth" min="2" max="20" value="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Alto (2-20)</label>
+                        <input type="number" id="mapHeight" min="2" max="20" value="10">
+                    </div>
+                    <button id="resizeBtn">Redimensionar</button>
+                </div>
+
+                <div class="section">
+                    <h3>❤️ Vida del jugador</h3>
+                    <div class="input-group">
+                        <label>Vida base</label>
+                        <input type="number" id="playerHpBase" min="10" max="200" value="50">
+                    </div>
+                    <div class="hp-bar">
+                        <div id="playerHpBar" class="hp-fill" style="width:100%"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span id="playerHpCurrent">50</span> / <span id="playerHpMax">50</span>
+                    </div>
+                    <button id="healBtn">🩹 Curar al jugador</button>
+                </div>
+
+                <div class="section">
+                    <h3>🗡️ Equipamiento</h3>
+                    <div class="radio-group" id="weaponGroup">
+                        <label><input type="radio" name="weapon" value="sword" checked> 🗡️ Espada (10-15)</label>
+                        <label><input type="radio" name="weapon" value="bow"> 🏹 Arco (8-12)</label>
+                        <label><input type="radio" name="weapon" value="fist"> 👊 Puño (4-8)</label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>👾 Enemigos vivos</h3>
+                    <div id="enemyList" class="enemy-list"></div>
+                    <div class="button-row">
+                        <button id="saveBtn">💾 Guardar</button>
+                        <button id="loadBtn">📂 Cargar</button>
+                        <button id="resetBtn">🔄 Reiniciar</button>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <label class="checkbox-label">
-                <input type="checkbox" id="editMode" checked> ✏️ Modo edición (clic en mapa)
-            </label>
-            <span id="message" class="status">🏃 Muévete con flechas</span>
-        </div>
-        <div id="coords">Posición ratón: -- , --</div>
     </div>
 
     <script>
-        (function() {
-            // ---------- Constantes ----------
-            const MAP_SIZE = 10;
-            const TILE_SIZE = 40;
-            const TILE_TYPES = 4;  // 0: suelo, 1: pared, 2: cofre, 3: agua
+        (function(){
+            // --- Configuración base ---
+            const TILE_SIZE = 32;            // Tamaño fijo de tile para el tileset
+            let mapWidth = 10, mapHeight = 10; // Tamaño actual del mapa
+            let mapData = [];                  // Matriz de tiles (solo IDs)
+            let player = { x: 1, y: 1 };        // Posición inicial
+            let playerHp = 50, playerMaxHp = 50;
+            let enemies = [];                   // { x, y, hp, maxHp }
 
-            // Definición de tiles (sólidos: no se puede caminar)
-            const SOLID_TILES = [1, 3]; // pared y agua son sólidas
+            // Tiles especiales: (puedes ampliar)
+            const TILE_EMPTY = 0;    // Suelo transitable
+            const TILE_WALL = 1;      // Pared (sólida)
+            const TILE_CHEST = 2;      // Cofre (al tocarlo da item)
+            const TILE_ENEMY = 3;      // Enemigo (combate)
 
-            // Mapa inicial (10x10)
-            const INITIAL_MAP = [
-                [1,1,1,1,1,1,1,1,1,1],
-                [1,0,0,0,0,0,0,0,0,1],
-                [1,0,1,1,0,1,0,1,0,1],
-                [1,0,0,0,0,0,0,1,0,1],
-                [1,0,1,0,1,1,0,0,0,1],
-                [1,0,0,0,0,0,0,1,0,1],
-                [1,0,1,1,0,1,0,1,0,1],
-                [1,0,0,0,0,2,0,0,0,1],  // cofre en (5,7)
-                [1,0,0,0,0,0,0,0,0,1],
-                [1,1,1,1,1,1,1,1,1,1]
-            ];
+            // Sólidos
+            const SOLID_TILES = [TILE_WALL];
 
-            // Copia del mapa editable
-            let mapData = JSON.parse(JSON.stringify(INITIAL_MAP));
+            // Armas y daño (mín, máx)
+            const weapons = {
+                sword: { name: 'Espada', min:10, max:15 },
+                bow:   { name: 'Arco',   min:8,  max:12 },
+                fist:  { name: 'Puño',   min:4,  max:8 }
+            };
+            let currentWeapon = 'sword';
 
-            // Jugador (col, fila)
-            let player = { x: 1, y: 1 };
-
-            // Tile seleccionado para edición (por defecto suelo)
-            let selectedTile = 0;
+            // Tileset (imagen)
+            let tilesetImage = null;
+            let tileCount = 4; // Por defecto 4 tiles (suelo, pared, cofre, enemigo) pero se ampliará
 
             // Referencias DOM
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             const messageEl = document.getElementById('message');
-            const coordsEl = document.getElementById('coords');
-            const editModeCheck = document.getElementById('editMode');
+            const playerHpCurrentSpan = document.getElementById('playerHpCurrent');
+            const playerHpMaxSpan = document.getElementById('playerHpMax');
+            const playerHpBar = document.getElementById('playerHpBar');
+            const enemyListDiv = document.getElementById('enemyList');
 
-            // ---------- Generar tileset (sprite sheet) en un canvas oculto ----------
-            const tilesetCanvas = document.createElement('canvas');
-            tilesetCanvas.width = TILE_SIZE * TILE_TYPES;
-            tilesetCanvas.height = TILE_SIZE;
-            const tCtx = tilesetCanvas.getContext('2d');
-
-            // Dibujar cada tile
-            function drawTileset() {
-                // Tile 0: Suelo (hierba)
-                tCtx.fillStyle = '#4caf50';
-                tCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-                tCtx.fillStyle = '#2e7d32';
-                for (let i = 0; i < 5; i++) {
-                    tCtx.beginPath();
-                    tCtx.arc(5 + i*8, 10 + (i%2)*15, 3, 0, 2*Math.PI);
-                    tCtx.fill();
+            // Inicializar mapa por defecto (10x10 con bordes)
+            function createDefaultMap(w, h) {
+                const newMap = [];
+                for (let row = 0; row < h; row++) {
+                    const rowData = [];
+                    for (let col = 0; col < w; col++) {
+                        if (row === 0 || row === h-1 || col === 0 || col === w-1) {
+                            rowData.push(TILE_WALL); // bordes pared
+                        } else {
+                            rowData.push(TILE_EMPTY);
+                        }
+                    }
+                    newMap.push(rowData);
                 }
-
-                // Tile 1: Pared (piedra)
-                tCtx.fillStyle = '#5d6d7e';
-                tCtx.fillRect(40, 0, TILE_SIZE, TILE_SIZE);
-                tCtx.fillStyle = '#2e4053';
-                for (let i = 0; i < 4; i++) {
-                    tCtx.fillRect(45 + i*8, 5, 4, 30);
+                // Colocar un cofre y un enemigo de ejemplo
+                if (w > 3 && h > 3) {
+                    newMap[3][3] = TILE_CHEST;
+                    newMap[5][5] = TILE_ENEMY;
+                    enemies.push({ x:5, y:5, hp:25, maxHp:25 });
                 }
-
-                // Tile 2: Cofre
-                tCtx.fillStyle = '#b86f2c';
-                tCtx.fillRect(80, 10, TILE_SIZE, 20);
-                tCtx.fillStyle = '#f1c40f';
-                tCtx.fillRect(85, 5, 30, 10);
-                tCtx.fillStyle = '#000';
-                tCtx.beginPath();
-                tCtx.arc(100, 10, 3, 0, 2*Math.PI);
-                tCtx.fill();
-
-                // Tile 3: Agua
-                tCtx.fillStyle = '#3498db';
-                tCtx.fillRect(120, 0, TILE_SIZE, TILE_SIZE);
-                tCtx.fillStyle = '#2980b9';
-                for (let i = 0; i < 3; i++) {
-                    tCtx.beginPath();
-                    tCtx.arc(130 + i*12, 15 + i*8, 6, 0, Math.PI, true);
-                    tCtx.fill();
-                }
+                return newMap;
             }
-            drawTileset();
+            mapData = createDefaultMap(mapWidth, mapHeight);
 
-            // ---------- Actualizar paleta visual ----------
-            const paletteDiv = document.getElementById('palette');
+            // Actualizar canvas size
+            function resizeCanvas() {
+                canvas.width = mapWidth * TILE_SIZE;
+                canvas.height = mapHeight * TILE_SIZE;
+                drawGame();
+            }
+
+            // --- Cargar tileset desde archivo ---
+            document.getElementById('tilesetUpload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        tilesetImage = img;
+                        // Calcular número de tiles (ancho de imagen / TILE_SIZE)
+                        const cols = Math.floor(img.width / TILE_SIZE);
+                        tileCount = cols;
+                        buildPalette();
+                        drawGame();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Construir paleta de tiles
             function buildPalette() {
-                paletteDiv.innerHTML = '';
-                for (let i = 0; i < TILE_TYPES; i++) {
-                    const preview = document.createElement('div');
-                    preview.className = 'tile-preview' + (i === selectedTile ? ' selected' : '');
-                    preview.dataset.tile = i;
-
-                    // Crear un canvas pequeño para mostrar el tile
-                    const tileImg = document.createElement('canvas');
-                    tileImg.width = TILE_SIZE;
-                    tileImg.height = TILE_SIZE;
-                    const imgCtx = tileImg.getContext('2d');
-                    imgCtx.drawImage(tilesetCanvas, i*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, 0, 0, TILE_SIZE, TILE_SIZE);
-                    preview.appendChild(tileImg);
-
-                    preview.addEventListener('click', () => {
-                        selectedTile = i;
-                        document.querySelectorAll('.tile-preview').forEach(el => el.classList.remove('selected'));
-                        preview.classList.add('selected');
+                const palette = document.getElementById('tilePalette');
+                palette.innerHTML = '';
+                const count = tileCount || 4; // mínimo 4 tiles por defecto
+                for (let i = 0; i < count; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'tile-item' + (i === 0 ? ' selected' : '');
+                    div.dataset.tile = i;
+                    const canvasTile = document.createElement('canvas');
+                    canvasTile.width = TILE_SIZE;
+                    canvasTile.height = TILE_SIZE;
+                    const tCtx = canvasTile.getContext('2d');
+                    if (tilesetImage) {
+                        tCtx.drawImage(tilesetImage, i*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, 0, 0, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        // Dibujar tiles por defecto
+                        tCtx.fillStyle = ['#4caf50','#5d6d7e','#f3c623','#e94560'][i % 4];
+                        tCtx.fillRect(0,0,TILE_SIZE,TILE_SIZE);
+                        tCtx.fillStyle = 'black';
+                        tCtx.font = 'bold 16px monospace';
+                        tCtx.fillText(i, 5, 22);
+                    }
+                    div.appendChild(canvasTile);
+                    div.addEventListener('click', () => {
+                        document.querySelectorAll('.tile-item').forEach(el => el.classList.remove('selected'));
+                        div.classList.add('selected');
                     });
-                    paletteDiv.appendChild(preview);
+                    palette.appendChild(div);
                 }
             }
-            buildPalette();
 
-            // ---------- Dibujar el mapa completo con tileset ----------
+            // Obtener tile seleccionado
+            function getSelectedTile() {
+                const selected = document.querySelector('.tile-item.selected');
+                return selected ? parseInt(selected.dataset.tile) : 0;
+            }
+
+            // --- Dibujado del mapa ---
             function drawGame() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let row = 0; row < MAP_SIZE; row++) {
-                    for (let col = 0; col < MAP_SIZE; col++) {
-                        const tile = mapData[row][col];
-                        const sx = tile * TILE_SIZE;
-                        ctx.drawImage(tilesetCanvas, sx, 0, TILE_SIZE, TILE_SIZE, col*TILE_SIZE, row*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                // Dibujar tiles
+                for (let row = 0; row < mapHeight; row++) {
+                    for (let col = 0; col < mapWidth; col++) {
+                        const tileId = mapData[row][col];
+                        const x = col * TILE_SIZE;
+                        const y = row * TILE_SIZE;
+                        if (tilesetImage && tileId < tileCount) {
+                            ctx.drawImage(tilesetImage, tileId*TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            // Fallback
+                            ctx.fillStyle = ['#4caf50','#5d6d7e','#f3c623','#e94560'][tileId % 4] || '#aaa';
+                            ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
+                        }
                     }
                 }
 
                 // Dibujar jugador
-                const px = player.x * TILE_SIZE;
-                const py = player.y * TILE_SIZE;
                 ctx.fillStyle = '#e94560';
                 ctx.beginPath();
-                ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 15, 0, 2*Math.PI);
+                ctx.arc(player.x * TILE_SIZE + TILE_SIZE/2, player.y * TILE_SIZE + TILE_SIZE/2, TILE_SIZE/2-4, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.fillStyle = 'white';
                 ctx.beginPath();
-                ctx.arc(px + TILE_SIZE/2 - 5, py + TILE_SIZE/2 - 5, 4, 0, 2*Math.PI);
+                ctx.arc(player.x * TILE_SIZE + TILE_SIZE/2 - 4, player.y * TILE_SIZE + TILE_SIZE/2 - 4, 5, 0, 2*Math.PI);
                 ctx.fill();
+
+                // Dibujar vidas de enemigos (si existen)
+                enemies.forEach(e => {
+                    const ex = e.x * TILE_SIZE, ey = e.y * TILE_SIZE;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(ex, ey-8, TILE_SIZE * (e.hp/e.maxHp), 4);
+                });
+
+                updateUI();
             }
 
-            // ---------- Lógica de movimiento ----------
+            // --- Movimiento del jugador (teclado) ---
             function movePlayer(dx, dy) {
-                const newX = player.x + dx;
-                const newY = player.y + dy;
-
-                // Límites
-                if (newX < 0 || newX >= MAP_SIZE || newY < 0 || newY >= MAP_SIZE) {
-                    messageEl.innerText = '🚧 Fin del mundo';
+                const nx = player.x + dx;
+                const ny = player.y + dy;
+                if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) {
+                    messageEl.innerText = '¡Límite del mundo!';
+                    return;
+                }
+                const tile = mapData[ny][nx];
+                if (SOLID_TILES.includes(tile)) {
+                    messageEl.innerText = '¡Obstáculo!';
                     return;
                 }
 
-                const destTile = mapData[newY][newX];
-
-                // Sólido?
-                if (SOLID_TILES.includes(destTile)) {
-                    messageEl.innerText = destTile === 1 ? '🧱 Pared' : '💧 Agua';
-                    return;
-                }
-
-                // Cofre? -> recoger y convertir en suelo
-                if (destTile === 2) {
-                    mapData[newY][newX] = 0;  // se vuelve suelo
-                    messageEl.innerText = '✨ ¡Tesoro encontrado! ✨';
-                } else {
-                    messageEl.innerText = '🏃 Explorando...';
+                // Interacción con cofre
+                if (tile === TILE_CHEST) {
+                    mapData[ny][nx] = TILE_EMPTY;
+                    messageEl.innerText = '¡Has encontrado una poción! +10 vida';
+                    playerHp = Math.min(playerHp + 10, playerMaxHp);
                 }
 
                 // Mover jugador
-                player.x = newX;
-                player.y = newY;
+                player.x = nx;
+                player.y = ny;
+
+                // Comprobar si hay enemigo en la nueva posición? (podríamos hacer combate automático, pero mejor manual)
+                const enemyHere = enemies.find(e => e.x === nx && e.y === ny);
+                if (enemyHere) {
+                    messageEl.innerText = `¡Enemigo! HP: ${enemyHere.hp}. Haz clic sobre él para atacar.`;
+                } else {
+                    messageEl.innerText = 'Usa las flechas para moverte';
+                }
                 drawGame();
             }
 
-            // ---------- Evento teclado ----------
-            window.addEventListener('keydown', (e) => {
-                if (e.key.startsWith('Arrow')) e.preventDefault();
-                switch (e.key) {
-                    case 'ArrowUp': movePlayer(0, -1); break;
-                    case 'ArrowDown': movePlayer(0, 1); break;
-                    case 'ArrowLeft': movePlayer(-1, 0); break;
-                    case 'ArrowRight': movePlayer(1, 0); break;
+            // --- Ataque a enemigo (por clic) ---
+            function attackEnemy(enemy) {
+                if (enemy.hp <= 0) return;
+                const weapon = weapons[currentWeapon];
+                const damage = Math.floor(Math.random() * (weapon.max - weapon.min + 1)) + weapon.min;
+                enemy.hp -= damage;
+                messageEl.innerText = `¡${weapon.name} causó ${damage} de daño!`;
+                if (enemy.hp <= 0) {
+                    // Eliminar enemigo
+                    enemies = enemies.filter(e => e !== enemy);
+                    mapData[enemy.y][enemy.x] = TILE_EMPTY; // convertir a suelo
+                    messageEl.innerText = '¡Enemigo derrotado!';
                 }
-            });
+                drawGame();
+            }
 
-            // ---------- Edición con clic (si modo activado) ----------
+            // --- Evento clic en canvas (ataque o edición) ---
             canvas.addEventListener('click', (e) => {
-                if (!editModeCheck.checked) return;
-
                 const rect = canvas.getBoundingClientRect();
                 const scaleX = canvas.width / rect.width;
                 const scaleY = canvas.height / rect.height;
+                const mx = (e.clientX - rect.left) * scaleX;
+                const my = (e.clientY - rect.top) * scaleY;
+                const col = Math.floor(mx / TILE_SIZE);
+                const row = Math.floor(my / TILE_SIZE);
+                if (col < 0 || col >= mapWidth || row < 0 || row >= mapHeight) return;
 
-                const mouseX = (e.clientX - rect.left) * scaleX;
-                const mouseY = (e.clientY - rect.top) * scaleY;
-
-                const col = Math.floor(mouseX / TILE_SIZE);
-                const row = Math.floor(mouseY / TILE_SIZE);
-
-                if (col >= 0 && col < MAP_SIZE && row >= 0 && row < MAP_SIZE) {
-                    // No permitir colocar tile sólido encima del jugador
-                    if (row === player.y && col === player.x && SOLID_TILES.includes(selectedTile)) {
-                        messageEl.innerText = '❌ No puedes bloquear al jugador';
+                // Si el checkbox de edición no existe, por defecto: si hay enemigo, atacar; sino, en modo edición (pero nosotros no tenemos modo edición ahora; decidimos: SIEMPRE edición con tile seleccionado? Mejor: botón modo edición. Añadamos un toggle rápido.
+                // Por simplicidad, añadiremos un estado "modoEdicion" con tecla E o botón.
+                // Pero para no complicar, asumimos que si hay un enemigo en esa celda, atacamos; si no, editamos.
+                const enemy = enemies.find(e => e.x === col && e.y === row);
+                if (enemy) {
+                    attackEnemy(enemy);
+                } else {
+                    // Modo edición: colocar tile seleccionado
+                    const tile = getSelectedTile();
+                    // No permitir poner sólido sobre jugador
+                    if (row === player.y && col === player.x && SOLID_TILES.includes(tile)) {
+                        messageEl.innerText = 'No puedes bloquear al jugador';
                         return;
                     }
-                    mapData[row][col] = selectedTile;
+                    // Si se coloca un enemigo, crear entidad
+                    if (tile === TILE_ENEMY) {
+                        // Evitar duplicados
+                        if (!enemies.some(e => e.x === col && e.y === row)) {
+                            enemies.push({ x:col, y:row, hp:25, maxHp:25 });
+                        }
+                    } else {
+                        // Si se quita un enemigo de esa celda, eliminarlo de enemies
+                        if (mapData[row][col] === TILE_ENEMY) {
+                            enemies = enemies.filter(e => !(e.x === col && e.y === row));
+                        }
+                    }
+                    mapData[row][col] = tile;
                     drawGame();
-                    messageEl.innerText = `Tile ${selectedTile} colocado en (${col}, ${row})`;
                 }
             });
 
-            // Mostrar coordenadas del ratón
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const mouseX = (e.clientX - rect.left) * scaleX;
-                const mouseY = (e.clientY - rect.top) * scaleY;
-                const col = Math.floor(mouseX / TILE_SIZE);
-                const row = Math.floor(mouseY / TILE_SIZE);
-                if (col >= 0 && col < MAP_SIZE && row >= 0 && row < MAP_SIZE) {
-                    coordsEl.innerText = `Posición: (${col}, ${row}) | Tile: ${mapData[row][col]}`;
-                } else {
-                    coordsEl.innerText = 'Posición: fuera del mapa';
+            // Teclado
+            window.addEventListener('keydown', (e) => {
+                if (e.key.startsWith('Arrow')) {
+                    e.preventDefault();
+                    switch(e.key) {
+                        case 'ArrowUp': movePlayer(0, -1); break;
+                        case 'ArrowDown': movePlayer(0, 1); break;
+                        case 'ArrowLeft': movePlayer(-1, 0); break;
+                        case 'ArrowRight': movePlayer(1, 0); break;
+                    }
                 }
             });
 
-            // ---------- Botones de persistencia ----------
+            // --- Actualizar interfaz (vidas, lista enemigos) ---
+            function updateUI() {
+                playerHpCurrentSpan.innerText = playerHp;
+                playerHpMaxSpan.innerText = playerMaxHp;
+                playerHpBar.style.width = (playerHp / playerMaxHp * 100) + '%';
+
+                enemyListDiv.innerHTML = '';
+                enemies.forEach(e => {
+                    const div = document.createElement('div');
+                    div.className = 'enemy-item';
+                    div.innerHTML = `<span>👾 (${e.x},${e.y})</span> <span>❤️ ${e.hp}/${e.maxHp}</span>`;
+                    enemyListDiv.appendChild(div);
+                });
+            }
+
+            // --- Cambiar tamaño del mundo ---
+            document.getElementById('resizeBtn').addEventListener('click', () => {
+                const newW = parseInt(document.getElementById('mapWidth').value);
+                const newH = parseInt(document.getElementById('mapHeight').value);
+                if (newW < 2 || newW > 20 || newH < 2 || newH > 20) return;
+
+                // Crear nuevo mapa con bordes
+                const newMap = [];
+                for (let row = 0; row < newH; row++) {
+                    const rowData = [];
+                    for (let col = 0; col < newW; col++) {
+                        if (row === 0 || row === newH-1 || col === 0 || col === newW-1) {
+                            rowData.push(TILE_WALL);
+                        } else {
+                            rowData.push(TILE_EMPTY);
+                        }
+                    }
+                    newMap.push(rowData);
+                }
+
+                // Copiar datos antiguos si encajan
+                for (let r = 0; r < Math.min(mapHeight, newH); r++) {
+                    for (let c = 0; c < Math.min(mapWidth, newW); c++) {
+                        if (!(r === 0 || r === newH-1 || c === 0 || c === newW-1)) {
+                            newMap[r][c] = mapData[r][c];
+                        }
+                    }
+                }
+
+                // Ajustar posición jugador
+                if (player.x >= newW-1) player.x = newW-2;
+                if (player.y >= newH-1) player.y = newH-2;
+
+                // Filtrar enemigos fuera del nuevo mapa
+                enemies = enemies.filter(e => e.x < newW-1 && e.y < newH-1 && e.x > 0 && e.y > 0);
+
+                mapData = newMap;
+                mapWidth = newW;
+                mapHeight = newH;
+                resizeCanvas();
+                drawGame();
+            });
+
+            // --- Cambiar vida base ---
+            document.getElementById('playerHpBase').addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                if (val > 0) {
+                    playerMaxHp = val;
+                    playerHp = Math.min(playerHp, playerMaxHp);
+                    drawGame();
+                }
+            });
+
+            // --- Curar ---
+            document.getElementById('healBtn').addEventListener('click', () => {
+                playerHp = playerMaxHp;
+                drawGame();
+            });
+
+            // --- Selección de arma ---
+            document.querySelectorAll('input[name=weapon]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    currentWeapon = e.target.value;
+                });
+            });
+
+            // --- Guardar / Cargar / Reiniciar ---
             document.getElementById('saveBtn').addEventListener('click', () => {
-                localStorage.setItem('rpgMap', JSON.stringify(mapData));
-                localStorage.setItem('rpgPlayer', JSON.stringify(player));
-                messageEl.innerText = '💾 Partida guardada';
+                const save = {
+                    map: mapData,
+                    player: player,
+                    playerHp, playerMaxHp,
+                    enemies,
+                    mapWidth, mapHeight
+                };
+                localStorage.setItem('rpgSave', JSON.stringify(save));
+                messageEl.innerText = 'Partida guardada';
             });
 
             document.getElementById('loadBtn').addEventListener('click', () => {
-                const savedMap = localStorage.getItem('rpgMap');
-                const savedPlayer = localStorage.getItem('rpgPlayer');
-                if (savedMap && savedPlayer) {
-                    mapData = JSON.parse(savedMap);
-                    player = JSON.parse(savedPlayer);
-                    drawGame();
-                    messageEl.innerText = '📂 Partida cargada';
-                } else {
-                    messageEl.innerText = '⚠️ No hay datos guardados';
-                }
+                const saved = localStorage.getItem('rpgSave');
+                if (!saved) return;
+                const data = JSON.parse(saved);
+                mapData = data.map;
+                player = data.player;
+                playerHp = data.playerHp;
+                playerMaxHp = data.playerMaxHp;
+                enemies = data.enemies || [];
+                mapWidth = data.mapWidth;
+                mapHeight = data.mapHeight;
+                document.getElementById('mapWidth').value = mapWidth;
+                document.getElementById('mapHeight').value = mapHeight;
+                document.getElementById('playerHpBase').value = playerMaxHp;
+                resizeCanvas();
+                drawGame();
+                messageEl.innerText = 'Partida cargada';
             });
 
             document.getElementById('resetBtn').addEventListener('click', () => {
-                mapData = JSON.parse(JSON.stringify(INITIAL_MAP));
-                player = { x: 1, y: 1 };
+                mapWidth = 10; mapHeight = 10;
+                document.getElementById('mapWidth').value = 10;
+                document.getElementById('mapHeight').value = 10;
+                mapData = createDefaultMap(10,10);
+                player = { x:1, y:1 };
+                playerMaxHp = 50; playerHp = 50;
+                document.getElementById('playerHpBase').value = 50;
+                enemies = [{ x:5, y:5, hp:25, maxHp:25 }];
+                resizeCanvas();
                 drawGame();
-                messageEl.innerText = '🔄 Mapa reiniciado';
             });
 
-            // Dibujar inicial
+            // Inicial
+            buildPalette();
+            resizeCanvas();
             drawGame();
-            messageEl.innerText = '🏃 Muévete con flechas';
         })();
     </script>
 </body>
