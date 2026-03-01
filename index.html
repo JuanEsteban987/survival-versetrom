@@ -2,1112 +2,694 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Easy Pro 2008 · 300+ comandos, ayuda y autocompletado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Scratch: Bloques y Creador de Sprites</title>
     <style>
-        /* ===== ESTÉTICA 2008 ===== */
         * {
             box-sizing: border-box;
-            margin: 0;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
         }
-
         body {
-            background: #1f3a5f;
-            font-family: 'Tahoma', 'Verdana', 'Arial', sans-serif;
-            padding: 25px 10px;
+            background: #4d4d4d;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-        }
-
-        .computer {
-            width: 1150px;
-            background: #d0d0d0;
-            border: 5px ridge #e0e0e0;
-            border-radius: 12px 12px 8px 8px;
-            padding: 20px 20px 15px 20px;
-            box-shadow: 8px 8px 0px #0a1e30, inset 2px 2px 5px #f0f0f0;
-        }
-
-        .top-bar {
-            background: linear-gradient(180deg, #1040a0, #002070);
-            border: 3px ridge #3070d0;
-            padding: 8px 20px;
-            margin-bottom: 20px;
-            box-shadow: inset 2px 2px 8px #80a0ff, inset -2px -2px 5px #001030;
-            color: white;
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-        .title {
-            font-size: 58px;
-            font-weight: bold;
-            font-family: 'Impact', 'Arial Black', sans-serif;
-            letter-spacing: 3px;
-            text-shadow: 4px 4px 0px #0f0f0f, 6px 6px 0px #303030;
-            color: #ffffb0;
-            line-height: 1;
-        }
-        .year {
-            font-size: 28px;
-            background: #c0c000;
-            color: #202020;
-            border: 3px inset #f0f000;
-            padding: 5px 15px;
-            font-weight: bold;
-            font-style: italic;
-            box-shadow: 0 0 0 2px #808080;
-            border-radius: 30px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .workspace {
-            display: flex;
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        .code-panel {
-            flex: 1.2;
-            background: #bebebe;
-            border: 4px inset #fcfcfc;
-            padding: 15px;
-            box-shadow: inset 3px 3px 8px #707070, inset -3px -3px 8px #e0e0e0;
-            position: relative;
-        }
-
-        .panel-label {
-            font-weight: bold;
-            font-size: 20px;
-            color: #202020;
-            background: linear-gradient(90deg, #c0c0c0, #a0a0a0);
-            padding: 5px 15px;
-            border: 3px outset #e0e0e0;
-            margin-bottom: 15px;
-            display: inline-block;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .editor-container {
-            position: relative;
-        }
-
-        textarea {
-            width: 100%;
-            height: 260px;
-            background: #ffffcc;
-            border: 4px inset #8a8a8a;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            font-weight: bold;
-            color: #001080;
-            padding: 12px;
-            line-height: 1.4;
-            resize: vertical;
-            box-shadow: inset 2px 2px 10px #404040;
-        }
-
-        .autocomplete-box {
-            position: absolute;
-            background: #e0e0e0;
-            border: 3px outset #ffffff;
-            max-height: 150px;
-            overflow-y: auto;
-            width: 250px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            box-shadow: 4px 4px 0px #404040;
-            z-index: 100;
-            display: none;
-        }
-        .autocomplete-item {
-            padding: 5px 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #a0a0a0;
-        }
-        .autocomplete-item:hover {
-            background: #b0b0ff;
-        }
-        .autocomplete-item.selected {
-            background: #8080ff;
-            color: white;
-        }
-
-        .button-group {
-            margin-top: 20px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: linear-gradient(180deg, #f0f0f0, #b0b0b0);
-            border: 4px outset #ffffff;
-            color: #101010;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 8px 24px;
-            cursor: pointer;
-            font-family: 'Tahoma', sans-serif;
-            box-shadow: 3px 3px 0px #404040;
-            transition: 0.05s linear;
-        }
-        .btn:hover {
-            background: linear-gradient(180deg, #ffffe0, #c0c0c0);
-            border-color: #fffff0;
-        }
-        .btn:active {
-            border: 4px inset #808080;
-            box-shadow: 1px 1px 0px #202020;
-            transform: translate(2px, 2px);
-        }
-
-        .stage-panel {
-            flex: 1;
-            background: #bebebe;
-            border: 4px inset #fcfcfc;
-            padding: 15px;
-            box-shadow: inset 3px 3px 8px #707070, inset -3px -3px 8px #e0e0e0;
-        }
-
-        .canvas-wrapper {
-            background: #8f8f8f;
-            border: 6px inset #5a5a5a;
-            padding: 8px;
-            display: flex;
-            justify-content: center;
-        }
-
-        canvas {
-            width: 400px;
-            height: 400px;
-            background: #ffffff;
-            border: 2px solid #303030;
-            display: block;
-            image-rendering: crisp-edges;
-        }
-
-        .object-panel {
-            margin-top: 20px;
-            background: #c8c8c8;
-            border: 4px inset #ececec;
-            padding: 10px;
-            max-height: 170px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: bold;
-            color: #000000;
-        }
-
-        .object-title {
-            background: #a0a0a0;
-            border: 2px outset #d0d0d0;
-            padding: 4px 10px;
-            margin-bottom: 8px;
-            font-weight: bold;
-            text-align: center;
-            color: #202020;
-        }
-
-        .object-list {
-            list-style: none;
-            padding: 2px;
-        }
-        .object-list li {
-            border-bottom: 1px dashed #404040;
-            padding: 5px 0px 5px 10px;
-            background: #e0e0e0;
-            margin-bottom: 3px;
-            border-left: 6px solid #202020;
-        }
-
-        .error-panel {
-            margin-top: 20px;
-            background: #4a1a1a;
-            border: 5px inset #a04040;
-            padding: 10px;
-            max-height: 120px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            color: #ffb0b0;
-        }
-        .error-title {
-            font-weight: bold;
-            color: #ff8080;
-            margin-bottom: 5px;
-        }
-        .error-line {
-            border-bottom: 1px solid #802020;
-            padding: 3px;
-        }
-
-        .log-console {
-            background: #1a1a1a;
-            color: #3aff99;
-            font-family: 'Courier New', monospace;
-            border: 5px inset #707070;
-            padding: 10px;
-            margin-top: 25px;
-            height: 100px;
-            overflow-y: auto;
-            font-size: 15px;
-            font-weight: bold;
-            box-shadow: inset 0 0 15px #00cc66;
-            border-radius: 0px;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 15px;
-            color: #dfdfdf;
-            text-shadow: 2px 2px 0 #0a1e30;
-            font-size: 16px;
-            font-weight: bold;
-            border-top: 2px groove #a0a0a0;
-            padding-top: 10px;
-        }
-
-        /* ===== MODAL DE AYUDA (estilo 2008) ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-        }
-        .modal-box {
-            background: #c0c0c0;
-            border: 8px ridge #e0e0e0;
-            width: 700px;
-            height: 500px;
-            margin: 50px auto;
             padding: 20px;
-            box-shadow: 10px 10px 0 #202020;
+        }
+        .scratch-container {
+            width: 1100px;
+            max-width: 100%;
+            background: #f0f0f0;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            margin: 0 0 15px 0;
+            color: #4d4d4d;
+            font-size: 28px;
+            text-align: center;
+            letter-spacing: 2px;
+            background: #ffd966;
+            padding: 10px;
+            border-radius: 40px;
+        }
+        .main-panels {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        /* Panel izquierdo - Bloques */
+        .blocks-panel {
+            background: #e5e5e5;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: inset 0 0 5px #aaa;
+        }
+        .categories {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .category-btn {
+            flex: 1;
+            background: #c4c4c4;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 0;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            text-shadow: 1px 1px 0 #00000030;
+        }
+        .category-btn.active {
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #4d4d4d;
+        }
+        .category-btn[data-cat="motion"] { background: #4a6cd4; }
+        .category-btn[data-cat="looks"] { background: #9b4f96; }
+        .category-btn[data-cat="sound"] { background: #d45d4a; }
+        
+        .blocks-container {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            min-height: 400px;
+            box-shadow: inset 0 0 5px #ccc;
             display: flex;
             flex-direction: column;
+            gap: 12px;
         }
-        .modal-title {
-            font-size: 32px;
+        .block {
+            padding: 12px 15px;
+            border-radius: 30px 8px 8px 30px; /* forma de bloque tipo pieza */
+            color: white;
             font-weight: bold;
-            color: #202080;
-            text-shadow: 2px 2px 0 #a0a0ff;
-            margin-bottom: 15px;
-            border-bottom: 4px ridge #808080;
+            text-align: center;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: 0.1s;
+            position: relative;
+            border-left: 8px solid rgba(0,0,0,0.2);
         }
-        .modal-content {
-            flex: 1;
-            overflow-y: auto;
-            background: #ffffcc;
-            border: 4px inset #8a8a8a;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
+        .block:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+        }
+        .block.motion { background: #4a6cd4; }
+        .block.looks { background: #9b4f96; }
+        .block.sound { background: #d45d4a; }
+        
+        /* Panel central - Script */
+        .script-panel {
+            background: #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 8px #888;
+        }
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 40px;
+            align-items: center;
+        }
+        .run-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 3px 0 #2e7d32;
+        }
+        .run-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #2e7d32;
+        }
+        .reset-pos-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
             font-size: 14px;
         }
-        .modal-close {
-            margin-top: 15px;
-            text-align: right;
+        .script-area {
+            background: white;
+            border-radius: 15px;
+            flex: 1;
+            min-height: 350px;
+            padding: 15px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 5px #aaa;
         }
-        .cmd-group {
+        .script-item {
+            background: #ffd966;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-left: 8px solid #d4a017;
+            box-shadow: 0 2px 0 #b98f12;
+        }
+        .remove-block {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #a12b2b;
+        }
+        .remove-block:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        
+        /* Panel derecho - Escenario */
+        .stage-panel {
+            background: #e5e5e5;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 0 5px #aaa;
+        }
+        .stage {
+            width: 220px;
+            height: 220px;
+            background: #c6e9ff;
+            border-radius: 20px;
+            box-shadow: 0 0 0 4px #b0b0b0;
+            position: relative;
+            overflow: hidden;
             margin-bottom: 15px;
         }
-        .cmd-group h3 {
-            background: #a0a0a0;
-            padding: 3px;
-            border: 2px outset #c0c0c0;
+        #stageCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
-        .cmd-item {
-            border-bottom: 1px dashed #404040;
-            padding: 5px;
-        }
-        .cmd-name {
+        .sprite-info {
             font-weight: bold;
-            color: #0000aa;
+            background: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 40px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        /* Editor de sprites */
+        .sprite-editor {
+            background: #d9d9d9;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .pixel-canvas-container {
+            text-align: center;
+        }
+        #pixelCanvas {
+            width: 160px;
+            height: 160px;
+            image-rendering: pixelated;
+            border: 3px solid #4d4d4d;
+            border-radius: 10px;
+            background: white;
+            cursor: crosshair;
+        }
+        .pixel-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 150px;
+        }
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .color-option {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px black;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .color-option.selected {
+            border: 4px solid #ffdd00;
+            transform: scale(1.1);
+        }
+        .editor-btn {
+            background: #4d4d4d;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #2d2d2d;
+        }
+        .editor-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-<div class="computer">
-    <div class="top-bar">
-        <span class="title">EASY PRO</span>
-        <span class="year">est. 2008</span>
-    </div>
-
-    <div class="workspace">
-        <div class="code-panel">
-            <div class="panel-label">✎ editar código</div>
-            <div class="editor-container">
-                <textarea id="codeArea" spellcheck="false"></textarea>
-                <div id="autocompleteBox" class="autocomplete-box"></div>
+    <div class="scratch-container">
+        <h1>⚡ MINI SCRATCH ⚡</h1>
+        
+        <div class="main-panels">
+            <!-- Panel de bloques izquierdo -->
+            <div class="blocks-panel">
+                <div class="categories">
+                    <button class="category-btn active" data-cat="motion">Movimiento</button>
+                    <button class="category-btn" data-cat="looks">Apariencia</button>
+                    <button class="category-btn" data-cat="sound">Sonido</button>
+                </div>
+                <div class="blocks-container" id="blocksContainer">
+                    <!-- Bloques de movimiento por defecto -->
+                    <div class="block motion" data-block='{"type":"move","value":10}'>mover 10 pasos</div>
+                    <div class="block motion" data-block='{"type":"turn","value":15}'>girar 15 grados</div>
+                    <div class="block motion" data-block='{"type":"move","value":-10}'>mover -10 pasos</div>
+                </div>
             </div>
-
-            <div class="button-group">
-                <button class="btn" id="runBtn">▶ ejecutar</button>
-                <button class="btn" id="resetBtn">⟲ reiniciar manual</button>
-                <button class="btn" id="exampleBtn">📁 ejemplos</button>
-                <button class="btn" id="helpBtn">📖 comandos</button>
+            
+            <!-- Panel central: script -->
+            <div class="script-panel">
+                <div class="script-header">
+                    <span>🧩 MIS BLOQUES</span>
+                    <button class="run-btn" id="runScriptBtn">▶ EJECUTAR</button>
+                    <button class="reset-pos-btn" id="resetPosBtn">↺ reiniciar</button>
+                </div>
+                <div class="script-area" id="scriptArea">
+                    <!-- Aquí se agregarán los bloques seleccionados -->
+                </div>
             </div>
-
-            <div class="error-panel" id="errorPanel">
-                <div class="error-title">⚠️ errores de la última ejecución:</div>
-                <div id="errorList">(ninguno)</div>
-            </div>
-
-            <div class="log-console" id="logConsole">
-                > Easy Pro 2008 listo. 300+ comandos disponibles.
-            </div>
-        </div>
-
-        <div class="stage-panel">
-            <div class="panel-label">🎬 escenario</div>
-            <div class="canvas-wrapper">
-                <canvas id="stageCanvas" width="400" height="400"></canvas>
-            </div>
-
-            <div class="object-panel">
-                <div class="object-title">📦 objetos activos</div>
-                <ul class="object-list" id="objectList">
-                    <li style="color:#404040;">(ningún objeto)</li>
-                </ul>
+            
+            <!-- Panel derecho: escenario -->
+            <div class="stage-panel">
+                <div class="stage">
+                    <canvas id="stageCanvas" width="220" height="220"></canvas>
+                </div>
+                <div class="sprite-info" id="spriteCoords">x: 100, y: 100</div>
             </div>
         </div>
-    </div>
-
-    <div class="footer-note">
-        ⚡ autocompletado (Ctrl+Espacio) · 300+ comandos extra · input por bloques · touching · createtext
-    </div>
-</div>
-
-<!-- Modal de ayuda -->
-<div id="helpModal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-title">📚 TODOS LOS COMANDOS (300+)</div>
-        <div class="modal-content" id="helpContent">
-            Cargando...
+        
+        <!-- Editor de sprites (pixel art) -->
+        <div class="sprite-editor">
+            <div class="pixel-canvas-container">
+                <canvas id="pixelCanvas" width="160" height="160"></canvas>
+                <p style="margin:5px 0 0; font-weight:bold;">✏️ Editor 16x16</p>
+            </div>
+            <div class="pixel-controls">
+                <div class="color-picker" id="colorPicker">
+                    <div class="color-option selected" style="background:#000000;" data-color="#000000"></div>
+                    <div class="color-option" style="background:#ff4d4d;" data-color="#ff4d4d"></div>
+                    <div class="color-option" style="background:#4d4dff;" data-color="#4d4dff"></div>
+                    <div class="color-option" style="background:#4dff4d;" data-color="#4dff4d"></div>
+                    <div class="color-option" style="background:#ffff4d;" data-color="#ffff4d"></div>
+                    <div class="color-option" style="background:#ffffff;" data-color="#ffffff"></div>
+                </div>
+                <button class="editor-btn" id="clearSpriteBtn">Limpiar todo</button>
+                <button class="editor-btn" id="fillSpriteBtn">Rellenar fondo</button>
+                <p style="font-size:13px; margin:5px 0;">Click y arrastra para dibujar</p>
+            </div>
         </div>
-        <div class="modal-close">
-            <button class="btn" id="closeHelpBtn">Cerrar</button>
-        </div>
+        <footer>🧪 Bloques interactivos • Editor de píxeles • Ejecuta tu script</footer>
     </div>
-</div>
 
-<script>
-    (function() {
-        // ========== CONFIGURACIÓN: 300 COMANDOS EXTRA ==========
-        const BASIC_COMMANDS = [
-            'varcreate', 'varset', 'if', 'else', 'createobj', 
-            'mov', 'tp', 'rotate', 'input', 'finish', 'createtext'
-        ];
-
-        // Generar 300 comandos extra con nombres y descripciones
-        let extraCommands = [];
-        for (let i = 1; i <= 300; i++) {
-            let cmdName = `extra_${i}`;
-            let description = `Comando extra número ${i}. Realiza una función especial (simulada).`;
-            extraCommands.push({ name: cmdName, desc: description });
-        }
-
-        // Unir todos los comandos (solo nombres para autocompletado)
-        const ALL_COMMAND_NAMES = BASIC_COMMANDS.concat(extraCommands.map(c => c.name));
-
-        // ========== ESTADO GLOBAL ==========
-        let objetos = [];
-        let variables = {};
-        let keyActions = {};  // tecla -> función que ejecuta bloque
-
-        // Flags para if/else (usados tanto en programa principal como en eventos)
-        let ifActive = false;
-        let ifResult = false;
-        let elsePending = false;
-        let elseActive = false;
-        let elseResult = false;
-
-        // Almacén de errores
-        let errors = [];
-
-        // ========== DOM ==========
-        const canvas = document.getElementById('stageCanvas');
-        const ctx = canvas.getContext('2d');
-        const codeArea = document.getElementById('codeArea');
-        const logDiv = document.getElementById('logConsole');
-        const objectList = document.getElementById('objectList');
-        const errorListDiv = document.getElementById('errorList');
-        const helpModal = document.getElementById('helpModal');
-        const helpContent = document.getElementById('helpContent');
-
-        // ========== FUNCIONES DE LOG Y ERRORES ==========
-        function logMessage(msg) {
-            const p = document.createElement('div');
-            p.textContent = '> ' + msg;
-            logDiv.appendChild(p);
-            if (logDiv.children.length > 9) {
-                logDiv.removeChild(logDiv.children[0]);
-            }
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-
-        function addError(lineNumber, message) {
-            errors.push({ line: lineNumber, msg: message });
-        }
-
-        function displayErrors() {
-            if (errors.length === 0) {
-                errorListDiv.innerHTML = '(ninguno)';
-                return;
-            }
-            let html = '';
-            errors.forEach(err => {
-                html += `<div class="error-line">Línea ${err.line}: ${err.msg}</div>`;
-            });
-            errorListDiv.innerHTML = html;
-        }
-
-        function clearErrors() {
-            errors = [];
-            displayErrors();
-        }
-
-        // ========== RENDERIZADO ==========
-        function actualizarListaObjetos() {
-            if (objetos.length === 0) {
-                objectList.innerHTML = '<li style="color:#404040;">(ningún objeto)</li>';
-                return;
-            }
-            let html = '';
-            objetos.forEach(obj => {
-                if (obj.shape === 'Texto') {
-                    html += `<li style="border-left-color: #000;">${obj.name} · Texto: "${obj.text}" · (${obj.x},${obj.y})</li>`;
-                } else {
-                    html += `<li style="border-left-color: ${obj.color};">${obj.name} · ${obj.shape} · rot:${obj.rotation || 0}° · (${obj.x},${obj.y})</li>`;
-                }
-            });
-            objectList.innerHTML = html;
-        }
-
-        function renderizar() {
-            ctx.clearRect(0, 0, 400, 400);
-            objetos.forEach(obj => {
-                if (obj.shape === 'Texto') {
-                    ctx.font = 'bold 16px "Courier New", monospace';
-                    ctx.fillStyle = '#000000';
-                    ctx.fillText(obj.text, obj.x, obj.y);
-                } else {
-                    ctx.save();
-                    ctx.translate(obj.x, obj.y);
-                    if (obj.rotation) {
-                        ctx.rotate(obj.rotation * Math.PI / 180);
-                    }
-                    ctx.fillStyle = obj.color;
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = 2.5;
-
-                    if (obj.shape === 'cubo') {
-                        ctx.fillRect(-20, -20, 40, 40);
-                        ctx.strokeRect(-20, -20, 40, 40);
-                    } else if (obj.shape === 'circulo') {
-                        ctx.beginPath();
-                        ctx.arc(0, 0, 20, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-
-                    ctx.font = 'bold 11px "Courier New", monospace';
-                    ctx.fillStyle = '#111111';
-                    ctx.fillText(obj.name, obj.x - 15, obj.y - 25);
-                    ctx.fillStyle = '#FFFFF0';
-                    ctx.fillText(obj.name, obj.x - 16, obj.y - 26);
-                }
-            });
-            actualizarListaObjetos();
-        }
-
-        // ========== FUNCIONES AUXILIARES ==========
-        function encontrarObj(nombre) {
-            return objetos.find(obj => obj.name === nombre);
-        }
-
-        function resetTotal() {
-            objetos = [];
-            variables = {};
-            keyActions = {};
-            ifActive = false;
-            ifResult = false;
-            elsePending = false;
-            elseActive = false;
-            elseResult = false;
-            renderizar();
-            logMessage('🔄 Escenario reiniciado (vacío).');
-        }
-
-        function cargarDemo() {
-            objetos = [
-                { name: 'demoCuad', shape: 'cubo', color: '#1070c0', x: 150, y: 150, rotation: 15 },
-                { name: 'demoCirc', shape: 'circulo', color: '#c05030', x: 260, y: 280, rotation: 0 }
-            ];
-            variables = { puntuacion: 5 };
-            keyActions = {};
-            renderizar();
-            logMessage('🎮 Modo demo activado.');
-        }
-
-        // ========== PARSER (con eliminación de comillas) ==========
-        function parsearComando(linea) {
-            linea = linea.trim();
-            if (linea === '' || linea.startsWith('//')) return null;
-            let partes = linea.split(/\s+/);
-            if (partes.length === 0) return null;
-            let comando = partes[0].toLowerCase();
-            let argumentos = partes.slice(1).map(arg => {
-                if (arg.startsWith('"') && arg.endsWith('"')) {
-                    return arg.slice(1, -1);
-                }
-                return arg;
-            });
-            return { comando, argumentos };
-        }
-
-        // ========== EVALUACIÓN DE CONDICIONES ==========
-        function evaluarCondicion(argumentos, lineNumber) {
-            if (argumentos.length < 3) {
-                addError(lineNumber, 'if: necesita variable operador valor');
-                return null;
-            }
-            let varName = argumentos[0];
-            let operador = argumentos[1];
-            let valorStr = argumentos[2];
-
-            if (!(varName in variables)) {
-                addError(lineNumber, `if: variable "${varName}" no existe`);
-                return null;
-            }
-            let varVal = variables[varName];
-            let valorNum = parseFloat(valorStr);
-            if (isNaN(valorNum)) {
-                if (valorStr in variables) {
-                    valorNum = variables[valorStr];
-                } else {
-                    addError(lineNumber, `if: valor no numérico ni variable: ${valorStr}`);
-                    return null;
-                }
-            }
-
-            switch (operador) {
-                case '=': return varVal === valorNum;
-                case '<': return varVal < valorNum;
-                case '>': return varVal > valorNum;
-                case '<=': return varVal <= valorNum;
-                case '>=': return varVal >= valorNum;
-                case '<>': return varVal !== valorNum;
-                default:
-                    addError(lineNumber, `if: operador desconocido "${operador}"`);
-                    return null;
-            }
-        }
-
-        function evaluarTouching(argumentos, lineNumber) {
-            if (argumentos.length < 2) {
-                addError(lineNumber, 'if touching: necesita dos objetos');
-                return null;
-            }
-            let obj1 = encontrarObj(argumentos[0]);
-            let obj2 = encontrarObj(argumentos[1]);
-            if (!obj1) {
-                addError(lineNumber, `if touching: objeto "${argumentos[0]}" no existe`);
-                return null;
-            }
-            if (!obj2) {
-                addError(lineNumber, `if touching: objeto "${argumentos[1]}" no existe`);
-                return null;
-            }
-            let dx = obj1.x - obj2.x;
-            let dy = obj1.y - obj2.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            return dist < 40;
-        }
-
-        // ========== EJECUCIÓN DE COMANDOS (con manejo de flujo) ==========
-        function ejecutarComando(parsed, lineNumber) {
-            if (!parsed) return false;
-            const { comando, argumentos } = parsed;
-
-            // Lógica de flujo if/else (incluyendo if touching)
-            if (comando === 'if') {
-                let cond = null;
-                if (argumentos[0] === 'touching') {
-                    cond = evaluarTouching(argumentos.slice(1), lineNumber);
-                } else {
-                    cond = evaluarCondicion(argumentos, lineNumber);
-                }
-                if (cond === null) return false;
-                ifActive = true;
-                ifResult = cond;
-                elsePending = false;
-                elseActive = false;
-                logMessage(`🔍 if: ${cond ? 'verdadero' : 'falso'}`);
-                return true;
-            }
-
-            if (ifActive) {
-                ifActive = false;
-                if (ifResult) {
-                    logMessage('  → then ejecutado');
-                    ejecutarComandoNormal(parsed, lineNumber);
-                } else {
-                    logMessage('  → then omitido');
-                }
-                elsePending = true;
-                return true;
-            }
-
-            if (elsePending) {
-                elsePending = false;
-                if (comando === 'else') {
-                    elseActive = true;
-                    elseResult = !ifResult;
-                    logMessage('  → else detectado');
-                    return true;
-                } else {
-                    logMessage('  → (sin else)');
-                    ejecutarComandoNormal(parsed, lineNumber);
-                    return true;
-                }
-            }
-
-            if (elseActive) {
-                elseActive = false;
-                if (elseResult) {
-                    logMessage('  → else ejecutado');
-                    ejecutarComandoNormal(parsed, lineNumber);
-                } else {
-                    logMessage('  → else omitido');
-                }
-                return true;
-            }
-
-            ejecutarComandoNormal(parsed, lineNumber);
-            return true;
-        }
-
-        function ejecutarComandoNormal(parsed, lineNumber) {
-            const { comando, argumentos } = parsed;
-
-            // Comandos básicos
-            if (comando === 'varcreate') {
-                if (argumentos.length < 1) {
-                    addError(lineNumber, 'varcreate: necesita nombre');
-                    return;
-                }
-                let nombre = argumentos[0];
-                if (nombre in variables) {
-                    addError(lineNumber, `varcreate: variable "${nombre}" ya existe`);
-                    return;
-                }
-                variables[nombre] = 0;
-                logMessage(`📊 variable "${nombre}" creada = 0`);
-            }
-            else if (comando === 'varset') {
-                if (argumentos.length < 2) {
-                    addError(lineNumber, 'varset: necesita nombre y valor');
-                    return;
-                }
-                let nombre = argumentos[0];
-                let valor = parseFloat(argumentos[1]);
-                if (isNaN(valor)) {
-                    if (argumentos[1] in variables) {
-                        valor = variables[argumentos[1]];
-                    } else {
-                        addError(lineNumber, `varset: valor no numérico ni variable: ${argumentos[1]}`);
-                        return;
+    <script>
+        (function() {
+            // ---------- CONSTANTES Y ESTADO ----------
+            const STAGE_WIDTH = 220, STAGE_HEIGHT = 220;
+            const SPRITE_SIZE = 40; // tamaño del sprite en stage (píxeles)
+            
+            // Estado del sprite
+            let spriteX = 100, spriteY = 100; // posición centro del sprite en stage
+            let direction = 90; // grados, no usado realmente pero por si acaso
+            let spriteMatrix = []; // 16x16 colores (hex string)
+            
+            // Script: lista de bloques
+            let scriptBlocks = [];
+            
+            // Para dibujo en pixel editor
+            let selectedColor = '#000000';
+            let isDrawing = false;
+            let pixelSize = 10; // cada pixel 10x10 en canvas de 160
+            
+            // Ejecución de script
+            let isRunning = false;
+            let executionTimer = null;
+            
+            // Referencias DOM
+            const stageCanvas = document.getElementById('stageCanvas');
+            const stageCtx = stageCanvas.getContext('2d');
+            const pixelCanvas = document.getElementById('pixelCanvas');
+            const pixelCtx = pixelCanvas.getContext('2d');
+            const scriptArea = document.getElementById('scriptArea');
+            const blocksContainer = document.getElementById('blocksContainer');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const runBtn = document.getElementById('runScriptBtn');
+            const resetPosBtn = document.getElementById('resetPosBtn');
+            const spriteCoords = document.getElementById('spriteCoords');
+            const colorOptions = document.querySelectorAll('.color-option');
+            const clearBtn = document.getElementById('clearSpriteBtn');
+            const fillBtn = document.getElementById('fillSpriteBtn');
+            
+            // ---------- INICIALIZAR MATRIZ DEL SPRITE (forma por defecto) ----------
+            function initSpriteMatrix() {
+                // Por defecto: un muñeco simple (gato naranja imaginario)
+                for (let y = 0; y < 16; y++) {
+                    spriteMatrix[y] = [];
+                    for (let x = 0; x < 16; x++) {
+                        // forma de círculo/cabeza
+                        let dx = x - 7.5, dy = y - 7.5;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 5) spriteMatrix[y][x] = '#ffa64d'; // naranja
+                        else if (dist < 6) spriteMatrix[y][x] = '#4d4d4d'; // contorno gris
+                        else spriteMatrix[y][x] = '#ffffff'; // fondo blanco
                     }
                 }
-                if (!(nombre in variables)) {
-                    addError(lineNumber, `varset: variable "${nombre}" no existe`);
-                    return;
-                }
-                variables[nombre] = valor;
-                logMessage(`📊 variable "${nombre}" = ${valor}`);
+                // Ojos
+                spriteMatrix[5][5] = '#000000';
+                spriteMatrix[5][10] = '#000000';
+                // Bigotes...
+                spriteMatrix[8][3] = '#000000'; spriteMatrix[8][4] = '#000000'; spriteMatrix[8][11] = '#000000'; spriteMatrix[8][12] = '#000000';
             }
-            else if (comando === 'createobj') {
-                if (argumentos.length < 3) {
-                    addError(lineNumber, 'createobj: necesita: nombre forma color');
-                    return;
-                }
-                const [nombre, forma, color] = argumentos;
-                if (forma !== 'cubo' && forma !== 'circulo') {
-                    addError(lineNumber, `createobj: forma debe ser cubo o circulo (recibió: ${forma})`);
-                    return;
-                }
-                if (encontrarObj(nombre)) {
-                    addError(lineNumber, `createobj: ya existe un objeto "${nombre}"`);
-                    return;
-                }
-                objetos.push({
-                    name: nombre,
-                    shape: forma,
-                    color: color,
-                    x: 200,
-                    y: 200,
-                    rotation: 0
-                });
-                logMessage(`✅ objeto "${nombre}" creado (${forma}, ${color}) en (200,200)`);
-                renderizar();
-            }
-            else if (comando === 'createtext') {
-                if (argumentos.length < 3) {
-                    addError(lineNumber, 'createtext: necesita: "texto" x y');
-                    return;
-                }
-                const [texto, xStr, yStr] = argumentos;
-                const x = parseFloat(xStr);
-                const y = parseFloat(yStr);
-                if (isNaN(x) || isNaN(y)) {
-                    addError(lineNumber, 'createtext: x e y deben ser números');
-                    return;
-                }
-                let nombre = 'text_' + Date.now() + Math.random();
-                objetos.push({
-                    name: nombre,
-                    shape: 'Texto',
-                    text: texto,
-                    x: x,
-                    y: y
-                });
-                logMessage(`📝 Texto "${texto}" creado en (${x},${y})`);
-                renderizar();
-            }
-            else if (comando === 'mov') {
-                if (argumentos.length < 3) {
-                    addError(lineNumber, 'mov: necesita: nombre dx dy');
-                    return;
-                }
-                const [nombre, dxStr, dyStr] = argumentos;
-                const obj = encontrarObj(nombre);
-                if (!obj) {
-                    addError(lineNumber, `mov: objeto "${nombre}" no existe`);
-                    return;
-                }
-                const dx = parseFloat(dxStr);
-                const dy = parseFloat(dyStr);
-                if (isNaN(dx) || isNaN(dy)) {
-                    addError(lineNumber, 'mov: dx y dy deben ser números');
-                    return;
-                }
-                obj.x += dx;
-                obj.y += dy;
-                logMessage(`🚚 "${nombre}" movido a (${obj.x},${obj.y})`);
-                renderizar();
-            }
-            else if (comando === 'tp') {
-                if (argumentos.length < 3) {
-                    addError(lineNumber, 'tp: necesita: nombre x y');
-                    return;
-                }
-                const [nombre, xStr, yStr] = argumentos;
-                const obj = encontrarObj(nombre);
-                if (!obj) {
-                    addError(lineNumber, `tp: objeto "${nombre}" no existe`);
-                    return;
-                }
-                const x = parseFloat(xStr);
-                const y = parseFloat(yStr);
-                if (isNaN(x) || isNaN(y)) {
-                    addError(lineNumber, 'tp: x e y deben ser números');
-                    return;
-                }
-                obj.x = x;
-                obj.y = y;
-                logMessage(`📞 "${nombre}" teleportado a (${obj.x},${obj.y})`);
-                renderizar();
-            }
-            else if (comando === 'rotate') {
-                if (argumentos.length < 2) {
-                    addError(lineNumber, 'rotate: necesita objeto y grados');
-                    return;
-                }
-                let nombre = argumentos[0];
-                let grados = parseFloat(argumentos[1]);
-                if (isNaN(grados)) {
-                    addError(lineNumber, 'rotate: grados debe ser número');
-                    return;
-                }
-                let obj = encontrarObj(nombre);
-                if (!obj) {
-                    addError(lineNumber, `rotate: objeto "${nombre}" no existe`);
-                    return;
-                }
-                obj.rotation = grados;
-                logMessage(`🔄 "${nombre}" rotado a ${grados}°`);
-                renderizar();
-            }
-            else if (comando === 'input') {
-                addError(lineNumber, 'input debe usarse con un bloque hasta finish');
-            }
-            else if (comando === 'finish') {
-                resetTotal();
-            }
-            else {
-                // Verificar si es un comando extra
-                if (ALL_COMMAND_NAMES.includes(comando)) {
-                    logMessage(`⚙️ Comando extra "${comando}" ejecutado (simulado)`);
-                } else {
-                    addError(lineNumber, `Comando desconocido: "${comando}"`);
-                }
-            }
-        }
-
-        // ========== EJECUTAR UN CONJUNTO DE LÍNEAS (para eventos) ==========
-        function ejecutarLineas(lineas) {
-            ifActive = false; ifResult = false; elsePending = false; elseActive = false; elseResult = false;
-            for (let i = 0; i < lineas.length; i++) {
-                let linea = lineas[i];
-                let parsed = parsearComando(linea);
-                if (parsed) {
-                    ejecutarComando(parsed, 0);
-                } else {
-                    if (linea.trim() !== '' && !linea.trim().startsWith('//')) {
-                        logMessage(`⚠️ Error en evento: "${linea.trim()}"`);
+            initSpriteMatrix();
+            
+            // ---------- DIBUJAR SPRITE EN STAGE (escalado) ----------
+            function drawStage() {
+                stageCtx.clearRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+                // Dibujar fondo tipo grid (opcional)
+                stageCtx.fillStyle = '#c6e9ff';
+                stageCtx.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+                
+                // Dibujar sprite desde matriz (escalado a SPRITE_SIZE x SPRITE_SIZE)
+                let cellSize = SPRITE_SIZE / 16;
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        let color = spriteMatrix[y][x];
+                        stageCtx.fillStyle = color;
+                        stageCtx.fillRect(spriteX - SPRITE_SIZE/2 + x * cellSize, spriteY - SPRITE_SIZE/2 + y * cellSize, cellSize+0.1, cellSize+0.1); // +0.1 para evitar bordes
                     }
                 }
+                
+                // Dibujar pequeño punto de referencia
+                stageCtx.fillStyle = '#ff0000';
+                stageCtx.beginPath();
+                stageCtx.arc(spriteX, spriteY, 3, 0, 2*Math.PI);
+                stageCtx.fill();
+                
+                // Actualizar coordenadas en pantalla
+                spriteCoords.innerText = `x: ${Math.round(spriteX)}, y: ${Math.round(spriteY)}`;
             }
-        }
-
-        // ========== EJECUTAR PROGRAMA PRINCIPAL ==========
-        function ejecutarTodo() {
-            clearErrors();
-            resetTotal();
-
-            const codigo = codeArea.value;
-            const lineas = codigo.split('\n');
-            let i = 0;
-            while (i < lineas.length) {
-                let linea = lineas[i].trim();
-                if (linea === '' || linea.startsWith('//')) {
-                    i++;
-                    continue;
-                }
-                let parsed = parsearComando(linea);
-                if (parsed && parsed.comando === 'input') {
-                    if (parsed.argumentos.length < 1) {
-                        addError(i+1, 'input: necesita una tecla');
-                        i++;
-                        continue;
+            
+            // ---------- DIBUJAR EDITOR DE PÍXELES (16x16) ----------
+            function drawPixelEditor() {
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        pixelCtx.fillStyle = spriteMatrix[y][x];
+                        pixelCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
                     }
-                    let tecla = parsed.argumentos[0].toLowerCase();
-                    let bloque = [];
-                    i++;
-                    while (i < lineas.length) {
-                        let l = lineas[i].trim();
-                        if (l === 'finish') {
-                            i++;
-                            break;
-                        }
-                        bloque.push(lineas[i]);
-                        i++;
-                    }
-                    keyActions[tecla] = function() {
-                        ejecutarLineas(bloque);
-                    };
-                    logMessage(`🎹 Tecla "${tecla}" registrada con bloque de ${bloque.length} líneas`);
-                } else {
-                    if (parsed) {
-                        ejecutarComando(parsed, i+1);
-                    } else {
-                        addError(i+1, `Sintaxis no válida: "${linea}"`);
-                    }
-                    i++;
+                }
+                // Dibujar rejilla
+                pixelCtx.strokeStyle = '#cccccc';
+                pixelCtx.lineWidth = 0.5;
+                for (let i = 0; i <= 16; i++) {
+                    pixelCtx.beginPath();
+                    pixelCtx.moveTo(i * pixelSize, 0);
+                    pixelCtx.lineTo(i * pixelSize, 160);
+                    pixelCtx.stroke();
+                    pixelCtx.beginPath();
+                    pixelCtx.moveTo(0, i * pixelSize);
+                    pixelCtx.lineTo(160, i * pixelSize);
+                    pixelCtx.stroke();
                 }
             }
-            displayErrors();
-        }
-
-        // ========== AUTOCOMPLETADO ==========
-        const autocompleteBox = document.getElementById('autocompleteBox');
-        let currentSuggestions = [];
-        let selectedIndex = -1;
-        let startPos = 0;
-
-        function showAutocomplete(suggestions, cursorPos) {
-            if (suggestions.length === 0) {
-                autocompleteBox.style.display = 'none';
-                return;
+            
+            // ---------- ACTUALIZAR AMBOS ----------
+            function updateAll() {
+                drawPixelEditor();
+                drawStage();
             }
-            currentSuggestions = suggestions;
-            selectedIndex = 0;
-            let html = '';
-            suggestions.forEach((s, i) => {
-                html += `<div class="autocomplete-item ${i === 0 ? 'selected' : ''}">${s}</div>`;
-            });
-            autocompleteBox.innerHTML = html;
-            autocompleteBox.style.display = 'block';
-
-            const rect = codeArea.getBoundingClientRect();
-            autocompleteBox.style.left = rect.left + 'px';
-            autocompleteBox.style.top = (rect.top + codeArea.offsetHeight) + 'px';
-        }
-
-        function insertSuggestion(suggestion) {
-            const text = codeArea.value;
-            const before = text.substring(0, startPos);
-            const after = text.substring(codeArea.selectionStart);
-            let endPos = codeArea.selectionStart;
-            while (endPos < text.length && text[endPos] !== ' ' && text[endPos] !== '\n') {
-                endPos++;
-            }
-            const newText = before + suggestion + after.substring(endPos - codeArea.selectionStart);
-            codeArea.value = newText;
-            codeArea.setSelectionRange(startPos + suggestion.length, startPos + suggestion.length);
-            autocompleteBox.style.display = 'none';
-        }
-
-        codeArea.addEventListener('keydown', (e) => {
-            if (autocompleteBox.style.display === 'block') {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex + 1) % currentSuggestions.length;
-                    highlightItem();
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
-                    highlightItem();
-                } else if (e.key === 'Enter' || e.key === 'Tab') {
-                    e.preventDefault();
-                    if (currentSuggestions.length > 0 && selectedIndex >= 0) {
-                        insertSuggestion(currentSuggestions[selectedIndex]);
-                    }
-                } else if (e.key === 'Escape') {
-                    autocompleteBox.style.display = 'none';
-                }
-            } else {
-                if (e.ctrlKey && e.key === ' ') {
-                    e.preventDefault();
-                    const cursorPos = codeArea.selectionStart;
-                    const text = codeArea.value;
-                    let wordStart = cursorPos;
-                    while (wordStart > 0 && text[wordStart - 1] !== ' ' && text[wordStart - 1] !== '\n') {
-                        wordStart--;
-                    }
-                    startPos = wordStart;
-                    const currentWord = text.substring(wordStart, cursorPos);
-                    const suggestions = ALL_COMMAND_NAMES.filter(cmd => cmd.startsWith(currentWord));
-                    showAutocomplete(suggestions, cursorPos);
-                }
-            }
-        });
-
-        function highlightItem() {
-            const items = document.querySelectorAll('.autocomplete-item');
-            items.forEach((item, i) => {
-                if (i === selectedIndex) {
-                    item.classList.add('selected');
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!autocompleteBox.contains(e.target) && e.target !== codeArea) {
-                autocompleteBox.style.display = 'none';
-            }
-        });
-
-        autocompleteBox.addEventListener('click', (e) => {
-            const item = e.target.closest('.autocomplete-item');
-            if (item) {
-                const index = Array.from(autocompleteBox.children).indexOf(item);
-                if (index !== -1) {
-                    insertSuggestion(currentSuggestions[index]);
-                }
-            }
-        });
-
-        // ========== TECLADO PARA INPUT ==========
-        document.addEventListener('keydown', (e) => {
-            if (document.activeElement === codeArea) return;
-            let tecla = e.key.toLowerCase();
-            if (keyActions[tecla]) {
+            
+            // ---------- EVENTOS DEL EDITOR DE PÍXELES ----------
+            function handlePixelDraw(e) {
+                if (!isDrawing && e.type !== 'mousedown') return;
                 e.preventDefault();
-                keyActions[tecla]();
+                const rect = pixelCanvas.getBoundingClientRect();
+                const scaleX = pixelCanvas.width / rect.width;
+                const scaleY = pixelCanvas.height / rect.height;
+                
+                let mouseX = (e.clientX - rect.left) * scaleX;
+                let mouseY = (e.clientY - rect.top) * scaleY;
+                
+                let gridX = Math.floor(mouseX / pixelSize);
+                let gridY = Math.floor(mouseY / pixelSize);
+                if (gridX >= 0 && gridX < 16 && gridY >= 0 && gridY < 16) {
+                    spriteMatrix[gridY][gridX] = selectedColor;
+                    updateAll();
+                }
             }
-        });
-
-        // ========== MENÚ DE AYUDA ==========
-        function generarAyuda() {
-            let html = '<div class="cmd-group"><h3>COMANDOS BÁSICOS</h3>';
-            BASIC_COMMANDS.forEach(cmd => {
-                html += `<div class="cmd-item"><span class="cmd-name">${cmd}</span> - Descripción básica del comando.</div>`;
+            
+            pixelCanvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                handlePixelDraw(e);
             });
-            html += '</div><div class="cmd-group"><h3>COMANDOS EXTRA (300+)</h3>';
-            extraCommands.forEach(cmd => {
-                html += `<div class="cmd-item"><span class="cmd-name">${cmd.name}</span> - ${cmd.desc}</div>`;
+            pixelCanvas.addEventListener('mousemove', handlePixelDraw);
+            pixelCanvas.addEventListener('mouseup', () => { isDrawing = false; });
+            pixelCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+            
+            // Color picker
+            colorOptions.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    colorOptions.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    selectedColor = opt.dataset.color;
+                });
             });
-            html += '</div>';
-            helpContent.innerHTML = html;
-        }
-
-        document.getElementById('helpBtn').addEventListener('click', () => {
-            generarAyuda();
-            helpModal.style.display = 'block';
-        });
-
-        document.getElementById('closeHelpBtn').addEventListener('click', () => {
-            helpModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === helpModal) {
-                helpModal.style.display = 'none';
+            
+            clearBtn.addEventListener('click', () => {
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        spriteMatrix[y][x] = '#ffffff';
+                    }
+                }
+                updateAll();
+            });
+            
+            fillBtn.addEventListener('click', () => {
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        spriteMatrix[y][x] = selectedColor;
+                    }
+                }
+                updateAll();
+            });
+            
+            // ---------- CAMBIAR CATEGORÍAS DE BLOQUES ----------
+            const blocksByCategory = {
+                motion: [
+                    { text: 'mover 10 pasos', data: { type: 'move', value: 10 } },
+                    { text: 'girar 15 grados', data: { type: 'turn', value: 15 } },
+                    { text: 'mover -10 pasos', data: { type: 'move', value: -10 } }
+                ],
+                looks: [
+                    { text: 'decir Hola', data: { type: 'say', message: 'Hola' } },
+                    { text: 'pensar Mmm...', data: { type: 'think', message: 'Mmm...' } }
+                ],
+                sound: [
+                    { text: 'tocar sonido Pop', data: { type: 'sound', sound: 'pop' } }
+                ]
+            };
+            
+            function loadCategory(cat) {
+                blocksContainer.innerHTML = '';
+                blocksByCategory[cat].forEach(block => {
+                    let blockDiv = document.createElement('div');
+                    blockDiv.className = `block ${cat}`;
+                    blockDiv.setAttribute('data-block', JSON.stringify(block.data));
+                    blockDiv.textContent = block.text;
+                    blocksContainer.appendChild(blockDiv);
+                });
             }
-        });
-
-        // ========== BOTONES ==========
-        document.getElementById('runBtn').addEventListener('click', () => {
-            logMessage('📟 --- EJECUTANDO ---');
-            ejecutarTodo();
-        });
-
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            resetTotal();
-            cargarDemo();
-        });
-
-        document.getElementById('exampleBtn').addEventListener('click', () => {
-            codeArea.value = `// Ejemplo completo
-varcreate puntuacion
-varset puntuacion 8
-createobj nave cubo #3a6ea5
-createobj enemigo circulo #b0302a
-tp enemigo 300 200
-rotate nave 30
-createtext "Hola" 50 50
-
-if puntuacion > 5
-  tp nave 100 100
-  rotate nave 45
-else
-  tp nave 300 300
-  rotate nave -45
-
-input "a"
-  tp nave 200 200
-  rotate nave 0
-  createtext "Tecla A" 200 50
-finish
-
-extra_42 prueba 123
-extra_99 otro comando
-`;
-            logMessage('📂 Ejemplos cargados en el editor.');
-        });
-
-        // Inicializar
-        cargarDemo();
-    })();
-</script>
+            
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadCategory(btn.dataset.cat);
+                });
+            });
+            
+            // ---------- AÑADIR BLOQUE AL SCRIPT (al hacer click en bloque) ----------
+            blocksContainer.addEventListener('click', (e) => {
+                const block = e.target.closest('.block');
+                if (!block) return;
+                const blockData = JSON.parse(block.dataset.block);
+                scriptBlocks.push(blockData);
+                renderScript();
+            });
+            
+            // Renderizar lista de bloques en scriptArea
+            function renderScript() {
+                scriptArea.innerHTML = '';
+                scriptBlocks.forEach((block, index) => {
+                    let text = '';
+                    if (block.type === 'move') text = `mover ${block.value} pasos`;
+                    else if (block.type === 'turn') text = `girar ${block.value} grados`;
+                    else if (block.type === 'say') text = `decir "${block.message}"`;
+                    else if (block.type === 'think') text = `pensar "${block.message}"`;
+                    else if (block.type === 'sound') text = `sonido: ${block.sound}`;
+                    
+                    let item = document.createElement('div');
+                    item.className = 'script-item';
+                    item.innerHTML = `${text} <button class="remove-block" data-index="${index}">✖</button>`;
+                    scriptArea.appendChild(item);
+                });
+                
+                // Añadir eventos a botones de eliminar
+                document.querySelectorAll('.remove-block').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const index = btn.dataset.index;
+                        scriptBlocks.splice(index, 1);
+                        renderScript();
+                    });
+                });
+            }
+            
+            // ---------- EJECUTAR SCRIPT ----------
+            function stopExecution() {
+                if (executionTimer) {
+                    clearTimeout(executionTimer);
+                    executionTimer = null;
+                }
+                isRunning = false;
+            }
+            
+            function runNextBlock(index) {
+                if (!isRunning) return;
+                if (index >= scriptBlocks.length) {
+                    isRunning = false;
+                    return;
+                }
+                
+                const block = scriptBlocks[index];
+                // Acción según tipo
+                switch (block.type) {
+                    case 'move':
+                        spriteX += block.value;
+                        // Mantener dentro del stage (con margen)
+                        spriteX = Math.max(SPRITE_SIZE/2, Math.min(STAGE_WIDTH - SPRITE_SIZE/2, spriteX));
+                        spriteY = Math.max(SPRITE_SIZE/2, Math.min(STAGE_HEIGHT - SPRITE_SIZE/2, spriteY));
+                        drawStage();
+                        break;
+                    case 'turn':
+                        direction = (direction + block.value) % 360;
+                        // No hay rotación visible, pero podemos mostrar algo
+                        break;
+                    case 'say':
+                        // dibujar bocadillo rápido
+                        stageCtx.fillStyle = 'white';
+                        stageCtx.strokeStyle = 'black';
+                        stageCtx.lineWidth = 2;
+                        stageCtx.beginPath();
+                        stageCtx.ellipse(spriteX + 30, spriteY - 25, 30, 18, 0, 0, 2*Math.PI);
+                        stageCtx.fill();
+                        stageCtx.stroke();
+                        stageCtx.fillStyle = 'black';
+                        stageCtx.font = 'bold 14px Arial';
+                        stageCtx.fillText(block.message, spriteX + 15, spriteY - 22);
+                        break;
+                    case 'think':
+                        stageCtx.fillStyle = 'white';
+                        stageCtx.strokeStyle = 'black';
+                        stageCtx.beginPath();
+                        stageCtx.ellipse(spriteX + 25, spriteY - 30, 25, 15, 0, 0, 2*Math.PI);
+                        stageCtx.fill();
+                        stageCtx.stroke();
+                        stageCtx.fillStyle = 'black';
+                        stageCtx.font = 'bold 14px Arial';
+                        stageCtx.fillText(block.message, spriteX + 10, spriteY - 28);
+                        break;
+                    case 'sound':
+                        // Beep simple
+                        try {
+                            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                            const oscillator = audioCtx.createOscillator();
+                            const gainNode = audioCtx.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            oscillator.frequency.value = 440;
+                            gainNode.gain.value = 0.1;
+                            oscillator.start();
+                            oscillator.stop(audioCtx.currentTime + 0.2);
+                        } catch (e) {}
+                        break;
+                }
+                
+                // Esperar un poco antes del siguiente bloque
+                executionTimer = setTimeout(() => {
+                    runNextBlock(index + 1);
+                }, 500);
+            }
+            
+            runBtn.addEventListener('click', () => {
+                if (isRunning) {
+                    stopExecution();
+                }
+                isRunning = true;
+                runNextBlock(0);
+            });
+            
+            resetPosBtn.addEventListener('click', () => {
+                spriteX = 100;
+                spriteY = 100;
+                direction = 90;
+                drawStage();
+            });
+            
+            // ---------- INICIALIZAR TODO ----------
+            updateAll();
+            renderScript();
+        })();
+    </script>
 </body>
 </html>
