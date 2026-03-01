@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch 1.4 · +200 bloques (2008)</title>
+    <title>Scratch 1.4 · Guardar/Cargar + Múltiples scripts</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (Mantengo todos los estilos anteriores, solo modifico la paleta para scroll y añado más bloques) */
+        /* (Mismos estilos que antes, solo añado algunos botones nuevos y ajustes) */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +24,7 @@
         }
 
         .scratch-window {
-            width: 1024px; /* un poco más ancho para que quepan los bloques */
+            width: 1024px;
             background: #ececec;
             border-radius: 10px 10px 6px 6px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 #ffffff;
@@ -86,9 +86,8 @@
             border-top: 1px solid #f5f5f5;
         }
 
-        /* PALETA CON SCROLL */
         .palette {
-            width: 250px; /* un poco más ancha para los bloques */
+            width: 250px;
             background: #e8e8e8;
             border-radius: 8px;
             border: 1px solid #9c9c9c;
@@ -148,12 +147,11 @@
         .lap { background: #64c87c; border-color: #2a8641; }
         .ope { background: #c0cf6b; border-color: #798d33; }
         .sen { background: #d46b5a; border-color: #943e2e; }
-        .con { background: #ffbf5e; border-color: #b1761a; } /* control naranja */
+        .con { background: #ffbf5e; border-color: #b1761a; }
 
-        /* CONTENEDOR DE BLOQUES CON SCROLL */
         .blocks-container {
             overflow-y: auto;
-            max-height: 400px; /* para que quepan muchos bloques */
+            max-height: 400px;
             padding-right: 4px;
         }
 
@@ -194,7 +192,6 @@
         .block.yellow { background: #c0cf6b; box-shadow: 0 4px 0 #798d33; color: #2d2d2d; text-shadow: 1px 1px 0 #e0e0a0; }
         .block.red { background: #d46b5a; box-shadow: 0 4px 0 #943e2e; }
 
-        /* ÁREA DE SCRIPTS */
         .scripts {
             flex: 1;
             background: #f8f8f8;
@@ -203,6 +200,15 @@
             padding: 12px;
             box-shadow: inset 0 0 0 2px #ffffff, inset 0 0 8px #bdbdbd, 2px 2px 5px rgba(0,0,0,0.2);
             min-height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scripts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .scripts h3 {
@@ -210,8 +216,35 @@
             color: #3f3f3f;
             border-bottom: 2px solid #ffb347;
             padding-bottom: 5px;
-            margin-bottom: 15px;
             text-transform: uppercase;
+            margin: 0;
+        }
+
+        .script-tools {
+            display: flex;
+            gap: 5px;
+        }
+
+        .script-tools button {
+            background: #b1b1b1;
+            border: 2px solid #6f6f6f;
+            border-radius: 30px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 0 #3f3f3f;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 #e0e0e0, 0 2px 3px #5a5a5a;
+            transition: 0.1s;
+        }
+        .script-tools button:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 #e0e0e0, 0 4px 5px #3a3a3a;
+        }
+        .script-tools button:active {
+            transform: translateY(2px);
+            box-shadow: inset 0 1px 0 #e0e0e0, 0 1px 2px #3a3a3a;
         }
 
         .script-area {
@@ -219,14 +252,15 @@
             flex-direction: column;
             gap: 8px;
             align-items: flex-start;
-            min-height: 250px;
+            min-height: 280px;
             background: #f0f0f0;
             border-radius: 12px;
             padding: 10px;
             border: 2px dashed #b0b0b0;
             transition: background-color 0.2s;
             overflow-y: auto;
-            max-height: 300px;
+            max-height: 320px;
+            flex: 1;
         }
         .script-area.drag-over {
             background: #e0f0e0;
@@ -246,11 +280,21 @@
             cursor: move;
             user-select: none;
             transition: box-shadow 0.1s;
+            position: relative;
         }
         .script-block[draggable="true"]:active {
             opacity: 0.8;
         }
-        .script-block.hat { border-left-color: #4caf50; background: #edfff0; }
+        .script-block.hat { 
+            border-left-color: #4caf50; 
+            background: #edfff0; 
+        }
+        .script-block.script-start {
+            margin-top: 16px;  /* separación entre scripts */
+        }
+        .script-block.script-start:first-child {
+            margin-top: 0;
+        }
 
         .script-block input {
             width: 40px;
@@ -262,7 +306,30 @@
             text-align: center;
         }
 
-        /* ESCENARIO */
+        /* Botón de eliminar (aparece en hover) */
+        .script-block .delete-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            background: #cc3333;
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #7f1f1f;
+            border: 1px solid #ff8888;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+        .script-block:hover .delete-btn {
+            opacity: 1;
+        }
+
         .stage-area {
             width: 210px;
             display: flex;
@@ -477,7 +544,7 @@
 <body>
     <div class="scratch-window">
         <div class="header">
-            <div class="logo"><i class="fas fa-cat"></i> Scratch 1.4 · +200 bloques</div>
+            <div class="logo"><i class="fas fa-cat"></i> Scratch 1.4 · Pro</div>
             <div class="menu">
                 <span>Archivo</span><span>Editar</span><span>Compartir</span><span>Ayuda</span>
             </div>
@@ -485,9 +552,9 @@
         </div>
 
         <div class="main">
-            <!-- PALETA CON SCROLL Y MUCHOS BLOQUES -->
+            <!-- PALETA (igual que antes, con muchos bloques) -->
             <div class="palette">
-                <div class="cat-title"><i class="fas fa-puzzle-piece"></i> Bloques (¡más de 40!)</div>
+                <div class="cat-title"><i class="fas fa-puzzle-piece"></i> Bloques</div>
                 <div class="category-buttons">
                     <div class="cat-btn mov">Movimiento</div>
                     <div class="cat-btn apa">Apariencia</div>
@@ -499,109 +566,101 @@
                     <div class="cat-btn apa">Variables</div>
                 </div>
                 <div class="blocks-container" id="paletteBlocks">
-                    <!-- BLOQUES DE MOVIMIENTO (azules) -->
-                    <div class="block" draggable="true" data-type="move">mover 10 pasos</div>
-                    <div class="block" draggable="true" data-type="move">mover 5 pasos</div>
-                    <div class="block" draggable="true" data-type="turn">girar ↻ 15 grados</div>
-                    <div class="block" draggable="true" data-type="turn">girar ↺ 15 grados</div>
-                    <div class="block" draggable="true" data-type="goto">ir a x: 0 y: 0</div>
-                    <div class="block" draggable="true" data-type="goto">ir a puntero del ratón</div>
-                    <div class="block" draggable="true" data-type="glide">deslizar 1 segs a x: 0 y: 0</div>
-                    <div class="block" draggable="true" data-type="direction">apuntar hacia 90</div>
-                    <div class="block" draggable="true" data-type="direction">apuntar hacia puntero</div>
-                    <div class="block" draggable="true" data-type="x">sumar a x 10</div>
-                    <div class="block" draggable="true" data-type="y">fijar y a 0</div>
-                    
-                    <!-- BLOQUES DE APARIENCIA (morados) -->
-                    <div class="block purple" draggable="true" data-type="say">decir ¡Hola! por 2 seg</div>
-                    <div class="block purple" draggable="true" data-type="say">decir algo</div>
-                    <div class="block purple" draggable="true" data-type="think">pensar Hmm... por 2 seg</div>
-                    <div class="block purple" draggable="true" data-type="think">pensar interesante</div>
-                    <div class="block purple" draggable="true" data-type="show">mostrar</div>
-                    <div class="block purple" draggable="true" data-type="hide">esconder</div>
-                    <div class="block purple" draggable="true" data-type="costume">cambiar disfraz a disfraz1</div>
-                    <div class="block purple" draggable="true" data-type="costume">siguiente disfraz</div>
-                    <div class="block purple" draggable="true" data-type="background">cambiar fondo a fondo1</div>
-                    <div class="block purple" draggable="true" data-type="effect">cambiar efecto color 25</div>
-                    
-                    <!-- BLOQUES DE SONIDO (rosas) -->
-                    <div class="block pink" draggable="true" data-type="sound">tocar sonido Maullido</div>
-                    <div class="block pink" draggable="true" data-type="sound">tocar sonido Maullido hasta terminar</div>
-                    <div class="block pink" draggable="true" data-type="sound">detener todos los sonidos</div>
-                    <div class="block pink" draggable="true" data-type="drum">tocar tambor 48 durante 0.2 beats</div>
-                    <div class="block pink" draggable="true" data-type="note">tocar nota 60 durante 0.5 beats</div>
-                    <div class="block pink" draggable="true" data-type="volume">cambiar volumen 10</div>
-                    <div class="block pink" draggable="true" data-type="volume">fijar volumen 100%</div>
-                    
-                    <!-- BLOQUES DE LÁPIZ (verdes) -->
-                    <div class="block green" draggable="true" data-type="pen">bajar lápiz</div>
-                    <div class="block green" draggable="true" data-type="pen">subir lápiz</div>
-                    <div class="block green" draggable="true" data-type="pen">fijar color lápiz a 0</div>
-                    <div class="block green" draggable="true" data-type="pen">cambiar color lápiz 10</div>
-                    <div class="block green" draggable="true" data-type="pen">fijar tamaño lápiz 1</div>
-                    
-                    <!-- BLOQUES DE CONTROL (naranjas) -->
-                    <div class="block orange" draggable="true" data-type="control">esperar 1 segundos</div>
-                    <div class="block orange" draggable="true" data-type="control">por siempre</div>
-                    <div class="block orange" draggable="true" data-type="control">repetir 10</div>
-                    <div class="block orange" draggable="true" data-type="control">si &lt;toca borde?&gt; entonces</div>
-                    <div class="block orange" draggable="true" data-type="control">si &lt;&gt; entonces / si no</div>
-                    <div class="block orange" draggable="true" data-type="control">esperar hasta que &lt;&gt;</div>
-                    <div class="block orange hat-block" draggable="true" data-type="hat">al presionar ⚑</div>
-                    <div class="block orange hat-block" draggable="true" data-type="hat">al presionar tecla espacio</div>
-                    <div class="block orange hat-block" draggable="true" data-type="hat">al hacer clic en este objeto</div>
-                    <div class="block orange" draggable="true" data-type="control">detener programa</div>
-                    <div class="block orange" draggable="true" data-type="control">detener todos</div>
-                    <div class="block orange" draggable="true" data-type="control">detener otros scripts en objeto</div>
-                    
-                    <!-- BLOQUES DE SENSORES (rojos) -->
-                    <div class="block red" draggable="true" data-type="sensor">¿tocando puntero?</div>
-                    <div class="block red" draggable="true" data-type="sensor">¿tocando color ?</div>
-                    <div class="block red" draggable="true" data-type="sensor">distancia a puntero</div>
-                    <div class="block red" draggable="true" data-type="sensor">respuesta</div>
-                    <div class="block red" draggable="true" data-type="sensor">¿tecla espacio presionada?</div>
-                    <div class="block red" draggable="true" data-type="sensor">¿ratón presionado?</div>
-                    
-                    <!-- BLOQUES DE OPERADORES (amarillos) -->
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 + 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 - 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 * 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 / 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">número al azar entre 1 y 10</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 &lt; 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 = 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 &gt; 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">¿y &lt;&gt; &lt;&gt;?</div>
-                    <div class="block yellow" draggable="true" data-type="operator">¿o &lt;&gt; &lt;&gt;?</div>
-                    <div class="block yellow" draggable="true" data-type="operator">¿no &lt;&gt;?</div>
-                    <div class="block yellow" draggable="true" data-type="operator">unir 🍊 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">letra 1 de 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">longitud de 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">🍊 módulo 🍎</div>
-                    <div class="block yellow" draggable="true" data-type="operator">redondear 🍊</div>
-                    <div class="block yellow" draggable="true" data-type="operator">abs de 🍊</div>
+                    <!-- Movimiento -->
+                    <div class="block" draggable="true">mover 10 pasos</div>
+                    <div class="block" draggable="true">mover 5 pasos</div>
+                    <div class="block" draggable="true">girar ↻ 15 grados</div>
+                    <div class="block" draggable="true">girar ↺ 15 grados</div>
+                    <div class="block" draggable="true">ir a x: 0 y: 0</div>
+                    <div class="block" draggable="true">ir a puntero del ratón</div>
+                    <div class="block" draggable="true">deslizar 1 segs a x: 0 y: 0</div>
+                    <div class="block" draggable="true">apuntar hacia 90</div>
+                    <div class="block" draggable="true">apuntar hacia puntero</div>
+                    <div class="block" draggable="true">sumar a x 10</div>
+                    <div class="block" draggable="true">fijar y a 0</div>
+                    <!-- Apariencia -->
+                    <div class="block purple" draggable="true">decir ¡Hola! por 2 seg</div>
+                    <div class="block purple" draggable="true">decir algo</div>
+                    <div class="block purple" draggable="true">pensar Hmm... por 2 seg</div>
+                    <div class="block purple" draggable="true">pensar interesante</div>
+                    <div class="block purple" draggable="true">mostrar</div>
+                    <div class="block purple" draggable="true">esconder</div>
+                    <div class="block purple" draggable="true">cambiar disfraz a disfraz1</div>
+                    <div class="block purple" draggable="true">siguiente disfraz</div>
+                    <div class="block purple" draggable="true">cambiar fondo a fondo1</div>
+                    <div class="block purple" draggable="true">cambiar efecto color 25</div>
+                    <!-- Sonido -->
+                    <div class="block pink" draggable="true">tocar sonido Maullido</div>
+                    <div class="block pink" draggable="true">tocar sonido Maullido hasta terminar</div>
+                    <div class="block pink" draggable="true">detener todos los sonidos</div>
+                    <div class="block pink" draggable="true">tocar tambor 48 durante 0.2 beats</div>
+                    <div class="block pink" draggable="true">tocar nota 60 durante 0.5 beats</div>
+                    <div class="block pink" draggable="true">cambiar volumen 10</div>
+                    <div class="block pink" draggable="true">fijar volumen 100%</div>
+                    <!-- Lápiz -->
+                    <div class="block green" draggable="true">bajar lápiz</div>
+                    <div class="block green" draggable="true">subir lápiz</div>
+                    <div class="block green" draggable="true">fijar color lápiz a 0</div>
+                    <div class="block green" draggable="true">cambiar color lápiz 10</div>
+                    <div class="block green" draggable="true">fijar tamaño lápiz 1</div>
+                    <!-- Control -->
+                    <div class="block orange" draggable="true">esperar 1 segundos</div>
+                    <div class="block orange" draggable="true">por siempre</div>
+                    <div class="block orange" draggable="true">repetir 10</div>
+                    <div class="block orange" draggable="true">si &lt;toca borde?&gt; entonces</div>
+                    <div class="block orange" draggable="true">si &lt;&gt; entonces / si no</div>
+                    <div class="block orange" draggable="true">esperar hasta que &lt;&gt;</div>
+                    <div class="block orange hat-block" draggable="true">al presionar ⚑</div>
+                    <div class="block orange hat-block" draggable="true">al presionar tecla espacio</div>
+                    <div class="block orange hat-block" draggable="true">al hacer clic en este objeto</div>
+                    <div class="block orange" draggable="true">detener programa</div>
+                    <div class="block orange" draggable="true">detener todos</div>
+                    <!-- Sensores -->
+                    <div class="block red" draggable="true">¿tocando puntero?</div>
+                    <div class="block red" draggable="true">¿tocando color ?</div>
+                    <div class="block red" draggable="true">distancia a puntero</div>
+                    <div class="block red" draggable="true">respuesta</div>
+                    <div class="block red" draggable="true">¿tecla espacio presionada?</div>
+                    <div class="block red" draggable="true">¿ratón presionado?</div>
+                    <!-- Operadores -->
+                    <div class="block yellow" draggable="true">🍊 + 🍎</div>
+                    <div class="block yellow" draggable="true">🍊 - 🍎</div>
+                    <div class="block yellow" draggable="true">🍊 * 🍎</div>
+                    <div class="block yellow" draggable="true">🍊 / 🍎</div>
+                    <div class="block yellow" draggable="true">número al azar entre 1 y 10</div>
+                    <div class="block yellow" draggable="true">🍊 &lt; 🍎</div>
+                    <div class="block yellow" draggable="true">🍊 = 🍎</div>
+                    <div class="block yellow" draggable="true">🍊 &gt; 🍎</div>
+                    <div class="block yellow" draggable="true">¿y &lt;&gt; &lt;&gt;?</div>
+                    <div class="block yellow" draggable="true">¿o &lt;&gt; &lt;&gt;?</div>
+                    <div class="block yellow" draggable="true">unir 🍊 🍎</div>
                 </div>
             </div>
 
-            <!-- SCRIPTS (área donde soltar) -->
+            <!-- SCRIPTS con herramientas -->
             <div class="scripts">
-                <h3><i class="fas fa-code"></i> Scripts - Gato</h3>
+                <div class="scripts-header">
+                    <h3><i class="fas fa-code"></i> Scripts - Gato</h3>
+                    <div class="script-tools">
+                        <button id="newScriptBtn" title="Añadir nuevo script (bloque sombrero)"><i class="fas fa-plus"></i> Script</button>
+                        <button id="clearScriptsBtn" title="Limpiar todos los bloques"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
                 <div class="script-area" id="scriptArea">
-                    <div class="script-block hat" draggable="true"><i class="fas fa-flag" style="color:green;"></i> al presionar ⚑</div>
-                    <div class="script-block" draggable="true">por siempre</div>
+                    <!-- Bloques iniciales -->
+                    <div class="script-block hat script-start" draggable="true"><i class="fas fa-flag" style="color:green;"></i> al presionar ⚑</div>
                     <div class="script-block" draggable="true" style="margin-left:20px;">mover <input type="text" value="10"> pasos</div>
                     <div class="script-block" draggable="true" style="margin-left:20px;">si &lt;toca borde?&gt; entonces</div>
                     <div class="script-block" draggable="true" style="margin-left:40px;">rebotar si toca borde</div>
+                    <div class="script-block hat script-start" draggable="true" style="margin-top:20px;">al presionar tecla espacio</div>
                     <div class="script-block" draggable="true" style="margin-left:20px;">cambiar disfraz a siguiente</div>
-                    <div class="script-block" draggable="true">esperar <input type="text" value="1"> segs</div>
-                    <div class="script-block" draggable="true">tocar sonido Maullido</div>
                 </div>
-                <div style="margin-top:20px; border:2px dotted #bbb; padding:8px; border-radius:20px; background:#f0f0f0; font-size:12px; text-align:center;">
-                    <i class="fas fa-arrows-alt"></i> Arrastra bloques desde la izquierda o dentro de esta área
+                <div style="margin-top:10px; font-size:11px; color:#555; text-align:center;">
+                    💡 Clic derecho en un bloque para eliminarlo · Arrastra para reordenar
                 </div>
             </div>
 
-            <!-- ESCENARIO + OBJETOS -->
+            <!-- ESCENARIO -->
             <div class="stage-area">
                 <div class="stage">
                     <div class="stage-tools">
@@ -632,32 +691,27 @@
                             <i class="fas fa-star"></i>
                             <span>Estrella</span>
                         </div>
-                        <div class="sprite-icon">
-                            <i class="fas fa-dog"></i>
-                            <span>Perro</span>
-                        </div>
                         <div class="sprite-icon new-sprite">
                             <i class="fas fa-plus"></i>
                         </div>
-                    </div>
-                    <div style="margin-top:10px; background:#bdbdbd; padding:3px; border-radius:30px; text-align:center; font-size:11px;">
-                        <i class="fas fa-mouse-pointer"></i> Sprite1 activo
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Barra inferior -->
-        <div style="background:linear-gradient(to bottom, #b8b8b8, #9c9c9c); padding:4px 12px; border-top:2px solid #747474; color:#2a2a2a; font-size:12px; display:flex; gap:20px;">
-            <span><i class="far fa-clock"></i> 2008 - +40 bloques (¡más de 200 si se repiten!)</span>
-            <span><i class="fas fa-th"></i> Arrastra y prueba la bandera</span>
-            <span style="margin-left:auto;"><i class="fas fa-save"></i> guardado en memoria 🧶</span>
+        <!-- Barra inferior con botones de guardar/cargar -->
+        <div style="background:linear-gradient(to bottom, #b8b8b8, #9c9c9c); padding:4px 12px; border-top:2px solid #747474; color:#2a2a2a; font-size:12px; display:flex; gap:15px; align-items:center;">
+            <span><i class="far fa-clock"></i> 2008 Retro</span>
+            <button id="saveBtn" style="background:#4a9eff; border:none; border-radius:30px; padding:3px 12px; color:white; font-weight:bold; box-shadow:0 2px 0 #1f5fa8; cursor:pointer;"><i class="fas fa-download"></i> Guardar</button>
+            <button id="loadBtn" style="background:#64c87c; border:none; border-radius:30px; padding:3px 12px; color:white; font-weight:bold; box-shadow:0 2px 0 #2a8641; cursor:pointer;"><i class="fas fa-upload"></i> Cargar</button>
+            <input type="file" id="fileInput" accept=".scratch,application/json" style="display:none;">
+            <span style="margin-left:auto;"><i class="fas fa-save"></i> Proyecto en memoria</span>
         </div>
     </div>
 
     <script>
         (function() {
-            // ---- MOVIMIENTO DEL GATO (bandera y stop) ----
+            // ---- MOVIMIENTO DEL GATO ----
             const cat = document.getElementById('catSprite');
             const coords = document.getElementById('coordsDisplay');
             const flagBtn = document.getElementById('flagBtn');
@@ -687,11 +741,32 @@
                 updateCoords(0, 0);
             });
 
-            // ---- DRAG & DROP DE BLOQUES ----
+            // ---- REFERENCIAS ----
             const paletteBlocks = document.querySelectorAll('#paletteBlocks .block');
             const scriptArea = document.getElementById('scriptArea');
+            const newScriptBtn = document.getElementById('newScriptBtn');
+            const clearScriptsBtn = document.getElementById('clearScriptsBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const loadBtn = document.getElementById('loadBtn');
+            const fileInput = document.getElementById('fileInput');
 
-            // Hacer que los bloques de la paleta sean arrastrables
+            // ---- FUNCIÓN PARA AÑADIR BOTÓN DE ELIMINAR A UN BLOQUE ----
+            function addDeleteButton(block) {
+                if (block.querySelector('.delete-btn')) return;
+                const delBtn = document.createElement('span');
+                delBtn.className = 'delete-btn';
+                delBtn.innerHTML = '✕';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    block.remove();
+                });
+                block.appendChild(delBtn);
+            }
+
+            // ---- AÑADIR BOTONES DE ELIMINAR A LOS BLOQUES EXISTENTES ----
+            document.querySelectorAll('.script-block').forEach(addDeleteButton);
+
+            // ---- HACER ARRASTRABLES LOS BLOQUES DE LA PALETA ----
             paletteBlocks.forEach(block => {
                 block.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text/plain', block.outerHTML);
@@ -703,7 +778,7 @@
                 });
             });
 
-            // Permitir que los bloques ya en scripts también sean arrastrables (reordenar)
+            // ---- REORDENAR EN SCRIPT AREA (DRAG & DROP INTERNO) ----
             scriptArea.addEventListener('dragstart', e => {
                 if (e.target.classList.contains('script-block')) {
                     e.dataTransfer.setData('text/plain', e.target.outerHTML);
@@ -732,62 +807,175 @@
                 e.preventDefault();
                 scriptArea.classList.remove('drag-over');
                 const data = e.dataTransfer.getData('text/plain');
-                if (data) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = data;
-                    const newBlock = temp.firstChild;
+                if (!data) return;
 
-                    // Si viene de la paleta (clase .block), lo convertimos a .script-block
-                    if (newBlock.classList.contains('block')) {
-                        newBlock.classList.remove('block');
-                        newBlock.classList.add('script-block');
-                        // Conservar el color de fondo en línea
-                        if (!newBlock.style.background) {
-                            if (newBlock.classList.contains('hat-block')) newBlock.style.background = '#4caf50';
-                            else if (newBlock.classList.contains('purple')) newBlock.style.background = '#b47cf5';
-                            else if (newBlock.classList.contains('green')) newBlock.style.background = '#64c87c';
-                            else if (newBlock.classList.contains('orange')) newBlock.style.background = '#ffbf5e';
-                            else if (newBlock.classList.contains('pink')) newBlock.style.background = '#e477d9';
-                            else if (newBlock.classList.contains('yellow')) newBlock.style.background = '#c0cf6b';
-                            else if (newBlock.classList.contains('red')) newBlock.style.background = '#d46b5a';
-                            else newBlock.style.background = '#4a9eff';
-                        }
-                        newBlock.classList.remove('hat-block', 'purple', 'green', 'orange', 'pink', 'yellow', 'red');
-                        // Ajustar borde izquierdo según categoría
-                        if (newBlock.style.background === 'rgb(76, 175, 80)' || newBlock.textContent.includes('bandera')) {
-                            newBlock.style.borderLeft = '6px solid #4caf50';
-                        } else {
-                            newBlock.style.borderLeft = '6px solid #ff8c00';
-                        }
-                        newBlock.setAttribute('draggable', 'true');
+                const temp = document.createElement('div');
+                temp.innerHTML = data;
+                let newBlock = temp.firstChild;
+
+                // Si viene de la paleta (clase .block), convertir a .script-block
+                if (newBlock.classList.contains('block')) {
+                    newBlock.classList.remove('block');
+                    newBlock.classList.add('script-block');
+                    // Conservar color de fondo
+                    if (!newBlock.style.background) {
+                        if (newBlock.classList.contains('hat-block')) newBlock.style.background = '#4caf50';
+                        else if (newBlock.classList.contains('purple')) newBlock.style.background = '#b47cf5';
+                        else if (newBlock.classList.contains('green')) newBlock.style.background = '#64c87c';
+                        else if (newBlock.classList.contains('orange')) newBlock.style.background = '#ffbf5e';
+                        else if (newBlock.classList.contains('pink')) newBlock.style.background = '#e477d9';
+                        else if (newBlock.classList.contains('yellow')) newBlock.style.background = '#c0cf6b';
+                        else if (newBlock.classList.contains('red')) newBlock.style.background = '#d46b5a';
+                        else newBlock.style.background = '#4a9eff';
                     }
-
-                    // Si viene del mismo script area (movimiento), eliminar el original si es move
-                    if (e.dataTransfer.effectAllowed === 'move') {
-                        let original = null;
-                        document.querySelectorAll('.script-block').forEach(el => {
-                            if (el.style.opacity === '0.5') original = el;
-                        });
-                        if (original && original !== newBlock) {
-                            original.remove();
-                        }
+                    newBlock.classList.remove('hat-block', 'purple', 'green', 'orange', 'pink', 'yellow', 'red');
+                    // Ajustar borde izquierdo
+                    if (newBlock.style.background === 'rgb(76, 175, 80)' || newBlock.textContent.includes('bandera') || newBlock.textContent.includes('tecla') || newBlock.textContent.includes('clic')) {
+                        newBlock.style.borderLeft = '6px solid #4caf50';
+                        newBlock.classList.add('hat');
+                    } else {
+                        newBlock.style.borderLeft = '6px solid #ff8c00';
                     }
+                    newBlock.setAttribute('draggable', 'true');
+                    addDeleteButton(newBlock);
+                }
 
-                    scriptArea.appendChild(newBlock);
+                // Si es un movimiento (desde el mismo scriptArea), eliminar el original
+                if (e.dataTransfer.effectAllowed === 'move') {
+                    let original = null;
+                    document.querySelectorAll('.script-block').forEach(el => {
+                        if (el.style.opacity === '0.5') original = el;
+                    });
+                    if (original && original !== newBlock) {
+                        original.remove();
+                    }
+                }
 
-                    // Añadir eventos dragstart/dragend al nuevo bloque
-                    newBlock.addEventListener('dragstart', e => {
-                        e.dataTransfer.setData('text/plain', e.target.outerHTML);
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.target.style.opacity = '0.5';
-                    });
-                    newBlock.addEventListener('dragend', e => {
-                        e.target.style.opacity = '1';
-                    });
+                // Añadir clase script-start si es un bloque hat (para separar visualmente)
+                if (newBlock.classList.contains('hat') || newBlock.style.borderLeftColor === 'rgb(76, 175, 80)') {
+                    newBlock.classList.add('script-start');
+                } else {
+                    // Si no es hat, pero se coloca solo (sin hat antes), podría ser inicio de script? No, lo dejamos sin clase.
+                }
+
+                // Insertar al final del área (podríamos insertar cerca del ratón, pero es complejo)
+                scriptArea.appendChild(newBlock);
+
+                // Añadir eventos dragstart/dragend
+                newBlock.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.target.style.opacity = '0.5';
+                });
+                newBlock.addEventListener('dragend', e => {
+                    e.target.style.opacity = '1';
+                });
+            });
+
+            // ---- ELIMINAR CON CLIC DERECHO ----
+            scriptArea.addEventListener('contextmenu', e => {
+                if (e.target.classList.contains('script-block') || e.target.closest('.script-block')) {
+                    e.preventDefault();
+                    const block = e.target.closest('.script-block');
+                    block.remove();
                 }
             });
 
-            // Prevenir drops fuera del área
+            // ---- NUEVO SCRIPT (AÑADIR BLOQUE HAT POR DEFECTO) ----
+            newScriptBtn.addEventListener('click', () => {
+                const hatBlock = document.createElement('div');
+                hatBlock.className = 'script-block hat script-start';
+                hatBlock.setAttribute('draggable', 'true');
+                hatBlock.style.background = '#4caf50';
+                hatBlock.style.borderLeft = '6px solid #4caf50';
+                hatBlock.innerHTML = 'al presionar ⚑ <i class="fas fa-flag" style="color:green;"></i>';
+                addDeleteButton(hatBlock);
+                scriptArea.appendChild(hatBlock);
+
+                // Añadir eventos drag
+                hatBlock.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.target.style.opacity = '0.5';
+                });
+                hatBlock.addEventListener('dragend', e => {
+                    e.target.style.opacity = '1';
+                });
+            });
+
+            // ---- LIMPIAR TODOS LOS BLOQUES ----
+            clearScriptsBtn.addEventListener('click', () => {
+                if (confirm('¿Eliminar todos los bloques del área de scripts?')) {
+                    scriptArea.innerHTML = '';
+                }
+            });
+
+            // ---- GUARDAR PROYECTO (exportar) ----
+            saveBtn.addEventListener('click', () => {
+                const blocks = [];
+                document.querySelectorAll('#scriptArea .script-block').forEach(block => {
+                    // Guardamos el outerHTML para poder restaurar exactamente
+                    blocks.push(block.outerHTML);
+                });
+                const project = {
+                    version: '1.0',
+                    blocks: blocks
+                };
+                const json = JSON.stringify(project, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'mi_proyecto.scratch';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // ---- CARGAR PROYECTO (importar) ----
+            loadBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const project = JSON.parse(ev.target.result);
+                        if (project.version && Array.isArray(project.blocks)) {
+                            scriptArea.innerHTML = '';
+                            project.blocks.forEach(html => {
+                                const temp = document.createElement('div');
+                                temp.innerHTML = html;
+                                const block = temp.firstChild;
+                                if (block) {
+                                    // Asegurar que sea arrastrable y tenga botón eliminar
+                                    block.setAttribute('draggable', 'true');
+                                    addDeleteButton(block);
+                                    block.addEventListener('dragstart', e => {
+                                        e.dataTransfer.setData('text/plain', e.target.outerHTML);
+                                        e.dataTransfer.effectAllowed = 'move';
+                                        e.target.style.opacity = '0.5';
+                                    });
+                                    block.addEventListener('dragend', e => {
+                                        e.target.style.opacity = '1';
+                                    });
+                                    scriptArea.appendChild(block);
+                                }
+                            });
+                        } else {
+                            alert('El archivo no tiene un formato válido.');
+                        }
+                    } catch (err) {
+                        alert('Error al cargar el archivo: ' + err);
+                    }
+                    fileInput.value = ''; // reset
+                };
+                reader.readAsText(file);
+            });
+
+            // ---- PREVENIR DRAG & DROP POR DEFECTO EN TODA LA PÁGINA ----
             document.addEventListener('dragover', e => e.preventDefault());
             document.addEventListener('drop', e => e.preventDefault());
         })();
