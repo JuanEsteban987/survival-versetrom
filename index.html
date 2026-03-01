@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Easy Pro 2008 · con reset automático y if/else mejorado</title>
+    <title>Easy Pro 2008 · con autocompletado y visor de errores</title>
     <style>
-        /* ===== ESTÉTICA 2008 (sin cambios) ===== */
+        /* ===== ESTÉTICA 2008 (con algunos ajustes) ===== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,7 +22,7 @@
         }
 
         .computer {
-            width: 1050px;
+            width: 1100px;
             background: #d0d0d0;
             border: 5px ridge #e0e0e0;
             border-radius: 12px 12px 8px 8px;
@@ -90,6 +90,12 @@
             text-transform: uppercase;
         }
 
+        /* Contenedor del editor con autocompletado */
+        .editor-container {
+            position: relative;
+            width: 100%;
+        }
+
         textarea {
             width: 100%;
             height: 260px;
@@ -103,6 +109,37 @@
             line-height: 1.4;
             resize: vertical;
             box-shadow: inset 2px 2px 10px #404040;
+            outline: none;
+        }
+
+        /* Lista de autocompletado estilo Godot/2008 */
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 10px;
+            right: 10px;
+            background: #e0e0e0;
+            border: 4px ridge #a0a0a0;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            box-shadow: 4px 4px 0px #404040;
+        }
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 2px outset #b0b0b0;
+            color: #202020;
+            font-weight: bold;
+        }
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: #1040a0;
+            color: #ffffb0;
+            border-bottom: 2px inset #3070d0;
         }
 
         .button-group {
@@ -194,14 +231,33 @@
             border-left: 6px solid #202020;
         }
 
+        /* Panel de errores */
+        .error-panel {
+            background: #400000;
+            border: 5px inset #a00000;
+            color: #ffb0b0;
+            font-family: 'Courier New', monospace;
+            padding: 8px;
+            margin-top: 15px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px #ff0000;
+        }
+        .error-item {
+            border-bottom: 1px dashed #ff8080;
+            padding: 4px;
+        }
+
         .log-console {
             background: #1a1a1a;
             color: #3aff99;
             font-family: 'Courier New', monospace;
             border: 5px inset #707070;
             padding: 10px;
-            margin-top: 25px;
-            height: 100px;
+            margin-top: 15px;
+            height: 80px;
             overflow-y: auto;
             font-size: 15px;
             font-weight: bold;
@@ -231,34 +287,20 @@
     <div class="workspace">
         <div class="code-panel">
             <div class="panel-label">✎ editar código</div>
-            <textarea id="codeArea" spellcheck="false">
-// Ejemplo: al ejecutar se reinicia el escenario
-varcreate puntos
-varset puntos 8
-createobj nave Cubo #2288ff
-createobj asteroide Circulo #aa5533
-tp asteroide 300 200
-
-if puntos > 5
-  tp nave 100 100
-  rotate nave 45
-else
-  tp nave 300 300
-  rotate nave -45
-
-input a
-input tab
-input espacio
-// finish opcional</textarea>
-
+            <div class="editor-container">
+                <textarea id="codeArea" spellcheck="false"></textarea>
+                <div id="autocompleteBox" class="autocomplete-list"></div>
+            </div>
             <div class="button-group">
                 <button class="btn" id="runBtn">▶ ejecutar (reinicia y corre)</button>
                 <button class="btn" id="resetBtn">⟲ reiniciar manual</button>
                 <button class="btn" id="exampleBtn">📁 ejemplos</button>
             </div>
-
+            <div class="error-panel" id="errorPanel">
+                <div>✅ Sin errores</div>
+            </div>
             <div class="log-console" id="logConsole">
-                > Easy Pro 2008 listo. Al ejecutar se limpia el escenario.
+                > Easy Pro 2008 listo.
             </div>
         </div>
 
@@ -267,7 +309,6 @@ input espacio
             <div class="canvas-wrapper">
                 <canvas id="stageCanvas" width="400" height="400"></canvas>
             </div>
-
             <div class="object-panel">
                 <div class="object-title">📦 objetos activos</div>
                 <ul class="object-list" id="objectList">
@@ -278,35 +319,165 @@ input espacio
     </div>
 
     <div class="footer-note">
-        ⚡ comandos: varcreate · varset · if/else (una línea) · rotate · input (tab incluido) · finish
+        ⚡ comandos: varcreate · varset · if/else · rotate · input · finish · autocompletado con TAB
     </div>
 </div>
 
 <script>
     (function() {
-        // ========== MOTOR EASY PRO 2008 (versión mejorada) ==========
+        // ========== MOTOR EASY PRO 2008 ==========
         let objetos = [];
         let variables = {};
         let keyActions = {};
 
-        // Flags para if/else (manejo simple de una línea)
-        let ifActive = false;       // acabamos de encontrar un if, esperamos el comando then
-        let ifResult = false;       // resultado de la condición del if actual
-        let elsePending = false;    // después del then, esperamos ver si hay un else
-        let elseActive = false;     // vamos a ejecutar el comando del else
-        let elseResult = false;     // resultado para el else (opuesto al if)
+        // Flags para if/else
+        let ifActive = false;
+        let ifResult = false;
+        let elsePending = false;
+        let elseActive = false;
+        let elseResult = false;
+
+        // Almacén de errores (por línea)
+        let errores = [];  // array de objetos {linea: n, mensaje: string}
 
         const canvas = document.getElementById('stageCanvas');
         const ctx = canvas.getContext('2d');
         const codeArea = document.getElementById('codeArea');
         const logDiv = document.getElementById('logConsole');
         const objectList = document.getElementById('objectList');
+        const errorPanel = document.getElementById('errorPanel');
 
+        // ========== AUTOCOMPLETADO ==========
+        const comandosConocidos = [
+            'varcreate', 'varset', 'if', 'else', 'createobj', 'mov', 'tp', 'rotate', 'input', 'finish'
+        ];
+
+        let autocompleteBox = document.getElementById('autocompleteBox');
+        let currentSuggestions = [];
+        let selectedSuggestionIndex = -1;
+        let ignoreNextKeyDown = false;  // para evitar conflicto con TAB
+
+        function mostrarAutocompletado(sugerencias) {
+            if (sugerencias.length === 0) {
+                autocompleteBox.style.display = 'none';
+                return;
+            }
+            autocompleteBox.innerHTML = '';
+            sugerencias.forEach((sug, index) => {
+                let item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = sug;
+                item.onclick = () => {
+                    insertarSugerencia(sug);
+                    autocompleteBox.style.display = 'none';
+                };
+                autocompleteBox.appendChild(item);
+            });
+            selectedSuggestionIndex = 0;
+            actualizarSeleccion();
+            autocompleteBox.style.display = 'block';
+        }
+
+        function actualizarSeleccion() {
+            let items = autocompleteBox.children;
+            for (let i = 0; i < items.length; i++) {
+                if (i === selectedSuggestionIndex) {
+                    items[i].classList.add('selected');
+                } else {
+                    items[i].classList.remove('selected');
+                }
+            }
+        }
+
+        function insertarSugerencia(sug) {
+            let texto = codeArea.value;
+            let pos = codeArea.selectionStart;
+            // Encontrar el inicio de la palabra actual
+            let start = pos;
+            while (start > 0 && texto[start-1] !== ' ' && texto[start-1] !== '\n') {
+                start--;
+            }
+            let end = pos;
+            while (end < texto.length && texto[end] !== ' ' && texto[end] !== '\n') {
+                end++;
+            }
+            let nuevaTexto = texto.substring(0, start) + sug + texto.substring(end);
+            codeArea.value = nuevaTexto;
+            codeArea.setSelectionRange(start + sug.length, start + sug.length);
+            codeArea.focus();
+        }
+
+        function actualizarAutocompletado() {
+            let texto = codeArea.value;
+            let pos = codeArea.selectionStart;
+            // Encontrar la palabra actual
+            let start = pos;
+            while (start > 0 && texto[start-1] !== ' ' && texto[start-1] !== '\n') {
+                start--;
+            }
+            let palabraActual = texto.substring(start, pos);
+            if (palabraActual.length === 0) {
+                autocompleteBox.style.display = 'none';
+                return;
+            }
+            let sugerencias = comandosConocidos.filter(cmd => cmd.startsWith(palabraActual));
+            // También podríamos agregar nombres de objetos y variables si queremos más adelante
+            mostrarAutocompletado(sugerencias);
+        }
+
+        codeArea.addEventListener('input', () => {
+            actualizarAutocompletado();
+        });
+
+        codeArea.addEventListener('keydown', (e) => {
+            if (autocompleteBox.style.display === 'block') {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = (selectedSuggestionIndex + 1) % autocompleteBox.children.length;
+                    actualizarSeleccion();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = (selectedSuggestionIndex - 1 + autocompleteBox.children.length) % autocompleteBox.children.length;
+                    actualizarSeleccion();
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (selectedSuggestionIndex >= 0 && autocompleteBox.children[selectedSuggestionIndex]) {
+                        e.preventDefault();
+                        let sug = autocompleteBox.children[selectedSuggestionIndex].textContent;
+                        insertarSugerencia(sug);
+                        autocompleteBox.style.display = 'none';
+                    }
+                } else if (e.key === 'Escape') {
+                    autocompleteBox.style.display = 'none';
+                }
+            }
+        });
+
+        // Cerrar autocompletado al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!autocompleteBox.contains(e.target) && e.target !== codeArea) {
+                autocompleteBox.style.display = 'none';
+            }
+        });
+
+        // ========== TECLADO: Solo capturar teclas si NO estamos escribiendo en el textarea ==========
+        document.addEventListener('keydown', (e) => {
+            // Si el textarea está enfocado, no activamos los inputs
+            if (document.activeElement === codeArea) {
+                return;
+            }
+            let tecla = e.key.toLowerCase();
+            if (keyActions[tecla]) {
+                e.preventDefault();
+                keyActions[tecla]();
+            }
+        });
+
+        // ========== FUNCIONES DEL MOTOR ==========
         function logMessage(msg) {
             const p = document.createElement('div');
             p.textContent = '> ' + msg;
             logDiv.appendChild(p);
-            if (logDiv.children.length > 9) {
+            if (logDiv.children.length > 8) {
                 logDiv.removeChild(logDiv.children[0]);
             }
             logDiv.scrollTop = logDiv.scrollHeight;
@@ -360,56 +531,6 @@ input espacio
             return objetos.find(obj => obj.name === nombre);
         }
 
-        // Parseo simple por espacios
-        function parsearComando(linea) {
-            linea = linea.trim();
-            if (linea === '' || linea.startsWith('//')) return null;
-            let partes = linea.split(/\s+/);
-            if (partes.length === 0) return null;
-            let comando = partes[0].toLowerCase();
-            let argumentos = partes.slice(1);
-            return { comando, argumentos };
-        }
-
-        // Evaluar condición del if
-        function evaluarCondicion(argumentos) {
-            if (argumentos.length < 3) {
-                logMessage('❌ if: necesita variable operador valor');
-                return null;
-            }
-            let varName = argumentos[0];
-            let operador = argumentos[1];
-            let valorStr = argumentos[2];
-
-            if (!(varName in variables)) {
-                logMessage(`❌ if: variable "${varName}" no existe`);
-                return null;
-            }
-            let varVal = variables[varName];
-            let valorNum = parseFloat(valorStr);
-            if (isNaN(valorNum)) {
-                if (valorStr in variables) {
-                    valorNum = variables[valorStr];
-                } else {
-                    logMessage(`❌ if: valor no numérico ni variable: ${valorStr}`);
-                    return null;
-                }
-            }
-
-            switch (operador) {
-                case '=': return varVal === valorNum;
-                case '<': return varVal < valorNum;
-                case '>': return varVal > valorNum;
-                case '<=': return varVal <= valorNum;
-                case '>=': return varVal >= valorNum;
-                case '<>': return varVal !== valorNum;
-                default:
-                    logMessage(`❌ if: operador desconocido "${operador}"`);
-                    return null;
-            }
-        }
-
-        // Reiniciar todo el estado (escenario, variables, teclas, flags)
         function resetTotal() {
             objetos = [];
             variables = {};
@@ -423,15 +544,74 @@ input espacio
             logMessage('🔄 Escenario reiniciado.');
         }
 
-        // Ejecutar un comando ya parseado (con manejo de flujo if/else)
-        function ejecutarComando(parsed) {
+        // ========== VISOR DE ERRORES ==========
+        function mostrarErrores() {
+            if (errores.length === 0) {
+                errorPanel.innerHTML = '<div style="color:#b0ffb0;">✅ Sin errores</div>';
+                return;
+            }
+            let html = '';
+            errores.forEach(err => {
+                html += `<div class="error-item">Línea ${err.linea}: ${err.mensaje}</div>`;
+            });
+            errorPanel.innerHTML = html;
+        }
+
+        // ========== PARSER Y EJECUCIÓN CON REGISTRO DE ERRORES ==========
+        function parsearComando(linea) {
+            linea = linea.trim();
+            if (linea === '' || linea.startsWith('//')) return null;
+            let partes = linea.split(/\s+/);
+            if (partes.length === 0) return null;
+            let comando = partes[0].toLowerCase();
+            let argumentos = partes.slice(1);
+            return { comando, argumentos };
+        }
+
+        function evaluarCondicion(argumentos, lineaNum) {
+            if (argumentos.length < 3) {
+                errores.push({ linea: lineaNum, mensaje: 'if: necesita variable operador valor' });
+                return null;
+            }
+            let varName = argumentos[0];
+            let operador = argumentos[1];
+            let valorStr = argumentos[2];
+
+            if (!(varName in variables)) {
+                errores.push({ linea: lineaNum, mensaje: `if: variable "${varName}" no existe` });
+                return null;
+            }
+            let varVal = variables[varName];
+            let valorNum = parseFloat(valorStr);
+            if (isNaN(valorNum)) {
+                if (valorStr in variables) {
+                    valorNum = variables[valorStr];
+                } else {
+                    errores.push({ linea: lineaNum, mensaje: `if: valor no numérico ni variable: ${valorStr}` });
+                    return null;
+                }
+            }
+
+            switch (operador) {
+                case '=': return varVal === valorNum;
+                case '<': return varVal < valorNum;
+                case '>': return varVal > valorNum;
+                case '<=': return varVal <= valorNum;
+                case '>=': return varVal >= valorNum;
+                case '<>': return varVal !== valorNum;
+                default:
+                    errores.push({ linea: lineaNum, mensaje: `if: operador desconocido "${operador}"` });
+                    return null;
+            }
+        }
+
+        function ejecutarComando(parsed, lineaNum) {
             if (!parsed) return false;
             const { comando, argumentos } = parsed;
 
-            // ========== LÓGICA DE FLUJO IF/ELSE ==========
+            // Manejo de if/else (con flags)
             if (comando === 'if') {
-                // Evaluar condición y preparar estado
-                let cond = evaluarCondicion(argumentos);
+                let cond = evaluarCondicion(argumentos, lineaNum);
                 if (cond === null) return false;
                 ifActive = true;
                 ifResult = cond;
@@ -441,68 +621,58 @@ input espacio
                 return true;
             }
 
-            // Si estamos esperando el comando then (justo después de if)
             if (ifActive) {
-                ifActive = false;  // ya procesamos el then
+                ifActive = false;
                 if (ifResult) {
-                    // Ejecutar este comando (es el then)
                     logMessage('  → then ejecutado');
-                    ejecutarComandoNormal(parsed);
+                    ejecutarComandoNormal(parsed, lineaNum);
                 } else {
-                    // Ignorar este comando (then falso)
                     logMessage('  → then omitido');
                 }
-                // Después del then, esperamos un posible else en la siguiente línea
                 elsePending = true;
                 return true;
             }
 
-            // Si estamos esperando ver si hay un else
             if (elsePending) {
                 elsePending = false;
                 if (comando === 'else') {
-                    // El siguiente comando será el else
                     elseActive = true;
-                    elseResult = !ifResult;  // el else se ejecuta si if fue falso
+                    elseResult = !ifResult;
                     logMessage('  → else detectado');
                     return true;
                 } else {
-                    // No hay else, este comando se ejecuta normalmente
                     logMessage('  → (sin else)');
-                    ejecutarComandoNormal(parsed);
+                    ejecutarComandoNormal(parsed, lineaNum);
                     return true;
                 }
             }
 
-            // Si estamos en medio de un else (el comando actual es el que sigue a 'else')
             if (elseActive) {
                 elseActive = false;
                 if (elseResult) {
                     logMessage('  → else ejecutado');
-                    ejecutarComandoNormal(parsed);
+                    ejecutarComandoNormal(parsed, lineaNum);
                 } else {
                     logMessage('  → else omitido');
                 }
                 return true;
             }
 
-            // Si no hay flujo especial, ejecutar normalmente
-            ejecutarComandoNormal(parsed);
+            ejecutarComandoNormal(parsed, lineaNum);
             return true;
         }
 
-        // Ejecución real de cada comando (sin lógica de flujo)
-        function ejecutarComandoNormal(parsed) {
+        function ejecutarComandoNormal(parsed, lineaNum) {
             const { comando, argumentos } = parsed;
 
             if (comando === 'varcreate') {
                 if (argumentos.length < 1) {
-                    logMessage('❌ varcreate: necesita nombre');
+                    errores.push({ linea: lineaNum, mensaje: 'varcreate: necesita nombre' });
                     return;
                 }
                 let nombre = argumentos[0];
                 if (nombre in variables) {
-                    logMessage(`❌ varcreate: variable "${nombre}" ya existe`);
+                    errores.push({ linea: lineaNum, mensaje: `varcreate: variable "${nombre}" ya existe` });
                     return;
                 }
                 variables[nombre] = 0;
@@ -510,7 +680,7 @@ input espacio
             }
             else if (comando === 'varset') {
                 if (argumentos.length < 2) {
-                    logMessage('❌ varset: necesita nombre y valor');
+                    errores.push({ linea: lineaNum, mensaje: 'varset: necesita nombre y valor' });
                     return;
                 }
                 let nombre = argumentos[0];
@@ -519,12 +689,12 @@ input espacio
                     if (argumentos[1] in variables) {
                         valor = variables[argumentos[1]];
                     } else {
-                        logMessage(`❌ varset: valor no numérico ni variable: ${argumentos[1]}`);
+                        errores.push({ linea: lineaNum, mensaje: `varset: valor no numérico ni variable: ${argumentos[1]}` });
                         return;
                     }
                 }
                 if (!(nombre in variables)) {
-                    logMessage(`❌ varset: variable "${nombre}" no existe`);
+                    errores.push({ linea: lineaNum, mensaje: `varset: variable "${nombre}" no existe` });
                     return;
                 }
                 variables[nombre] = valor;
@@ -532,16 +702,16 @@ input espacio
             }
             else if (comando === 'createobj') {
                 if (argumentos.length < 3) {
-                    logMessage('❌ createobj: necesita: nombre forma color');
+                    errores.push({ linea: lineaNum, mensaje: 'createobj: necesita: nombre forma color' });
                     return;
                 }
                 const [nombre, forma, color] = argumentos;
                 if (forma !== 'Cubo' && forma !== 'Circulo') {
-                    logMessage(`❌ createobj: forma debe ser Cubo o Circulo (recibió: ${forma})`);
+                    errores.push({ linea: lineaNum, mensaje: `createobj: forma debe ser Cubo o Circulo (recibió: ${forma})` });
                     return;
                 }
                 if (encontrarObj(nombre)) {
-                    logMessage(`❌ createobj: ya existe un objeto "${nombre}"`);
+                    errores.push({ linea: lineaNum, mensaje: `createobj: ya existe un objeto "${nombre}"` });
                     return;
                 }
                 objetos.push({
@@ -557,19 +727,19 @@ input espacio
             }
             else if (comando === 'mov') {
                 if (argumentos.length < 3) {
-                    logMessage('❌ mov: necesita: nombre dx dy');
+                    errores.push({ linea: lineaNum, mensaje: 'mov: necesita: nombre dx dy' });
                     return;
                 }
                 const [nombre, dxStr, dyStr] = argumentos;
                 const obj = encontrarObj(nombre);
                 if (!obj) {
-                    logMessage(`❌ mov: objeto "${nombre}" no existe`);
+                    errores.push({ linea: lineaNum, mensaje: `mov: objeto "${nombre}" no existe` });
                     return;
                 }
                 const dx = parseFloat(dxStr);
                 const dy = parseFloat(dyStr);
                 if (isNaN(dx) || isNaN(dy)) {
-                    logMessage('❌ mov: dx y dy deben ser números');
+                    errores.push({ linea: lineaNum, mensaje: 'mov: dx y dy deben ser números' });
                     return;
                 }
                 obj.x += dx;
@@ -579,19 +749,19 @@ input espacio
             }
             else if (comando === 'tp') {
                 if (argumentos.length < 3) {
-                    logMessage('❌ tp: necesita: nombre x y');
+                    errores.push({ linea: lineaNum, mensaje: 'tp: necesita: nombre x y' });
                     return;
                 }
                 const [nombre, xStr, yStr] = argumentos;
                 const obj = encontrarObj(nombre);
                 if (!obj) {
-                    logMessage(`❌ tp: objeto "${nombre}" no existe`);
+                    errores.push({ linea: lineaNum, mensaje: `tp: objeto "${nombre}" no existe` });
                     return;
                 }
                 const x = parseFloat(xStr);
                 const y = parseFloat(yStr);
                 if (isNaN(x) || isNaN(y)) {
-                    logMessage('❌ tp: x e y deben ser números');
+                    errores.push({ linea: lineaNum, mensaje: 'tp: x e y deben ser números' });
                     return;
                 }
                 obj.x = x;
@@ -601,18 +771,18 @@ input espacio
             }
             else if (comando === 'rotate') {
                 if (argumentos.length < 2) {
-                    logMessage('❌ rotate: necesita objeto y grados');
+                    errores.push({ linea: lineaNum, mensaje: 'rotate: necesita objeto y grados' });
                     return;
                 }
                 let nombre = argumentos[0];
                 let grados = parseFloat(argumentos[1]);
                 if (isNaN(grados)) {
-                    logMessage('❌ rotate: grados debe ser número');
+                    errores.push({ linea: lineaNum, mensaje: 'rotate: grados debe ser número' });
                     return;
                 }
                 let obj = encontrarObj(nombre);
                 if (!obj) {
-                    logMessage(`❌ rotate: objeto "${nombre}" no existe`);
+                    errores.push({ linea: lineaNum, mensaje: `rotate: objeto "${nombre}" no existe` });
                     return;
                 }
                 obj.rotation = grados;
@@ -621,7 +791,7 @@ input espacio
             }
             else if (comando === 'input') {
                 if (argumentos.length < 1) {
-                    logMessage('❌ input: necesita una tecla');
+                    errores.push({ linea: lineaNum, mensaje: 'input: necesita una tecla' });
                     return;
                 }
                 const tecla = argumentos[0].toLowerCase();
@@ -634,29 +804,41 @@ input espacio
                 resetTotal();
             }
             else {
-                logMessage(`⚠️ Comando desconocido: "${comando}"`);
+                errores.push({ linea: lineaNum, mensaje: `comando desconocido: "${comando}"` });
             }
         }
 
-        // Ejecutar todo el código (primero reinicia)
         function ejecutarTodo() {
-            resetTotal();  // limpia escenario, variables, teclas y flags
+            // Reiniciar todo
+            objetos = [];
+            variables = {};
+            keyActions = {};
+            ifActive = false;
+            ifResult = false;
+            elsePending = false;
+            elseActive = false;
+            elseResult = false;
+            errores = [];
 
             const codigo = codeArea.value;
             const lineas = codigo.split('\n');
-            lineas.forEach(linea => {
+            lineas.forEach((linea, index) => {
+                const lineaNum = index + 1;
                 const parsed = parsearComando(linea);
                 if (parsed) {
-                    ejecutarComando(parsed);
+                    ejecutarComando(parsed, lineaNum);
                 } else {
                     if (linea.trim() !== '' && !linea.trim().startsWith('//')) {
-                        logMessage(`⏭ línea ignorada: "${linea.trim()}"`);
+                        // Línea no vacía y no comentario, pero no se pudo parsear? maybe espacios
+                        // No generamos error por ahora
                     }
                 }
             });
+            renderizar();
+            mostrarErrores();
+            logMessage('📟 Ejecución completada.');
         }
 
-        // Cargar ejemplo en el editor
         function cargarEjemplos() {
             codeArea.value = `// Programa de ejemplo
 varcreate puntuacion
@@ -676,11 +858,11 @@ else
 input a
 input tab
 input espacio
-// finish  (opcional, se puede usar para reiniciar)`;
-            logMessage('📂 Ejemplos cargados en el editor.');
+// finish (opcional)`;
+            logMessage('📂 Ejemplos cargados.');
         }
 
-        // Demo inicial (solo visual, sin afectar la lógica)
+        // Demo inicial
         function demoInicial() {
             objetos = [
                 { name: 'demoCuad', shape: 'Cubo', color: '#1070c0', x: 150, y: 150, rotation: 15 },
@@ -688,17 +870,17 @@ input espacio
             ];
             variables = { puntuacion: 5 };
             renderizar();
-            logMessage('⚡ Easy Pro 2008 listo. Objetos de demostración (no forman parte del programa).');
+            logMessage('⚡ Easy Pro 2008 listo. Objetos de demostración.');
         }
 
-        // Event listeners
         document.getElementById('runBtn').addEventListener('click', () => {
-            logMessage('📟 --- EJECUTANDO (con reinicio automático) ---');
             ejecutarTodo();
         });
 
         document.getElementById('resetBtn').addEventListener('click', () => {
             resetTotal();
+            errores = [];
+            mostrarErrores();
         });
 
         document.getElementById('exampleBtn').addEventListener('click', () => {
@@ -706,15 +888,6 @@ input espacio
         });
 
         demoInicial();
-
-        // Teclado: prevenir comportamiento por defecto de teclas registradas
-        document.addEventListener('keydown', (e) => {
-            let tecla = e.key.toLowerCase();
-            if (keyActions[tecla]) {
-                e.preventDefault();  // evita que la tecla escriba en el textarea o mueva el foco
-                keyActions[tecla]();
-            }
-        });
     })();
 </script>
 </body>
