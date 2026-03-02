@@ -3,376 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Maker 2008 · Estudio de creación</title>
+    <title>Comandos 2008 · Estudio retro</title>
     <style>
-        /* ========== ESTÉTICA 2008 ========== */
+        /* ===== ESTÉTICA 2008 ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            background: #336699; /* azul XP clásico de fondo */
+            background: #2f4f7f;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, 'Courier New', monospace;
+            font-family: 'Segoe UI', 'Courier New', monospace;
             padding: 16px;
         }
-        .ventana-principal {
-            width: 1100px;
+        .ventana {
+            width: 1000px;
             max-width: 95%;
-            background: #ece9d8; /* fondo gris claro XP */
-            border: 3px solid #0a246a;
+            background: #e3dfd1;
+            border: 4px solid #0b1a4a;
             border-radius: 12px 12px 8px 8px;
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
-            overflow: hidden;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
         }
-        .barra-titulo {
-            background: linear-gradient(180deg, #d6e0f5 0%, #b1c1e0 100%);
-            padding: 8px 12px;
-            border-bottom: 2px solid #0a246a;
+        .barra-superior {
+            background: linear-gradient(180deg, #cbd6f0 0%, #9aabcf 100%);
+            padding: 8px 16px;
+            border-bottom: 3px solid #0b1a4a;
             display: flex;
             align-items: center;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 18px;
-            color: #1f2d5a;
+            color: #102040;
             text-shadow: 1px 1px white;
         }
-        .barra-titulo img {
-            width: 24px;
-            height: 24px;
+        .barra-superior span {
             margin-right: 8px;
-            filter: drop-shadow(1px 1px 0 white);
+            font-size: 28px;
         }
-        .contenedor-editores {
+        .contenedor {
             display: flex;
-            flex-direction: row;
             padding: 12px;
             gap: 12px;
-            background: #d4d0c8; /* gris más oscuro tipo panel */
-            border-top: 1px solid #ffffff;
-            border-bottom: 1px solid #808080;
+            background: #bdb79e;
+            border-top: 2px solid #fffae8;
+            border-bottom: 2px solid #6f6a56;
         }
         .panel-codigo {
-            flex: 1;
-            background: #ffffff;
-            border: 2px inset #b0a898;
-            padding: 4px;
-            box-shadow: inset 2px 2px 0px #5f5a52;
+            flex: 2;
+            background: #fffedc;
+            border: 3px inset #9c927c;
+            padding: 5px;
         }
         .panel-codigo textarea {
             width: 100%;
-            height: 400px;
+            height: 420px;
+            background: #fffed0;
             border: none;
-            background: #fefedc; /* fondo amarillento como editores viejos */
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
             line-height: 1.5;
-            color: #001188;
+            color: #002277;
             padding: 8px;
             resize: none;
             outline: none;
-            overflow: auto;
-            border: 1px solid #a7a394;
+            border: 1px solid #b0a278;
         }
         .panel-escenario {
-            width: 360px;
-            background: #b6b09c;
-            border: 2px inset #b0a898;
-            padding: 10px;
+            flex: 1;
+            background: #a69e87;
+            border: 3px inset #9c927c;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            box-shadow: inset 2px 2px 0px #5f5a52;
+            gap: 16px;
         }
-        .canvas-2008 {
-            background: #303030;
-            border: 4px solid #4b4f5c;
-            border-radius: 6px;
-            box-shadow: 4px 4px 0px #202020;
+        .canvas-retro {
+            background: #2c2c2c;
+            border: 5px solid #4d5363;
+            border-radius: 8px;
+            box-shadow: 5px 5px 0 #1a1f2b;
             width: 320px;
             height: 240px;
-            image-rendering: crisp-edges; /* píxel retro */
         }
         canvas {
             display: block;
             width: 100%;
             height: 100%;
         }
-        .toolbar-2008 {
+        .botonera {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
-            background: #c0b9a8;
-            padding: 10px;
-            border: 2px outset #ffffff;
-            border-radius: 6px;
+            background: #b6af98;
+            padding: 12px;
+            border: 3px outset #fff3d1;
+            border-radius: 8px;
         }
         .btn-2008 {
-            background: linear-gradient(180deg, #e8e2d4 0%, #c7beaa 100%);
-            border: 2px solid #6a5f4f;
-            border-radius: 4px;
-            color: #1e2b45;
+            background: linear-gradient(180deg, #f0ead8 0%, #cfc5a8 100%);
+            border: 2px solid #5a4f39;
+            border-radius: 5px;
             font-weight: bold;
-            font-size: 13px;
-            padding: 6px 14px;
+            font-size: 14px;
+            padding: 7px 16px;
             cursor: pointer;
-            box-shadow: 2px 2px 0px #4a3f32;
+            box-shadow: 3px 3px 0 #3f3729;
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            transition: 0.05s linear;
+            color: #1d2b45;
+            transition: 0.05s;
         }
         .btn-2008:active {
-            background: linear-gradient(0deg, #e8e2d4 0%, #c7beaa 100%);
-            box-shadow: inset 2px 2px 0px #4a3f32;
+            background: linear-gradient(0deg, #f0ead8 0%, #cfc5a8 100%);
+            box-shadow: inset 3px 3px 0 #3f3729;
             transform: translate(2px, 2px);
         }
-        .btn-2008.accion {
-            background: linear-gradient(180deg, #fde59c 0%, #f2c75f 100%);
-            border-color: #b37b2e;
+        .btn-2008.ejecutar {
+            background: linear-gradient(180deg, #fef7b0 0%, #f2d96c 100%);
+            border-color: #aa6f2b;
         }
         .barra-estado {
-            background: #d4d0c8;
-            padding: 6px 16px;
-            border-top: 2px solid #f0ece4;
-            font-size: 13px;
-            color: #2b2b2b;
+            background: #bdb79e;
+            padding: 8px 18px;
+            border-top: 3px solid #fff7d7;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: #16233b;
         }
-        .luz-ejecucion {
-            background: #29a329;
-            width: 14px;
-            height: 14px;
+        .led {
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            box-shadow: inset -2px -2px 0px #145a14;
+            background: #3f3;
+            box-shadow: inset -2px -2px 0 #0a4b0a;
             display: inline-block;
+            margin-left: 6px;
         }
-        .luz-detente {
-            background: #a32929;
-            box-shadow: inset -2px -2px 0px #5a1414;
+        .led.rojo {
+            background: #f33;
+            box-shadow: inset -2px -2px 0 #6b0a0a;
         }
     </style>
 </head>
 <body>
-<div class="ventana-principal">
-    <div class="barra-titulo">
-        <!-- icono simplificado -->
-        <span style="font-size:24px; margin-right:8px;">🎮</span>
-        <span>Game Maker 2008 · Proyecto [*]</span>
+<div class="ventana">
+    <div class="barra-superior">
+        <span>⌨️</span> COMANDOS '08 · (create, move, tp, input, fin)
     </div>
-
-    <div class="contenedor-editores">
-        <!-- PANEL DE CÓDIGO -->
+    <div class="contenedor">
+        <!-- PANEL DE CÓDIGO (COMANDOS) -->
         <div class="panel-codigo">
-            <textarea id="codigoUsuario" placeholder="; Escribe tu código JavaScript aquí...">// Ejemplo: un cuadrado que rebota
-let x = 100, y = 50;
-let vx = 2, vy = 1.5;
+            <textarea id="codigoComandos" spellcheck="false">
+; --------------------------------------
+;  EJEMPLO: cubo azul que se mueve con flechas
+; --------------------------------------
+create "cubo" "rectangulo" "#33aaff" "30"
+create "bola" "circulo" "#f4d03f" "25"
+tp "bola" "200" "120"
 
-function update() {
-    ctx.fillStyle = '#336699';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#ffcc00';
-    ctx.beginPath();
-    ctx.rect(x, y, 40, 40);
-    ctx.fill();
-    
-    x += vx;
-    y += vy;
-    
-    if (x < 0 || x > canvas.width-40) vx = -vx;
-    if (y < 0 || y > canvas.height-40) vy = -vy;
-}
+input "up"    "move cubo 0 -5"
+input "down"  "move cubo 0 5"
+input "left"  "move cubo -5 0"
+input "right" "move cubo 5 0"
+input "space" "tp bola 150 100"
 
-startLoop(update);</textarea>
+fin
+            </textarea>
         </div>
-
-        <!-- PANEL ESCENARIO + BOTONES -->
+        <!-- PANEL ESCENARIO -->
         <div class="panel-escenario">
-            <div class="canvas-2008">
-                <canvas id="gameCanvas" width="320" height="240"></canvas>
+            <div class="canvas-retro">
+                <canvas id="canvasJuego" width="320" height="240"></canvas>
             </div>
-            <div class="toolbar-2008">
-                <button class="btn-2008 accion" id="btnRun">▶ Ejecutar</button>
-                <button class="btn-2008" id="btnStop">■ Detener</button>
-                <button class="btn-2008" id="btnExport">📤 Exportar</button>
-                <label class="btn-2008" for="importFile">📂 Importar</label>
-                <input type="file" id="importFile" accept=".txt,.js,.json" style="display:none;">
+            <div class="botonera">
+                <button class="btn-2008 ejecutar" id="btnRun">▶ EJECUTAR</button>
+                <button class="btn-2008" id="btnStop">■ DETENER</button>
+                <button class="btn-2008" id="btnExport">📤 EXPORTAR</button>
+                <label class="btn-2008" for="importFile">📂 IMPORTAR</label>
+                <input type="file" id="importFile" accept=".txt,.scr,.cmds" style="display:none;">
             </div>
-            <div style="font-size:12px; color:#3f3f3f; margin-top:4px;">
-                ⚡ Flechas = mueven objeto (si implementas)
+            <div style="color:#222; font-size:12px; text-align:center;">
+                ⚡ teclas: ↑ ↓ ← → space (configura con input)
             </div>
         </div>
     </div>
-
     <div class="barra-estado">
-        <span id="estado">🟡 DETENIDO</span>
-        <span>GM 2008 · by retro</span>
+        <span id="estadoTexto">🟢 SISTEMA LISTO</span>
+        <span>v1.0 · 2008 style</span>
     </div>
 </div>
 
 <script>
 (function(){
-    // Elementos del DOM
-    const canvas = document.getElementById('gameCanvas');
+    // ========== ELEMENTOS ==========
+    const canvas = document.getElementById('canvasJuego');
     const ctx = canvas.getContext('2d');
-    const codigoTextarea = document.getElementById('codigoUsuario');
+    const codigoEl = document.getElementById('codigoComandos');
     const btnRun = document.getElementById('btnRun');
     const btnStop = document.getElementById('btnStop');
     const btnExport = document.getElementById('btnExport');
     const importFile = document.getElementById('importFile');
-    const estadoSpan = document.getElementById('estado');
+    const estadoTexto = document.getElementById('estadoTexto');
 
-    // Variables de control de animación
-    let animFrameId = null;
-    let loopFunction = null;          // función de loop definida por el usuario (si usa startLoop)
-    let userStopRequested = false;
+    // ========== ESTADO DEL JUEGO ==========
+    let objetos = {};           // ID -> { x, y, forma, color, tamaño }
+    let inputs = {};            // tecla -> comando (string)
+    let animFrame = null;
+    let ejecutando = false;
 
-    // === API que se expone al código del usuario ===
-    function startLoop(fn) {
-        // Detiene cualquier loop previo
-        if (animFrameId) {
-            cancelAnimationFrame(animFrameId);
-            animFrameId = null;
+    // ========== FUNCIONES DE DIBUJO ==========
+    function dibujar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Fondo cuadriculado retro
+        ctx.fillStyle = '#1a2634';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#2f4057';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < canvas.width; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, canvas.height);
+            ctx.strokeStyle = '#2f4057';
+            ctx.stroke();
         }
-        if (typeof fn === 'function') {
-            loopFunction = fn;
-            // lanzar bucle
-            function frame() {
-                if (!loopFunction) return;
-                try {
-                    loopFunction();
-                } catch (e) {
-                    console.error("Error en loop del usuario:", e);
-                    stopEverything();
-                }
-                animFrameId = requestAnimationFrame(frame);
+        for (let i = 0; i < canvas.height; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(canvas.width, i);
+            ctx.stroke();
+        }
+
+        // Dibujar objetos
+        for (let id in objetos) {
+            const obj = objetos[id];
+            ctx.fillStyle = obj.color;
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            if (obj.forma === 'circulo') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, obj.tamaño/2, 0, 2 * Math.PI);
+                ctx.fill();
+                // borde blanco delgado
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else { // rectangulo (u otros por defecto)
+                ctx.fillRect(obj.x - obj.tamaño/2, obj.y - obj.tamaño/2, obj.tamaño, obj.tamaño);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(obj.x - obj.tamaño/2, obj.y - obj.tamaño/2, obj.tamaño, obj.tamaño);
             }
-            animFrameId = requestAnimationFrame(frame);
-            actualizarEstado(true);
-        } else {
-            console.warn("startLoop necesita una función");
+            // texto ID pequeño
+            ctx.shadowBlur = 0;
+            ctx.font = '10px "Courier New"';
+            ctx.fillStyle = '#ffffaa';
+            ctx.fillText(id, obj.x - 15, obj.y - 20);
         }
+        ctx.shadowBlur = 0;
     }
 
-    function stopLoop() {
-        if (animFrameId) {
-            cancelAnimationFrame(animFrameId);
-            animFrameId = null;
-        }
-        loopFunction = null;
-        actualizarEstado(false);
+    function loop() {
+        if (!ejecutando) return;
+        dibujar();
+        animFrame = requestAnimationFrame(loop);
     }
 
-    // Función interna para detener todo (desde botón o error)
-    function stopEverything() {
-        if (animFrameId) {
-            cancelAnimationFrame(animFrameId);
-            animFrameId = null;
-        }
-        loopFunction = null;
-        actualizarEstado(false);
+    function iniciarLoop() {
+        if (animFrame) cancelAnimationFrame(animFrame);
+        ejecutando = true;
+        estadoTexto.innerHTML = '🟢 EJECUTANDO';
+        loop();
     }
 
-    function actualizarEstado(encendido) {
-        if (encendido) {
-            estadoSpan.innerHTML = '🟢 EJECUTANDO';
-        } else {
-            estadoSpan.innerHTML = '🔴 DETENIDO';
+    function detenerLoop() {
+        if (animFrame) {
+            cancelAnimationFrame(animFrame);
+            animFrame = null;
         }
-    }
-
-    // === EJECUTAR CÓDIGO DEL USUARIO (Run) ===
-    function ejecutarCodigo() {
-        // Detener cualquier ejecución previa
-        stopEverything();
-        // Limpiar canvas (opcional)
+        ejecutando = false;
+        estadoTexto.innerHTML = '🔴 DETENIDO';
+        // dibujar mensaje
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const codigo = codigoTextarea.value;
-
-        // Preparar el entorno de la sandbox: pasamos ctx, canvas, width, height,
-        // startLoop, stopLoop y requestAnimationFrame (por si quiere usarlo directamente)
-        // pero limitamos el acceso a window. Al usar new Function, el código solo ve
-        // las variables que le pasamos como argumentos.
-        try {
-            // Crear función con los parámetros permitidos
-            const funcionUsuario = new Function(
-                'ctx', 'canvas', 'width', 'height',
-                'startLoop', 'stopLoop', 'requestAnimationFrame', 'cancelAnimationFrame',
-                codigo
-            );
-
-            // Ejecutar la función en modo estricto implícito (por new Function) y con los objetos permitidos
-            funcionUsuario(
-                ctx, canvas, canvas.width, canvas.height,
-                startLoop, stopLoop,               // funciones control loop
-                requestAnimationFrame, cancelAnimationFrame
-            );
-
-            // Si el código no llamó a startLoop, no pasa nada; se queda detenido
-            // pero se considera una ejecución correcta.
-        } catch (error) {
-            console.error('Error al ejecutar código:', error);
-            alert('Error en el código: ' + error.message);
-            stopEverything();
-        }
-    }
-
-    // === DETENER (Stop) ===
-    function detenerEjecucion() {
-        stopEverything();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // pequeño mensaje de "detenido"
-        ctx.fillStyle = '#666';
+        ctx.fillStyle = '#2c3a4f';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = 'bold 16px "Courier New"';
-        ctx.fillText('DETENIDO', 80, 120);
+        ctx.fillStyle = '#9cb6d9';
+        ctx.fillText('SISTEMA DETENIDO', 50, 120);
     }
 
-    // === EXPORTAR CÓDIGO ===
-    function exportarCodigo() {
-        const codigo = codigoTextarea.value;
-        const blob = new Blob([codigo], { type: 'text/plain' });
+    // ========== PARSEAR Y EJECUTAR COMANDOS ==========
+    // Tokenizador simple que respeta comillas dobles
+    function tokenizarLinea(linea) {
+        const tokens = [];
+        let i = 0;
+        while (i < linea.length) {
+            if (linea[i] === ' ' || linea[i] === '\t') { i++; continue; }
+            if (linea[i] === '"') {
+                // texto entre comillas
+                i++;
+                let start = i;
+                while (i < linea.length && linea[i] !== '"') i++;
+                tokens.push(linea.substring(start, i));
+                i++; // saltar comilla cierre
+            } else {
+                let start = i;
+                while (i < linea.length && linea[i] !== ' ' && linea[i] !== '\t') i++;
+                tokens.push(linea.substring(start, i));
+            }
+        }
+        return tokens;
+    }
+
+    // Ejecuta un comando representado por lista de tokens (sin el comando)
+    function ejecutarComando(comando, tokens) {
+        if (comando === 'create') {
+            // create "id" "forma" "color" "tamaño"
+            if (tokens.length < 4) { console.warn('create necesita 4 argumentos'); return; }
+            const id = tokens[0];
+            const forma = tokens[1].toLowerCase();
+            const color = tokens[2];
+            const tamaño = parseFloat(tokens[3]);
+            if (isNaN(tamaño)) { console.warn('tamaño inválido'); return; }
+            // Si ya existe, lo reemplazamos (nuevas propiedades, posición por defecto 0,0)
+            objetos[id] = {
+                x: 0, y: 0,
+                forma: (forma === 'circulo' || forma === 'rectangulo') ? forma : 'rectangulo',
+                color: color,
+                tamaño: tamaño
+            };
+        }
+        else if (comando === 'move') {
+            // move "id" "dx" "dy"
+            if (tokens.length < 3) return;
+            const id = tokens[0];
+            const dx = parseFloat(tokens[1]);
+            const dy = parseFloat(tokens[2]);
+            if (isNaN(dx) || isNaN(dy)) return;
+            if (objetos[id]) {
+                objetos[id].x += dx;
+                objetos[id].y += dy;
+                // límites suaves (opcional)
+                objetos[id].x = Math.max(0, Math.min(canvas.width, objetos[id].x));
+                objetos[id].y = Math.max(0, Math.min(canvas.height, objetos[id].y));
+            }
+        }
+        else if (comando === 'tp') {
+            // tp "id" "x" "y"
+            if (tokens.length < 3) return;
+            const id = tokens[0];
+            const x = parseFloat(tokens[1]);
+            const y = parseFloat(tokens[2]);
+            if (isNaN(x) || isNaN(y)) return;
+            if (objetos[id]) {
+                objetos[id].x = Math.max(0, Math.min(canvas.width, x));
+                objetos[id].y = Math.max(0, Math.min(canvas.height, y));
+            }
+        }
+        else if (comando === 'input') {
+            // input "tecla" "comando"
+            if (tokens.length < 2) return;
+            const tecla = tokens[0].toLowerCase();
+            const cmd = tokens[1]; // el comando completo (ej: "move cubo 5 0")
+            inputs[tecla] = cmd;
+        }
+        else if (comando === 'fin') {
+            // no hace nada, pero se usa como marcador
+        }
+    }
+
+    // Procesa una línea de script (ignora comentarios ;)
+    function procesarLinea(linea) {
+        linea = linea.trim();
+        if (linea === '' || linea.startsWith(';')) return true; // continuar
+
+        const tokens = tokenizarLinea(linea);
+        if (tokens.length === 0) return true;
+        const cmd = tokens[0].toLowerCase();
+
+        // Si encontramos 'fin', detenemos el procesamiento (retorna false)
+        if (cmd === 'fin') {
+            return false; // stop
+        }
+
+        // Los comandos válidos: create, move, tp, input
+        if (['create', 'move', 'tp', 'input'].includes(cmd)) {
+            ejecutarComando(cmd, tokens.slice(1));
+        } else {
+            console.warn('Comando desconocido:', cmd);
+        }
+        return true; // continuar
+    }
+
+    // Ejecuta todo el script (desde textarea)
+    function ejecutarScript() {
+        // Reiniciar estado
+        objetos = {};
+        inputs = {};
+        detenerLoop(); // cancela loop y limpia canvas
+
+        const texto = codigoEl.value;
+        const lineas = texto.split('\n');
+
+        for (let linea of lineas) {
+            const continuar = procesarLinea(linea);
+            if (!continuar) break; // fin del script
+        }
+
+        // Iniciar loop si hay objetos o aunque no haya (para que se vea el canvas)
+        iniciarLoop();
+    }
+
+    // ========== MANEJADOR DE TECLAS ==========
+    function manejarTecla(e) {
+        if (!ejecutando) return;
+        let tecla = e.key;
+        // Normalizar
+        if (tecla === ' ') tecla = 'space';
+        else if (tecla === 'ArrowUp') tecla = 'up';
+        else if (tecla === 'ArrowDown') tecla = 'down';
+        else if (tecla === 'ArrowLeft') tecla = 'left';
+        else if (tecla === 'ArrowRight') tecla = 'right';
+        else tecla = tecla.toLowerCase(); // 'a', 'b', etc.
+
+        if (inputs[tecla]) {
+            e.preventDefault(); // evitar scroll con flechas
+            const comandoStr = inputs[tecla];
+            // Parsear el comando almacenado y ejecutarlo
+            const tokens = tokenizarLinea(comandoStr);
+            if (tokens.length > 0) {
+                const cmd = tokens[0].toLowerCase();
+                ejecutarComando(cmd, tokens.slice(1));
+            }
+        }
+    }
+
+    window.addEventListener('keydown', manejarTecla);
+
+    // ========== BOTONES ==========
+    btnRun.addEventListener('click', () => {
+        ejecutarScript();
+    });
+
+    btnStop.addEventListener('click', () => {
+        detenerLoop();
+        objetos = {};
+        inputs = {};
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#1f293d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Exportar
+    btnExport.addEventListener('click', () => {
+        const contenido = codigoEl.value;
+        const blob = new Blob([contenido], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'mi_juego_2008.txt';
+        a.download = 'comandos_2008.txt';
         a.click();
         URL.revokeObjectURL(url);
-    }
+    });
 
-    // === IMPORTAR CÓDIGO ===
-    importFile.addEventListener('change', function(e) {
+    // Importar
+    importFile.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(ev) {
-            codigoTextarea.value = ev.target.result;
-            importFile.value = ''; // reset
+        reader.onload = (ev) => {
+            codigoEl.value = ev.target.result;
+            importFile.value = '';
         };
         reader.readAsText(file);
     });
 
-    // === EVENTOS DE BOTONES ===
-    btnRun.addEventListener('click', ejecutarCodigo);
-    btnStop.addEventListener('click', detenerEjecucion);
-    btnExport.addEventListener('click', exportarCodigo);
-
-    // Prevenir arrastrar archivo sobre la ventana (para evitar que se abra)
-    window.addEventListener('dragover', e => e.preventDefault());
-    window.addEventListener('drop', e => e.preventDefault());
-
-    // Ejemplo de código por defecto (se muestra en textarea)
-    // ya está en el HTML
-
-    // Inicializar estado
-    actualizarEstado(false);
+    // ========== EJEMPLO INICIAL ==========
+    // El textarea ya contiene un ejemplo, lo ejecutamos al cargar para que se vea algo
+    window.addEventListener('load', () => {
+        ejecutarScript();
+    });
 })();
 </script>
 </body>
