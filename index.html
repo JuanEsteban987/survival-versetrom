@@ -3,982 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch 1.4 · Guardar/Cargar + Múltiples scripts</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>✨ Creador de juegos simple · Exportar/Importar</title>
     <style>
-        /* (Mismos estilos que antes, solo añado algunos botones nuevos y ajustes) */
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
-
         body {
-            background: #4a4a4a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #1a1f2e;
             min-height: 100vh;
-            margin: 20px;
-        }
-
-        .scratch-window {
-            width: 1024px;
-            background: #ececec;
-            border-radius: 10px 10px 6px 6px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 #ffffff;
-            border: 2px solid #7b7b7b;
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(to bottom, #ffb347, #ff8c00);
-            padding: 8px 15px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid #b95b00;
-            box-shadow: inset 0 1px 0 #ffe393;
-            color: white;
-            text-shadow: 1px 1px 0 #b45f00;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .menu {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .menu span {
-            cursor: default;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.2);
-            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.2);
-        }
-
-        .idioma {
-            background: #e07c00;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            border: 1px solid #b86200;
-            box-shadow: inset 0 1px 0 #ffbc6e;
-            cursor: default;
-        }
-
-        .main {
-            display: flex;
-            padding: 12px;
-            gap: 12px;
-            background: #d4d4d4;
-            border-top: 1px solid #f5f5f5;
-        }
-
-        .palette {
-            width: 250px;
-            background: #e8e8e8;
-            border-radius: 8px;
-            border: 1px solid #9c9c9c;
-            padding: 8px;
-            box-shadow: inset 0 1px 3px #ffffff, inset 0 -1px 3px #b1b1b1, 2px 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cat-title {
-            background: #b1b1b1;
-            color: #2a2a2a;
-            padding: 5px 10px;
-            margin: -8px -8px 8px -8px;
-            border-radius: 8px 8px 0 0;
-            font-weight: bold;
-            font-size: 12px;
-            text-shadow: 0 1px 0 #ddd;
-            border-bottom: 2px solid #7e7e7e;
-            box-shadow: inset 0 1px 0 #f0f0f0;
-            flex-shrink: 0;
-        }
-
-        .category-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-shrink: 0;
-        }
-
-        .cat-btn {
-            padding: 6px 4px;
-            border-radius: 16px;
-            border: 2px solid #6f6f6f;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            color: white;
-            text-shadow: 1px 1px 0 #333;
-            box-shadow: inset 0 1px 0 #f0f0f0, 0 2px 3px #5a5a5a;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .cat-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: inset 0 1px 0 #f0f0f0, 0 4px 5px #3a3a3a;
-        }
-        .cat-btn:active {
-            transform: translateY(2px);
-            box-shadow: inset 0 1px 0 #f0f0f0, 0 1px 2px #3a3a3a;
-        }
-
-        .mov { background: #4a9eff; border-color: #1f5fa8; }
-        .apa { background: #b47cf5; border-color: #6b3fad; }
-        .son { background: #e477d9; border-color: #9d3e94; }
-        .lap { background: #64c87c; border-color: #2a8641; }
-        .ope { background: #c0cf6b; border-color: #798d33; }
-        .sen { background: #d46b5a; border-color: #943e2e; }
-        .con { background: #ffbf5e; border-color: #b1761a; }
-
-        .blocks-container {
-            overflow-y: auto;
-            max-height: 400px;
-            padding-right: 4px;
-        }
-
-        .block {
-            background: #4a9eff;
-            padding: 8px 12px;
-            border-radius: 18px 18px 18px 8px;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #1f5fa8, 0 6px 6px rgba(0,0,0,0.3);
-            width: fit-content;
-            border: 1px solid #9acdff;
-            text-shadow: 1px 1px 0 #2565ae;
-            margin-bottom: 8px;
-            cursor: grab;
-            user-select: none;
-            transition: box-shadow 0.1s, transform 0.1s;
-        }
-        .block:active {
-            cursor: grabbing;
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        .hat-block {
-            background: #4caf50;
-            border-radius: 20px 20px 10px 10px;
-            box-shadow: 0 4px 0 #2d6d30, 0 6px 6px rgba(0,0,0,0.3);
-            border: 1px solid #8bc34a;
-            text-shadow: 1px 1px 0 #1f5420;
-        }
-
-        .block.purple { background: #b47cf5; box-shadow: 0 4px 0 #6b3fad; }
-        .block.green { background: #64c87c; box-shadow: 0 4px 0 #2a8641; }
-        .block.orange { background: #ffbf5e; box-shadow: 0 4px 0 #b1761a; text-shadow: 1px 1px 0 #9b6218; }
-        .block.pink { background: #e477d9; box-shadow: 0 4px 0 #9d3e94; }
-        .block.yellow { background: #c0cf6b; box-shadow: 0 4px 0 #798d33; color: #2d2d2d; text-shadow: 1px 1px 0 #e0e0a0; }
-        .block.red { background: #d46b5a; box-shadow: 0 4px 0 #943e2e; }
-
-        .scripts {
-            flex: 1;
-            background: #f8f8f8;
-            border-radius: 8px;
-            border: 1px solid #8f8f8f;
-            padding: 12px;
-            box-shadow: inset 0 0 0 2px #ffffff, inset 0 0 8px #bdbdbd, 2px 2px 5px rgba(0,0,0,0.2);
-            min-height: 380px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .scripts-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .scripts h3 {
-            font-size: 14px;
-            color: #3f3f3f;
-            border-bottom: 2px solid #ffb347;
-            padding-bottom: 5px;
-            text-transform: uppercase;
             margin: 0;
+            padding: 16px;
         }
-
-        .script-tools {
+        .game-lab {
+            background: #252b3d;
+            border-radius: 32px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid #3e4559;
+        }
+        .toolbar {
             display: flex;
-            gap: 5px;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #1e2333;
+            padding: 14px 18px;
+            border-radius: 60px;
+            border: 1px solid #3f485e;
         }
-
-        .script-tools button {
-            background: #b1b1b1;
-            border: 2px solid #6f6f6f;
-            border-radius: 30px;
-            padding: 4px 8px;
-            font-size: 11px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 0 #3f3f3f;
-            cursor: pointer;
-            box-shadow: inset 0 1px 0 #e0e0e0, 0 2px 3px #5a5a5a;
-            transition: 0.1s;
-        }
-        .script-tools button:hover {
-            transform: translateY(-2px);
-            box-shadow: inset 0 1px 0 #e0e0e0, 0 4px 5px #3a3a3a;
-        }
-        .script-tools button:active {
-            transform: translateY(2px);
-            box-shadow: inset 0 1px 0 #e0e0e0, 0 1px 2px #3a3a3a;
-        }
-
-        .script-area {
+        .palette {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: flex-start;
-            min-height: 280px;
-            background: #f0f0f0;
-            border-radius: 12px;
-            padding: 10px;
-            border: 2px dashed #b0b0b0;
-            transition: background-color 0.2s;
-            overflow-y: auto;
-            max-height: 320px;
-            flex: 1;
-        }
-        .script-area.drag-over {
-            background: #e0f0e0;
-            border-color: #4caf50;
-        }
-
-        .script-block {
-            background: #e0e0e0;
-            border-radius: 12px 12px 12px 6px;
-            border-left: 6px solid #ff8c00;
+            gap: 6px;
+            background: #0f121c;
             padding: 6px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #1f1f1f;
-            box-shadow: 0 2px 0 #a1a1a1, 0 4px 8px rgba(0,0,0,0.1);
-            display: inline-block;
-            cursor: move;
-            user-select: none;
-            transition: box-shadow 0.1s;
-            position: relative;
+            border-radius: 40px;
+            border: 1px solid #414b63;
         }
-        .script-block[draggable="true"]:active {
-            opacity: 0.8;
-        }
-        .script-block.hat { 
-            border-left-color: #4caf50; 
-            background: #edfff0; 
-        }
-        .script-block.script-start {
-            margin-top: 16px;  /* separación entre scripts */
-        }
-        .script-block.script-start:first-child {
-            margin-top: 0;
-        }
-
-        .script-block input {
-            width: 40px;
-            background: white;
-            border: 2px inset #cecece;
+        .tile-option {
+            width: 42px;
+            height: 42px;
             border-radius: 20px;
-            padding: 2px 5px;
-            font-size: 11px;
-            text-align: center;
-        }
-
-        /* Botón de eliminar (aparece en hover) */
-        .script-block .delete-btn {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 18px;
-            height: 18px;
-            background: #cc3333;
-            border-radius: 50%;
-            color: white;
-            font-size: 12px;
+            background: #2a3147;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 2px 0 #7f1f1f;
-            border: 1px solid #ff8888;
-            opacity: 0;
-            transition: opacity 0.1s;
+            border: 2px solid transparent;
+            transition: 0.1s ease;
+            box-shadow: 0 2px 0 #0b0e14;
         }
-        .script-block:hover .delete-btn {
-            opacity: 1;
+        .tile-option.selected {
+            border-color: #ffcc66;
+            transform: scale(1.05);
+            background: #3d4660;
+            box-shadow: 0 0 0 2px #ffb347;
         }
-
-        .stage-area {
-            width: 210px;
+        .tile-option[data-type="0"] { background: #3f4a63; color: #9aa9c7; }  /* vacío */
+        .tile-option[data-type="1"] { background: #5a4c3c; color: #b9a68c; }  /* muro */
+        .tile-option[data-type="2"] { background: #3c5a4b; color: #ffd966; }  /* moneda */
+        .tile-option[data-type="3"] { background: #4a3f5e; color: #a5d8ff; }  /* jugador */
+        button {
+            background: #323b52;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 15px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #57627e;
+            box-shadow: 0 4px 0 #171c29;
+            transition: 0.08s linear;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .mode-indicator {
+            background: #0b0f18;
+            color: #b7c7e9;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border: 1px solid #49536d;
+        }
+        .mode-indicator span {
+            color: #ffdb8e;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 28px;
+            background: #1d2332;
+            box-shadow: inset 0 0 0 2px #3c435b, 0 16px 30px black;
+            cursor: crosshair;
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            image-rendering: pixelated;
+        }
+        .status-bar {
+            margin-top: 16px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            color: #a6b9dc;
+            background: #1b202f;
+            padding: 10px 18px;
+            border-radius: 40px;
+            border: 1px solid #404a61;
+            font-weight: 500;
         }
-
-        .stage {
-            background: #ffffff;
-            border: 3px solid #7a7a7a;
-            border-radius: 10px;
-            padding: 12px 8px 8px 8px;
-            box-shadow: inset 0 0 0 2px #dfdfdf, 3px 3px 8px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .stage-tools {
+        .file-zone {
             display: flex;
             gap: 10px;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .flag, .stop {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 3px 0 #4f4f4f, 0 5px 8px #2f2f2f;
+        }
+        .file-zone label {
+            background: #323b52;
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid #5c6a89;
             cursor: pointer;
-            border: 1px solid white;
-            transition: transform 0.1s, box-shadow 0.1s;
+            font-weight: 600;
+            font-size: 14px;
         }
-        .flag:hover, .stop:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 0 #3a3a3a, 0 6px 10px #1f1f1f;
+        #importFile {
+            display: none;
         }
-        .flag:active, .stop:active {
-            transform: scale(1);
-            box-shadow: 0 2px 0 #3a3a3a, 0 3px 5px #1f1f1f;
-        }
-
-        .flag { background: radial-gradient(circle at 30% 30%, #a0ffa0, #2ecc2e); }
-        .stop { background: radial-gradient(circle at 30% 30%, #ff8888, #cc2e2e); }
-
-        .cat-on-stage {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 10px 0 5px;
-            transition: transform 0.3s ease;
-        }
-
-        .cat-head {
-            position: relative;
-            width: 100px;
-            height: 90px;
-            background: #f9b83c;
-            border-radius: 50% 50% 45% 45%;
-            border: 3px solid #c57e1a;
-            box-shadow: 0 6px 0 #b1610e, inset 0 -4px 0 #dd972b;
-        }
-
-        .ear-left, .ear-right {
-            position: absolute;
-            top: -15px;
-            width: 30px;
-            height: 30px;
-            background: #f9b83c;
-            border: 3px solid #c57e1a;
-            border-radius: 60% 10% 50% 30%;
-        }
-        .ear-left { left: 5px; transform: rotate(-20deg); }
-        .ear-right { right: 5px; transform: rotate(20deg); }
-
-        .eye-left, .eye-right {
-            position: absolute;
-            top: 30px;
-            width: 22px;
-            height: 28px;
-            background: white;
-            border-radius: 50%;
-            border: 2px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .eye-left { left: 15px; }
-        .eye-right { right: 15px; }
-
-        .pupil {
-            width: 10px;
-            height: 16px;
-            background: #0f0f0f;
-            border-radius: 50%;
-        }
-
-        .nose {
-            position: absolute;
-            bottom: 30px;
-            left: 45px;
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 10px solid #ed6a9c;
-            transform: rotate(180deg);
-        }
-
-        .whisker-left, .whisker-right {
-            position: absolute;
-            top: 55px;
-            width: 25px;
-            height: 2px;
-            background: #5f5f5f;
-        }
-        .whisker-left { left: -20px; transform: rotate(5deg); }
-        .whisker-right { right: -20px; transform: rotate(-5deg); }
-
-        .stage-coords {
-            background: #ddd;
-            border-radius: 12px;
-            padding: 4px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid #9c9c9c;
-            margin-top: 5px;
-        }
-
-        .sprites-panel {
-            background: #e0e0e0;
-            border-radius: 8px;
-            border: 2px solid #838383;
-            padding: 8px;
-            box-shadow: inset 0 1px 4px #ffffff, 2px 2px 5px #6f6f6f;
-        }
-
-        .sprites-header {
-            font-size: 12px;
-            font-weight: bold;
-            background: #b5b5b5;
-            margin: -8px -8px 8px -8px;
-            padding: 5px;
-            border-radius: 6px 6px 0 0;
-            border-bottom: 2px solid #6f6f6f;
-            color: #2b2b2b;
-        }
-
-        .sprite-list {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .sprite-icon {
-            width: 55px;
-            height: 55px;
-            background: #79c8ff;
-            border: 3px solid #3a72a5;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 0 #2d5082, 0 6px 8px #3f3f3f;
-            cursor: pointer;
-            font-size: 9px;
-            color: white;
-            text-shadow: 1px 1px 0 #0f2f4f;
-            transition: transform 0.1s;
-        }
-        .sprite-icon:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 0 #2d5082, 0 8px 10px #2f2f2f;
-        }
-        .sprite-icon:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #2d5082, 0 3px 5px #2f2f2f;
-        }
-
-        .sprite-icon.cat {
-            background: #f9b83c;
-            border-color: #b1610e;
-            box-shadow: 0 4px 0 #b1610e;
-        }
-
-        .new-sprite {
-            border: 2px dashed #2f6f2f;
-            background: #cce6cc;
-            color: #1f4f1f;
-            font-size: 24px;
-            justify-content: center;
-            box-shadow: 0 2px 0 #5f8f5f;
-        }
-
-        .noise {
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc0IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wNSIgLz48L3N2Zz4=');
-            background-repeat: repeat;
-            pointer-events: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            opacity: 0.15;
-            mix-blend-mode: multiply;
-            border-radius: 8px;
+        .coin-counter {
+            background: #2a324a;
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid #f5c542;
+            color: #ffe19c;
         }
     </style>
 </head>
 <body>
-    <div class="scratch-window">
-        <div class="header">
-            <div class="logo"><i class="fas fa-cat"></i> Scratch 1.4 · Pro</div>
-            <div class="menu">
-                <span>Archivo</span><span>Editar</span><span>Compartir</span><span>Ayuda</span>
-            </div>
-            <div class="idioma"><i class="fas fa-globe"></i> Español</div>
+<div class="game-lab">
+    <div class="toolbar">
+        <div class="palette">
+            <div class="tile-option selected" data-type="0" title="Vacío (borrar)">⬜</div>
+            <div class="tile-option" data-type="1" title="Muro">🧱</div>
+            <div class="tile-option" data-type="2" title="Moneda">🪙</div>
+            <div class="tile-option" data-type="3" title="Inicio jugador">👤</div>
         </div>
-
-        <div class="main">
-            <!-- PALETA (igual que antes, con muchos bloques) -->
-            <div class="palette">
-                <div class="cat-title"><i class="fas fa-puzzle-piece"></i> Bloques</div>
-                <div class="category-buttons">
-                    <div class="cat-btn mov">Movimiento</div>
-                    <div class="cat-btn apa">Apariencia</div>
-                    <div class="cat-btn son">Sonido</div>
-                    <div class="cat-btn lap">Lápiz</div>
-                    <div class="cat-btn con">Control</div>
-                    <div class="cat-btn sen">Sensores</div>
-                    <div class="cat-btn ope">Operadores</div>
-                    <div class="cat-btn apa">Variables</div>
-                </div>
-                <div class="blocks-container" id="paletteBlocks">
-                    <!-- Movimiento -->
-                    <div class="block" draggable="true">mover 10 pasos</div>
-                    <div class="block" draggable="true">mover 5 pasos</div>
-                    <div class="block" draggable="true">girar ↻ 15 grados</div>
-                    <div class="block" draggable="true">girar ↺ 15 grados</div>
-                    <div class="block" draggable="true">ir a x: 0 y: 0</div>
-                    <div class="block" draggable="true">ir a puntero del ratón</div>
-                    <div class="block" draggable="true">deslizar 1 segs a x: 0 y: 0</div>
-                    <div class="block" draggable="true">apuntar hacia 90</div>
-                    <div class="block" draggable="true">apuntar hacia puntero</div>
-                    <div class="block" draggable="true">sumar a x 10</div>
-                    <div class="block" draggable="true">fijar y a 0</div>
-                    <!-- Apariencia -->
-                    <div class="block purple" draggable="true">decir ¡Hola! por 2 seg</div>
-                    <div class="block purple" draggable="true">decir algo</div>
-                    <div class="block purple" draggable="true">pensar Hmm... por 2 seg</div>
-                    <div class="block purple" draggable="true">pensar interesante</div>
-                    <div class="block purple" draggable="true">mostrar</div>
-                    <div class="block purple" draggable="true">esconder</div>
-                    <div class="block purple" draggable="true">cambiar disfraz a disfraz1</div>
-                    <div class="block purple" draggable="true">siguiente disfraz</div>
-                    <div class="block purple" draggable="true">cambiar fondo a fondo1</div>
-                    <div class="block purple" draggable="true">cambiar efecto color 25</div>
-                    <!-- Sonido -->
-                    <div class="block pink" draggable="true">tocar sonido Maullido</div>
-                    <div class="block pink" draggable="true">tocar sonido Maullido hasta terminar</div>
-                    <div class="block pink" draggable="true">detener todos los sonidos</div>
-                    <div class="block pink" draggable="true">tocar tambor 48 durante 0.2 beats</div>
-                    <div class="block pink" draggable="true">tocar nota 60 durante 0.5 beats</div>
-                    <div class="block pink" draggable="true">cambiar volumen 10</div>
-                    <div class="block pink" draggable="true">fijar volumen 100%</div>
-                    <!-- Lápiz -->
-                    <div class="block green" draggable="true">bajar lápiz</div>
-                    <div class="block green" draggable="true">subir lápiz</div>
-                    <div class="block green" draggable="true">fijar color lápiz a 0</div>
-                    <div class="block green" draggable="true">cambiar color lápiz 10</div>
-                    <div class="block green" draggable="true">fijar tamaño lápiz 1</div>
-                    <!-- Control -->
-                    <div class="block orange" draggable="true">esperar 1 segundos</div>
-                    <div class="block orange" draggable="true">por siempre</div>
-                    <div class="block orange" draggable="true">repetir 10</div>
-                    <div class="block orange" draggable="true">si &lt;toca borde?&gt; entonces</div>
-                    <div class="block orange" draggable="true">si &lt;&gt; entonces / si no</div>
-                    <div class="block orange" draggable="true">esperar hasta que &lt;&gt;</div>
-                    <div class="block orange hat-block" draggable="true">al presionar ⚑</div>
-                    <div class="block orange hat-block" draggable="true">al presionar tecla espacio</div>
-                    <div class="block orange hat-block" draggable="true">al hacer clic en este objeto</div>
-                    <div class="block orange" draggable="true">detener programa</div>
-                    <div class="block orange" draggable="true">detener todos</div>
-                    <!-- Sensores -->
-                    <div class="block red" draggable="true">¿tocando puntero?</div>
-                    <div class="block red" draggable="true">¿tocando color ?</div>
-                    <div class="block red" draggable="true">distancia a puntero</div>
-                    <div class="block red" draggable="true">respuesta</div>
-                    <div class="block red" draggable="true">¿tecla espacio presionada?</div>
-                    <div class="block red" draggable="true">¿ratón presionado?</div>
-                    <!-- Operadores -->
-                    <div class="block yellow" draggable="true">🍊 + 🍎</div>
-                    <div class="block yellow" draggable="true">🍊 - 🍎</div>
-                    <div class="block yellow" draggable="true">🍊 * 🍎</div>
-                    <div class="block yellow" draggable="true">🍊 / 🍎</div>
-                    <div class="block yellow" draggable="true">número al azar entre 1 y 10</div>
-                    <div class="block yellow" draggable="true">🍊 &lt; 🍎</div>
-                    <div class="block yellow" draggable="true">🍊 = 🍎</div>
-                    <div class="block yellow" draggable="true">🍊 &gt; 🍎</div>
-                    <div class="block yellow" draggable="true">¿y &lt;&gt; &lt;&gt;?</div>
-                    <div class="block yellow" draggable="true">¿o &lt;&gt; &lt;&gt;?</div>
-                    <div class="block yellow" draggable="true">unir 🍊 🍎</div>
-                </div>
-            </div>
-
-            <!-- SCRIPTS con herramientas -->
-            <div class="scripts">
-                <div class="scripts-header">
-                    <h3><i class="fas fa-code"></i> Scripts - Gato</h3>
-                    <div class="script-tools">
-                        <button id="newScriptBtn" title="Añadir nuevo script (bloque sombrero)"><i class="fas fa-plus"></i> Script</button>
-                        <button id="clearScriptsBtn" title="Limpiar todos los bloques"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </div>
-                <div class="script-area" id="scriptArea">
-                    <!-- Bloques iniciales -->
-                    <div class="script-block hat script-start" draggable="true"><i class="fas fa-flag" style="color:green;"></i> al presionar ⚑</div>
-                    <div class="script-block" draggable="true" style="margin-left:20px;">mover <input type="text" value="10"> pasos</div>
-                    <div class="script-block" draggable="true" style="margin-left:20px;">si &lt;toca borde?&gt; entonces</div>
-                    <div class="script-block" draggable="true" style="margin-left:40px;">rebotar si toca borde</div>
-                    <div class="script-block hat script-start" draggable="true" style="margin-top:20px;">al presionar tecla espacio</div>
-                    <div class="script-block" draggable="true" style="margin-left:20px;">cambiar disfraz a siguiente</div>
-                </div>
-                <div style="margin-top:10px; font-size:11px; color:#555; text-align:center;">
-                    💡 Clic derecho en un bloque para eliminarlo · Arrastra para reordenar
-                </div>
-            </div>
-
-            <!-- ESCENARIO -->
-            <div class="stage-area">
-                <div class="stage">
-                    <div class="stage-tools">
-                        <div class="flag" id="flagBtn" title="Mover gato aleatoriamente">🏁</div>
-                        <div class="stop" id="stopBtn" title="Centrar gato">🛑</div>
-                    </div>
-                    <div class="cat-on-stage" id="catSprite">
-                        <div class="cat-head">
-                            <div class="ear-left"></div><div class="ear-right"></div>
-                            <div class="eye-left"><div class="pupil"></div></div>
-                            <div class="eye-right"><div class="pupil"></div></div>
-                            <div class="nose"></div>
-                            <div class="whisker-left"></div><div class="whisker-right"></div>
-                        </div>
-                    </div>
-                    <div class="stage-coords" id="coordsDisplay">x: 0, y: 0</div>
-                    <div class="noise"></div>
-                </div>
-
-                <div class="sprites-panel">
-                    <div class="sprites-header"><i class="fas fa-images"></i> Objetos</div>
-                    <div class="sprite-list">
-                        <div class="sprite-icon cat" id="spriteGato">
-                            <i class="fas fa-cat"></i>
-                            <span>Gato</span>
-                        </div>
-                        <div class="sprite-icon">
-                            <i class="fas fa-star"></i>
-                            <span>Estrella</span>
-                        </div>
-                        <div class="sprite-icon new-sprite">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barra inferior con botones de guardar/cargar -->
-        <div style="background:linear-gradient(to bottom, #b8b8b8, #9c9c9c); padding:4px 12px; border-top:2px solid #747474; color:#2a2a2a; font-size:12px; display:flex; gap:15px; align-items:center;">
-            <span><i class="far fa-clock"></i> 2008 Retro</span>
-            <button id="saveBtn" style="background:#4a9eff; border:none; border-radius:30px; padding:3px 12px; color:white; font-weight:bold; box-shadow:0 2px 0 #1f5fa8; cursor:pointer;"><i class="fas fa-download"></i> Guardar</button>
-            <button id="loadBtn" style="background:#64c87c; border:none; border-radius:30px; padding:3px 12px; color:white; font-weight:bold; box-shadow:0 2px 0 #2a8641; cursor:pointer;"><i class="fas fa-upload"></i> Cargar</button>
-            <input type="file" id="fileInput" accept=".scratch,application/json" style="display:none;">
-            <span style="margin-left:auto;"><i class="fas fa-save"></i> Proyecto en memoria</span>
-        </div>
+        <button id="modeToggle">🎮 Modo: <span id="modeText">EDICIÓN</span></button>
+        <button id="clearBtn">🗑️ Limpiar todo</button>
+        <div class="mode-indicator">⚡ Instrucciones <span style="color:#a5d8ff;">click · arrastrar · clic derecho borra</span></div>
     </div>
 
-    <script>
-        (function() {
-            // ---- MOVIMIENTO DEL GATO ----
-            const cat = document.getElementById('catSprite');
-            const coords = document.getElementById('coordsDisplay');
-            const flagBtn = document.getElementById('flagBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const spriteGato = document.getElementById('spriteGato');
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
 
-            function updateCoords(x, y) {
-                coords.textContent = `x: ${x}, y: ${y}`;
-            }
+    <div class="status-bar">
+        <div class="coin-counter">🪙 <span id="coinCount">0</span></div>
+        <div class="file-zone">
+            <button id="exportBtn">📤 Exportar (.json)</button>
+            <label for="importFile">📂 Importar</label>
+            <input type="file" id="importFile" accept=".json,application/json">
+        </div>
+    </div>
+</div>
 
-            flagBtn.addEventListener('click', () => {
-                const maxX = 70;
-                const maxY = 40;
-                const randomX = Math.floor(Math.random() * (maxX * 2) - maxX);
-                const randomY = Math.floor(Math.random() * (maxY * 2) - maxY);
-                cat.style.transform = `translate(${randomX}px, ${randomY}px)`;
-                updateCoords(randomX, randomY);
-            });
+<script>
+(function(){
+    // ---------- configuración ----------
+    const COLS = 20;
+    const ROWS = 15;
+    const TILE_SIZE = 32; // 20*32=640, 15*32=480
 
-            stopBtn.addEventListener('click', () => {
-                cat.style.transform = `translate(0px, 0px)`;
-                updateCoords(0, 0);
-            });
+    const TILE_EMPTY = 0;
+    const TILE_WALL = 1;
+    const TILE_COIN = 2;
+    const TILE_PLAYER_START = 3; // solo en editor
 
-            spriteGato.addEventListener('click', () => {
-                cat.style.transform = `translate(0px, 0px)`;
-                updateCoords(0, 0);
-            });
+    // grid: 2D array (ROWS x COLS)
+    let grid = Array(ROWS).fill().map(() => Array(COLS).fill(TILE_EMPTY));
 
-            // ---- REFERENCIAS ----
-            const paletteBlocks = document.querySelectorAll('#paletteBlocks .block');
-            const scriptArea = document.getElementById('scriptArea');
-            const newScriptBtn = document.getElementById('newScriptBtn');
-            const clearScriptsBtn = document.getElementById('clearScriptsBtn');
-            const saveBtn = document.getElementById('saveBtn');
-            const loadBtn = document.getElementById('loadBtn');
-            const fileInput = document.getElementById('fileInput');
+    // estado del editor/juego
+    let mode = 'edit'; // 'edit' o 'play'
+    let selectedTile = TILE_EMPTY; // por defecto borrar
 
-            // ---- FUNCIÓN PARA AÑADIR BOTÓN DE ELIMINAR A UN BLOQUE ----
-            function addDeleteButton(block) {
-                if (block.querySelector('.delete-btn')) return;
-                const delBtn = document.createElement('span');
-                delBtn.className = 'delete-btn';
-                delBtn.innerHTML = '✕';
-                delBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    block.remove();
-                });
-                block.appendChild(delBtn);
-            }
+    // datos del juego en modo play
+    let playerPos = { x: 1, y: 1 }; // temporal (se asigna al iniciar play)
+    let coinsRemaining = 0;
+    let winFlag = false;
 
-            // ---- AÑADIR BOTONES DE ELIMINAR A LOS BLOQUES EXISTENTES ----
-            document.querySelectorAll('.script-block').forEach(addDeleteButton);
+    // referencia canvas
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-            // ---- HACER ARRASTRABLES LOS BLOQUES DE LA PALETA ----
-            paletteBlocks.forEach(block => {
-                block.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', block.outerHTML);
-                    e.dataTransfer.effectAllowed = 'copy';
-                    block.style.opacity = '0.5';
-                });
-                block.addEventListener('dragend', e => {
-                    block.style.opacity = '1';
-                });
-            });
+    // elementos UI
+    const modeText = document.getElementById('modeText');
+    const modeToggle = document.getElementById('modeToggle');
+    const coinSpan = document.getElementById('coinCount');
+    const clearBtn = document.getElementById('clearBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+    const tileOptions = document.querySelectorAll('.tile-option');
 
-            // ---- REORDENAR EN SCRIPT AREA (DRAG & DROP INTERNO) ----
-            scriptArea.addEventListener('dragstart', e => {
-                if (e.target.classList.contains('script-block')) {
-                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.target.style.opacity = '0.5';
-                }
-            });
+    // ---------- dibujado común ----------
+    function drawGrid() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            scriptArea.addEventListener('dragend', e => {
-                if (e.target.classList.contains('script-block')) {
-                    e.target.style.opacity = '1';
-                }
-            });
+        // dibujar celdas
+        for (let row = 0; row < ROWS; row++) {
+            for (let col = 0; col < COLS; col++) {
+                let x = col * TILE_SIZE;
+                let y = row * TILE_SIZE;
+                let tile = grid[row][col];
 
-            scriptArea.addEventListener('dragover', e => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'copy';
-                scriptArea.classList.add('drag-over');
-            });
-
-            scriptArea.addEventListener('dragleave', () => {
-                scriptArea.classList.remove('drag-over');
-            });
-
-            scriptArea.addEventListener('drop', e => {
-                e.preventDefault();
-                scriptArea.classList.remove('drag-over');
-                const data = e.dataTransfer.getData('text/plain');
-                if (!data) return;
-
-                const temp = document.createElement('div');
-                temp.innerHTML = data;
-                let newBlock = temp.firstChild;
-
-                // Si viene de la paleta (clase .block), convertir a .script-block
-                if (newBlock.classList.contains('block')) {
-                    newBlock.classList.remove('block');
-                    newBlock.classList.add('script-block');
-                    // Conservar color de fondo
-                    if (!newBlock.style.background) {
-                        if (newBlock.classList.contains('hat-block')) newBlock.style.background = '#4caf50';
-                        else if (newBlock.classList.contains('purple')) newBlock.style.background = '#b47cf5';
-                        else if (newBlock.classList.contains('green')) newBlock.style.background = '#64c87c';
-                        else if (newBlock.classList.contains('orange')) newBlock.style.background = '#ffbf5e';
-                        else if (newBlock.classList.contains('pink')) newBlock.style.background = '#e477d9';
-                        else if (newBlock.classList.contains('yellow')) newBlock.style.background = '#c0cf6b';
-                        else if (newBlock.classList.contains('red')) newBlock.style.background = '#d46b5a';
-                        else newBlock.style.background = '#4a9eff';
-                    }
-                    newBlock.classList.remove('hat-block', 'purple', 'green', 'orange', 'pink', 'yellow', 'red');
-                    // Ajustar borde izquierdo
-                    if (newBlock.style.background === 'rgb(76, 175, 80)' || newBlock.textContent.includes('bandera') || newBlock.textContent.includes('tecla') || newBlock.textContent.includes('clic')) {
-                        newBlock.style.borderLeft = '6px solid #4caf50';
-                        newBlock.classList.add('hat');
-                    } else {
-                        newBlock.style.borderLeft = '6px solid #ff8c00';
-                    }
-                    newBlock.setAttribute('draggable', 'true');
-                    addDeleteButton(newBlock);
+                // fondo según tile (en modo play, el tile PLAYER_START no se muestra porque se reemplaza por jugador)
+                if (mode === 'play' && tile === TILE_PLAYER_START) {
+                    tile = TILE_EMPTY; // no dibujar marca de inicio
                 }
 
-                // Si es un movimiento (desde el mismo scriptArea), eliminar el original
-                if (e.dataTransfer.effectAllowed === 'move') {
-                    let original = null;
-                    document.querySelectorAll('.script-block').forEach(el => {
-                        if (el.style.opacity === '0.5') original = el;
-                    });
-                    if (original && original !== newBlock) {
-                        original.remove();
-                    }
-                }
-
-                // Añadir clase script-start si es un bloque hat (para separar visualmente)
-                if (newBlock.classList.contains('hat') || newBlock.style.borderLeftColor === 'rgb(76, 175, 80)') {
-                    newBlock.classList.add('script-start');
+                // color de fondo base
+                if (tile === TILE_WALL) {
+                    ctx.fillStyle = '#6f5e4f';
+                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
+                    ctx.fillStyle = '#8f7a66';
+                    ctx.fillRect(x+2, y+2, TILE_SIZE-5, TILE_SIZE-5);
+                } else if (tile === TILE_COIN) {
+                    ctx.fillStyle = '#4c6b5f';
+                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
+                    ctx.fillStyle = '#f5e56b';
+                    ctx.beginPath();
+                    ctx.arc(x+16, y+16, 10, 0, 2*Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#c9a03d';
+                    ctx.beginPath();
+                    ctx.arc(x+16, y+16, 4, 0, 2*Math.PI);
+                    ctx.fill();
+                } else if (tile === TILE_PLAYER_START && mode === 'edit') {
+                    ctx.fillStyle = '#4a3f70';
+                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
+                    ctx.font = 'bold 22px "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#b4d0ff';
+                    ctx.fillText('👤', x+6, y+26);
+                } else if (tile === TILE_EMPTY) {
+                    ctx.fillStyle = '#2c3349';
+                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
+                    // cuadrícula tenue
+                    ctx.strokeStyle = '#404a62';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
                 } else {
-                    // Si no es hat, pero se coloca solo (sin hat antes), podría ser inicio de script? No, lo dejamos sin clase.
+                    // fallback (vacío)
+                    ctx.fillStyle = '#2c3349';
+                    ctx.fillRect(x, y, TILE_SIZE-1, TILE_SIZE-1);
                 }
 
-                // Insertar al final del área (podríamos insertar cerca del ratón, pero es complejo)
-                scriptArea.appendChild(newBlock);
+                // borde de cuadrícula (siempre)
+                ctx.strokeStyle = '#5f6b89';
+                ctx.lineWidth = 0.8;
+                ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+            }
+        }
 
-                // Añadir eventos dragstart/dragend
-                newBlock.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.target.style.opacity = '0.5';
-                });
-                newBlock.addEventListener('dragend', e => {
-                    e.target.style.opacity = '1';
-                });
-            });
+        // dibujar jugador si estamos en modo play
+        if (mode === 'play' && !winFlag) {
+            const { x, y } = playerPos;
+            ctx.fillStyle = '#7aa5ff';
+            ctx.beginPath();
+            ctx.arc(x * TILE_SIZE + 16, y * TILE_SIZE + 16, 14, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('😊', x * TILE_SIZE + 8, y * TILE_SIZE + 24);
+        } else if (mode === 'play' && winFlag) {
+            // mensaje victoria
+            ctx.font = 'bold 28px "Segoe UI"';
+            ctx.fillStyle = '#ffeaa0';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 10;
+            ctx.fillText('✨ VICTORIA ✨', 140, 240);
+            ctx.shadowBlur = 0;
+        }
+    }
 
-            // ---- ELIMINAR CON CLIC DERECHO ----
-            scriptArea.addEventListener('contextmenu', e => {
-                if (e.target.classList.contains('script-block') || e.target.closest('.script-block')) {
-                    e.preventDefault();
-                    const block = e.target.closest('.script-block');
-                    block.remove();
-                }
-            });
+    // ---------- lógica editor ----------
+    function handleCanvasClick(e) {
+        if (mode !== 'edit') return;
 
-            // ---- NUEVO SCRIPT (AÑADIR BLOQUE HAT POR DEFECTO) ----
-            newScriptBtn.addEventListener('click', () => {
-                const hatBlock = document.createElement('div');
-                hatBlock.className = 'script-block hat script-start';
-                hatBlock.setAttribute('draggable', 'true');
-                hatBlock.style.background = '#4caf50';
-                hatBlock.style.borderLeft = '6px solid #4caf50';
-                hatBlock.innerHTML = 'al presionar ⚑ <i class="fas fa-flag" style="color:green;"></i>';
-                addDeleteButton(hatBlock);
-                scriptArea.appendChild(hatBlock);
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
-                // Añadir eventos drag
-                hatBlock.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', e.target.outerHTML);
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.target.style.opacity = '0.5';
-                });
-                hatBlock.addEventListener('dragend', e => {
-                    e.target.style.opacity = '1';
-                });
-            });
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
 
-            // ---- LIMPIAR TODOS LOS BLOQUES ----
-            clearScriptsBtn.addEventListener('click', () => {
-                if (confirm('¿Eliminar todos los bloques del área de scripts?')) {
-                    scriptArea.innerHTML = '';
-                }
-            });
+        const col = Math.floor(mouseX / TILE_SIZE);
+        const row = Math.floor(mouseY / TILE_SIZE);
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return;
 
-            // ---- GUARDAR PROYECTO (exportar) ----
-            saveBtn.addEventListener('click', () => {
-                const blocks = [];
-                document.querySelectorAll('#scriptArea .script-block').forEach(block => {
-                    // Guardamos el outerHTML para poder restaurar exactamente
-                    blocks.push(block.outerHTML);
-                });
-                const project = {
-                    version: '1.0',
-                    blocks: blocks
-                };
-                const json = JSON.stringify(project, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'mi_proyecto.scratch';
-                a.click();
-                URL.revokeObjectURL(url);
-            });
+        e.preventDefault(); // evitar menú contextual en clic derecho
 
-            // ---- CARGAR PROYECTO (importar) ----
-            loadBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const project = JSON.parse(ev.target.result);
-                        if (project.version && Array.isArray(project.blocks)) {
-                            scriptArea.innerHTML = '';
-                            project.blocks.forEach(html => {
-                                const temp = document.createElement('div');
-                                temp.innerHTML = html;
-                                const block = temp.firstChild;
-                                if (block) {
-                                    // Asegurar que sea arrastrable y tenga botón eliminar
-                                    block.setAttribute('draggable', 'true');
-                                    addDeleteButton(block);
-                                    block.addEventListener('dragstart', e => {
-                                        e.dataTransfer.setData('text/plain', e.target.outerHTML);
-                                        e.dataTransfer.effectAllowed = 'move';
-                                        e.target.style.opacity = '0.5';
-                                    });
-                                    block.addEventListener('dragend', e => {
-                                        e.target.style.opacity = '1';
-                                    });
-                                    scriptArea.appendChild(block);
-                                }
-                            });
-                        } else {
-                            alert('El archivo no tiene un formato válido.');
+        if (e.button === 2) { // clic derecho = borrar (poner vacío)
+            grid[row][col] = TILE_EMPTY;
+        } else { // izquierdo
+            if (selectedTile === TILE_PLAYER_START) {
+                // solo puede haber un inicio de jugador: buscar y eliminar otro
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (grid[r][c] === TILE_PLAYER_START) {
+                            grid[r][c] = TILE_EMPTY;
                         }
-                    } catch (err) {
-                        alert('Error al cargar el archivo: ' + err);
                     }
-                    fileInput.value = ''; // reset
-                };
-                reader.readAsText(file);
-            });
+                }
+            }
+            grid[row][col] = selectedTile;
+        }
+        drawGrid();
+    }
 
-            // ---- PREVENIR DRAG & DROP POR DEFECTO EN TODA LA PÁGINA ----
-            document.addEventListener('dragover', e => e.preventDefault());
-            document.addEventListener('drop', e => e.preventDefault());
-        })();
-    </script>
+    // arrastrar para pintar rápido
+    function handleDrag(e) {
+        if (mode !== 'edit') return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        const col = Math.floor(mouseX / TILE_SIZE);
+        const row = Math.floor(mouseY / TILE_SIZE);
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return;
+
+        // Si se arrastra con botón izquierdo (botón principal), pintamos tile seleccionado
+        // Nota: e.buttons === 1 significa botón izquierdo presionado
+        if (e.buttons === 1) {
+            if (selectedTile === TILE_PLAYER_START) {
+                // al arrastrar con player start, queremos moverlo de lugar?
+                // mejor: arrastrar solo pinta si es tile normal, pero si es player start también pintamos (pero antes borramos el anterior)
+                // para simplicidad: en arrastre con player start, eliminamos el anterior y ponemos el nuevo
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (grid[r][c] === TILE_PLAYER_START) {
+                            grid[r][c] = TILE_EMPTY;
+                        }
+                    }
+                }
+                grid[row][col] = TILE_PLAYER_START;
+            } else {
+                grid[row][col] = selectedTile;
+            }
+            drawGrid();
+        }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        handleCanvasClick(e);
+    });
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    canvas.addEventListener('mousemove', handleDrag);
+    canvas.addEventListener('mouseenter', () => {}); // evitar errores
+
+    // ----- cambiar tile seleccionado -----
+    tileOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            tileOptions.forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectedTile = parseInt(opt.dataset.type, 10);
+        });
+    });
+
+    // ----- cambiar modo edicion / play -----
+    function switchMode() {
+        if (mode === 'edit') {
+            // entrar a play: buscar inicio jugador, si no hay, usar default (0,0) o avisar
+            let startFound = false;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (grid[r][c] === TILE_PLAYER_START) {
+                        playerPos = { x: c, y: r };
+                        startFound = true;
+                        break;
+                    }
+                }
+            }
+            if (!startFound) {
+                alert("Coloca un punto de inicio 👤 antes de jugar.");
+                return; // no cambia modo
+            }
+
+            // contar monedas y guardarlas
+            coinsRemaining = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (grid[r][c] === TILE_COIN) coinsRemaining++;
+                }
+            }
+            coinSpan.innerText = coinsRemaining;
+            winFlag = false;
+            mode = 'play';
+            modeText.innerText = 'JUEGO';
+        } else {
+            // volver a edición (conservando el grid tal cual, pero las monedas reaparecen porque no se modificó el grid)
+            // restauramos todas las celdas que pudieron haber sido cambiadas (monedas) ya que grid no se alteró en play.
+            // El único cambio durante play es que las monedas se "eliminan" del grid? en nuestro juego, al recoger moneda se pone TILE_EMPTY, así que sí modificamos grid.
+            // por lo tanto al volver a edición, las monedas recogidas se quedan como vacío. Eso es correcto si queremos reflejar el estado actual.
+            // pero también podemos decidir si queremos resetear al estado guardado antes del play, pero lo dejamos así.
+            mode = 'edit';
+            modeText.innerText = 'EDICIÓN';
+            winFlag = false;
+            // actualizar contador de monedas (solo para edición no se usa)
+        }
+        drawGrid();
+    }
+
+    modeToggle.addEventListener('click', switchMode);
+
+    // ----- teclado para mover jugador (modo play) -----
+    window.addEventListener('keydown', (e) => {
+        if (mode !== 'play' || winFlag) return;
+
+        const key = e.key;
+        let dx = 0, dy = 0;
+        if (key === 'ArrowUp') dy = -1;
+        else if (key === 'ArrowDown') dy = 1;
+        else if (key === 'ArrowLeft') dx = -1;
+        else if (key === 'ArrowRight') dx = 1;
+        else return;
+
+        e.preventDefault();
+
+        const newX = playerPos.x + dx;
+        const newY = playerPos.y + dy;
+
+        if (newX < 0 || newX >= COLS || newY < 0 || newY >= ROWS) return; // límites
+
+        const targetTile = grid[newY][newX];
+
+        // colisión con muros
+        if (targetTile === TILE_WALL) return;
+
+        // mover jugador
+        playerPos.x = newX;
+        playerPos.y = newY;
+
+        // recoger moneda
+        if (targetTile === TILE_COIN) {
+            grid[newY][newX] = TILE_EMPTY;
+            coinsRemaining--;
+            coinSpan.innerText = coinsRemaining;
+        }
+
+        // comprobar victoria
+        if (coinsRemaining === 0) {
+            winFlag = true;
+        }
+
+        drawGrid();
+    });
+
+    // ----- limpiar todo -----
+    clearBtn.addEventListener('click', () => {
+        if (mode === 'play') {
+            // si estamos en play, volver a edit automáticamente?
+            mode = 'edit';
+            modeText.innerText = 'EDICIÓN';
+        }
+        grid = Array(ROWS).fill().map(() => Array(COLS).fill(TILE_EMPTY));
+        playerPos = { x: 0, y: 0 };
+        coinsRemaining = 0;
+        winFlag = false;
+        coinSpan.innerText = '0';
+        drawGrid();
+    });
+
+    // ----- exportar a JSON -----
+    function exportLevel() {
+        const levelData = {
+            grid: grid,
+            // también podemos guardar versión, etc.
+        };
+        const jsonStr = JSON.stringify(levelData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nivel_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    exportBtn.addEventListener('click', exportLevel);
+
+    // ----- importar desde JSON -----
+    importFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                if (parsed.grid && Array.isArray(parsed.grid) && parsed.grid.length === ROWS) {
+                    // validación simple
+                    grid = parsed.grid;
+                    // asegurar que todas las filas tengan COLS
+                    for (let r = 0; r < ROWS; r++) {
+                        if (!grid[r] || grid[r].length !== COLS) {
+                            throw new Error('Dimensiones incorrectas');
+                        }
+                    }
+                } else {
+                    throw new Error('Formato inválido');
+                }
+
+                // si estábamos en modo play, volver a edición
+                if (mode === 'play') {
+                    mode = 'edit';
+                    modeText.innerText = 'EDICIÓN';
+                }
+                winFlag = false;
+                // recalcular monedas (solo para UI)
+                coinsRemaining = 0;
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (grid[r][c] === TILE_COIN) coinsRemaining++;
+                    }
+                }
+                coinSpan.innerText = coinsRemaining;
+                drawGrid();
+            } catch (err) {
+                alert('Error al importar: ' + err.message);
+            }
+            importFile.value = ''; // reset
+        };
+        reader.readAsText(file);
+    });
+
+    // ----- inicializar nivel por defecto (algo bonito) -----
+    function createDemoLevel() {
+        // paredes alrededor
+        for (let c = 0; c < COLS; c++) {
+            grid[0][c] = TILE_WALL;
+            grid[ROWS-1][c] = TILE_WALL;
+        }
+        for (let r = 0; r < ROWS; r++) {
+            grid[r][0] = TILE_WALL;
+            grid[r][COLS-1] = TILE_WALL;
+        }
+        // interior
+        for (let r = 2; r < ROWS-2; r+=2) {
+            for (let c = 2; c < COLS-2; c+=3) {
+                grid[r][c] = TILE_WALL;
+            }
+        }
+        // monedas
+        grid[3][5] = TILE_COIN;
+        grid[4][10] = TILE_COIN;
+        grid[7][15] = TILE_COIN;
+        grid[9][7] = TILE_COIN;
+        grid[11][12] = TILE_COIN;
+        grid[12][5] = TILE_COIN;
+        // inicio jugador
+        grid[1][1] = TILE_PLAYER_START;
+        coinsRemaining = 6;
+        coinSpan.innerText = '6';
+    }
+
+    createDemoLevel();
+    drawGrid();
+})();
+</script>
 </body>
 </html>
