@@ -2,662 +2,616 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>GMOD 2D /// ZOMBIE PANIC 2008</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Creador de Juegos - VS Code Style</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
+
         body {
-            background: #000000;
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Impact', 'Arial Black', 'Arial Narrow', sans-serif;
+            padding: 20px;
         }
+
         .game-container {
-            background: #330000;
-            background-image: radial-gradient(circle at 50% 30%, #660000, #1a0000);
-            border-radius: 0;
-            padding: 25px 25px 30px 25px;
-            box-shadow: 0 0 0 4px #ff9900, 0 0 0 8px #993300, 0 20px 30px black;
-            border: 3px outset #ff6600;
+            max-width: 1200px;
+            width: 100%;
+            background: #252526;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+            border: 1px solid #3e3e42;
         }
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 0;
-            background: #87a5b9;
-            background-image: linear-gradient(145deg, #a1c4db 0%, #6b8fa0 100%);
-            box-shadow: inset 0 0 0 2px #fff9e6, inset 0 0 0 5px #6f5230, 0 10px 20px black;
+
+        /* VS Code Title Bar */
+        .title-bar {
+            background: #3c3c3c;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #0e0e0e;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27c93f; }
+
+        .title-text {
+            color: #cccccc;
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 600px;
+        }
+
+        /* Sidebar - Game Creator Tools */
+        .sidebar {
+            background: #1e1e1e;
+            border-right: 1px solid #3e3e42;
+            padding: 20px;
+        }
+
+        .sidebar-title {
+            color: #cccccc;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .tool-section {
+            margin-bottom: 25px;
+        }
+
+        .tool-section h3 {
+            color: #cccccc;
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+
+        .game-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #3c3c3c;
+            border: 1px solid #0e0e0e;
+            color: #cccccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .game-input:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+
+        .game-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0e639c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .game-button:hover {
+            background: #1177bb;
+        }
+
+        .game-button.secondary {
+            background: #3c3c3c;
+            color: #cccccc;
+            border: 1px solid #0e0e0e;
+        }
+
+        .game-button.secondary:hover {
+            background: #4a4a4a;
+        }
+
+        .color-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .color-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: white;
+        }
+
+        /* Game Canvas Area */
+        .game-area {
+            background: #1e1e1e;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #gameCanvas {
+            background: #2d2d2d;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 1px solid #3e3e42;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
             cursor: crosshair;
-            image-rendering: pixelated;
-            border: 4px ridge #ffaa33;
         }
-        .panel {
+
+        .game-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 15px 25px;
+            background: #2d2d2d;
+            border-radius: 6px;
+            border: 1px solid #3e3e42;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #969696;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: #007acc;
+            padding: 6px 16px;
+            color: white;
+            font-size: 12px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-top: 25px;
-            color: #ffffaa;
-            font-weight: 400;
-            text-shadow: 3px 3px 0 #7f3300, 5px 5px 0 #3f1a00;
-            font-size: 22px;
-            letter-spacing: 2px;
         }
-        .stats {
+
+        .status-item {
             display: flex;
-            gap: 45px;
-            background: #2b1e0e;
-            padding: 12px 35px;
-            border-radius: 0;
-            border: 4px ridge #ffb347;
-            box-shadow: inset 0 0 0 2px #cc8400, 0 5px 0 #4a2a00;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: #ffff66;
+            align-items: center;
+            gap: 8px;
         }
-        .stats span {
-            color: #ff8888;
-            font-size: 2rem;
-            margin-left: 12px;
-            text-shadow: 2px 2px 0 #8b0000;
-            background: #1f1206;
-            padding: 0 10px;
-            border: 2px inset #a0522d;
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        button {
-            background: #d45500;
-            background: linear-gradient(180deg, #ff9900 0%, #b85100 100%);
-            border: none;
+
+        .modal-content {
+            background: #252526;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #3e3e42;
+        }
+
+        .modal h2 {
             color: #ffffff;
-            font-weight: bold;
-            font-size: 1.5rem;
-            padding: 12px 35px;
-            border-radius: 0;
-            cursor: pointer;
-            box-shadow: 0 7px 0 #4f2b00, 0 10px 15px black;
-            transition: 0.05s linear;
-            border: 3px outset #ffcc66;
-            font-family: Impact, fantasy;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 0 #7f3300;
-            letter-spacing: 3px;
+            margin-bottom: 15px;
         }
-        button:hover {
-            background: #ffaa33;
-            background: linear-gradient(180deg, #ffbb44 0%, #dd7700 100%);
-            box-shadow: 0 4px 0 #4f2b00, 0 8px 15px black;
-            transform: translateY(3px);
-            border: 3px outset #ffe28a;
+
+        .modal p {
+            color: #cccccc;
+            margin-bottom: 20px;
         }
-        button:active {
-            transform: translateY(7px);
-            box-shadow: 0 1px 0 #4f2b00, 0 8px 15px black;
-        }
-        .info {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-        .key-hint {
-            background: #111111;
-            background: linear-gradient(135deg, #2d2d2d 0%, #0a0a0a 100%);
-            padding: 15px 25px;
-            border-radius: 0;
-            font-size: 1.1rem;
-            border: 4px outset #aaaaaa;
-            color: #44ff44;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 8px #00ff00;
-            box-shadow: 0 0 0 2px #660000, 0 8px 0 #1f1f1f;
-        }
-        .key-hint kbd {
-            background: #000000;
-            color: #ffff00;
-            padding: 6px 12px;
-            border-radius: 0;
-            font-weight: 900;
-            margin: 0 6px;
-            border: 3px inset #cccccc;
-            font-size: 1.3rem;
-            box-shadow: 0 3px 0 #666;
-            font-family: 'Courier New', monospace;
-        }
-        /* glow retro */
-        .glow {
-            font-size: 28px;
-            color: #ffdd44;
-            text-shadow: 0 0 10px #ff9900, 0 0 20px #ff5500;
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="glow" style="text-align: center; margin-bottom: 15px;">⚡ GMOD 2D · ZOMBIE PANIC 2008 ⚡</div>
-    <canvas id="gameCanvas" width="1000" height="600"></canvas>
-
-    <div class="panel">
-        <div class="stats">
-            <div>❤️ <span id="healthDisplay">100</span></div>
-            <div>💀 <span id="scoreDisplay">0</span></div>
-        </div>
-        <div class="info">
-            <div class="key-hint">
-                <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> MOVE • 
-                <kbd>E</kbd> BOX • <kbd>Z</kbd> ZOMBIE
+    <div class="game-container">
+        <!-- VS Code Title Bar -->
+        <div class="title-bar">
+            <div class="window-controls">
+                <div class="window-btn close"></div>
+                <div class="window-btn minimize"></div>
+                <div class="window-btn maximize"></div>
             </div>
-            <button id="spawnBoxBtn">➕ SPAWN BOX</button>
+            <span class="title-text">🎮 Game Creator - Visual Studio Code</span>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar Tools -->
+            <div class="sidebar">
+                <div class="sidebar-title">EXPLORER: GAME CREATOR</div>
+                
+                <div class="tool-section">
+                    <h3>🎯 Game Settings</h3>
+                    <input type="text" class="game-input" id="gameTitle" placeholder="Game Title" value="Mi Aventura">
+                    <input type="number" class="game-input" id="targetScore" placeholder="Target Score" value="10" min="1" max="50">
+                </div>
+
+                <div class="tool-section">
+                    <h3>🎨 Player Color</h3>
+                    <div class="color-picker" id="colorPicker">
+                        <div class="color-option selected" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                        <div class="color-option" style="background: #4ecdc4" data-color="#4ecdc4"></div>
+                        <div class="color-option" style="background: #45b7d1" data-color="#45b7d1"></div>
+                        <div class="color-option" style="background: #96ceb4" data-color="#96ceb4"></div>
+                        <div class="color-option" style="background: #ffeead" data-color="#ffeead"></div>
+                        <div class="color-option" style="background: #ffcc5c" data-color="#ffcc5c"></div>
+                        <div class="color-option" style="background: #ff6f69" data-color="#ff6f69"></div>
+                        <div class="color-option" style="background: #88d8b0" data-color="#88d8b0"></div>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>⚡ Power-Ups</h3>
+                    <button class="game-button secondary" onclick="addPowerUp()">➕ Add Power-Up</button>
+                    <button class="game-button secondary" onclick="removePowerUp()">➖ Remove Power-Up</button>
+                </div>
+
+                <div class="tool-section">
+                    <h3>🕹️ Controls</h3>
+                    <button class="game-button" onclick="startGame()">▶ Start Game</button>
+                    <button class="game-button secondary" onclick="resetGame()">⟲ Reset Game</button>
+                </div>
+
+                <div class="tool-section">
+                    <h3>📊 Active Power-Ups</h3>
+                    <div style="color: #cccccc; font-size: 13px; text-align: center;" id="powerUpCount">
+                        0 Active
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Area -->
+            <div class="game-area">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Target</div>
+                        <div class="stat-value" id="target">10</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="timer">0s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span>✨ Game Creator v1.0</span>
+            </div>
+            <div class="status-item">
+                <span>⚡ Click on squares to score!</span>
+            </div>
+            <div class="status-item">
+                <span id="gameStatus">Ready to play</span>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    (function() {
-        // --- CONFIG VINTAGE 2008 ---
+    <!-- Victory Modal -->
+    <div class="modal" id="victoryModal">
+        <div class="modal-content">
+            <h2>🏆 Victory!</h2>
+            <p id="victoryMessage">You reached the target score!</p>
+            <button class="game-button" onclick="closeVictoryModal()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
-        const healthSpan = document.getElementById('healthDisplay');
-        const scoreSpan = document.getElementById('scoreDisplay');
-
-        // --- CONSTANTES ---
-        const PLAYER_RADIUS = 18;
-        const ENEMY_RADIUS = 16;
-        const BULLET_RADIUS = 7;
-        const BULLET_SPEED = 8;
-        const PLAYER_SPEED = 3.8;
-        const ENEMY_SPEED = 1.3;
-        const SHOT_COOLDOWN = 10;
-        const FRICTION = 0.98;
-        const BOX_WIDTH = 48;
-        const BOX_HEIGHT = 48;
-
-        // --- VARIABLES ---
-        let player = {
-            x: 400, y: 300,
-            vx: 0, vy: 0,
-            radius: PLAYER_RADIUS,
-            health: 100,
-            maxHealth: 100
-        };
-
-        let enemies = [];
-        let bullets = [];
-        let boxes = [];
-
+        
+        // Game State
+        let gameRunning = false;
         let score = 0;
-
-        const keys = {
-            w: false, a: false, s: false, d: false
+        let targetScore = 10;
+        let timeElapsed = 0;
+        let timerInterval = null;
+        let gameLoop = null;
+        
+        // Player Settings
+        let currentColor = '#ff6b6b';
+        let gameTitle = 'Mi Aventura';
+        
+        // Game Objects
+        let player = {
+            x: 300,
+            y: 200,
+            size: 30,
+            color: currentColor
         };
-
-        let mouseX = player.x, mouseY = player.y;
-        let shotTimer = 0;
-
-        // CAJA INICIAL (ESTILO 2008, POCAS PERO RADICALES)
-        boxes.push({ x: 300, y: 200, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT });
-        boxes.push({ x: 700, y: 400, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT });
-
-        // --- EVENTOS ---
-        window.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                keys[key] = true;
-                e.preventDefault();
-            }
-            // TECLA E: spawn caja en el MOUSE
-            if (key === 'e') {
-                spawnBoxAtMouse();
-                e.preventDefault();
-            }
-            // TECLA Z: spawn zombie en el MOUSE
-            if (key === 'z') {
-                spawnZombieAtMouse();
-                e.preventDefault();
-            }
+        
+        let powerUps = [];
+        let powerUpCount = 0;
+        
+        // Color Selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                currentColor = this.dataset.color;
+                player.color = currentColor;
+            });
         });
-
-        window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                keys[key] = false;
-                e.preventDefault();
-            }
+        
+        // Input Handlers
+        document.getElementById('gameTitle').addEventListener('input', (e) => {
+            gameTitle = e.target.value;
+            document.querySelector('.title-text').textContent = `🎮 ${gameTitle} - Visual Studio Code`;
         });
-
-        canvas.addEventListener('mousemove', (e) => {
+        
+        document.getElementById('targetScore').addEventListener('change', (e) => {
+            targetScore = parseInt(e.target.value) || 10;
+            document.getElementById('target').textContent = targetScore;
+        });
+        
+        // Canvas Click Handler
+        canvas.addEventListener('click', (e) => {
+            if (!gameRunning) return;
+            
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-            mouseX = (e.clientX - rect.left) * scaleX;
-            mouseY = (e.clientY - rect.top) * scaleY;
+            
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+            
+            // Check if clicked on player
+            if (mouseX >= player.x - player.size/2 && 
+                mouseX <= player.x + player.size/2 &&
+                mouseY >= player.y - player.size/2 && 
+                mouseY <= player.y + player.size/2) {
+                
+                score++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('gameStatus').textContent = '🎯 Hit! +1 point';
+                
+                // Move player to random position
+                player.x = Math.random() * (canvas.width - player.size) + player.size/2;
+                player.y = Math.random() * (canvas.height - player.size) + player.size/2;
+                
+                // Check for victory
+                if (score >= targetScore) {
+                    victory();
+                }
+            } else {
+                document.getElementById('gameStatus').textContent = '❌ Miss! Try again';
+            }
         });
-
-        canvas.addEventListener('mousedown', (e) => {
-            if (e.button === 0) {
-                e.preventDefault();
-                if (shotTimer <= 0) {
-                    shootBullet();
-                    shotTimer = SHOT_COOLDOWN;
-                }
-            }
-        });
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        document.getElementById('spawnBoxBtn').addEventListener('click', spawnBoxAtMouse);
-
-        // --- FUNCIONES DE SPAWN (SIEMPRE EN EL RATÓN) ---
-        function spawnBoxAtMouse() {
-            // Aparece exactamente donde está el ratón, respetando bordes
-            let x = Math.min(canvas.width - BOX_WIDTH/2, Math.max(BOX_WIDTH/2, mouseX));
-            let y = Math.min(canvas.height - BOX_HEIGHT/2, Math.max(BOX_HEIGHT/2, mouseY));
-            boxes.push({
-                x: x, y: y,
-                vx: 0, vy: 0,
-                w: BOX_WIDTH, h: BOX_HEIGHT
-            });
-        }
-
-        function spawnZombieAtMouse() {
-            // Spawn zombie justo en la posición del mouse (con un mini offset para no spawnear dentro del player si está justo ahí)
-            let x = Math.min(canvas.width - ENEMY_RADIUS, Math.max(ENEMY_RADIUS, mouseX));
-            let y = Math.min(canvas.height - ENEMY_RADIUS, Math.max(ENEMY_RADIUS, mouseY));
-            enemies.push({
-                x: x, y: y,
-                vx: 0, vy: 0,
-                radius: ENEMY_RADIUS,
-            });
-        }
-
-        function shootBullet() {
-            const dx = mouseX - player.x;
-            const dy = mouseY - player.y;
-            const len = Math.hypot(dx, dy);
-            if (len < 0.001) return;
-
-            const normDx = dx / len;
-            const normDy = dy / len;
-
-            bullets.push({
-                x: player.x + normDx * (PLAYER_RADIUS + BULLET_RADIUS + 4),
-                y: player.y + normDy * (PLAYER_RADIUS + BULLET_RADIUS + 4),
-                vx: normDx * BULLET_SPEED,
-                vy: normDy * BULLET_SPEED,
-                radius: BULLET_RADIUS,
-                active: true
-            });
-        }
-
-        // --- FÍSICA ---
-        function circleRectCollision(cx, cy, r, rect) {
-            let closestX = Math.max(rect.x - rect.w/2, Math.min(cx, rect.x + rect.w/2));
-            let closestY = Math.max(rect.y - rect.h/2, Math.min(cy, rect.y + rect.h/2));
-            let dx = cx - closestX;
-            let dy = cy - closestY;
-            let dist = Math.hypot(dx, dy);
-            if (dist < r) {
-                if (dist === 0) return { collides: true, nx: 0, ny: -1, depth: r };
-                let nx = dx / dist;
-                let ny = dy / dist;
-                return { collides: true, nx: nx, ny: ny, depth: r - dist };
-            }
-            return { collides: false };
-        }
-
-        function circleCollision(c1, r1, c2, r2) {
-            let dx = c2.x - c1.x;
-            let dy = c2.y - c1.y;
-            let dist = Math.hypot(dx, dy);
-            let minDist = r1 + r2;
-            if (dist < minDist) {
-                if (dist === 0) return { collides: true, nx: 1, ny: 0, depth: minDist };
-                let nx = dx / dist;
-                let ny = dy / dist;
-                return { collides: true, nx: nx, ny: ny, depth: minDist - dist };
-            }
-            return { collides: false };
-        }
-
-        function applyFriction() {
-            player.vx *= FRICTION;
-            player.vy *= FRICTION;
-            for (let b of boxes) { b.vx *= FRICTION; b.vy *= FRICTION; }
-            for (let e of enemies) { e.vx *= FRICTION; e.vy *= FRICTION; }
-        }
-
-        function moveObjects() {
-            player.x += player.vx;
-            player.y += player.vy;
-
-            for (let b of boxes) {
-                b.x += b.vx;
-                b.y += b.vy;
-                if (b.x - b.w/2 < 0) { b.x = b.w/2; b.vx *= -0.3; }
-                if (b.x + b.w/2 > canvas.width) { b.x = canvas.width - b.w/2; b.vx *= -0.3; }
-                if (b.y - b.h/2 < 0) { b.y = b.h/2; b.vy *= -0.3; }
-                if (b.y + b.h/2 > canvas.height) { b.y = canvas.height - b.h/2; b.vy *= -0.3; }
-            }
-
-            for (let e of enemies) {
-                e.x += e.vx;
-                e.y += e.vy;
-                if (e.x - e.radius < 0) { e.x = e.radius; e.vx *= -0.3; }
-                if (e.x + e.radius > canvas.width) { e.x = canvas.width - e.radius; e.vx *= -0.3; }
-                if (e.y - e.radius < 0) { e.y = e.radius; e.vy *= -0.3; }
-                if (e.y + e.radius > canvas.height) { e.y = canvas.height - e.radius; e.vy *= -0.3; }
-            }
-
-            for (let b of bullets) {
-                b.x += b.vx;
-                b.y += b.vy;
-                if (b.x < -50 || b.x > canvas.width + 50 || b.y < -50 || b.y > canvas.height + 50) {
-                    b.active = false;
-                }
-            }
-            bullets = bullets.filter(b => b.active);
-        }
-
-        function handleCollisions() {
-            // Jugador vs cajas
-            for (let box of boxes) {
-                let col = circleRectCollision(player.x, player.y, player.radius, box);
-                if (col.collides) {
-                    player.x += col.nx * col.depth;
-                    player.y += col.ny * col.depth;
-                    let impulse = 0.7;
-                    box.vx += col.nx * impulse * (Math.hypot(player.vx, player.vy) + 0.8);
-                    box.vy += col.ny * impulse * (Math.hypot(player.vx, player.vy) + 0.8);
-                    player.vx -= col.nx * 0.6;
-                    player.vy -= col.ny * 0.6;
-                }
-            }
-
-            // Jugador vs enemigos
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                let e = enemies[i];
-                let col = circleCollision(player, player.radius, e, e.radius);
-                if (col.collides) {
-                    player.x -= col.nx * col.depth * 0.6;
-                    player.y -= col.ny * col.depth * 0.6;
-                    e.x += col.nx * col.depth * 0.6;
-                    e.y += col.ny * col.depth * 0.6;
-
-                    player.health = Math.max(0, player.health - 10);
-                    healthSpan.innerText = Math.floor(player.health);
-
-                    let push = 2.2;
-                    player.vx -= col.nx * push;
-                    player.vy -= col.ny * push;
-                    e.vx += col.nx * push * 0.7;
-                    e.vy += col.ny * push * 0.7;
-
-                    if (player.health <= 0) {
-                        resetGame();
-                        return;
-                    }
-                }
-            }
-
-            // Balas vs enemigos
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                let bullet = bullets[i];
-                for (let j = enemies.length - 1; j >= 0; j--) {
-                    let enemy = enemies[j];
-                    let col = circleCollision(bullet, bullet.radius, enemy, enemy.radius);
-                    if (col.collides) {
-                        bullets.splice(i, 1);
-                        enemies.splice(j, 1);
-                        score += 15;
-                        scoreSpan.innerText = score;
-                        break;
-                    }
-                }
-            }
-
-            // Balas vs cajas
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                let bullet = bullets[i];
-                for (let j = boxes.length - 1; j >= 0; j--) {
-                    let box = boxes[j];
-                    let col = circleRectCollision(bullet.x, bullet.y, bullet.radius, box);
-                    if (col.collides) {
-                        box.vx += col.nx * 3.5;
-                        box.vy += col.ny * 3.5;
-                        bullets.splice(i, 1);
-                        break;
-                    }
-                }
+        
+        // Power-Up Functions
+        function addPowerUp() {
+            if (powerUps.length < 5) {
+                const newPowerUp = {
+                    x: Math.random() * (canvas.width - 20) + 10,
+                    y: Math.random() * (canvas.height - 20) + 10,
+                    active: true,
+                    type: 'speed'
+                };
+                powerUps.push(newPowerUp);
+                powerUpCount = powerUps.length;
+                document.getElementById('powerUpCount').textContent = powerUpCount + ' Active';
+                document.getElementById('gameStatus').textContent = '✨ Power-up added!';
+            } else {
+                document.getElementById('gameStatus').textContent = '⚠️ Maximum power-ups reached!';
             }
         }
-
-        function updateEnemies() {
-            for (let e of enemies) {
-                let dx = player.x - e.x;
-                let dy = player.y - e.y;
-                let dist = Math.hypot(dx, dy);
-                if (dist > 0.1) {
-                    let normX = dx / dist;
-                    let normY = dy / dist;
-                    e.vx += normX * ENEMY_SPEED * 0.16;
-                    e.vy += normY * ENEMY_SPEED * 0.16;
-                    let sp = Math.hypot(e.vx, e.vy);
-                    let maxSp = ENEMY_SPEED * 1.8;
-                    if (sp > maxSp) {
-                        e.vx = (e.vx / sp) * maxSp;
-                        e.vy = (e.vy / sp) * maxSp;
-                    }
-                }
+        
+        function removePowerUp() {
+            if (powerUps.length > 0) {
+                powerUps.pop();
+                powerUpCount = powerUps.length;
+                document.getElementById('powerUpCount').textContent = powerUpCount + ' Active';
+                document.getElementById('gameStatus').textContent = '➖ Power-up removed';
             }
         }
-
-        function resetGame() {
-            player = { x: 400, y: 300, vx: 0, vy: 0, radius: PLAYER_RADIUS, health: 100, maxHealth: 100 };
-            enemies = [];
-            bullets = [];
-            boxes = [
-                { x: 300, y: 200, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT },
-                { x: 700, y: 400, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT }
-            ];
-            score = 0;
-            shotTimer = 0;
-            healthSpan.innerText = '100';
-            scoreSpan.innerText = '0';
-        }
-
-        function updatePlayerInput() {
-            let moveX = 0, moveY = 0;
-            if (keys.w) moveY -= 1;
-            if (keys.s) moveY += 1;
-            if (keys.a) moveX -= 1;
-            if (keys.d) moveX += 1;
-            if (moveX !== 0 || moveY !== 0) {
-                let len = Math.hypot(moveX, moveY);
-                moveX = moveX / len * PLAYER_SPEED;
-                moveY = moveY / len * PLAYER_SPEED;
-                player.vx += moveX * 0.25;
-                player.vy += moveY * 0.25;
-                let sp = Math.hypot(player.vx, player.vy);
-                let maxSp = PLAYER_SPEED * 1.3;
-                if (sp > maxSp) {
-                    player.vx = (player.vx / sp) * maxSp;
-                    player.vy = (player.vy / sp) * maxSp;
-                }
-            }
-        }
-
-        // --- DIBUJADO ESTILO 2008 (RADICAL) ---
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Fondo degradado retro
-            let grad = ctx.createLinearGradient(0, 0, canvas.width*0.8, canvas.height);
-            grad.addColorStop(0, '#98b9cf');
-            grad.addColorStop(0.5, '#6d8fa5');
-            grad.addColorStop(1, '#3e5f75');
-            ctx.fillStyle = grad;
+        
+        // Drawing Functions
+        function drawGame() {
+            // Clear canvas
+            ctx.fillStyle = '#2d2d2d';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Cuadrícula "vaporwave" (líneas gruesas)
-            ctx.strokeStyle = "#ffffff30";
-            ctx.lineWidth = 3;
-            for (let i = 0; i < canvas.width; i += 70) {
+            
+            // Draw grid (VS Code style)
+            ctx.strokeStyle = '#3e3e42';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < canvas.width; i += 30) {
                 ctx.beginPath();
-                ctx.strokeStyle = "#c0daf0";
                 ctx.moveTo(i, 0);
                 ctx.lineTo(i, canvas.height);
                 ctx.stroke();
             }
-            for (let i = 0; i < canvas.height; i += 70) {
+            for (let i = 0; i < canvas.height; i += 30) {
                 ctx.beginPath();
-                ctx.strokeStyle = "#c0daf0";
                 ctx.moveTo(0, i);
                 ctx.lineTo(canvas.width, i);
                 ctx.stroke();
             }
-
-            // Sombra bestial
-            ctx.shadowColor = "#000000";
-            ctx.shadowBlur = 20;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
-
-            // CAJAS (estilo 2008: madera saturada)
-            for (let b of boxes) {
-                ctx.fillStyle = "#cc8800";
-                ctx.strokeStyle = "#ffdd55";
-                ctx.lineWidth = 6;
-                ctx.fillRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
-                ctx.strokeRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
-                ctx.fillStyle = "#aa6d00";
-                ctx.fillRect(b.x - 20, b.y - 8, 40, 16);
-                ctx.fillStyle = "#ffaa22";
-                ctx.fillRect(b.x - 14, b.y - 20, 28, 10);
-            }
-
-            // ZOMBIES (verdes fosforitos)
-            for (let e of enemies) {
-                ctx.fillStyle = "#33aa33";
-                ctx.shadowColor = "#00ff00";
+            
+            // Draw power-ups
+            powerUps.forEach(powerUp => {
                 ctx.beginPath();
-                ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2);
+                ctx.arc(powerUp.x, powerUp.y, 10, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 10;
                 ctx.fill();
-                ctx.strokeStyle = "#005500";
-                ctx.lineWidth = 4;
-                ctx.stroke();
-                // Ojos rojos
-                ctx.fillStyle = "#ff0000";
-                ctx.shadowColor = "#ff8888";
-                ctx.beginPath();
-                ctx.arc(e.x-6, e.y-5, 4, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(e.x+6, e.y-5, 4, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                ctx.arc(e.x-8, e.y-8, 2, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(e.x+4, e.y-8, 2, 0, 2*Math.PI);
-                ctx.fill();
-            }
-
-            // BALAS (neón)
-            for (let b of bullets) {
-                ctx.fillStyle = "#ffff33";
-                ctx.shadowColor = "#ffcc00";
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
-                ctx.fill();
-            }
-
-            // JUGADOR (azul radical)
-            ctx.shadowColor = "#2266ff";
-            ctx.shadowBlur = 30;
-            ctx.fillStyle = "#3366ff";
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // Línea de mira láser
+                ctx.shadowBlur = 0;
+                
+                // Draw star effect
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#000';
+                ctx.fillText('⚡', powerUp.x - 6, powerUp.y + 4);
+            });
+            
+            // Draw player
+            ctx.shadowColor = currentColor;
             ctx.shadowBlur = 15;
-            ctx.strokeStyle = "#ff66aa";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(player.x, player.y);
-            ctx.lineTo(mouseX, mouseY);
-            ctx.stroke();
-
-            // OJOS (mirando al ratón)
-            let dx = mouseX - player.x;
-            let dy = mouseY - player.y;
-            let lookDist = Math.hypot(dx, dy);
-            if (lookDist > 1) {
-                let lookX = dx / lookDist;
-                let lookY = dy / lookDist;
-                ctx.fillStyle = "white";
-                ctx.shadowColor = "#aaccff";
-                ctx.beginPath();
-                ctx.arc(player.x + lookX*8 - 3, player.y + lookY*8 - 4, 5, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(player.x + lookX*8 + 3, player.y + lookY*8 - 4, 5, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = "#16213e";
-                ctx.beginPath();
-                ctx.arc(player.x + lookX*8 - 4, player.y + lookY*8 - 6, 2.5, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(player.x + lookX*8 + 2, player.y + lookY*8 - 6, 2.5, 0, 2*Math.PI);
-                ctx.fill();
-            }
-
-            // Barra de vida retro
+            ctx.fillStyle = currentColor;
+            ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+            
+            // Draw player border
             ctx.shadowBlur = 0;
-            ctx.fillStyle = "#511010";
-            ctx.fillRect(player.x-30, player.y-40, 60, 12);
-            ctx.fillStyle = "#ff3333";
-            let healthPercent = player.health / player.maxHealth;
-            ctx.fillRect(player.x-30, player.y-40, 60 * healthPercent, 12);
-            ctx.strokeStyle = "#ffaaaa";
+            ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
-            ctx.strokeRect(player.x-30, player.y-40, 60, 12);
-
-            // Reset sombra
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
+            ctx.strokeRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+            
+            // Draw game title
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`🎮 ${gameTitle}`, 10, 30);
+            
+            // Draw controls hint
+            ctx.font = '12px Segoe UI';
+            ctx.fillStyle = '#969696';
+            ctx.fillText('Click on the colored square to score!', 10, 50);
         }
-
-        function gameLoop() {
-            if (shotTimer > 0) shotTimer--;
-
-            updatePlayerInput();
-            updateEnemies();
-            applyFriction();
-            moveObjects();
-            handleCollisions();
-
-            player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
-            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
-
-            healthSpan.innerText = Math.floor(player.health);
-            scoreSpan.innerText = score;
-
-            draw();
-            requestAnimationFrame(gameLoop);
+        
+        // Game Control Functions
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            score = 0;
+            timeElapsed = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('timer').textContent = '0s';
+            document.getElementById('gameStatus').textContent = '🎮 Game started!';
+            
+            // Reset player position
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            
+            // Start timer
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeElapsed++;
+                document.getElementById('timer').textContent = timeElapsed + 's';
+            }, 1000);
+            
+            // Start game loop
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(() => {
+                drawGame();
+            }, 16); // ~60 FPS
         }
-
-        resetGame();
-        gameLoop();
-    })();
-</script>
+        
+        function resetGame() {
+            gameRunning = false;
+            score = 0;
+            timeElapsed = 0;
+            powerUps = [];
+            powerUpCount = 0;
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('timer').textContent = '0s';
+            document.getElementById('powerUpCount').textContent = '0 Active';
+            document.getElementById('gameStatus').textContent = '🔄 Game reset';
+            
+            if (timerInterval) clearInterval(timerInterval);
+            if (gameLoop) clearInterval(gameLoop);
+            
+            // Reset player
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            
+            drawGame();
+        }
+        
+        function victory() {
+            gameRunning = false;
+            if (timerInterval) clearInterval(timerInterval);
+            if (gameLoop) clearInterval(gameLoop);
+            
+            document.getElementById('victoryMessage').textContent = 
+                `¡Felicidades! Puntuación: ${score} en ${timeElapsed} segundos`;
+            document.getElementById('victoryModal').style.display = 'flex';
+            document.getElementById('gameStatus').textContent = '🏆 Victory!';
+        }
+        
+        function closeVictoryModal() {
+            document.getElementById('victoryModal').style.display = 'none';
+            resetGame();
+        }
+        
+        // Initialize game
+        drawGame();
+    </script>
 </body>
 </html>
