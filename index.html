@@ -3,485 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMod 2008 · 3D Sandbox (iluminado)</title>
+    <title>GMod 2008 · Versión simplificada</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'VT323', 'Courier New', monospace;
-            background-color: #111;
-        }
+        body { margin: 0; overflow: hidden; font-family: 'VT323', monospace; background: #111; }
         #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #0f0;
-            padding: 8px 16px;
-            border: 3px solid #0a0;
-            border-radius: 0;
-            font-size: 24px;
-            text-shadow: 2px 2px 0 #070;
-            box-shadow: 4px 4px 0 #0a0a0a;
-            z-index: 100;
-            pointer-events: none;
-            image-rendering: pixelated;
+            position: absolute; top: 10px; left: 10px; background: #000; color: #0f0;
+            padding: 8px 16px; border: 3px solid #0a0; font-size: 24px; z-index: 100;
         }
         #toolbar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #b0b7b0;
-            border: 4px solid #222;
-            border-radius: 8px;
-            padding: 8px 16px;
-            display: flex;
-            gap: 20px;
-            box-shadow: 6px 6px 0 #3a3a3a, inset 2px 2px 0 #f0f0f0, inset -2px -2px 0 #6c6c6c;
-            z-index: 200;
-            image-rendering: pixelated;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #b0b7b0; border: 4px solid #222; padding: 8px 16px; display: flex;
+            gap: 20px; box-shadow: 6px 6px 0 #3a3a3a; z-index: 200;
         }
         .tool-btn {
-            background: #dbdddb;
-            border: 3px solid #222;
-            color: #111;
-            font-family: 'VT323', monospace;
-            font-size: 28px;
-            padding: 5px 20px;
-            cursor: pointer;
-            box-shadow: 3px 3px 0 #3c3c3c, inset -1px -1px 0 #6f6f6f, inset 1px 1px 0 #fefefe;
-            text-transform: uppercase;
-            transition: 0.05s linear;
+            background: #dbdddb; border: 3px solid #222; color: #111; font-family: 'VT323';
+            font-size: 28px; padding: 5px 20px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 3px 3px 0 #3c3c3c;
         }
-        .tool-btn.active {
-            background: #acc7e6;
-            box-shadow: inset 2px 2px 0 #1e1e1e, inset -1px -1px 0 #a0a0a0;
-            transform: translate(2px, 2px);
-        }
+        .tool-btn.active { background: #acc7e6; transform: translate(2px, 2px); }
         #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            transform: translate(-50%, -50%);
-            border: 2px solid #fff;
-            border-radius: 2px;
-            pointer-events: none;
-            z-index: 150;
-            box-shadow: 0 0 0 2px #000;
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            transform: translate(-50%, -50%); border: 2px solid white; z-index: 150;
+            box-shadow: 0 0 0 2px black;
         }
         #status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #ffcc00;
-            padding: 8px 16px;
-            border: 3px solid #ffaa00;
-            font-size: 22px;
-            font-family: 'VT323';
-            z-index: 100;
+            position: absolute; top: 10px; right: 10px; background: #000; color: #ffcc00;
+            padding: 8px 16px; border: 3px solid #ffaa00; font-size: 22px; z-index: 100;
         }
     </style>
-    <!-- Librerías -->
+    <!-- Three.js desde CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="info">🛠️ GARRY'S MOD 2008 · 3D</div>
+    <div id="info">🛠️ GMod 2008 · Lite</div>
     <div id="status">HERRAMIENTA: <span id="toolName">PROP</span></div>
     <div id="crosshair"></div>
     <div id="toolbar">
         <button class="tool-btn active" data-tool="prop">📦 PROP</button>
-        <button class="tool-btn" data-tool="ragdoll">👤 RAGDOLL</button>
         <button class="tool-btn" data-tool="remove">❌ REMOVE</button>
     </div>
 
     <script>
-        (function() {
-            // --- Configuración básica ---
-            let currentTool = 'prop';
-            const toolButtons = document.querySelectorAll('.tool-btn');
-            const toolSpan = document.getElementById('toolName');
+        // --- Inicialización básica ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Cielo azul claro
 
-            toolButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    toolButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentTool = btn.dataset.tool;
-                    toolSpan.innerText = currentTool.toUpperCase();
-                });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(5, 3, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // Sombras para más realismo
+        document.body.appendChild(renderer.domElement);
+
+        // --- Luces potentes (para que todo se vea) ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Luz ambiental clara
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        dirLight.receiveShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        dirLight.shadow.camera.near = 0.5;
+        dirLight.shadow.camera.far = 25;
+        dirLight.shadow.camera.left = -10;
+        dirLight.shadow.camera.right = 10;
+        dirLight.shadow.camera.top = 10;
+        dirLight.shadow.camera.bottom = -10;
+        scene.add(dirLight);
+
+        // Luz puntual extra para iluminar desde abajo
+        const pointLight = new THREE.PointLight(0xffffff, 0.5);
+        pointLight.position.set(0, 5, 5);
+        scene.add(pointLight);
+
+        // --- Suelo con cuadrícula (visible) ---
+        const gridHelper = new THREE.GridHelper(30, 20, 0x88ff88, 0x335533);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        const planeGeo = new THREE.PlaneGeometry(30, 30);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x3c6e3c, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.y = 0;
+        plane.receiveShadow = true;
+        scene.add(plane);
+
+        // --- Paredes invisibles para no caerse (no se renderizan, pero limitan el movimiento) ---
+        // Simularemos límites con un simple check en el movimiento, sin físicas complejas.
+
+        // --- Variables globales ---
+        const keyState = { w: false, a: false, s: false, d: false, space: false };
+        const player = {
+            mesh: null,
+            velocity: new THREE.Vector3(0, 0, 0),
+            onGround: false,
+            radius: 0.5,
+            height: 1.8
+        };
+        const props = []; // almacena los meshes de props
+        let currentTool = 'prop';
+
+        // --- Crear jugador (un grupo con cuerpo y cabeza) ---
+        const playerGroup = new THREE.Group();
+        
+        // Cuerpo (camisa roja)
+        const torsoGeo = new THREE.BoxGeometry(0.9, 1.4, 0.6);
+        const torsoMat = new THREE.MeshStandardMaterial({ color: 0xff5555 });
+        const torso = new THREE.Mesh(torsoGeo, torsoMat);
+        torso.position.y = 0.7;
+        torso.castShadow = true;
+        torso.receiveShadow = true;
+        playerGroup.add(torso);
+        
+        // Cabeza
+        const headGeo = new THREE.SphereGeometry(0.4, 16, 16);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+        const head = new THREE.Mesh(headGeo, headMat);
+        head.position.y = 1.5;
+        head.castShadow = true;
+        head.receiveShadow = true;
+        playerGroup.add(head);
+        
+        // Ojos
+        const eyeGeo = new THREE.SphereGeometry(0.1, 8);
+        const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+        eyeL.position.set(-0.15, 1.6, 0.35);
+        playerGroup.add(eyeL);
+        const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+        eyeR.position.set(0.15, 1.6, 0.35);
+        playerGroup.add(eyeR);
+
+        playerGroup.position.set(0, 1, 0);
+        playerGroup.castShadow = true;
+        playerGroup.receiveShadow = true;
+        scene.add(playerGroup);
+        player.mesh = playerGroup;
+
+        // --- Suelo lógico (para gravedad) ---
+        const groundLevel = 0.9; // altura a la que el jugador toca el suelo (considerando su altura)
+
+        // --- Controles de teclado ---
+        window.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyW': keyState.w = true; e.preventDefault(); break;
+                case 'KeyA': keyState.a = true; e.preventDefault(); break;
+                case 'KeyS': keyState.s = true; e.preventDefault(); break;
+                case 'KeyD': keyState.d = true; e.preventDefault(); break;
+                case 'Space': keyState.space = true; e.preventDefault(); break;
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW': keyState.w = false; e.preventDefault(); break;
+                case 'KeyA': keyState.a = false; e.preventDefault(); break;
+                case 'KeyS': keyState.s = false; e.preventDefault(); break;
+                case 'KeyD': keyState.d = false; e.preventDefault(); break;
+                case 'Space': keyState.space = false; e.preventDefault(); break;
+            }
+        });
+
+        // --- Toolbar ---
+        const toolButtons = document.querySelectorAll('.tool-btn');
+        const toolSpan = document.getElementById('toolName');
+        toolButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                toolButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+                toolSpan.innerText = currentTool.toUpperCase();
             });
+        });
 
-            // --- Escena Three.js ---
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xaaccff); // cielo azul 2008
+        // --- Raycaster para interacción ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
 
-            // Cámara
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(5, 5, 10);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
+        });
 
-            // Renderer
-            const renderer = new THREE.WebGLRenderer({ antialias: false }); // desactivar antialias para look retro
+        // --- Spawn de props (cajas de colores) ---
+        function spawnProp(position) {
+            const size = 0.5 + Math.random() * 0.5;
+            const color = new THREE.Color().setHSL(Math.random(), 0.9, 0.6);
+            const geo = new THREE.BoxGeometry(size, size, size);
+            const mat = new THREE.MeshStandardMaterial({ color: color });
+            const cube = new THREE.Mesh(geo, mat);
+            cube.position.copy(position);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            scene.add(cube);
+            props.push(cube);
+        }
+
+        // --- Eliminar prop bajo el cursor ---
+        function removeProp() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(props);
+            if (intersects.length > 0) {
+                const hit = intersects[0].object;
+                scene.remove(hit);
+                const index = props.indexOf(hit);
+                if (index > -1) props.splice(index, 1);
+            }
+        }
+
+        // --- Eventos de clic ---
+        window.addEventListener('click', (e) => {
+            if (currentTool === 'prop') {
+                // Colocar prop donde mira la cámara, a 5 unidades de distancia
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                const spawnPos = camera.position.clone().add(direction.multiplyScalar(5));
+                spawnPos.y = Math.max(1, spawnPos.y); // evitar que aparezca bajo tierra
+                spawnProp(spawnPos);
+            } else if (currentTool === 'remove') {
+                removeProp();
+            }
+        });
+
+        // Bloquear menú contextual para clic derecho
+        window.addEventListener('contextmenu', e => e.preventDefault());
+
+        // --- Físicas simples (gravedad y movimiento) ---
+        const gravity = -15; // unidades por segundo²
+        const moveSpeed = 8;
+        const jumpSpeed = 7;
+
+        function updatePlayer(deltaTime) {
+            // Aplicar gravedad
+            player.velocity.y += gravity * deltaTime;
+
+            // Movimiento horizontal (solo si está en el suelo o con poco control en aire)
+            const moveDir = new THREE.Vector3(0, 0, 0);
+            if (keyState.w) moveDir.z -= 1;
+            if (keyState.s) moveDir.z += 1;
+            if (keyState.a) moveDir.x -= 1;
+            if (keyState.d) moveDir.x += 1;
+            if (moveDir.length() > 0) {
+                moveDir.normalize();
+                // Convertir dirección relativa a la cámara
+                const cameraDir = new THREE.Vector3();
+                camera.getWorldDirection(cameraDir);
+                cameraDir.y = 0;
+                cameraDir.normalize();
+                const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), cameraDir).normalize();
+                
+                const move = new THREE.Vector3(0, 0, 0);
+                if (keyState.w) move.add(cameraDir);
+                if (keyState.s) move.sub(cameraDir);
+                if (keyState.a) move.add(right);
+                if (keyState.d) move.sub(right);
+                move.normalize();
+                player.velocity.x = move.x * moveSpeed;
+                player.velocity.z = move.z * moveSpeed;
+            } else {
+                // Frenar suavemente
+                player.velocity.x *= 0.8;
+                player.velocity.z *= 0.8;
+            }
+
+            // Salto
+            if (keyState.space && player.onGround) {
+                player.velocity.y = jumpSpeed;
+                player.onGround = false;
+            }
+
+            // Actualizar posición
+            player.mesh.position.x += player.velocity.x * deltaTime;
+            player.mesh.position.y += player.velocity.y * deltaTime;
+            player.mesh.position.z += player.velocity.z * deltaTime;
+
+            // Colisión con el suelo
+            if (player.mesh.position.y < groundLevel) {
+                player.mesh.position.y = groundLevel;
+                player.velocity.y = 0;
+                player.onGround = true;
+            } else {
+                player.onGround = false;
+            }
+
+            // Límites del mundo (para no irse al infinito)
+            const boundary = 14;
+            if (player.mesh.position.x > boundary) player.mesh.position.x = boundary;
+            if (player.mesh.position.x < -boundary) player.mesh.position.x = -boundary;
+            if (player.mesh.position.z > boundary) player.mesh.position.z = boundary;
+            if (player.mesh.position.z < -boundary) player.mesh.position.z = -boundary;
+        }
+
+        // --- Cámara en tercera persona ---
+        function updateCamera() {
+            const playerPos = player.mesh.position.clone();
+            const offset = new THREE.Vector3(-3, 2, 4); // detrás y arriba
+            // Rotar offset según la dirección del jugador? En este caso lo fijamos relativo al mundo
+            camera.position.copy(playerPos.clone().add(offset));
+            camera.lookAt(playerPos.clone().add(new THREE.Vector3(0, 1.2, 0)));
+        }
+
+        // --- Reloj para deltaTime ---
+        const clock = new THREE.Clock();
+
+        // --- Animación ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const deltaTime = Math.min(clock.getDelta(), 0.1); // seguridad
+
+            updatePlayer(deltaTime);
+            updateCamera();
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- Ajustar tamaño de ventana ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            document.body.appendChild(renderer.domElement);
+        });
 
-            // --- LUCES CORREGIDAS (más intensidad y variedad) ---
-            // Luz ambiental clara para iluminar todo
-            const ambientLight = new THREE.AmbientLight(0xcccccc); // Gris muy claro
-            scene.add(ambientLight);
-
-            // Luz direccional principal (sombra)
-            const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.8); // Intensidad alta
-            dirLight.position.set(5, 12, 8);
-            dirLight.castShadow = true;
-            dirLight.receiveShadow = true;
-            dirLight.shadow.mapSize.width = 1024;
-            dirLight.shadow.mapSize.height = 1024;
-            const d = 15;
-            dirLight.shadow.camera.left = -d;
-            dirLight.shadow.camera.right = d;
-            dirLight.shadow.camera.top = d;
-            dirLight.shadow.camera.bottom = -d;
-            dirLight.shadow.camera.near = 1;
-            dirLight.shadow.camera.far = 25;
-            scene.add(dirLight);
-
-            // Luz puntual de relleno desde atrás
-            const pointLight = new THREE.PointLight(0xffffff, 0.9);
-            pointLight.position.set(-2, 5, 5);
-            scene.add(pointLight);
-
-            // Una segunda luz direccional desde el otro lado para eliminar sombras muy oscuras
-            const backLight = new THREE.DirectionalLight(0xffeedd, 0.8);
-            backLight.position.set(-3, 5, -5);
-            scene.add(backLight);
-
-            // Suelo con cuadrícula retro
-            const gridHelper = new THREE.GridHelper(30, 20, 0x88ff88, 0x335533);
-            gridHelper.position.y = 0;
-            scene.add(gridHelper);
-
-            const planeGeometry = new THREE.PlaneGeometry(30, 30);
-            const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x6a8c6a, side: THREE.DoubleSide, roughness: 0.7, emissive: 0x000000 });
-            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.rotation.x = -Math.PI / 2;
-            plane.position.y = 0;
-            plane.receiveShadow = true;
-            scene.add(plane);
-
-            // --- Mundo físico CANNON ---
-            const world = new CANNON.World();
-            world.gravity.set(0, -15, 0);
-            world.broadphase = new CANNON.SAPBroadphase(world);
-            world.defaultContactMaterial.restitution = 0.3;
-
-            // Suelo físico
-            const groundShape = new CANNON.Plane();
-            const groundBody = new CANNON.Body({ mass: 0, material: new CANNON.Material('ground') });
-            groundBody.addShape(groundShape);
-            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-            groundBody.position.set(0, 0, 0);
-            world.addBody(groundBody);
-
-            // Material de contacto
-            const material = new CANNON.Material('default');
-            const contactMaterial = new CANNON.ContactMaterial(material, groundBody.material, { friction: 0.5, restitution: 0.2 });
-            world.addContactMaterial(contactMaterial);
-
-            // --- Jugador (cuerpo físico) ---
-            const playerRadius = 0.5;
-            const playerHeight = 1.8;
-            const playerShape = new CANNON.Cylinder(playerRadius, playerRadius, playerHeight, 8);
-            const playerBody = new CANNON.Body({ mass: 70, material: material, shape: playerShape });
-            playerBody.position.set(0, playerHeight/2, 0);
-            playerBody.fixedRotation = true; // evitar que se caiga
-            playerBody.updateMassProperties();
-            world.addBody(playerBody);
-
-            // Representación visual del jugador (colores brillantes)
-            const playerGroup = new THREE.Group();
-            
-            // Cuerpo (camisa roja)
-            const torsoGeo = new THREE.BoxGeometry(0.9, 1.4, 0.6);
-            const torsoMat = new THREE.MeshStandardMaterial({ color: 0xff5555, emissive: 0x000000 });
-            const torso = new THREE.Mesh(torsoGeo, torsoMat);
-            torso.position.y = 0.7;
-            torso.castShadow = true;
-            torso.receiveShadow = true;
-            playerGroup.add(torso);
-            
-            // Cabeza
-            const headGeo = new THREE.SphereGeometry(0.4, 8, 8);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, emissive: 0x000000 });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.5;
-            head.castShadow = true;
-            head.receiveShadow = true;
-            playerGroup.add(head);
-            
-            // Ojos (puntos negros)
-            const eyeGeo = new THREE.SphereGeometry(0.1, 4);
-            const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-            const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeL.position.set(-0.15, 1.6, 0.35);
-            playerGroup.add(eyeL);
-            const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-            eyeR.position.set(0.15, 1.6, 0.35);
-            playerGroup.add(eyeR);
-            
-            scene.add(playerGroup);
-
-            // --- Listas para sincronizar Three.js con Cannon ---
-            const physicsBodies = []; // para props
-            const threeMeshes = [];
-
-            // --- Controles del jugador (WASD) ---
-            const keyState = { w: false, a: false, s: false, d: false };
-            window.addEventListener('keydown', (e) => {
-                switch(e.code) {
-                    case 'KeyW': keyState.w = true; e.preventDefault(); break;
-                    case 'KeyA': keyState.a = true; e.preventDefault(); break;
-                    case 'KeyS': keyState.s = true; e.preventDefault(); break;
-                    case 'KeyD': keyState.d = true; e.preventDefault(); break;
-                }
-            });
-            window.addEventListener('keyup', (e) => {
-                switch(e.code) {
-                    case 'KeyW': keyState.w = false; e.preventDefault(); break;
-                    case 'KeyA': keyState.a = false; e.preventDefault(); break;
-                    case 'KeyS': keyState.s = false; e.preventDefault(); break;
-                    case 'KeyD': keyState.d = false; e.preventDefault(); break;
-                }
-            });
-
-            // --- Cámara en tercera persona ---
-            const cameraOffset = new THREE.Vector3(-4, 3, 5); // detrás-arriba
-
-            // --- Raycaster para interacción ---
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2();
-
-            // --- Spawn de props (con colores brillantes) ---
-            function spawnProp(position) {
-                // Crear cuerpo físico (caja o esfera aleatoria)
-                const isBox = Math.random() > 0.3;
-                let shape, body;
-                const size = 0.5 + Math.random() * 0.5;
-                if (isBox) {
-                    shape = new CANNON.Box(new CANNON.Vec3(size/2, size/2, size/2));
-                } else {
-                    shape = new CANNON.Sphere(size/2);
-                }
-                body = new CANNON.Body({ mass: 5, material: material });
-                body.addShape(shape);
-                body.position.set(position.x, position.y, position.z);
-                world.addBody(body);
-                
-                // Crear mesh visual con color aleatorio brillante
-                let mesh;
-                const hue = Math.random();
-                const color = new THREE.Color().setHSL(hue, 0.9, 0.6); // colores vivos
-                if (isBox) {
-                    const geo = new THREE.BoxGeometry(size, size, size);
-                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x000000 });
-                    mesh = new THREE.Mesh(geo, mat);
-                } else {
-                    const geo = new THREE.SphereGeometry(size/2, 8, 8);
-                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x000000 });
-                    mesh = new THREE.Mesh(geo, mat);
-                }
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                mesh.position.copy(position);
-                scene.add(mesh);
-                
-                // Guardar relación
-                physicsBodies.push({ body, mesh });
-            }
-
-            function spawnRagdoll(position) {
-                // Versión simplificada: un grupo de esferas que simulan un ragdoll
-                const colors = [0xffaaaa, 0xaaffaa, 0xaaaaff, 0xffdd88, 0xff88ff];
-                for (let i = 0; i < 6; i++) {
-                    const offX = (Math.random() - 0.5) * 0.6;
-                    const offY = i * 0.35 + 0.2;
-                    const offZ = (Math.random() - 0.5) * 0.4;
-                    const pos = new THREE.Vector3(position.x + offX, position.y + offY, position.z + offZ);
-                    const shape = new CANNON.Sphere(0.25);
-                    const body = new CANNON.Body({ mass: 2, material: material });
-                    body.addShape(shape);
-                    body.position.set(pos.x, pos.y, pos.z);
-                    world.addBody(body);
-                    
-                    const geo = new THREE.SphereGeometry(0.25, 6);
-                    const mat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length], emissive: 0x222222 });
-                    const mesh = new THREE.Mesh(geo, mat);
-                    mesh.castShadow = true;
-                    mesh.receiveShadow = true;
-                    mesh.position.copy(pos);
-                    scene.add(mesh);
-                    
-                    physicsBodies.push({ body, mesh });
-                }
-            }
-
-            function removeObjectAtMouse() {
-                // Calcular rayo desde cámara a través del cursor
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(physicsBodies.map(b => b.mesh));
-                if (intersects.length > 0) {
-                    const hitMesh = intersects[0].object;
-                    // Buscar el par cuerpo-malla
-                    for (let i = 0; i < physicsBodies.length; i++) {
-                        if (physicsBodies[i].mesh === hitMesh) {
-                            // Eliminar del mundo físico y de la escena
-                            world.removeBody(physicsBodies[i].body);
-                            scene.remove(physicsBodies[i].mesh);
-                            physicsBodies.splice(i, 1);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // --- Eventos de ratón ---
-            window.addEventListener('mousemove', (e) => {
-                mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
-                mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
-            });
-
-            window.addEventListener('click', (e) => {
-                if (currentTool === 'prop') {
-                    // Disparar un rayo para colocar el objeto donde mira la cámara, a cierta distancia
-                    raycaster.setFromCamera(mouse, camera);
-                    const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // plano del suelo
-                    const targetPoint = new THREE.Vector3();
-                    if (raycaster.ray.intersectPlane(planeGround, targetPoint)) {
-                        spawnProp(targetPoint);
-                    } else {
-                        // Si no toca suelo, poner enfrente del jugador
-                        const dir = new THREE.Vector3();
-                        camera.getWorldDirection(dir);
-                        const spawnPos = playerBody.position.clone().vadd(new CANNON.Vec3(dir.x*3, 1, dir.z*3));
-                        spawnProp(new THREE.Vector3(spawnPos.x, spawnPos.y, spawnPos.z));
-                    }
-                } else if (currentTool === 'ragdoll') {
-                    raycaster.setFromCamera(mouse, camera);
-                    const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-                    const targetPoint = new THREE.Vector3();
-                    if (raycaster.ray.intersectPlane(planeGround, targetPoint)) {
-                        spawnRagdoll(targetPoint);
-                    } else {
-                        const dir = new THREE.Vector3();
-                        camera.getWorldDirection(dir);
-                        const spawnPos = playerBody.position.clone().vadd(new CANNON.Vec3(dir.x*3, 1, dir.z*3));
-                        spawnRagdoll(new THREE.Vector3(spawnPos.x, spawnPos.y, spawnPos.z));
-                    }
-                } else if (currentTool === 'remove') {
-                    removeObjectAtMouse();
-                }
-            });
-
-            // --- Movimiento del jugador (fuerzas) ---
-            function updatePlayerMovement() {
-                const force = 40;
-                const dir = new CANNON.Vec3(0, 0, 0);
-                if (keyState.w) dir.z -= 1;
-                if (keyState.s) dir.z += 1;
-                if (keyState.a) dir.x -= 1;
-                if (keyState.d) dir.x += 1;
-                if (dir.length() > 0) {
-                    dir.normalize();
-                    // Aplicar fuerza en dirección de la cámara (para que ande hacia donde miramos)
-                    const cameraDir = new THREE.Vector3();
-                    camera.getWorldDirection(cameraDir);
-                    cameraDir.y = 0;
-                    cameraDir.normalize();
-                    const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), cameraDir).normalize();
-                    const moveDir = new CANNON.Vec3(0, 0, 0);
-                    if (keyState.w) {
-                        moveDir.x += cameraDir.x * force;
-                        moveDir.z += cameraDir.z * force;
-                    }
-                    if (keyState.s) {
-                        moveDir.x -= cameraDir.x * force;
-                        moveDir.z -= cameraDir.z * force;
-                    }
-                    if (keyState.a) {
-                        moveDir.x += right.x * force;
-                        moveDir.z += right.z * force;
-                    }
-                    if (keyState.d) {
-                        moveDir.x -= right.x * force;
-                        moveDir.z -= right.z * force;
-                    }
-                    playerBody.applyForce(moveDir, playerBody.position);
-                }
-            }
-
-            // --- Sincronización Three <-> Cannon ---
-            function syncPhysics() {
-                // Jugador
-                playerGroup.position.copy(playerBody.position);
-                playerGroup.quaternion.copy(playerBody.quaternion);
-                
-                // Props
-                physicsBodies.forEach(item => {
-                    item.mesh.position.copy(item.body.position);
-                    item.mesh.quaternion.copy(item.body.quaternion);
-                });
-            }
-
-            // --- Animación y cámara ---
-            function animate() {
-                requestAnimationFrame(animate);
-
-                // Movimiento jugador
-                updatePlayerMovement();
-
-                // Avanzar física
-                world.step(1 / 60);
-
-                // Sincronizar
-                syncPhysics();
-
-                // Actualizar cámara: sigue al jugador desde atrás
-                const playerPos = playerGroup.position.clone();
-                const playerQuat = playerGroup.quaternion.clone();
-                const offset = new THREE.Vector3(-3, 2.5, 4); // ajustado para mejor vista
-                offset.applyQuaternion(playerQuat);
-                camera.position.copy(playerPos.clone().add(offset));
-                camera.lookAt(playerPos.clone().add(new THREE.Vector3(0, 1.2, 0)));
-
-                renderer.render(scene, camera);
-            }
-
-            animate();
-
-            // --- Redimensionar ventana ---
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-
-            // --- Bloquear menú contextual para usar clic derecho sin interrupciones ---
-            window.addEventListener('contextmenu', e => e.preventDefault());
-
-            // --- Añadir algunos objetos de ejemplo al inicio (visibles) ---
-            setTimeout(() => {
-                spawnProp(new THREE.Vector3(3, 1, 2));
-                spawnProp(new THREE.Vector3(-2, 1, -1));
-                spawnRagdoll(new THREE.Vector3(0, 1, 5));
-                spawnProp(new THREE.Vector3(1, 1, 4));
-            }, 500);
-        })();
+        // --- Añadir algunos props iniciales ---
+        setTimeout(() => {
+            spawnProp(new THREE.Vector3(2, 1, 3));
+            spawnProp(new THREE.Vector3(-1, 1, 2));
+            spawnProp(new THREE.Vector3(0, 1, 5));
+        }, 100);
     </script>
 </body>
 </html>
