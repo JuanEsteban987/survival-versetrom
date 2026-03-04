@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 VisualScript - Conexiones Visuales</title>
+    <title>🎮 VisualScript - Controles de Teclado</title>
     <style>
         * {
             margin: 0;
@@ -235,7 +235,7 @@
             background: #2d2d2d;
             border: 1px solid #3e3e42;
             border-radius: 6px;
-            min-width: 150px;
+            min-width: 160px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             user-select: none;
             z-index: 10;
@@ -392,12 +392,23 @@
         }
 
         .property-row input, .property-row select {
-            width: 120px;
+            width: 130px;
             background: #3c3c3c;
             border: 1px solid #0e0e0e;
             color: white;
             padding: 4px;
             border-radius: 3px;
+        }
+
+        .key-indicator {
+            display: inline-block;
+            background: #3c3c3c;
+            border: 1px solid #0e0e0e;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #ffaa00;
         }
 
         /* Modal */
@@ -434,7 +445,7 @@
                 <div class="window-btn minimize"></div>
                 <div class="window-btn maximize"></div>
             </div>
-            <span class="title-text">🔷 VisualScript - Conexiones Visuales</span>
+            <span class="title-text">🔷 VisualScript - Controles de Teclado</span>
         </div>
 
         <!-- Main Layout -->
@@ -453,34 +464,46 @@
                             <div class="node-icon event">⟳</div>
                             On Update
                         </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="collision" ondragstart="dragNode(event)">
-                            <div class="node-icon event">⚡</div>
-                            On Collision
+                    </div>
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">⌨️ CONDICIONES DE TECLADO</div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">⌨</div>
+                            Key Pressed
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keydown" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">⬇</div>
+                            Key Down
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keyup" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">⬆</div>
+                            Key Up
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">🎮 ACCIONES</div>
+                        <div class="node-category-title">🎮 ACCIONES DE MOVIMIENTO</div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="move" ondragstart="dragNode(event)">
                             <div class="node-icon action">⬆</div>
                             Move Player
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
-                            <div class="node-icon action">✨</div>
-                            Spawn Object
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_arrow" ondragstart="dragNode(event)">
+                            <div class="node-icon action">⬅➡</div>
+                            Move with Arrows
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="destroy" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🗑</div>
-                            Destroy Object
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_wasd" ondragstart="dragNode(event)">
+                            <div class="node-icon action">WASD</div>
+                            Move with WASD
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🏆</div>
-                            Add Score
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="set_position" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🎯</div>
+                            Set Position
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">🔀 CONDICIONES</div>
+                        <div class="node-category-title">🔀 OTRAS CONDICIONES</div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="if" ondragstart="dragNode(event)">
                             <div class="node-icon condition">❓</div>
                             If Condition
@@ -489,25 +512,17 @@
                             <div class="node-icon condition">≟</div>
                             Compare Values
                         </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⌨</div>
-                            Key Pressed
-                        </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">📊 VARIABLES</div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="number" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">#</div>
-                            Number
+                        <div class="node-category-title">🎯 OTRAS ACCIONES</div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
+                            <div class="node-icon action">✨</div>
+                            Spawn Object
                         </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="vector" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">⬛</div>
-                            Vector 2D
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="color" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">🎨</div>
-                            Color
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🏆</div>
+                            Add Score
                         </div>
                     </div>
                 </div>
@@ -518,6 +533,9 @@
                 <div class="canvas-toolbar">
                     <button class="canvas-button primary" onclick="compileAndRun()">
                         ▶ Compile & Run
+                    </button>
+                    <button class="canvas-button" onclick="stopGame()">
+                        ⏹ Stop
                     </button>
                     <button class="canvas-button" onclick="clearCanvas()">
                         🗑 Clear All
@@ -554,7 +572,9 @@
                     </div>
                     <div style="color: #cccccc; font-size: 12px; width: 100%;">
                         <div>Score: <span id="gameScore">0</span></div>
+                        <div>Pos: <span id="playerPos">150,150</span></div>
                         <div>Connections: <span id="connectionCount">0</span></div>
+                        <div id="keyStatus" style="margin-top: 5px; color: #ffaa00;">⌨️ Press keys...</div>
                     </div>
                 </div>
                 
@@ -568,6 +588,21 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal" style="display: none;">
+        <div class="modal-content">
+            <h3>📖 Controles de Teclado</h3>
+            <p style="margin: 15px 0; color: #cccccc;">
+                1. Arrastra nodos "Key Pressed" al canvas<br>
+                2. Configura la tecla en propiedades<br>
+                3. Conéctalos a acciones de movimiento<br>
+                4. ¡Ejecuta y prueba las teclas!<br><br>
+                <strong>Teclas disponibles:</strong> ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Space, Enter, Shift, Control, Alt, Tab, Escape, y letras (a-z)
+            </p>
+            <button class="game-button" onclick="closeHelp()">Entendido</button>
         </div>
     </div>
 
@@ -594,20 +629,55 @@
         let gameScore = 0;
         let gameLoop = null;
         let player = { x: 150, y: 150, size: 20 };
-
+        
+        // Keyboard state
+        let keyStates = {};
+        
         // Initialize with example nodes
         window.onload = function() {
-            addNode('event', 'start', 50, 50);
-            addNode('action', 'move', 250, 50);
-            addNode('action', 'score', 250, 150);
+            // Add example nodes for arrow key movement
+            addNode('condition', 'key', 50, 50, { key: 'ArrowRight' });
+            addNode('condition', 'key', 50, 120, { key: 'ArrowLeft' });
+            addNode('condition', 'key', 50, 190, { key: 'ArrowUp' });
+            addNode('condition', 'key', 50, 260, { key: 'ArrowDown' });
             
-            // Create an example connection
+            addNode('action', 'move', 250, 50, { direction: 'right', speed: 5 });
+            addNode('action', 'move', 250, 120, { direction: 'left', speed: 5 });
+            addNode('action', 'move', 250, 190, { direction: 'up', speed: 5 });
+            addNode('action', 'move', 250, 260, { direction: 'down', speed: 5 });
+            
+            // Create example connections
             setTimeout(() => {
-                if (nodes.length >= 2) {
-                    createConnection(nodes[0].id, 'out', nodes[1].id, 'in');
+                if (nodes.length >= 8) {
+                    createConnection(nodes[0].id, 'true', nodes[4].id, 'in');
+                    createConnection(nodes[1].id, 'true', nodes[5].id, 'in');
+                    createConnection(nodes[2].id, 'true', nodes[6].id, 'in');
+                    createConnection(nodes[3].id, 'true', nodes[7].id, 'in');
                 }
             }, 100);
+            
+            // Show help
+            setTimeout(() => {
+                document.getElementById('helpModal').style.display = 'flex';
+            }, 500);
+            
+            // Keyboard event listeners
+            window.addEventListener('keydown', (e) => {
+                keyStates[e.key] = true;
+                updateKeyStatus();
+                e.preventDefault();
+            });
+            
+            window.addEventListener('keyup', (e) => {
+                keyStates[e.key] = false;
+                updateKeyStatus();
+            });
         };
+
+        function updateKeyStatus() {
+            const activeKeys = Object.keys(keyStates).filter(key => keyStates[key]).join(', ');
+            document.getElementById('keyStatus').innerHTML = `⌨️ Keys: ${activeKeys || 'none'}`;
+        }
 
         // Drag and Drop
         function allowDrop(ev) {
@@ -628,7 +698,7 @@
             addNode(data[0], data[1], x, y);
         }
 
-        function addNode(type, subtype, x, y) {
+        function addNode(type, subtype, x, y, customProps = null) {
             const nodeId = nextNodeId++;
             const node = {
                 id: nodeId,
@@ -636,7 +706,7 @@
                 subtype: subtype,
                 x: x,
                 y: y,
-                properties: getDefaultProperties(subtype)
+                properties: customProps || getDefaultProperties(subtype)
             };
             
             nodes.push(node);
@@ -646,15 +716,17 @@
         function getDefaultProperties(subtype) {
             switch(subtype) {
                 case 'move':
-                    return { speed: 5, direction: 'right' };
-                case 'spawn':
-                    return { object: 'enemy', count: 1 };
+                case 'move_arrow':
+                case 'move_wasd':
+                    return { speed: 5 };
+                case 'key':
+                case 'keydown':
+                case 'keyup':
+                    return { key: 'Space' };
+                case 'set_position':
+                    return { x: 150, y: 150 };
                 case 'score':
                     return { amount: 10 };
-                case 'number':
-                    return { value: 0 };
-                case 'color':
-                    return { r: 255, g: 255, b: 255 };
                 default:
                     return {};
             }
@@ -675,8 +747,15 @@
                 // Node header
                 const header = document.createElement('div');
                 header.className = `node-header ${node.type}`;
+                
+                // Show key in header for key nodes
+                let headerText = getNodeName(node.subtype);
+                if ((node.subtype === 'key' || node.subtype === 'keydown' || node.subtype === 'keyup') && node.properties.key) {
+                    headerText += ` [${node.properties.key}]`;
+                }
+                
                 header.innerHTML = `
-                    ${getNodeIcon(node.subtype)} ${getNodeName(node.subtype)}
+                    ${getNodeIcon(node.subtype)} ${headerText}
                     <span style="cursor: pointer; padding: 0 4px;" onclick="deleteNode(${node.id})">✕</span>
                 `;
                 header.onmousedown = (e) => startDragNode(e, node.id);
@@ -745,13 +824,6 @@
                         <div class="pin-dot output" data-node="${node.id}" data-pin="false"></div>
                     </div>
                 `;
-            } else if (node.type === 'variable') {
-                pins = `
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Value</span>
-                        <div class="pin-dot output" data-node="${node.id}" data-pin="value"></div>
-                    </div>
-                `;
             }
             
             return pins;
@@ -765,6 +837,9 @@
             const nodeId = parseInt(pin.dataset.node);
             const pinName = pin.dataset.pin;
             const isOutput = pin.classList.contains('output');
+            
+            // Only allow dragging from output pins
+            if (!isOutput) return;
             
             // Start dragging a connection
             draggingConnection = {
@@ -808,7 +883,7 @@
                 const targetPinName = targetPin.dataset.pin;
                 const isTargetOutput = targetPin.classList.contains('output');
                 
-                // Valid connection: output -> input
+                // Valid connection: output -> input (target should be input)
                 if (!isTargetOutput) {
                     createConnection(draggingConnection.fromNode, draggingConnection.fromPin, targetNodeId, targetPinName);
                 }
@@ -924,17 +999,17 @@
             const icons = {
                 start: '▶',
                 update: '⟳',
-                collision: '⚡',
                 move: '⬆',
-                spawn: '✨',
-                destroy: '🗑',
-                score: '🏆',
+                move_arrow: '⬅➡',
+                move_wasd: 'WASD',
+                set_position: '🎯',
+                key: '⌨',
+                keydown: '⬇',
+                keyup: '⬆',
                 if: '❓',
                 compare: '≟',
-                key: '⌨',
-                number: '#',
-                vector: '⬛',
-                color: '🎨'
+                spawn: '✨',
+                score: '🏆'
             };
             return icons[subtype] || '●';
         }
@@ -943,17 +1018,17 @@
             const names = {
                 start: 'Game Start',
                 update: 'Update',
-                collision: 'Collision',
                 move: 'Move',
-                spawn: 'Spawn',
-                destroy: 'Destroy',
-                score: 'Add Score',
+                move_arrow: 'Arrow Keys',
+                move_wasd: 'WASD Keys',
+                set_position: 'Set Position',
+                key: 'Key Pressed',
+                keydown: 'Key Down',
+                keyup: 'Key Up',
                 if: 'If',
                 compare: 'Compare',
-                key: 'Key Press',
-                number: 'Number',
-                vector: 'Vector',
-                color: 'Color'
+                spawn: 'Spawn',
+                score: 'Add Score'
             };
             return names[subtype] || subtype;
         }
@@ -1026,6 +1101,31 @@
                             </select>
                         </div>
                     `;
+                } else if (key === 'key') {
+                    html += `
+                        <div class="property-row">
+                            <span>${key}:</span>
+                            <select onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
+                                <option value="Space" ${value === 'Space' ? 'selected' : ''}>Space</option>
+                                <option value="Enter" ${value === 'Enter' ? 'selected' : ''}>Enter</option>
+                                <option value="Shift" ${value === 'Shift' ? 'selected' : ''}>Shift</option>
+                                <option value="Control" ${value === 'Control' ? 'selected' : ''}>Control</option>
+                                <option value="Alt" ${value === 'Alt' ? 'selected' : ''}>Alt</option>
+                                <option value="Tab" ${value === 'Tab' ? 'selected' : ''}>Tab</option>
+                                <option value="Escape" ${value === 'Escape' ? 'selected' : ''}>Escape</option>
+                                <option value="ArrowUp" ${value === 'ArrowUp' ? 'selected' : ''}>Arrow Up</option>
+                                <option value="ArrowDown" ${value === 'ArrowDown' ? 'selected' : ''}>Arrow Down</option>
+                                <option value="ArrowLeft" ${value === 'ArrowLeft' ? 'selected' : ''}>Arrow Left</option>
+                                <option value="ArrowRight" ${value === 'ArrowRight' ? 'selected' : ''}>Arrow Right</option>
+                                <option value="a" ${value === 'a' ? 'selected' : ''}>A</option>
+                                <option value="b" ${value === 'b' ? 'selected' : ''}>B</option>
+                                <option value="c" ${value === 'c' ? 'selected' : ''}>C</option>
+                                <option value="d" ${value === 'd' ? 'selected' : ''}>D</option>
+                                <option value="w" ${value === 'w' ? 'selected' : ''}>W</option>
+                                <option value="s" ${value === 's' ? 'selected' : ''}>S</option>
+                            </select>
+                        </div>
+                    `;
                 } else {
                     html += `
                         <div class="property-row">
@@ -1043,6 +1143,7 @@
             const node = nodes.find(n => n.id === nodeId);
             if (node) {
                 node.properties[key] = value;
+                renderNodes(); // Re-render to update header
             }
         }
 
@@ -1080,6 +1181,10 @@
             }
         }
 
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
         // Game functions
         function compileAndRun() {
             startGame();
@@ -1099,6 +1204,13 @@
                 
                 // Interpret connections and update game
                 interpretVisualScript();
+                
+                // Keep player in bounds
+                player.x = Math.max(10, Math.min(290, player.x));
+                player.y = Math.max(10, Math.min(290, player.y));
+                
+                // Update position display
+                document.getElementById('playerPos').innerText = `${Math.round(player.x)},${Math.round(player.y)}`;
                 
                 // Draw
                 ctx.clearRect(0, 0, 300, 300);
@@ -1124,33 +1236,87 @@
                 ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
                 ctx.shadowBlur = 0;
                 
+                // Draw direction indicator
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px monospace';
+                ctx.fillText(`(${Math.round(player.x)},${Math.round(player.y)})`, 10, 20);
+                
             }, 1000/60);
         }
 
         function interpretVisualScript() {
-            // Simple interpretation - find event nodes connected to actions
+            // Process each connection
             connections.forEach(conn => {
                 const fromNode = nodes.find(n => n.id === conn.fromNode);
                 const toNode = nodes.find(n => n.id === conn.toNode);
                 
-                if (fromNode && toNode) {
-                    if (fromNode.subtype === 'start' || fromNode.subtype === 'update') {
-                        if (toNode.subtype === 'move') {
-                            const speed = parseInt(toNode.properties.speed) || 5;
-                            if (toNode.properties.direction === 'right') player.x = Math.min(290, player.x + speed);
-                            if (toNode.properties.direction === 'left') player.x = Math.max(10, player.x - speed);
-                            if (toNode.properties.direction === 'up') player.y = Math.max(10, player.y - speed);
-                            if (toNode.properties.direction === 'down') player.y = Math.min(290, player.y + speed);
-                        }
+                if (!fromNode || !toNode) return;
+                
+                // Check if condition is met (for key nodes)
+                let conditionMet = true;
+                
+                if (fromNode.type === 'condition') {
+                    if (fromNode.subtype === 'key' || fromNode.subtype === 'keydown' || fromNode.subtype === 'keyup') {
+                        const targetKey = fromNode.properties.key || 'Space';
                         
-                        if (toNode.subtype === 'score') {
-                            const amount = parseInt(toNode.properties.amount) || 10;
-                            gameScore += amount;
-                            document.getElementById('gameScore').innerText = gameScore;
+                        if (fromNode.subtype === 'key') {
+                            conditionMet = keyStates[targetKey] === true;
+                        } else if (fromNode.subtype === 'keydown') {
+                            // Just triggered on key down (we'd need more complex handling)
+                            conditionMet = keyStates[targetKey] === true;
+                        } else if (fromNode.subtype === 'keyup') {
+                            // Just triggered on key up
+                            conditionMet = keyStates[targetKey] === false;
                         }
                     }
                 }
+                
+                // If condition is met, execute the action
+                if (conditionMet) {
+                    executeAction(toNode);
+                }
             });
+        }
+
+        function executeAction(node) {
+            if (!node) return;
+            
+            switch(node.subtype) {
+                case 'move':
+                    const speed = parseInt(node.properties.speed) || 5;
+                    if (node.properties.direction === 'right') player.x += speed;
+                    if (node.properties.direction === 'left') player.x -= speed;
+                    if (node.properties.direction === 'up') player.y -= speed;
+                    if (node.properties.direction === 'down') player.y += speed;
+                    break;
+                    
+                case 'move_arrow':
+                    const arrowSpeed = parseInt(node.properties.speed) || 5;
+                    if (keyStates['ArrowRight']) player.x += arrowSpeed;
+                    if (keyStates['ArrowLeft']) player.x -= arrowSpeed;
+                    if (keyStates['ArrowUp']) player.y -= arrowSpeed;
+                    if (keyStates['ArrowDown']) player.y += arrowSpeed;
+                    break;
+                    
+                case 'move_wasd':
+                    const wasdSpeed = parseInt(node.properties.speed) || 5;
+                    if (keyStates['d'] || keyStates['D']) player.x += wasdSpeed;
+                    if (keyStates['a'] || keyStates['A']) player.x -= wasdSpeed;
+                    if (keyStates['w'] || keyStates['W']) player.y -= wasdSpeed;
+                    if (keyStates['s'] || keyStates['S']) player.y += wasdSpeed;
+                    break;
+                    
+                case 'set_position':
+                    player.x = parseInt(node.properties.x) || 150;
+                    player.y = parseInt(node.properties.y) || 150;
+                    break;
+                    
+                case 'score':
+                    const amount = parseInt(node.properties.amount) || 10;
+                    gameScore += amount;
+                    document.getElementById('gameScore').innerText = gameScore;
+                    break;
+            }
         }
 
         function stopGame() {
@@ -1166,6 +1332,7 @@
             player = { x: 150, y: 150, size: 20 };
             gameScore = 0;
             document.getElementById('gameScore').innerText = '0';
+            document.getElementById('playerPos').innerText = '150,150';
             ctx.clearRect(0, 0, 300, 300);
         }
 
@@ -1185,6 +1352,7 @@
         window.stopGame = stopGame;
         window.resetGame = resetGame;
         window.selectNode = selectNode;
+        window.closeHelp = closeHelp;
     </script>
 </body>
 </html>
