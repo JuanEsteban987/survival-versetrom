@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 VisualScript - Controles de Teclado</title>
+    <title>🎮 VisualScript - Biblioteca Completa de Nodos</title>
     <style>
         * {
             margin: 0;
@@ -75,7 +75,7 @@
 
         /* Toolbox Sidebar */
         .toolbox {
-            width: 220px;
+            width: 250px;
             background: #252526;
             border-right: 1px solid #3e3e42;
             display: flex;
@@ -106,6 +106,9 @@
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .node-item {
@@ -141,7 +144,10 @@
         .node-icon.event { background: #804000; }
         .node-icon.action { background: #005a9e; }
         .node-icon.condition { background: #6c4f8c; }
+        .node-icon.math { background: #2e7d32; }
         .node-icon.variable { background: #8c4f4f; }
+        .node-icon.game { background: #008b8b; }
+        .node-icon.enemy { background: #8b0000; }
 
         /* Visual Scripting Canvas */
         .script-canvas-area {
@@ -160,6 +166,7 @@
             display: flex;
             gap: 8px;
             z-index: 10;
+            flex-wrap: wrap;
         }
 
         .canvas-button {
@@ -235,7 +242,7 @@
             background: #2d2d2d;
             border: 1px solid #3e3e42;
             border-radius: 6px;
-            min-width: 160px;
+            min-width: 170px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             user-select: none;
             z-index: 10;
@@ -260,7 +267,10 @@
         .node-header.event { background: #804000; color: white; }
         .node-header.action { background: #005a9e; color: white; }
         .node-header.condition { background: #6c4f8c; color: white; }
+        .node-header.math { background: #2e7d32; color: white; }
         .node-header.variable { background: #8c4f4f; color: white; }
+        .node-header.game { background: #008b8b; color: white; }
+        .node-header.enemy { background: #8b0000; color: white; }
 
         .node-content {
             padding: 10px;
@@ -307,6 +317,14 @@
         .pin-dot.connected {
             background: #4caf50;
             box-shadow: 0 0 10px #4caf50;
+        }
+
+        .pin-dot.data {
+            background: #ff6b6b;
+        }
+
+        .pin-dot.data.output {
+            background: #ff8c8c;
         }
 
         .pin-label {
@@ -445,14 +463,14 @@
                 <div class="window-btn minimize"></div>
                 <div class="window-btn maximize"></div>
             </div>
-            <span class="title-text">🔷 VisualScript - Controles de Teclado</span>
+            <span class="title-text">🔷 VisualScript - Biblioteca Completa de Nodos</span>
         </div>
 
         <!-- Main Layout -->
         <div class="main-layout">
             <!-- Toolbox -->
             <div class="toolbox">
-                <div class="toolbox-header">📦 NODE TOOLBOX</div>
+                <div class="toolbox-header">📦 NODE TOOLBOX (42 NODOS)</div>
                 <div class="toolbox-content" id="nodeToolbox">
                     <div class="node-category">
                         <div class="node-category-title">🎯 EVENTOS</div>
@@ -464,65 +482,229 @@
                             <div class="node-icon event">⟳</div>
                             On Update
                         </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="fixedupdate" ondragstart="dragNode(event)">
+                            <div class="node-icon event">⏱️</div>
+                            On Fixed Update
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="collision" ondragstart="dragNode(event)">
+                            <div class="node-icon event">💥</div>
+                            On Collision
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="trigger" ondragstart="dragNode(event)">
+                            <div class="node-icon event">🔘</div>
+                            On Trigger Enter
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="mouse" ondragstart="dragNode(event)">
+                            <div class="node-icon event">🖱️</div>
+                            On Mouse Click
+                        </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">⌨️ CONDICIONES DE TECLADO</div>
+                        <div class="node-category-title">⌨️ INPUT</div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⌨</div>
+                            <div class="node-icon condition">⌨️</div>
                             Key Pressed
                         </div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="keydown" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⬇</div>
+                            <div class="node-icon condition">⬇️</div>
                             Key Down
                         </div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="keyup" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⬆</div>
+                            <div class="node-icon condition">⬆️</div>
                             Key Up
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="mousepos" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">📌</div>
+                            Mouse Position
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="mousedown" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">🖱️⬇️</div>
+                            Mouse Button Down
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">🎮 ACCIONES DE MOVIMIENTO</div>
+                        <div class="node-category-title">🎮 MOVIMIENTO</div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="move" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⬆</div>
-                            Move Player
+                            <div class="node-icon action">⬆️</div>
+                            Move Direction
                         </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="move_arrow" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⬅➡</div>
-                            Move with Arrows
+                            <div class="node-icon action">⬅️➡️</div>
+                            Arrow Keys Move
                         </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="move_wasd" ondragstart="dragNode(event)">
                             <div class="node-icon action">WASD</div>
-                            Move with WASD
+                            WASD Move
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="set_position" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🎯</div>
-                            Set Position
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="jump" ondragstart="dragNode(event)">
+                            <div class="node-icon action">⬆️⬆️</div>
+                            Jump
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="gravity" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🌍</div>
+                            Apply Gravity
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="teleport" ondragstart="dragNode(event)">
+                            <div class="node-icon action">✨</div>
+                            Teleport To
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="follow" ondragstart="dragNode(event)">
+                            <div class="node-icon action">👁️</div>
+                            Follow Player
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="patrol" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🔄</div>
+                            Patrol
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">🔀 OTRAS CONDICIONES</div>
+                        <div class="node-category-title">➕ MATEMÁTICAS</div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="add" ondragstart="dragNode(event)">
+                            <div class="node-icon math">➕</div>
+                            Add
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="subtract" ondragstart="dragNode(event)">
+                            <div class="node-icon math">➖</div>
+                            Subtract
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="multiply" ondragstart="dragNode(event)">
+                            <div class="node-icon math">✖️</div>
+                            Multiply
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="divide" ondragstart="dragNode(event)">
+                            <div class="node-icon math">➗</div>
+                            Divide
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="random" ondragstart="dragNode(event)">
+                            <div class="node-icon math">🎲</div>
+                            Random
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="distance" ondragstart="dragNode(event)">
+                            <div class="node-icon math">📏</div>
+                            Distance
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="clamp" ondragstart="dragNode(event)">
+                            <div class="node-icon math">📐</div>
+                            Clamp
+                        </div>
+                        <div class="node-item" draggable="true" data-type="math" data-subtype="lerp" ondragstart="dragNode(event)">
+                            <div class="node-icon math">📈</div>
+                            Lerp
+                        </div>
+                    </div>
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">🔀 CONDICIONES</div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="if" ondragstart="dragNode(event)">
                             <div class="node-icon condition">❓</div>
                             If Condition
                         </div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="compare" ondragstart="dragNode(event)">
                             <div class="node-icon condition">≟</div>
-                            Compare Values
+                            Compare
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="greater" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">></div>
+                            Greater Than
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="less" ondragstart="dragNode(event)">
+                            <div class="node-icon condition"><</div>
+                            Less Than
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="and" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">&&</div>
+                            AND
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="or" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">||</div>
+                            OR
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="not" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">!</div>
+                            NOT
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">🎯 OTRAS ACCIONES</div>
+                        <div class="node-category-title">📊 VARIABLES</div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="number" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">#</div>
+                            Number
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="string" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">A</div>
+                            String
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="boolean" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">✓</div>
+                            Boolean
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="vector2" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">⬛</div>
+                            Vector 2
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="color" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">🎨</div>
+                            Color
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="array" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">📋</div>
+                            Array
+                        </div>
+                    </div>
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">🎯 JUEGO</div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🏆</div>
+                            Add Score
+                        </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
                             <div class="node-icon action">✨</div>
                             Spawn Object
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🏆</div>
-                            Add Score
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="destroy" ondragstart="dragNode(event)">
+                            <div class="node-icon action">💀</div>
+                            Destroy Object
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="timer" ondragstart="dragNode(event)">
+                            <div class="node-icon action">⏰</div>
+                            Timer
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="delay" ondragstart="dragNode(event)">
+                            <div class="node-icon action">⏳</div>
+                            Delay
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="repeat" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🔄</div>
+                            Repeat
+                        </div>
+                    </div>
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">👾 ENEMIGOS</div>
+                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="chase" ondragstart="dragNode(event)">
+                            <div class="node-icon enemy">🏃</div>
+                            Chase Player
+                        </div>
+                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="shoot" ondragstart="dragNode(event)">
+                            <div class="node-icon enemy">🔫</div>
+                            Shoot
+                        </div>
+                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="patrol" ondragstart="dragNode(event)">
+                            <div class="node-icon enemy">🔄</div>
+                            Enemy Patrol
+                        </div>
+                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="health" ondragstart="dragNode(event)">
+                            <div class="node-icon enemy">❤️</div>
+                            Enemy Health
+                        </div>
+                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="spawner" ondragstart="dragNode(event)">
+                            <div class="node-icon enemy">🪺</div>
+                            Enemy Spawner
                         </div>
                     </div>
                 </div>
@@ -549,6 +731,9 @@
                     <button class="canvas-button" onclick="deleteSelectedConnection()">
                         🔗 Delete Connection
                     </button>
+                    <button class="canvas-button" onclick="createExampleGame()">
+                        📝 Example Game
+                    </button>
                 </div>
                 <div id="visualScriptCanvas" ondragover="allowDrop(event)" ondrop="dropNode(event)">
                     <svg class="connections-layer" id="connectionsSVG"></svg>
@@ -573,6 +758,7 @@
                     <div style="color: #cccccc; font-size: 12px; width: 100%;">
                         <div>Score: <span id="gameScore">0</span></div>
                         <div>Pos: <span id="playerPos">150,150</span></div>
+                        <div>Enemies: <span id="enemyCount">0</span></div>
                         <div>Connections: <span id="connectionCount">0</span></div>
                         <div id="keyStatus" style="margin-top: 5px; color: #ffaa00;">⌨️ Press keys...</div>
                     </div>
@@ -594,15 +780,19 @@
     <!-- Help Modal -->
     <div class="modal" id="helpModal" style="display: none;">
         <div class="modal-content">
-            <h3>📖 Controles de Teclado</h3>
-            <p style="margin: 15px 0; color: #cccccc;">
-                1. Arrastra nodos "Key Pressed" al canvas<br>
-                2. Configura la tecla en propiedades<br>
-                3. Conéctalos a acciones de movimiento<br>
-                4. ¡Ejecuta y prueba las teclas!<br><br>
-                <strong>Teclas disponibles:</strong> ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Space, Enter, Shift, Control, Alt, Tab, Escape, y letras (a-z)
+            <h3>📖 VisualScript - 42 Nodos</h3>
+            <p style="margin: 15px 0; color: #cccccc; max-height: 300px; overflow-y: auto;">
+                <strong>Eventos:</strong> Game Start, Update, Collision, Mouse<br>
+                <strong>Input:</strong> Key Pressed, Mouse Position, Mouse Button<br>
+                <strong>Movimiento:</strong> Arrow Keys, WASD, Jump, Gravity, Follow<br>
+                <strong>Matemáticas:</strong> Add, Subtract, Multiply, Random, Distance<br>
+                <strong>Condiciones:</strong> If, Compare, AND, OR, NOT<br>
+                <strong>Variables:</strong> Number, String, Boolean, Vector, Color<br>
+                <strong>Juego:</strong> Score, Spawn, Destroy, Timer, Repeat<br>
+                <strong>Enemigos:</strong> Chase, Shoot, Patrol, Health, Spawner<br><br>
+                <button class="game-button" onclick="createExampleGame()">Crear Juego Ejemplo</button>
             </p>
-            <button class="game-button" onclick="closeHelp()">Entendido</button>
+            <button class="game-button" onclick="closeHelp()">Cerrar</button>
         </div>
     </div>
 
@@ -628,38 +818,18 @@
         let gameRunning = false;
         let gameScore = 0;
         let gameLoop = null;
-        let player = { x: 150, y: 150, size: 20 };
+        let player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+        let enemies = [];
+        let bullets = [];
+        let variables = {};
+        let timers = {};
         
         // Keyboard state
         let keyStates = {};
         
-        // Initialize with example nodes
+        // Initialize
         window.onload = function() {
-            // Add example nodes for arrow key movement
-            addNode('condition', 'key', 50, 50, { key: 'ArrowRight' });
-            addNode('condition', 'key', 50, 120, { key: 'ArrowLeft' });
-            addNode('condition', 'key', 50, 190, { key: 'ArrowUp' });
-            addNode('condition', 'key', 50, 260, { key: 'ArrowDown' });
-            
-            addNode('action', 'move', 250, 50, { direction: 'right', speed: 5 });
-            addNode('action', 'move', 250, 120, { direction: 'left', speed: 5 });
-            addNode('action', 'move', 250, 190, { direction: 'up', speed: 5 });
-            addNode('action', 'move', 250, 260, { direction: 'down', speed: 5 });
-            
-            // Create example connections
-            setTimeout(() => {
-                if (nodes.length >= 8) {
-                    createConnection(nodes[0].id, 'true', nodes[4].id, 'in');
-                    createConnection(nodes[1].id, 'true', nodes[5].id, 'in');
-                    createConnection(nodes[2].id, 'true', nodes[6].id, 'in');
-                    createConnection(nodes[3].id, 'true', nodes[7].id, 'in');
-                }
-            }, 100);
-            
-            // Show help
-            setTimeout(() => {
-                document.getElementById('helpModal').style.display = 'flex';
-            }, 500);
+            showHelp();
             
             // Keyboard event listeners
             window.addEventListener('keydown', (e) => {
@@ -671,6 +841,16 @@
             window.addEventListener('keyup', (e) => {
                 keyStates[e.key] = false;
                 updateKeyStatus();
+            });
+            
+            // Mouse event listeners
+            canvas.addEventListener('click', (e) => {
+                if (gameRunning) {
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    handleMouseClick(mouseX, mouseY);
+                }
             });
         };
 
@@ -715,28 +895,90 @@
 
         function getDefaultProperties(subtype) {
             switch(subtype) {
+                // Movimiento
                 case 'move':
+                    return { speed: 5, direction: 'right' };
                 case 'move_arrow':
                 case 'move_wasd':
                     return { speed: 5 };
+                case 'jump':
+                    return { force: 10, cooldown: 0 };
+                case 'gravity':
+                    return { strength: 0.5, maxSpeed: 10 };
+                case 'teleport':
+                    return { x: 150, y: 150 };
+                case 'follow':
+                    return { speed: 3, distance: 50 };
+                case 'patrol':
+                    return { speed: 2, range: 100 };
+                    
+                // Matemáticas
+                case 'add':
+                case 'subtract':
+                case 'multiply':
+                case 'divide':
+                    return { a: 0, b: 0 };
+                case 'random':
+                    return { min: 0, max: 100 };
+                case 'distance':
+                    return { x1: 0, y1: 0, x2: 0, y2: 0 };
+                case 'clamp':
+                    return { value: 0, min: 0, max: 100 };
+                case 'lerp':
+                    return { a: 0, b: 0, t: 0.5 };
+                    
+                // Input
                 case 'key':
                 case 'keydown':
                 case 'keyup':
                     return { key: 'Space' };
-                case 'set_position':
-                    return { x: 150, y: 150 };
+                case 'mousepos':
+                    return { output: 'vector' };
+                    
+                // Juego
                 case 'score':
                     return { amount: 10 };
+                case 'spawn':
+                    return { type: 'enemy', count: 1 };
+                case 'timer':
+                    return { seconds: 1, repeat: false };
+                case 'delay':
+                    return { seconds: 1 };
+                case 'repeat':
+                    return { times: 3, delay: 0.5 };
+                    
+                // Enemigos
+                case 'chase':
+                    return { speed: 2, damage: 10 };
+                case 'shoot':
+                    return { speed: 5, cooldown: 1 };
+                case 'health':
+                    return { maxHealth: 100, currentHealth: 100 };
+                case 'spawner':
+                    return { rate: 2, maxEnemies: 5 };
+                    
+                // Variables
+                case 'number':
+                    return { value: 0 };
+                case 'string':
+                    return { value: '' };
+                case 'boolean':
+                    return { value: true };
+                case 'vector2':
+                    return { x: 0, y: 0 };
+                case 'color':
+                    return { r: 255, g: 255, b: 255 };
+                case 'array':
+                    return { values: [] };
+                    
                 default:
                     return {};
             }
         }
 
         function renderNodes() {
-            // Clear canvas inner
             canvasInner.innerHTML = '';
             
-            // Render each node
             nodes.forEach(node => {
                 const nodeEl = document.createElement('div');
                 nodeEl.className = 'visual-node' + (selectedNode === node.id ? ' selected' : '');
@@ -748,9 +990,11 @@
                 const header = document.createElement('div');
                 header.className = `node-header ${node.type}`;
                 
-                // Show key in header for key nodes
+                // Show value in header for some nodes
                 let headerText = getNodeName(node.subtype);
-                if ((node.subtype === 'key' || node.subtype === 'keydown' || node.subtype === 'keyup') && node.properties.key) {
+                if (node.subtype === 'number' && node.properties.value !== undefined) {
+                    headerText += ` [${node.properties.value}]`;
+                } else if ((node.subtype === 'key' || node.subtype === 'keydown' || node.subtype === 'keyup') && node.properties.key) {
                     headerText += ` [${node.properties.key}]`;
                 }
                 
@@ -783,7 +1027,6 @@
                 pin.addEventListener('mousedown', startPinDrag);
             });
             
-            // Render connections
             renderConnections();
             updateConnectionCount();
         }
@@ -791,6 +1034,7 @@
         function generateNodePins(node) {
             let pins = '';
             
+            // Base pins based on node type
             if (node.type === 'event') {
                 pins = `
                     <div class="node-pin pin-output">
@@ -798,7 +1042,7 @@
                         <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
                     </div>
                 `;
-            } else if (node.type === 'action') {
+            } else if (node.type === 'action' || node.type === 'enemy') {
                 pins = `
                     <div class="node-pin">
                         <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
@@ -824,6 +1068,32 @@
                         <div class="pin-dot output" data-node="${node.id}" data-pin="false"></div>
                     </div>
                 `;
+            } else if (node.type === 'math') {
+                pins = `
+                    <div class="node-pin">
+                        <div class="pin-dot data" data-node="${node.id}" data-pin="a"></div>
+                        <span class="pin-label">A</span>
+                    </div>
+                    <div class="node-pin">
+                        <div class="pin-dot data" data-node="${node.id}" data-pin="b"></div>
+                        <span class="pin-label">B</span>
+                    </div>
+                    <div class="node-pin pin-output">
+                        <span class="pin-label">Result</span>
+                        <div class="pin-dot output data" data-node="${node.id}" data-pin="result"></div>
+                    </div>
+                `;
+            } else if (node.type === 'variable') {
+                pins = `
+                    <div class="node-pin pin-output">
+                        <span class="pin-label">Get</span>
+                        <div class="pin-dot output data" data-node="${node.id}" data-pin="get"></div>
+                    </div>
+                    <div class="node-pin">
+                        <div class="pin-dot data" data-node="${node.id}" data-pin="set"></div>
+                        <span class="pin-label">Set</span>
+                    </div>
+                `;
             }
             
             return pins;
@@ -841,7 +1111,6 @@
             // Only allow dragging from output pins
             if (!isOutput) return;
             
-            // Start dragging a connection
             draggingConnection = {
                 fromNode: nodeId,
                 fromPin: pinName,
@@ -849,7 +1118,6 @@
                 startY: e.clientY
             };
             
-            // Create temporary connection line
             tempConnection = {
                 fromNode: nodeId,
                 fromPin: pinName,
@@ -867,14 +1135,12 @@
             tempConnection.toX = e.clientX;
             tempConnection.toY = e.clientY;
             
-            // Update temporary line
             renderConnections();
         }
 
         function onPinDragEnd(e) {
             if (!draggingConnection) return;
             
-            // Check if dropped on another pin
             const elementsAtCursor = document.elementsFromPoint(e.clientX, e.clientY);
             const targetPin = elementsAtCursor.find(el => el.classList.contains('pin-dot'));
             
@@ -889,7 +1155,6 @@
                 }
             }
             
-            // Clear dragging state
             draggingConnection = null;
             tempConnection = null;
             document.removeEventListener('mousemove', onPinDragMove);
@@ -899,7 +1164,6 @@
         }
 
         function createConnection(fromNodeId, fromPin, toNodeId, toPin) {
-            // Check if connection already exists
             const exists = connections.some(c => 
                 c.fromNode === fromNodeId && c.fromPin === fromPin && 
                 c.toNode === toNodeId && c.toPin === toPin
@@ -918,13 +1182,10 @@
         }
 
         function renderConnections() {
-            // Clear SVG
             svg.innerHTML = '';
             
-            // Get canvas position
             const canvasRect = document.getElementById('visualScriptCanvas').getBoundingClientRect();
             
-            // Render permanent connections
             connections.forEach(conn => {
                 const fromPin = findPinElement(conn.fromNode, conn.fromPin);
                 const toPin = findPinElement(conn.toNode, conn.toPin);
@@ -942,7 +1203,6 @@
                 }
             });
             
-            // Render temporary connection
             if (tempConnection && draggingConnection) {
                 const fromPin = findPinElement(tempConnection.fromNode, tempConnection.fromPin);
                 
@@ -961,7 +1221,6 @@
         function drawConnection(x1, y1, x2, y2, isTemporary) {
             const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
             
-            // Calculate control points for curved line
             const dx = Math.abs(x2 - x1) * 0.5;
             const path = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
             
@@ -997,38 +1256,32 @@
 
         function getNodeIcon(subtype) {
             const icons = {
-                start: '▶',
-                update: '⟳',
-                move: '⬆',
-                move_arrow: '⬅➡',
-                move_wasd: 'WASD',
-                set_position: '🎯',
-                key: '⌨',
-                keydown: '⬇',
-                keyup: '⬆',
-                if: '❓',
-                compare: '≟',
-                spawn: '✨',
-                score: '🏆'
+                start: '▶', update: '⟳', fixedupdate: '⏱️', collision: '💥', trigger: '🔘', mouse: '🖱️',
+                key: '⌨️', keydown: '⬇️', keyup: '⬆️', mousepos: '📌', mousedown: '🖱️⬇️',
+                move: '⬆️', move_arrow: '⬅️➡️', move_wasd: 'WASD', jump: '⬆️⬆️', gravity: '🌍',
+                teleport: '✨', follow: '👁️', patrol: '🔄',
+                add: '➕', subtract: '➖', multiply: '✖️', divide: '➗', random: '🎲',
+                distance: '📏', clamp: '📐', lerp: '📈',
+                if: '❓', compare: '≟', greater: '>', less: '<', and: '&&', or: '||', not: '!',
+                number: '#', string: 'A', boolean: '✓', vector2: '⬛', color: '🎨', array: '📋',
+                score: '🏆', spawn: '✨', destroy: '💀', timer: '⏰', delay: '⏳', repeat: '🔄',
+                chase: '🏃', shoot: '🔫', health: '❤️', spawner: '🪺'
             };
             return icons[subtype] || '●';
         }
 
         function getNodeName(subtype) {
             const names = {
-                start: 'Game Start',
-                update: 'Update',
-                move: 'Move',
-                move_arrow: 'Arrow Keys',
-                move_wasd: 'WASD Keys',
-                set_position: 'Set Position',
-                key: 'Key Pressed',
-                keydown: 'Key Down',
-                keyup: 'Key Up',
-                if: 'If',
-                compare: 'Compare',
-                spawn: 'Spawn',
-                score: 'Add Score'
+                start: 'Game Start', update: 'Update', fixedupdate: 'Fixed Update', collision: 'Collision', trigger: 'Trigger', mouse: 'Mouse Click',
+                key: 'Key Pressed', keydown: 'Key Down', keyup: 'Key Up', mousepos: 'Mouse Pos', mousedown: 'Mouse Down',
+                move: 'Move', move_arrow: 'Arrow Keys', move_wasd: 'WASD', jump: 'Jump', gravity: 'Gravity',
+                teleport: 'Teleport', follow: 'Follow', patrol: 'Patrol',
+                add: 'Add', subtract: 'Subtract', multiply: 'Multiply', divide: 'Divide', random: 'Random',
+                distance: 'Distance', clamp: 'Clamp', lerp: 'Lerp',
+                if: 'If', compare: 'Compare', greater: 'Greater', less: 'Less', and: 'AND', or: 'OR', not: 'NOT',
+                number: 'Number', string: 'String', boolean: 'Boolean', vector2: 'Vector2', color: 'Color', array: 'Array',
+                score: 'Add Score', spawn: 'Spawn', destroy: 'Destroy', timer: 'Timer', delay: 'Delay', repeat: 'Repeat',
+                chase: 'Chase', shoot: 'Shoot', health: 'Health', spawner: 'Spawner'
             };
             return names[subtype] || subtype;
         }
@@ -1061,9 +1314,7 @@
         }
 
         function deleteNode(nodeId) {
-            // Delete connections involving this node
             connections = connections.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId);
-            
             nodes = nodes.filter(n => n.id !== nodeId);
             if (selectedNode === nodeId) {
                 selectedNode = null;
@@ -1143,7 +1394,7 @@
             const node = nodes.find(n => n.id === nodeId);
             if (node) {
                 node.properties[key] = value;
-                renderNodes(); // Re-render to update header
+                renderNodes();
             }
         }
 
@@ -1181,8 +1432,40 @@
             }
         }
 
+        function createExampleGame() {
+            clearCanvas();
+            
+            // Create a simple platformer example
+            addNode('event', 'start', 50, 50);
+            addNode('event', 'update', 50, 120);
+            
+            addNode('condition', 'key', 50, 200, { key: 'Space' });
+            addNode('action', 'jump', 250, 200, { force: 12 });
+            
+            addNode('action', 'move_arrow', 250, 280, { speed: 5 });
+            addNode('action', 'gravity', 250, 350, { strength: 0.5 });
+            
+            addNode('action', 'score', 450, 50, { amount: 1 });
+            addNode('enemy', 'spawner', 450, 120, { rate: 3 });
+            
+            setTimeout(() => {
+                if (nodes.length >= 7) {
+                    createConnection(nodes[1].id, 'out', nodes[2].id, 'in');
+                    createConnection(nodes[2].id, 'true', nodes[3].id, 'in');
+                    createConnection(nodes[1].id, 'out', nodes[4].id, 'in');
+                    createConnection(nodes[1].id, 'out', nodes[5].id, 'in');
+                }
+            }, 100);
+            
+            alert('¡Juego ejemplo creado! Conecta: Update → Jump (con Space) y Update → Move y Gravity');
+        }
+
         function closeHelp() {
             document.getElementById('helpModal').style.display = 'none';
+        }
+
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'flex';
         }
 
         // Game functions
@@ -1195,66 +1478,70 @@
             
             gameRunning = true;
             gameScore = 0;
+            enemies = [];
+            bullets = [];
+            player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+            
             document.getElementById('gameScore').innerText = '0';
             
-            // Game loop
             if (gameLoop) clearInterval(gameLoop);
             gameLoop = setInterval(() => {
                 if (!gameRunning) return;
                 
-                // Interpret connections and update game
                 interpretVisualScript();
+                
+                // Apply gravity
+                if (player.velocityY !== undefined) {
+                    player.y += player.velocityY;
+                    player.velocityY += 0.5; // Gravity
+                    
+                    // Ground collision
+                    if (player.y > 280) {
+                        player.y = 280;
+                        player.velocityY = 0;
+                        player.onGround = true;
+                    } else {
+                        player.onGround = false;
+                    }
+                }
                 
                 // Keep player in bounds
                 player.x = Math.max(10, Math.min(290, player.x));
                 player.y = Math.max(10, Math.min(290, player.y));
                 
-                // Update position display
+                // Update enemies
+                enemies = enemies.filter(e => {
+                    if (e.health <= 0) return false;
+                    
+                    // Simple chase behavior
+                    if (e.type === 'chase') {
+                        if (player.x > e.x) e.x += e.speed || 1;
+                        if (player.x < e.x) e.x -= e.speed || 1;
+                        if (player.y > e.y) e.y += e.speed || 1;
+                        if (player.y < e.y) e.y -= e.speed || 1;
+                    }
+                    
+                    return true;
+                });
+                
                 document.getElementById('playerPos').innerText = `${Math.round(player.x)},${Math.round(player.y)}`;
+                document.getElementById('enemyCount').innerText = enemies.length;
                 
-                // Draw
-                ctx.clearRect(0, 0, 300, 300);
-                
-                // Draw grid
-                ctx.strokeStyle = '#3e3e42';
-                ctx.lineWidth = 0.5;
-                for (let i = 0; i <= 300; i += 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(i, 0);
-                    ctx.lineTo(i, 300);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(0, i);
-                    ctx.lineTo(300, i);
-                    ctx.stroke();
-                }
-                
-                // Draw player
-                ctx.fillStyle = '#4ecdc4';
-                ctx.shadowColor = '#4ecdc4';
-                ctx.shadowBlur = 10;
-                ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
-                ctx.shadowBlur = 0;
-                
-                // Draw direction indicator
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '10px monospace';
-                ctx.fillText(`(${Math.round(player.x)},${Math.round(player.y)})`, 10, 20);
+                draw();
                 
             }, 1000/60);
         }
 
         function interpretVisualScript() {
-            // Process each connection
             connections.forEach(conn => {
                 const fromNode = nodes.find(n => n.id === conn.fromNode);
                 const toNode = nodes.find(n => n.id === conn.toNode);
                 
                 if (!fromNode || !toNode) return;
                 
-                // Check if condition is met (for key nodes)
                 let conditionMet = true;
                 
+                // Check conditions for condition nodes
                 if (fromNode.type === 'condition') {
                     if (fromNode.subtype === 'key' || fromNode.subtype === 'keydown' || fromNode.subtype === 'keyup') {
                         const targetKey = fromNode.properties.key || 'Space';
@@ -1262,26 +1549,29 @@
                         if (fromNode.subtype === 'key') {
                             conditionMet = keyStates[targetKey] === true;
                         } else if (fromNode.subtype === 'keydown') {
-                            // Just triggered on key down (we'd need more complex handling)
                             conditionMet = keyStates[targetKey] === true;
                         } else if (fromNode.subtype === 'keyup') {
-                            // Just triggered on key up
                             conditionMet = keyStates[targetKey] === false;
                         }
                     }
                 }
                 
-                // If condition is met, execute the action
+                // Execute based on pin
                 if (conditionMet) {
-                    executeAction(toNode);
+                    if (conn.fromPin === 'true' || conn.fromPin === 'out' || conn.fromPin === 'result' || conn.fromPin === 'get') {
+                        executeNode(toNode);
+                    }
+                } else if (conn.fromPin === 'false') {
+                    executeNode(toNode);
                 }
             });
         }
 
-        function executeAction(node) {
+        function executeNode(node) {
             if (!node) return;
             
             switch(node.subtype) {
+                // Movimiento
                 case 'move':
                     const speed = parseInt(node.properties.speed) || 5;
                     if (node.properties.direction === 'right') player.x += speed;
@@ -1306,9 +1596,33 @@
                     if (keyStates['s'] || keyStates['S']) player.y += wasdSpeed;
                     break;
                     
-                case 'set_position':
+                case 'jump':
+                    if (player.onGround) {
+                        player.velocityY = -(parseInt(node.properties.force) || 10);
+                        player.onGround = false;
+                    }
+                    break;
+                    
+                case 'gravity':
+                    // Already handled in main loop
+                    break;
+                    
+                case 'teleport':
                     player.x = parseInt(node.properties.x) || 150;
                     player.y = parseInt(node.properties.y) || 150;
+                    break;
+                    
+                case 'spawn':
+                    const count = parseInt(node.properties.count) || 1;
+                    for (let i = 0; i < count; i++) {
+                        enemies.push({
+                            x: Math.random() * 280 + 10,
+                            y: Math.random() * 280 + 10,
+                            health: 100,
+                            type: 'chase',
+                            speed: 2
+                        });
+                    }
                     break;
                     
                 case 'score':
@@ -1316,7 +1630,68 @@
                     gameScore += amount;
                     document.getElementById('gameScore').innerText = gameScore;
                     break;
+                    
+                case 'destroy':
+                    // Simplified - remove first enemy
+                    if (enemies.length > 0) enemies.pop();
+                    break;
             }
+        }
+
+        function handleMouseClick(x, y) {
+            // Check if clicked on enemy
+            enemies = enemies.filter(e => {
+                const dist = Math.sqrt((x - e.x)**2 + (y - e.y)**2);
+                if (dist < 15) {
+                    gameScore += 10;
+                    document.getElementById('gameScore').innerText = gameScore;
+                    return false; // Remove enemy
+                }
+                return true;
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 300, 300);
+            
+            // Draw grid
+            ctx.strokeStyle = '#3e3e42';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 300; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 300);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(300, i);
+                ctx.stroke();
+            }
+            
+            // Draw enemies
+            enemies.forEach(enemy => {
+                ctx.fillStyle = '#ff6b6b';
+                ctx.shadowColor = '#ff6b6b';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw player
+            ctx.fillStyle = '#4ecdc4';
+            ctx.shadowColor = '#4ecdc4';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
+            ctx.shadowBlur = 0;
+            
+            // Draw ground line
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 290);
+            ctx.lineTo(300, 290);
+            ctx.stroke();
         }
 
         function stopGame() {
@@ -1329,11 +1704,14 @@
 
         function resetGame() {
             stopGame();
-            player = { x: 150, y: 150, size: 20 };
+            player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+            enemies = [];
             gameScore = 0;
             document.getElementById('gameScore').innerText = '0';
             document.getElementById('playerPos').innerText = '150,150';
+            document.getElementById('enemyCount').innerText = '0';
             ctx.clearRect(0, 0, 300, 300);
+            draw();
         }
 
         // Make functions global
@@ -1353,6 +1731,8 @@
         window.resetGame = resetGame;
         window.selectNode = selectNode;
         window.closeHelp = closeHelp;
+        window.showHelp = showHelp;
+        window.createExampleGame = createExampleGame;
     </script>
 </body>
 </html>
