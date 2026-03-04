@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 ScriptCraft - Crea Juegos con Código</title>
+    <title>🎮 VisualScript - Crea Juegos Visualmente</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Fira Code', 'Consolas', monospace;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
         body {
@@ -19,13 +19,14 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow: hidden;
         }
 
-        .game-dev-container {
-            width: 1400px;
+        .visual-script-container {
+            width: 1600px;
             max-width: 100%;
-            height: 800px;
-            max-height: 90vh;
+            height: 900px;
+            max-height: 95vh;
             background: #1e1e1e;
             border-radius: 10px;
             overflow: hidden;
@@ -72,16 +73,16 @@
             overflow: hidden;
         }
 
-        /* Sidebar - File Explorer */
-        .sidebar {
-            width: 250px;
+        /* Toolbox Sidebar */
+        .toolbox {
+            width: 220px;
             background: #252526;
             border-right: 1px solid #3e3e42;
             display: flex;
             flex-direction: column;
         }
 
-        .explorer-header {
+        .toolbox-header {
             padding: 10px;
             color: #cccccc;
             font-size: 11px;
@@ -90,93 +91,116 @@
             border-bottom: 1px solid #3e3e42;
         }
 
-        .file-tree {
+        .toolbox-content {
             padding: 10px;
-            flex: 1;
             overflow-y: auto;
+            flex: 1;
         }
 
-        .file-item {
-            padding: 4px 8px;
+        .node-category {
+            margin-bottom: 15px;
+        }
+
+        .node-category-title {
+            color: #969696;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .node-item {
+            background: #2d2d2d;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
             color: #cccccc;
-            font-size: 13px;
-            cursor: pointer;
+            font-size: 12px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .node-item:hover {
+            background: #3e3e42;
+            border-color: #007acc;
+        }
+
+        .node-icon {
+            width: 24px;
+            height: 24px;
             border-radius: 4px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .node-icon.event { background: #804000; }
+        .node-icon.action { background: #005a9e; }
+        .node-icon.condition { background: #6c4f8c; }
+        .node-icon.variable { background: #8c4f4f; }
+
+        /* Visual Scripting Canvas */
+        .script-canvas-area {
+            flex: 1;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-toolbar {
+            background: #2d2d2d;
+            padding: 8px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
             gap: 8px;
         }
 
-        .file-item:hover {
-            background: #2a2d2e;
-        }
-
-        .file-item.active {
-            background: #37373d;
-        }
-
-        .file-icon {
-            font-size: 16px;
-        }
-
-        /* Center Area - Code Editor */
-        .center-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #1e1e1e;
-        }
-
-        .editor-tabs {
-            background: #252526;
-            border-bottom: 1px solid #3e3e42;
-            display: flex;
-            padding-left: 10px;
-        }
-
-        .tab {
-            padding: 8px 16px;
-            color: #969696;
-            font-size: 13px;
-            border-right: 1px solid #3e3e42;
+        .canvas-button {
+            background: #3e3e42;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
         }
 
-        .tab.active {
-            background: #1e1e1e;
-            color: white;
-            border-bottom: 2px solid #007acc;
+        .canvas-button:hover {
+            background: #4a4a4a;
         }
 
-        .code-editor {
+        .canvas-button.primary {
+            background: #007acc;
+        }
+
+        .canvas-button.primary:hover {
+            background: #0098ff;
+        }
+
+        #visualScriptCanvas {
             flex: 1;
-            padding: 10px;
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #d4d4d4;
-            background: #1e1e1e;
-            border: none;
-            resize: none;
-            outline: none;
-            white-space: pre;
+            background: #1a1a1a;
+            background-image: 
+                linear-gradient(rgba(60, 60, 60, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(60, 60, 60, 0.3) 1px, transparent 1px);
+            background-size: 20px 20px;
+            cursor: default;
+            position: relative;
             overflow: auto;
         }
 
-        .line-numbers {
-            float: left;
-            text-align: right;
-            padding-right: 10px;
-            color: #858585;
-            user-select: none;
-        }
-
-        /* Right Side - Game Preview */
-        .preview-area {
-            width: 400px;
+        /* Game Preview */
+        .preview-panel {
+            width: 350px;
             background: #252526;
             border-left: 1px solid #3e3e42;
             display: flex;
@@ -192,88 +216,131 @@
             align-items: center;
         }
 
-        .preview-canvas {
+        .preview-content {
             flex: 1;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            background: #1a1a1a;
+            gap: 15px;
         }
 
-        #gamePreviewCanvas {
-            width: 100%;
-            height: auto;
+        #gameCanvas {
+            width: 300px;
+            height: 300px;
             background: #2d2d2d;
             border-radius: 4px;
             border: 1px solid #3e3e42;
         }
 
-        .console-panel {
-            height: 150px;
-            background: #1e1e1e;
-            border-top: 1px solid #3e3e42;
-            padding: 10px;
-            overflow-y: auto;
-            font-family: 'Consolas', monospace;
-            font-size: 12px;
-        }
-
-        .console-line {
-            color: #cccccc;
-            margin: 2px 0;
-            border-bottom: 1px solid #2d2d2d;
-            padding: 2px 0;
-        }
-
-        .console-line.error {
-            color: #f48771;
-        }
-
-        .console-line.success {
-            color: #89d185;
-        }
-
-        /* Toolbar */
-        .toolbar {
-            background: #3c3c3c;
-            padding: 8px 16px;
+        .game-controls {
             display: flex;
             gap: 10px;
-            border-top: 1px solid #0e0e0e;
         }
 
-        .toolbar-button {
+        .game-button {
             background: #0e639c;
             color: white;
             border: none;
             padding: 6px 12px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
-        .toolbar-button:hover {
-            background: #1177bb;
-        }
-
-        .toolbar-button.secondary {
+        .game-button.secondary {
             background: #3e3e42;
         }
 
-        .toolbar-button.secondary:hover {
-            background: #4a4a4a;
+        .node-properties {
+            background: #2d2d2d;
+            border-top: 1px solid #3e3e42;
+            padding: 10px;
         }
 
-        .toolbar-button.danger {
-            background: #a1260d;
+        .node-properties h4 {
+            color: #cccccc;
+            font-size: 12px;
+            margin-bottom: 8px;
         }
 
-        .toolbar-button.danger:hover {
-            background: #c42b1c;
+        .property-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #cccccc;
+            font-size: 12px;
+        }
+
+        .property-row input {
+            width: 120px;
+            background: #3c3c3c;
+            border: 1px solid #0e0e0e;
+            color: white;
+            padding: 4px;
+            border-radius: 3px;
+        }
+
+        /* Nodes */
+        .visual-node {
+            position: absolute;
+            background: #2d2d2d;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            user-select: none;
+            z-index: 10;
+        }
+
+        .node-header {
+            padding: 6px 10px;
+            border-radius: 5px 5px 0 0;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .node-header.event { background: #804000; color: white; }
+        .node-header.action { background: #005a9e; color: white; }
+        .node-header.condition { background: #6c4f8c; color: white; }
+        .node-header.variable { background: #8c4f4f; color: white; }
+
+        .node-content {
+            padding: 10px;
+        }
+
+        .node-pin {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0;
+            font-size: 11px;
+            color: #cccccc;
+        }
+
+        .pin-output {
+            justify-content: flex-end;
+        }
+
+        .pin-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #007acc;
+            cursor: pointer;
+        }
+
+        .pin-dot.output {
+            background: #ffaa00;
+        }
+
+        .pin-label {
+            font-size: 11px;
         }
 
         /* Modal */
@@ -294,36 +361,15 @@
             background: #252526;
             border-radius: 8px;
             padding: 30px;
-            max-width: 500px;
+            max-width: 400px;
             width: 90%;
             border: 1px solid #3e3e42;
-        }
-
-        .modal-content h3 {
             color: white;
-            margin-bottom: 15px;
-        }
-
-        .modal-content input, .modal-content select {
-            width: 100%;
-            padding: 8px;
-            background: #3c3c3c;
-            border: 1px solid #0e0e0e;
-            color: white;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-family: 'Fira Code', monospace;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
-    <div class="game-dev-container">
+    <div class="visual-script-container">
         <!-- Title Bar -->
         <div class="title-bar">
             <div class="window-controls">
@@ -331,458 +377,521 @@
                 <div class="window-btn minimize"></div>
                 <div class="window-btn maximize"></div>
             </div>
-            <span class="title-text">📝 ScriptCraft - Game Development Environment</span>
+            <span class="title-text">🔷 VisualScript - Game Creator (Node-Based)</span>
         </div>
 
         <!-- Main Layout -->
         <div class="main-layout">
-            <!-- File Explorer Sidebar -->
-            <div class="sidebar">
-                <div class="explorer-header">📁 EXPLORER</div>
-                <div class="file-tree" id="fileTree">
-                    <div class="file-item active" onclick="loadScript('player')">
-                        <span class="file-icon">📄</span>
-                        player.js
+            <!-- Toolbox -->
+            <div class="toolbox">
+                <div class="toolbox-header">📦 NODE TOOLBOX</div>
+                <div class="toolbox-content" id="nodeToolbox">
+                    <div class="node-category">
+                        <div class="node-category-title">🎯 EVENTOS</div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="start" ondragstart="dragNode(event)">
+                            <div class="node-icon event">▶</div>
+                            On Game Start
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="update" ondragstart="dragNode(event)">
+                            <div class="node-icon event">⟳</div>
+                            On Update
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="collision" ondragstart="dragNode(event)">
+                            <div class="node-icon event">⚡</div>
+                            On Collision
+                        </div>
                     </div>
-                    <div class="file-item" onclick="loadScript('enemy')">
-                        <span class="file-icon">📄</span>
-                        enemy.js
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">🎮 ACCIONES</div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="move" ondragstart="dragNode(event)">
+                            <div class="node-icon action">⬆</div>
+                            Move Player
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
+                            <div class="node-icon action">✨</div>
+                            Spawn Object
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="destroy" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🗑</div>
+                            Destroy Object
+                        </div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
+                            <div class="node-icon action">🏆</div>
+                            Add Score
+                        </div>
                     </div>
-                    <div class="file-item" onclick="loadScript('powerup')">
-                        <span class="file-icon">📄</span>
-                        powerup.js
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">🔀 CONDICIONES</div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="if" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">❓</div>
+                            If Condition
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="compare" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">≟</div>
+                            Compare Values
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
+                            <div class="node-icon condition">⌨</div>
+                            Key Pressed
+                        </div>
                     </div>
-                    <div class="file-item" onclick="loadScript('game')">
-                        <span class="file-icon">📄</span>
-                        game.js
-                    </div>
-                    <div class="file-item" onclick="loadScript('level')">
-                        <span class="file-icon">📄</span>
-                        level1.js
+                    
+                    <div class="node-category">
+                        <div class="node-category-title">📊 VARIABLES</div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="number" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">#</div>
+                            Number
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="vector" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">⬛</div>
+                            Vector 2D
+                        </div>
+                        <div class="node-item" draggable="true" data-type="variable" data-subtype="color" ondragstart="dragNode(event)">
+                            <div class="node-icon variable">🎨</div>
+                            Color
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Code Editor Area -->
-            <div class="center-area">
-                <div class="editor-tabs">
-                    <div class="tab active" id="currentFileTab">📄 player.js</div>
+            <!-- Visual Script Canvas -->
+            <div class="script-canvas-area">
+                <div class="canvas-toolbar">
+                    <button class="canvas-button primary" onclick="compileAndRun()">
+                        ▶ Compile & Run
+                    </button>
+                    <button class="canvas-button" onclick="clearCanvas()">
+                        🗑 Clear All
+                    </button>
+                    <button class="canvas-button" onclick="saveProject()">
+                        💾 Save
+                    </button>
+                    <button class="canvas-button" onclick="loadProject()">
+                        📂 Load
+                    </button>
+                    <button class="canvas-button" onclick="zoomIn()">
+                        🔍 +
+                    </button>
+                    <button class="canvas-button" onclick="zoomOut()">
+                        🔍 -
+                    </button>
                 </div>
-                <textarea class="code-editor" id="codeEditor" spellcheck="false">// Player script
-class Player {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.speed = 5;
-        this.color = '#4ecdc4';
-        this.size = 30;
-    }
-    
-    update() {
-        // Move player with arrow keys
-        if (keys.ArrowRight) this.x += this.speed;
-        if (keys.ArrowLeft) this.x -= this.speed;
-        if (keys.ArrowUp) this.y -= this.speed;
-        if (keys.ArrowDown) this.y += this.speed;
-        
-        // Keep player in bounds
-        this.x = Math.max(this.size/2, Math.min(400 - this.size/2, this.x));
-        this.y = Math.max(this.size/2, Math.min(400 - this.size/2, this.y));
-    }
-    
-    draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
-    }
-    
-    onCollide(enemy) {
-        console.log('Player collided with enemy!');
-        return false; // Game over
-    }
-}</textarea>
+                <div id="visualScriptCanvas" ondrop="dropNode(event)" ondragover="allowDrop(event)" style="position: relative;">
+                    <!-- Nodes will be dynamically added here -->
+                </div>
             </div>
 
-            <!-- Preview Area -->
-            <div class="preview-area">
+            <!-- Preview Panel -->
+            <div class="preview-panel">
                 <div class="preview-header">
                     <span>🎮 Game Preview</span>
-                    <span style="color: #969696; font-size: 11px;">400x400</span>
                 </div>
-                <div class="preview-canvas">
-                    <canvas id="gamePreviewCanvas" width="400" height="400"></canvas>
+                <div class="preview-content">
+                    <canvas id="gameCanvas" width="300" height="300"></canvas>
+                    <div class="game-controls">
+                        <button class="game-button" onclick="startGame()">▶ Start</button>
+                        <button class="game-button secondary" onclick="stopGame()">⏹ Stop</button>
+                        <button class="game-button secondary" onclick="resetGame()">⟲ Reset</button>
+                    </div>
+                    <div style="color: #cccccc; font-size: 12px; width: 100%;">
+                        <div>Score: <span id="gameScore">0</span></div>
+                        <div>Status: <span id="gameStatus">Stopped</span></div>
+                    </div>
                 </div>
-                <div class="console-panel" id="console">
-                    <div class="console-line">> ScriptCraft v1.0 ready</div>
-                    <div class="console-line">> Click RUN to execute your scripts</div>
+                
+                <!-- Node Properties -->
+                <div class="node-properties">
+                    <h4>🔧 Node Properties</h4>
+                    <div id="nodeProperties">
+                        <div class="property-row">
+                            <span>No node selected</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <button class="toolbar-button" onclick="runGame()">
-                ▶ RUN (Ctrl+R)
-            </button>
-            <button class="toolbar-button secondary" onclick="stopGame()">
-                ⏹ STOP
-            </button>
-            <button class="toolbar-button secondary" onclick="saveScript()">
-                💾 SAVE (Ctrl+S)
-            </button>
-            <button class="toolbar-button" onclick="showNewScriptModal()">
-                📄 NEW SCRIPT
-            </button>
-            <button class="toolbar-button secondary" onclick="clearConsole()">
-                🗑 CLEAR CONSOLE
-            </button>
-            <button class="toolbar-button danger" onclick="resetGame()">
-                ⟲ RESET
-            </button>
         </div>
     </div>
 
-    <!-- New Script Modal -->
-    <div class="modal" id="newScriptModal">
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
         <div class="modal-content">
-            <h3>📄 Create New Script</h3>
-            <input type="text" id="newScriptName" placeholder="script_name.js">
-            <select id="newScriptTemplate">
-                <option value="empty">Empty Script</option>
-                <option value="player">Player Template</option>
-                <option value="enemy">Enemy Template</option>
-                <option value="powerup">Power-up Template</option>
-            </select>
-            <div class="modal-buttons">
-                <button class="toolbar-button secondary" onclick="closeModal()">Cancel</button>
-                <button class="toolbar-button" onclick="createScript()">Create</button>
-            </div>
+            <h3>📖 Visual Scripting Guide</h3>
+            <p style="margin: 15px 0; color: #cccccc;">
+                1. Arrastra nodos desde el toolbox<br>
+                2. Conecta los puntos (output → input)<br>
+                3. Configura propiedades<br>
+                4. Compila y ejecuta
+            </p>
+            <button class="game-button" onclick="closeHelp()">Entendido</button>
         </div>
     </div>
 
     <script>
+        // Visual Scripting System
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+        let nextNodeId = 1;
+        let zoom = 1;
+        let offsetX = 0, offsetY = 0;
+        let isDraggingCanvas = false;
+        let dragStartX, dragStartY;
+
         // Game State
         let gameRunning = false;
+        let gameScore = 0;
         let gameLoop = null;
-        let currentFile = 'player';
-        let scripts = {
-            player: `// Player script
-class Player {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.speed = 5;
-        this.color = '#4ecdc4';
-        this.size = 30;
-    }
-    
-    update() {
-        // Move player with arrow keys
-        if (keys.ArrowRight) this.x += this.speed;
-        if (keys.ArrowLeft) this.x -= this.speed;
-        if (keys.ArrowUp) this.y -= this.speed;
-        if (keys.ArrowDown) this.y += this.speed;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         
-        // Keep player in bounds
-        this.x = Math.max(this.size/2, Math.min(400 - this.size/2, this.x));
-        this.y = Math.max(this.size/2, Math.min(400 - this.size/2, this.y));
-    }
-    
-    draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
-    }
-    
-    onCollide(enemy) {
-        console.log('Player collided with enemy!');
-        return false; // Game over
-    }
-}`,
-            enemy: `// Enemy script
-class Enemy {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.speed = 2;
-        this.color = '#ff6b6b';
-        this.size = 25;
-    }
-    
-    update(player) {
-        // Chase the player
-        if (player.x > this.x) this.x += this.speed;
-        if (player.x < this.x) this.x -= this.speed;
-        if (player.y > this.y) this.y += this.speed;
-        if (player.y < this.y) this.y -= this.speed;
-    }
-    
-    draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size/2, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}`,
-            powerup: `// Power-up script
-class PowerUp {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.color = '#ffd700';
-        this.size = 15;
-        this.active = true;
-    }
-    
-    update() {
-        // Make power-up rotate or pulse
-        this.size = 15 + Math.sin(Date.now() * 0.01) * 2;
-    }
-    
-    draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size/2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-    }
-    
-    onCollect(player) {
-        console.log('Power-up collected!');
-        return true; // Remove power-up
-    }
-}`,
-            game: `// Main game script
-class Game {
-    constructor() {
-        this.score = 0;
-        this.gameOver = false;
-        this.victory = false;
-    }
-    
-    checkCollisions(player, enemies) {
-        for (let enemy of enemies) {
-            const dx = player.x - enemy.x;
-            const dy = player.y - enemy.y;
-            const distance = Math.sqrt(dx*dx + dy*dy);
+        // Player position
+        let player = { x: 150, y: 150, size: 20 };
+
+        // Initialize with some example nodes
+        window.onload = function() {
+            // Add example nodes
+            addNode('event', 'start', 50, 50);
+            addNode('action', 'move', 250, 50);
+            addNode('condition', 'key', 250, 150);
             
-            if (distance < (player.size/2 + enemy.size/2)) {
-                return player.onCollide(enemy);
-            }
-        }
-        return true;
-    }
-    
-    updateScore(points) {
-        this.score += points;
-        console.log('Score: ' + this.score);
-    }
-}`,
-            level: `// Level 1 script
-function createLevel1() {
-    const player = new Player(200, 200);
-    const enemies = [
-        new Enemy(100, 100),
-        new Enemy(300, 300)
-    ];
-    const powerUps = [
-        new PowerUp(150, 150),
-        new PowerUp(250, 250)
-    ];
-    
-    return { player, enemies, powerUps };
-}`
+            showHelp();
         };
 
-        // Canvas and Context
-        const canvas = document.getElementById('gamePreviewCanvas');
-        const ctx = canvas.getContext('2d');
-        const consoleEl = document.getElementById('console');
-        const codeEditor = document.getElementById('codeEditor');
+        // Drag and Drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
 
-        // Keyboard state
-        const keys = {};
+        function dragNode(ev) {
+            ev.dataTransfer.setData("text", ev.target.closest('.node-item').dataset.type + ',' + ev.target.closest('.node-item').dataset.subtype);
+        }
 
-        // Game objects
-        let player = null;
-        let enemies = [];
-        let powerUps = [];
-        let game = null;
-
-        // Initialize
-        loadScript('player');
-
-        // Keyboard event listeners
-        window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            if (e.ctrlKey && e.key === 'r') {
-                e.preventDefault();
-                runGame();
-            }
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveScript();
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-        });
-
-        // File management
-        function loadScript(filename) {
-            currentFile = filename;
-            document.getElementById('currentFileTab').innerHTML = `📄 ${filename}.js`;
-            codeEditor.value = scripts[filename];
+        function dropNode(ev) {
+            ev.preventDefault();
+            const canvas = document.getElementById('visualScriptCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = (ev.clientX - rect.left - offsetX) / zoom;
+            const y = (ev.clientY - rect.top - offsetY) / zoom;
             
-            // Update active file in explorer
-            document.querySelectorAll('.file-item').forEach(item => {
-                item.classList.remove('active');
+            const data = ev.dataTransfer.getData("text").split(',');
+            addNode(data[0], data[1], x, y);
+        }
+
+        function addNode(type, subtype, x, y) {
+            const nodeId = nextNodeId++;
+            const node = {
+                id: nodeId,
+                type: type,
+                subtype: subtype,
+                x: x,
+                y: y,
+                properties: getDefaultProperties(subtype)
+            };
+            
+            nodes.push(node);
+            renderNodes();
+        }
+
+        function getDefaultProperties(subtype) {
+            switch(subtype) {
+                case 'move':
+                    return { speed: 5, direction: 'right' };
+                case 'spawn':
+                    return { object: 'enemy', count: 1 };
+                case 'score':
+                    return { amount: 10 };
+                case 'number':
+                    return { value: 0 };
+                case 'color':
+                    return { r: 255, g: 255, b: 255 };
+                default:
+                    return {};
+            }
+        }
+
+        function renderNodes() {
+            const canvas = document.getElementById('visualScriptCanvas');
+            canvas.innerHTML = '';
+            
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'visual-node';
+                nodeEl.style.left = (node.x * zoom + offsetX) + 'px';
+                nodeEl.style.top = (node.y * zoom + offsetY) + 'px';
+                nodeEl.style.transform = `scale(${zoom})`;
+                nodeEl.setAttribute('data-id', node.id);
+                
+                // Node header
+                const header = document.createElement('div');
+                header.className = `node-header ${node.type}`;
+                header.innerHTML = `
+                    ${getNodeIcon(node.subtype)} ${getNodeName(node.subtype)}
+                    <span style="cursor: pointer;" onclick="deleteNode(${node.id})">✕</span>
+                `;
+                header.onmousedown = (e) => startDragNode(e, node.id);
+                
+                // Node content
+                const content = document.createElement('div');
+                content.className = 'node-content';
+                
+                // Add pins based on node type
+                if (node.type === 'event') {
+                    content.innerHTML = `
+                        <div class="node-pin pin-output">
+                            <span class="pin-label">Out</span>
+                            <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
+                        </div>
+                    `;
+                } else if (node.type === 'action') {
+                    content.innerHTML = `
+                        <div class="node-pin">
+                            <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
+                            <span class="pin-label">In</span>
+                        </div>
+                        <div class="node-pin pin-output">
+                            <span class="pin-label">Out</span>
+                            <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
+                        </div>
+                    `;
+                } else if (node.type === 'condition') {
+                    content.innerHTML = `
+                        <div class="node-pin">
+                            <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
+                            <span class="pin-label">In</span>
+                        </div>
+                        <div class="node-pin pin-output">
+                            <span class="pin-label">True</span>
+                            <div class="pin-dot output" data-node="${node.id}" data-pin="true"></div>
+                        </div>
+                        <div class="node-pin pin-output">
+                            <span class="pin-label">False</span>
+                            <div class="pin-dot output" data-node="${node.id}" data-pin="false"></div>
+                        </div>
+                    `;
+                } else if (node.type === 'variable') {
+                    content.innerHTML = `
+                        <div class="node-pin pin-output">
+                            <span class="pin-label">Value</span>
+                            <div class="pin-dot output" data-node="${node.id}" data-pin="value"></div>
+                        </div>
+                    `;
+                }
+                
+                nodeEl.appendChild(header);
+                nodeEl.appendChild(content);
+                
+                // Add click handler for properties
+                nodeEl.onclick = (e) => {
+                    if (!e.target.classList.contains('pin-dot')) {
+                        selectNode(node.id);
+                    }
+                };
+                
+                canvas.appendChild(nodeEl);
             });
-            event.target.classList.add('active');
-        }
-
-        function saveScript() {
-            scripts[currentFile] = codeEditor.value;
-            addToConsole(`✅ Script ${currentFile}.js saved`, 'success');
-        }
-
-        function showNewScriptModal() {
-            document.getElementById('newScriptModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('newScriptModal').style.display = 'none';
-        }
-
-        function createScript() {
-            const name = document.getElementById('newScriptName').value;
-            const template = document.getElementById('newScriptTemplate').value;
             
-            if (!name.endsWith('.js')) {
-                alert('Script name must end with .js');
+            // Render connections
+            renderConnections();
+        }
+
+        function renderConnections() {
+            // Simple connection lines (in a real app, you'd use SVG or Canvas)
+            // For demo, we'll just store connections
+        }
+
+        function startDragNode(e, nodeId) {
+            e.preventDefault();
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const nodeStartX = node.x;
+            const nodeStartY = node.y;
+            
+            function onMouseMove(e) {
+                const dx = (e.clientX - startX) / zoom;
+                const dy = (e.clientY - startY) / zoom;
+                node.x = nodeStartX + dx;
+                node.y = nodeStartY + dy;
+                renderNodes();
+            }
+            
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function deleteNode(nodeId) {
+            nodes = nodes.filter(n => n.id !== nodeId);
+            if (selectedNode === nodeId) {
+                selectedNode = null;
+                updateProperties();
+            }
+            renderNodes();
+        }
+
+        function selectNode(nodeId) {
+            selectedNode = nodeId;
+            updateProperties();
+        }
+
+        function updateProperties() {
+            const propertiesDiv = document.getElementById('nodeProperties');
+            const node = nodes.find(n => n.id === selectedNode);
+            
+            if (!node) {
+                propertiesDiv.innerHTML = '<div class="property-row">No node selected</div>';
                 return;
             }
             
-            const baseName = name.replace('.js', '');
-            
-            // Add to scripts
-            if (template === 'empty') {
-                scripts[baseName] = '// New script\n';
-            } else {
-                scripts[baseName] = scripts[template];
+            let html = '';
+            for (let [key, value] of Object.entries(node.properties)) {
+                html += `
+                    <div class="property-row">
+                        <span>${key}:</span>
+                        <input type="text" value="${value}" onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
+                    </div>
+                `;
             }
             
-            // Add to file tree
-            const fileTree = document.getElementById('fileTree');
-            const newFile = document.createElement('div');
-            newFile.className = 'file-item';
-            newFile.innerHTML = `<span class="file-icon">📄</span> ${name}`;
-            newFile.setAttribute('onclick', `loadScript('${baseName}')`);
-            fileTree.appendChild(newFile);
-            
-            closeModal();
-            addToConsole(`📄 Created new script: ${name}`, 'success');
+            propertiesDiv.innerHTML = html;
         }
 
-        // Game functions
-        function runGame() {
-            stopGame();
-            
-            try {
-                // Save current script
-                scripts[currentFile] = codeEditor.value;
-                
-                // Create new Function from scripts
-                const scriptCode = `
-                    ${scripts.player}
-                    ${scripts.enemy}
-                    ${scripts.powerup}
-                    ${scripts.game}
-                    ${scripts.level}
-                    
-                    return createLevel1();
-                `;
-                
-                const createGame = new Function(scriptCode);
-                const gameObjects = createGame();
-                
-                player = gameObjects.player;
-                enemies = gameObjects.enemies;
-                powerUps = gameObjects.powerUps;
-                game = new Game();
-                
-                gameRunning = true;
-                addToConsole('▶ Game started successfully!', 'success');
-                
-                // Start game loop
-                gameLoop = setInterval(() => {
-                    if (!gameRunning) return;
-                    
-                    // Update
-                    if (player) {
-                        player.update();
-                        
-                        // Update enemies
-                        enemies.forEach(enemy => enemy.update(player));
-                        
-                        // Update power-ups
-                        powerUps.forEach(powerUp => powerUp.update());
-                        
-                        // Check collisions with enemies
-                        if (!game.checkCollisions(player, enemies)) {
-                            gameOver();
-                        }
-                        
-                        // Check collisions with power-ups
-                        powerUps = powerUps.filter(powerUp => {
-                            const dx = player.x - powerUp.x;
-                            const dy = player.y - powerUp.y;
-                            const distance = Math.sqrt(dx*dx + dy*dy);
-                            
-                            if (distance < (player.size/2 + powerUp.size/2)) {
-                                game.updateScore(10);
-                                return !powerUp.onCollect(player);
-                            }
-                            return true;
-                        });
-                    }
-                    
-                    // Draw
-                    ctx.clearRect(0, 0, 400, 400);
-                    
-                    // Draw grid
-                    ctx.strokeStyle = '#3e3e42';
-                    ctx.lineWidth = 0.5;
-                    for (let i = 0; i <= 400; i += 40) {
-                        ctx.beginPath();
-                        ctx.moveTo(i, 0);
-                        ctx.lineTo(i, 400);
-                        ctx.stroke();
-                        ctx.beginPath();
-                        ctx.moveTo(0, i);
-                        ctx.lineTo(400, i);
-                        ctx.stroke();
-                    }
-                    
-                    // Draw game objects
-                    if (player) player.draw(ctx);
-                    enemies.forEach(enemy => enemy.draw(ctx));
-                    powerUps.forEach(powerUp => powerUp.draw(ctx));
-                    
-                    // Draw score
-                    if (game) {
-                        ctx.font = 'bold 14px Fira Code';
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillText('Score: ' + game.score, 10, 30);
-                    }
-                    
-                }, 1000/60); // 60 FPS
-                
-            } catch (error) {
-                addToConsole('❌ Error: ' + error.message, 'error');
-                console.error(error);
+        function updateNodeProperty(nodeId, key, value) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (node) {
+                node.properties[key] = value;
             }
+        }
+
+        function getNodeIcon(subtype) {
+            const icons = {
+                start: '▶',
+                update: '⟳',
+                collision: '⚡',
+                move: '⬆',
+                spawn: '✨',
+                destroy: '🗑',
+                score: '🏆',
+                if: '❓',
+                compare: '≟',
+                key: '⌨',
+                number: '#',
+                vector: '⬛',
+                color: '🎨'
+            };
+            return icons[subtype] || '●';
+        }
+
+        function getNodeName(subtype) {
+            const names = {
+                start: 'Game Start',
+                update: 'Update',
+                collision: 'Collision',
+                move: 'Move',
+                spawn: 'Spawn',
+                destroy: 'Destroy',
+                score: 'Add Score',
+                if: 'If',
+                compare: 'Compare',
+                key: 'Key Press',
+                number: 'Number',
+                vector: 'Vector',
+                color: 'Color'
+            };
+            return names[subtype] || subtype;
+        }
+
+        // Compilation
+        function compileAndRun() {
+            console.log('Compiling visual script...');
+            // In a real app, you'd generate code from the node graph
+            // For demo, we'll just run a simple behavior based on nodes
+            startGame();
+        }
+
+        // Game Functions
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gameScore = 0;
+            document.getElementById('gameScore').innerText = '0';
+            document.getElementById('gameStatus').innerText = 'Running';
+            
+            // Interpret visual script
+            interpretNodes();
+            
+            // Game loop
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(() => {
+                if (!gameRunning) return;
+                
+                // Update based on nodes
+                updateFromNodes();
+                
+                // Draw
+                ctx.clearRect(0, 0, 300, 300);
+                
+                // Draw grid
+                ctx.strokeStyle = '#3e3e42';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= 300; i += 30) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, 300);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(300, i);
+                    ctx.stroke();
+                }
+                
+                // Draw player
+                ctx.fillStyle = '#4ecdc4';
+                ctx.shadowColor = '#4ecdc4';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
+                ctx.shadowBlur = 0;
+                
+            }, 1000/60);
+        }
+
+        function interpretNodes() {
+            // Simple interpretation of nodes
+            nodes.forEach(node => {
+                if (node.type === 'action' && node.subtype === 'move') {
+                    // Move player based on properties
+                    const speed = parseInt(node.properties.speed) || 5;
+                    if (node.properties.direction === 'right') player.x += speed;
+                    if (node.properties.direction === 'left') player.x -= speed;
+                    if (node.properties.direction === 'up') player.y -= speed;
+                    if (node.properties.direction === 'down') player.y += speed;
+                }
+                
+                if (node.type === 'action' && node.subtype === 'score') {
+                    const amount = parseInt(node.properties.amount) || 10;
+                    gameScore += amount;
+                    document.getElementById('gameScore').innerText = gameScore;
+                }
+            });
+        }
+
+        function updateFromNodes() {
+            // Check for key press nodes
+            nodes.forEach(node => {
+                if (node.type === 'condition' && node.subtype === 'key') {
+                    // In a real app, you'd check actual key presses
+                    // For demo, we'll simulate
+                }
+            });
         }
 
         function stopGame() {
@@ -791,51 +900,80 @@ function createLevel1() {
                 clearInterval(gameLoop);
                 gameLoop = null;
             }
-            addToConsole('⏹ Game stopped');
-        }
-
-        function gameOver() {
-            stopGame();
-            addToConsole('💀 Game Over!', 'error');
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.fillRect(0, 0, 400, 400);
-            ctx.font = 'bold 24px Fira Code';
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillText('GAME OVER', 80, 200);
+            document.getElementById('gameStatus').innerText = 'Stopped';
         }
 
         function resetGame() {
             stopGame();
-            player = null;
-            enemies = [];
-            powerUps = [];
-            game = null;
-            ctx.clearRect(0, 0, 400, 400);
-            addToConsole('⟲ Game reset');
+            player = { x: 150, y: 150, size: 20 };
+            gameScore = 0;
+            document.getElementById('gameScore').innerText = '0';
+            ctx.clearRect(0, 0, 300, 300);
         }
 
-        function clearConsole() {
-            consoleEl.innerHTML = '<div class="console-line">> Console cleared</div>';
+        // Canvas Controls
+        function clearCanvas() {
+            nodes = [];
+            connections = [];
+            selectedNode = null;
+            renderNodes();
         }
 
-        function addToConsole(message, type = '') {
-            const line = document.createElement('div');
-            line.className = 'console-line ' + (type || '');
-            line.textContent = '> ' + message;
-            consoleEl.appendChild(line);
-            consoleEl.scrollTop = consoleEl.scrollHeight;
+        function zoomIn() {
+            zoom = Math.min(zoom + 0.1, 2);
+            renderNodes();
+        }
+
+        function zoomOut() {
+            zoom = Math.max(zoom - 0.1, 0.5);
+            renderNodes();
+        }
+
+        function saveProject() {
+            const project = {
+                nodes: nodes,
+                connections: connections
+            };
+            localStorage.setItem('visualScriptProject', JSON.stringify(project));
+            alert('Proyecto guardado!');
+        }
+
+        function loadProject() {
+            const saved = localStorage.getItem('visualScriptProject');
+            if (saved) {
+                const project = JSON.parse(saved);
+                nodes = project.nodes;
+                connections = project.connections || [];
+                nextNodeId = Math.max(...nodes.map(n => n.id)) + 1;
+                renderNodes();
+                alert('Proyecto cargado!');
+            }
+        }
+
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
         }
 
         // Make functions global
-        window.loadScript = loadScript;
-        window.runGame = runGame;
+        window.dragNode = dragNode;
+        window.allowDrop = allowDrop;
+        window.dropNode = dropNode;
+        window.compileAndRun = compileAndRun;
+        window.clearCanvas = clearCanvas;
+        window.zoomIn = zoomIn;
+        window.zoomOut = zoomOut;
+        window.saveProject = saveProject;
+        window.loadProject = loadProject;
+        window.deleteNode = deleteNode;
+        window.updateNodeProperty = updateNodeProperty;
+        window.startGame = startGame;
         window.stopGame = stopGame;
-        window.saveScript = saveScript;
-        window.showNewScriptModal = showNewScriptModal;
-        window.closeModal = closeModal;
-        window.createScript = createScript;
-        window.clearConsole = clearConsole;
         window.resetGame = resetGame;
+        window.closeHelp = closeHelp;
     </script>
 </body>
 </html>
