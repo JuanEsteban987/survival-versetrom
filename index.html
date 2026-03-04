@@ -2,744 +2,281 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft 3D Clon · P2P Multijugador</title>
+    <title>JS-Craft: Peer-to-Peer Engine</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        canvas { display: block; }
+        #hud { position: absolute; top: 10px; left: 10px; color: white; pointer-events: none; }
+        #crosshair { 
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; 
+            border: 2px solid white; transform: translate(-50%, -50%); border-radius: 50%;
         }
-        #info-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
-            border: 1px solid #4a4a4a;
-            pointer-events: none;
-            z-index: 10;
-            font-size: 14px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        #ui-panel { 
+            position: absolute; right: 10px; top: 10px; background: rgba(0,0,0,0.7); 
+            padding: 15px; color: white; border-radius: 8px; pointer-events: all;
         }
-        #info-panel .label {
-            color: #aaa;
-            margin-right: 8px;
+        .hotbar { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 5px; background: rgba(0,0,0,0.5); padding: 5px; pointer-events: all;
         }
-        #info-panel .value {
-            color: #ffaa00;
-            font-weight: bold;
-        }
-        #connection-status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #0f0;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            border: 1px solid #0f0;
-            backdrop-filter: blur(5px);
-            z-index: 10;
-            box-shadow: 0 2px 10px rgba(0,255,0,0.2);
-        }
-        #connection-status.disconnected {
-            color: #f44;
-            border-color: #f44;
-        }
-        #menu-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-        }
-        .menu-card {
-            background: #2d2d2d;
-            padding: 30px 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            color: white;
-            width: 350px;
-            border: 1px solid #555;
-        }
-        .menu-card h2 {
-            margin-top: 0;
-            color: #ffaa00;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-        .menu-card input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            background: #3d3d3d;
-            border: 1px solid #555;
-            color: white;
-            border-radius: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .menu-card button {
-            background: #4a90e2;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            margin: 8px;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: bold;
-            min-width: 140px;
-            border: 1px solid #5a9eff;
-        }
-        .menu-card button:hover {
-            background: #6aaaff;
-            transform: scale(1.02);
-        }
-        .menu-card button.secondary {
-            background: #555;
-            border-color: #777;
-        }
-        .menu-card button.secondary:hover {
-            background: #666;
-        }
-        .menu-card .peer-id-display {
-            background: #1e1e1e;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 18px;
-            margin: 15px 0;
-            word-break: break-all;
-            border: 1px solid #ffaa00;
-            color: #ffaa00;
-        }
-        .menu-card .hint {
-            font-size: 13px;
-            color: #aaa;
-            margin-top: 15px;
-        }
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid white;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.5);
-            color: #ccc;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            backdrop-filter: blur(4px);
-            z-index: 5;
-            border: 1px solid #555;
-        }
+        .slot { width: 40px; height: 40px; border: 2px solid #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .slot.active { border-color: #fff; background: rgba(255,255,255,0.2); }
+        input, button { width: 100%; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <div id="menu-overlay">
-        <div class="menu-card">
-            <h2>⛏️ CRAFT P2P</h2>
-            <button id="create-room">🎮 Crear Partida</button>
-            <button id="join-room" class="secondary">🔗 Unirse a Partida</button>
-            <div id="peer-id-container" style="display: none;">
-                <div class="peer-id-display" id="peer-id-value">Cargando...</div>
-                <button id="copy-id" class="secondary">📋 Copiar ID</button>
-                <div class="hint">Esperando a que un amigo se conecte...</div>
-            </div>
-            <div id="join-container" style="display: none;">
-                <input type="text" id="peer-id-input" placeholder="ID del amigo">
-                <button id="connect-btn">Conectar</button>
-                <button id="back-btn" class="secondary">Atrás</button>
-            </div>
-        </div>
-    </div>
 
-    <div id="info-panel">
-        <span class="label">🆔 MI ID:</span> <span class="value" id="my-peer-id">---</span><br>
-        <span class="label">👤 AMIGO:</span> <span class="value" id="remote-peer-id">---</span>
-    </div>
-    <div id="connection-status" class="disconnected">⚫ Desconectado</div>
-    <div id="crosshair"></div>
-    <div class="instructions">🖱️ Click izquierdo: romper | Click derecho: colocar | ␣ Saltar | ESC: salir</div>
+<div id="hud">
+    <div id="status">PeerJS: Inicializando...</div>
+    <div id="peer-id">ID: -</div>
+    <input type="text" id="conn-id" placeholder="ID del Host" style="pointer-events: all;">
+    <button id="connect-btn" style="pointer-events: all;">Conectar</button>
+</div>
 
-    <!-- Importar librerías desde CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
+<div id="ui-panel">
+    <h3>MCreator API</h3>
+    <label>Nombre:</label>
+    <input type="text" id="block-name" value="Gema">
+    <label>Color:</label>
+    <input type="color" id="block-color" value="#00ffcc">
+    <label>Opacidad:</label>
+    <input type="range" id="block-opacity" min="0.1" max="1" step="0.1" value="1">
+    <button id="create-block-btn">Crear Bloque</button>
+</div>
 
-    <script>
-        (function() {
-            // --- Configuración global ---
-            const MAX_BLOCKS = 10000; // Suficiente para 21x21x21 aprox
-            const WORLD_SIZE = 20; // Rango -10 a 10 en X y Z
-            const WORLD_HEIGHT = 10; // 0 a 9
-            const BLOCK_SIZE = 1;
-            const PLAYER_HEIGHT = 1.8;
-            const PLAYER_RADIUS = 0.3;
-            const GRAVITY = 0.02;
-            const JUMP_FORCE = 0.35;
-            const MOVEMENT_SPEED = 0.15;
-            const POSITION_UPDATE_INTERVAL = 100; // ms
+<div id="crosshair"></div>
+<div class="hotbar" id="hotbar"></div>
 
-            // Colores para tipos de bloque (índice 0 = aire)
-            const BLOCK_COLORS = [
-                null,           // 0 aire
-                0x7ec850,       // 1 pasto
-                0x8B5A2B,       // 2 tierra
-                0x808080,       // 3 piedra
-                0xffaa00,       // 4 arena? (para avatar)
-            ];
+<script>
+/**
+ * CLASE MCREATOR
+ * Gestiona el registro de tipos de bloques y la lógica de inventario.
+ */
+class MCreator {
+    constructor() {
+        this.registry = {
+            1: { id: 1, name: 'Piedra', color: 0x888888, opacity: 1 },
+            2: { id: 2, name: 'Pasto', color: 0x44aa44, opacity: 1 }
+        };
+        this.currentId = 3;
+        this.selectedBlockId = 1;
+    }
 
-            // --- Variables globales Three.js ---
-            let scene, camera, renderer, controls;
-            let raycaster = new THREE.Raycaster();
-            let mouse = new THREE.Vector2();
+    // Registra un nuevo tipo de bloque y actualiza la UI
+    defineBlock(name, color, opacity) {
+        const id = this.currentId++;
+        const config = { id, name, color: parseInt(color.replace('#', '0x')), opacity: parseFloat(opacity) };
+        this.registry[id] = config;
+        this.updateHotbar();
+        return config;
+    }
 
-            // --- Mundo de bloques ---
-            let world = {}; // Diccionario "x,y,z" -> tipo (1,2,3). 0 o ausente = aire
-            let instancedMesh;
-            let instanceActive = new Array(MAX_BLOCKS).fill(false);
-            let freeIndices = []; // pila de índices libres
-            let blockTypeAtInstance = new Array(MAX_BLOCKS).fill(0); // tipo de bloque en cada instancia
+    updateHotbar() {
+        const hb = document.getElementById('hotbar');
+        hb.innerHTML = '';
+        Object.values(this.registry).forEach(block => {
+            const slot = document.createElement('div');
+            slot.className = `slot ${this.selectedBlockId === block.id ? 'active' : ''}`;
+            slot.style.backgroundColor = '#' + block.color.toString(16).padStart(6, '0');
+            slot.title = block.name;
+            slot.onclick = () => {
+                this.selectedBlockId = block.id;
+                this.updateHotbar();
+            };
+            hb.appendChild(slot);
+        });
+    }
+}
 
-            // --- Jugador local ---
-            let velocity = new THREE.Vector3();
-            let onGround = false;
-            const playerPos = new THREE.Vector3(0, 20, 0); // spawn en el aire para caer sobre el mundo
+// --- CONFIGURACIÓN DEL MOTOR 3D ---
+const creator = new MCreator();
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-            // --- Multijugador ---
-            let peer = null;
-            let conn = null;
-            let myPeerId = '';
-            let remotePeerId = '';
-            let remoteAvatar; // Mesh para el otro jugador
-            let lastPositionUpdate = 0;
-            const positionUpdateInterval = 100; // ms
+const light = new THREE.HemisphereLight(0xeeeeee, 0x888888, 1);
+scene.add(light);
 
-            // --- Estado UI ---
-            const menuOverlay = document.getElementById('menu-overlay');
-            const peerIdContainer = document.getElementById('peer-id-container');
-            const joinContainer = document.getElementById('join-container');
-            const myPeerIdSpan = document.getElementById('my-peer-id');
-            const remotePeerIdSpan = document.getElementById('remote-peer-id');
-            const connectionStatusDiv = document.getElementById('connection-status');
-            const peerIdValueDiv = document.getElementById('peer-id-value');
+// Terreno e Instancias
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const blocks = []; // Guardaremos objetos {mesh, id}
+const voxelMap = new Map(); // Para colisiones rápidas "x,y,z"
 
-            // --- Inicialización Three.js ---
-            function initThree() {
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x87CEEB); // Cielo
+function createBlockMesh(x, y, z, blockId) {
+    const config = creator.registry[blockId];
+    const mat = new THREE.MeshLambertMaterial({ 
+        color: config.color, 
+        transparent: config.opacity < 1, 
+        opacity: config.opacity 
+    });
+    const mesh = new THREE.Mesh(geometry, mat);
+    mesh.position.set(x, y, z);
+    scene.add(mesh);
+    const key = `${Math.round(x)},${Math.round(y)},${Math.round(z)}`;
+    voxelMap.set(key, mesh);
+    return mesh;
+}
 
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.copy(playerPos);
+// Generación inicial simple
+for(let x = -5; x < 5; x++) {
+    for(let z = -5; z < 5; z++) {
+        createBlockMesh(x, 0, z, 2);
+    }
+}
 
-                renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.shadowMap.enabled = true; // Para efecto visual
-                document.body.appendChild(renderer.domElement);
+// --- FÍSICAS Y CONTROLES ---
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, canJump = false;
+let velocity = new THREE.Vector3();
+const clock = new THREE.Clock();
 
-                // Luces
-                const ambientLight = new THREE.AmbientLight(0x404060);
-                scene.add(ambientLight);
-                const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-                dirLight.position.set(10, 20, 5);
-                dirLight.castShadow = true;
-                dirLight.shadow.mapSize.width = 1024;
-                dirLight.shadow.mapSize.height = 1024;
-                scene.add(dirLight);
+document.addEventListener('keydown', (e) => {
+    if(e.code === 'KeyW') moveForward = true;
+    if(e.code === 'KeyS') moveBackward = true;
+    if(e.code === 'KeyA') moveLeft = true;
+    if(e.code === 'KeyD') moveRight = true;
+    if(e.code === 'Space' && canJump) { velocity.y += 5; canJump = false; }
+});
+document.addEventListener('keyup', (e) => {
+    if(e.code === 'KeyW') moveForward = false;
+    if(e.code === 'KeyS') moveBackward = false;
+    if(e.code === 'KeyA') moveLeft = false;
+    if(e.code === 'KeyD') moveRight = false;
+});
 
-                // Controles
-                controls = new THREE.PointerLockControls(camera, document.body);
-                scene.add(controls.getObject()); // Añadir el objeto del jugador a la escena (para que la cámara se mueva)
+// Pointer Lock
+renderer.domElement.addEventListener('click', () => {
+    renderer.domElement.requestPointerLock();
+});
 
-                // Eventos de clic
-                renderer.domElement.addEventListener('click', (e) => {
-                    if (!controls.isLocked) return;
-                    if (e.button === 0) { // Izquierdo
-                        handleBlockInteraction('remove');
-                    }
-                });
-                renderer.domElement.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    if (!controls.isLocked) return;
-                    handleBlockInteraction('add');
-                });
+const pitch = new THREE.Object3D();
+const yaw = new THREE.Object3D();
+yaw.add(pitch);
+pitch.add(camera);
+scene.add(yaw);
+yaw.position.y = 2;
 
-                // Crear avatar remoto (un cubo rojo)
-                const avatarGeo = new THREE.BoxGeometry(0.8, 1.8, 0.8);
-                const avatarMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
-                remoteAvatar = new THREE.Mesh(avatarGeo, avatarMat);
-                remoteAvatar.castShadow = true;
-                remoteAvatar.receiveShadow = true;
-                remoteAvatar.visible = false;
-                scene.add(remoteAvatar);
+document.addEventListener('mousemove', (e) => {
+    if (document.pointerLockElement) {
+        yaw.rotation.y -= e.movementX * 0.002;
+        pitch.rotation.x -= e.movementY * 0.002;
+        pitch.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch.rotation.x));
+    }
+});
 
-                // Crear el InstancedMesh para todos los bloques
-                const geometry = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                const material = new THREE.MeshStandardMaterial({ vertexColors: true }); // Usaremos colores por instancia
-                instancedMesh = new THREE.InstancedMesh(geometry, material, MAX_BLOCKS);
-                instancedMesh.castShadow = true;
-                instancedMesh.receiveShadow = true;
-                scene.add(instancedMesh);
+// Interaction (Raycasting)
+const raycaster = new THREE.Raycaster();
+window.addEventListener('mousedown', (e) => {
+    if (!document.pointerLockElement) return;
+    
+    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+    const intersects = raycaster.intersectObjects(Array.from(voxelMap.values()));
 
-                // Inicializar pila de índices libres (todos desde 0 hasta MAX_BLOCKS-1)
-                for (let i = 0; i < MAX_BLOCKS; i++) {
-                    freeIndices.push(i);
-                }
-
-                // Generar mundo inicial
-                generateWorld();
-
-                // Actualizar instancias según el mundo inicial
-                rebuildInstancesFromWorld();
-
-                // Iniciar loop de animación
-                animate();
-            }
-
-            // --- Generar terreno simple (pasto con algunas colinas) ---
-            function generateWorld() {
-                // Suelo base en y=0 para todo el rango
-                for (let x = -WORLD_SIZE/2; x < WORLD_SIZE/2; x++) {
-                    for (let z = -WORLD_SIZE/2; z < WORLD_SIZE/2; z++) {
-                        setBlock(Math.floor(x), 0, Math.floor(z), 1); // pasto
-                    }
-                }
-                // Añadir algunos bloques de tierra y piedra para variedad
-                for (let i = 0; i < 20; i++) {
-                    let x = Math.floor(Math.random() * WORLD_SIZE - WORLD_SIZE/2);
-                    let z = Math.floor(Math.random() * WORLD_SIZE - WORLD_SIZE/2);
-                    let y = 1;
-                    setBlock(x, y, z, 2); // tierra
-                    if (Math.random() > 0.5) {
-                        setBlock(x, y+1, z, 3); // piedra encima
-                    }
-                }
-                // Asegurar que el jugador aparezca sobre un bloque
-                playerPos.set(2, 2, 2);
-                controls.getObject().position.copy(playerPos);
-            }
-
-            // --- Funciones para modificar el mundo ---
-            function setBlock(x, y, z, type) {
-                if (y < 0 || y >= WORLD_HEIGHT) return; // límite vertical
-                const key = `${x},${y},${z}`;
-                if (type === 0) {
-                    delete world[key];
-                } else {
-                    world[key] = type;
-                }
-            }
-
-            function getBlock(x, y, z) {
-                const key = `${x},${y},${z}`;
-                return world[key] || 0;
-            }
-
-            // Reconstruir instancias desde el mundo (útil al inicio o al recibir estado)
-            function rebuildInstancesFromWorld() {
-                // Resetear instancias activas
-                for (let i = 0; i < MAX_BLOCKS; i++) {
-                    if (instanceActive[i]) {
-                        // Desactivar
-                        const dummyMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
-                        instancedMesh.setMatrixAt(i, dummyMatrix);
-                        instanceActive[i] = false;
-                        freeIndices.push(i);
-                        blockTypeAtInstance[i] = 0;
-                    }
-                }
-                // Ahora añadir cada bloque del mundo
-                for (const [key, type] of Object.entries(world)) {
-                    const [x, y, z] = key.split(',').map(Number);
-                    addBlockInstance(x, y, z, type, false); // false = no modificar world (ya está)
-                }
-                instancedMesh.instanceMatrix.needsUpdate = true;
-            }
-
-            // Añadir una instancia para un bloque (asume que ya está en world)
-            function addBlockInstance(x, y, z, type, updateWorld = true) {
-                if (freeIndices.length === 0) {
-                    console.warn('No más espacio para instancias');
-                    return false;
-                }
-                const idx = freeIndices.pop();
-                const matrix = new THREE.Matrix4().makeTranslation(x + 0.5, y + 0.5, z + 0.5); // centro del cubo
-                instancedMesh.setMatrixAt(idx, matrix);
-                // Color según tipo
-                const color = new THREE.Color(BLOCK_COLORS[type]);
-                instancedMesh.setColorAt(idx, color);
-                instanceActive[idx] = true;
-                blockTypeAtInstance[idx] = type;
-                if (updateWorld) {
-                    setBlock(x, y, z, type);
-                }
-                instancedMesh.instanceMatrix.needsUpdate = true;
-                instancedMesh.instanceColor.needsUpdate = true;
-                return true;
-            }
-
-            function removeBlockInstance(x, y, z, updateWorld = true) {
-                // Buscar instancia en esa posición
-                for (let i = 0; i < MAX_BLOCKS; i++) {
-                    if (!instanceActive[i]) continue;
-                    // Obtener posición de la instancia
-                    const matrix = new THREE.Matrix4();
-                    instancedMesh.getMatrixAt(i, matrix);
-                    const pos = new THREE.Vector3();
-                    pos.setFromMatrixPosition(matrix);
-                    // Ajustar porque el centro está en x+0.5
-                    const bx = Math.floor(pos.x - 0.5);
-                    const by = Math.floor(pos.y - 0.5);
-                    const bz = Math.floor(pos.z - 0.5);
-                    if (bx === x && by === y && bz === z) {
-                        // Desactivar
-                        const dummyMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
-                        instancedMesh.setMatrixAt(i, dummyMatrix);
-                        instanceActive[i] = false;
-                        freeIndices.push(i);
-                        blockTypeAtInstance[i] = 0;
-                        if (updateWorld) {
-                            setBlock(x, y, z, 0);
-                        }
-                        instancedMesh.instanceMatrix.needsUpdate = true;
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            // --- Raycasting para interacción ---
-            function handleBlockInteraction(action) {
-                if (!controls.isLocked) return;
-
-                raycaster.setFromCamera(new THREE.Vector2(0, 0), camera); // centro de la pantalla
-                const intersects = raycaster.intersectObject(instancedMesh);
-
-                if (intersects.length > 0) {
-                    const intersect = intersects[0];
-                    const instanceId = intersect.instanceId;
-                    if (instanceId === undefined) return;
-
-                    // Obtener posición del bloque
-                    const matrix = new THREE.Matrix4();
-                    instancedMesh.getMatrixAt(instanceId, matrix);
-                    const pos = new THREE.Vector3();
-                    pos.setFromMatrixPosition(matrix);
-                    const bx = Math.floor(pos.x - 0.5);
-                    const by = Math.floor(pos.y - 0.5);
-                    const bz = Math.floor(pos.z - 0.5);
-
-                    if (action === 'remove') {
-                        // Romper bloque
-                        removeBlockInstance(bx, by, bz, true);
-                        // Enviar por red
-                        sendMessage({ type: 'blockRemove', x: bx, y: by, z: bz });
-                    } else if (action === 'add') {
-                        // Colocar bloque en la cara adyacente
-                        const normal = intersect.face.normal;
-                        const nx = bx + Math.round(normal.x);
-                        const ny = by + Math.round(normal.y);
-                        const nz = bz + Math.round(normal.z);
-
-                        // Verificar límites y si ya hay bloque
-                        if (ny >= 0 && ny < WORLD_HEIGHT && getBlock(nx, ny, nz) === 0) {
-                            // Tipo por defecto: tierra (2) para colocar
-                            const type = 2;
-                            addBlockInstance(nx, ny, nz, type, true);
-                            sendMessage({ type: 'blockAdd', x: nx, y: ny, z: nz, blockType: type });
-                        }
-                    }
-                }
-            }
-
-            // --- Física y movimiento ---
-            function updatePhysics() {
-                if (!controls.isLocked) return;
-
-                const delta = 1; // Asumimos 60fps estable, podemos usar tiempo real pero simplificamos
-
-                // Gravedad
-                velocity.y -= GRAVITY;
-
-                // Movimiento por teclado (WASD)
-                const moveX = (controls.moveRight ? 1 : 0) - (controls.moveLeft ? 1 : 0);
-                const moveZ = (controls.moveForward ? 1 : 0) - (controls.moveBackward ? 1 : 0);
-
-                if (moveX !== 0 || moveZ !== 0) {
-                    const angle = camera.rotation.y;
-                    const speed = MOVEMENT_SPEED;
-                    const dx = Math.sin(angle) * moveZ + Math.cos(angle) * moveX;
-                    const dz = Math.cos(angle) * moveZ - Math.sin(angle) * moveX;
-                    velocity.x = dx * speed;
-                    velocity.z = dz * speed;
-                } else {
-                    velocity.x *= 0.8;
-                    velocity.z *= 0.8;
-                }
-
-                // Aplicar movimiento con colisiones simples (solo contra bloques)
-                const newPos = controls.getObject().position.clone().add(velocity);
-
-                // Detección de colisiones (AABB con bloques)
-                // Simplificamos: comprobar cubo del jugador contra bloques cercanos
-                const playerBox = new THREE.Box3(
-                    new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y, newPos.z - PLAYER_RADIUS),
-                    new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + PLAYER_HEIGHT, newPos.z + PLAYER_RADIUS)
-                );
-
-                let collision = false;
-                // Recorrer bloques cercanos
-                for (let x = Math.floor(newPos.x - 2); x <= Math.floor(newPos.x + 2); x++) {
-                    for (let y = Math.floor(newPos.y - 2); y <= Math.floor(newPos.y + 3); y++) {
-                        for (let z = Math.floor(newPos.z - 2); z <= Math.floor(newPos.z + 2); z++) {
-                            const block = getBlock(x, y, z);
-                            if (block === 0) continue;
-                            const blockBox = new THREE.Box3(
-                                new THREE.Vector3(x, y, z),
-                                new THREE.Vector3(x + 1, y + 1, z + 1)
-                            );
-                            if (playerBox.intersectsBox(blockBox)) {
-                                collision = true;
-                                // Rebote simple (no física real, solo evita atravesar)
-                                // Ajustar velocidad para detener
-                                velocity.set(0, 0, 0);
-                                break;
-                            }
-                        }
-                        if (collision) break;
-                    }
-                    if (collision) break;
-                }
-
-                if (!collision) {
-                    controls.getObject().position.copy(newPos);
-                }
-
-                // Suelo (detección para salto)
-                const feetPos = controls.getObject().position.clone();
-                feetPos.y -= 0.1;
-                const belowBlock = getBlock(Math.floor(feetPos.x), Math.floor(feetPos.y), Math.floor(feetPos.z));
-                onGround = belowBlock !== 0 || feetPos.y <= 0.1;
-
-                // Salto
-                if (controls.jump && onGround) {
-                    velocity.y = JUMP_FORCE;
-                }
-            }
-
-            // --- Multijugador PeerJS ---
-            function initPeer(isCreator) {
-                peer = new Peer();
-
-                peer.on('open', (id) => {
-                    myPeerId = id;
-                    myPeerIdSpan.textContent = id;
-                    peerIdValueDiv.textContent = id;
-                    console.log('Mi ID:', id);
-                });
-
-                peer.on('connection', (connection) => {
-                    conn = connection;
-                    setupConnection(conn);
-                    if (isCreator) {
-                        // Enviar estado completo del mundo al conectarse
-                        sendWorldState();
-                    }
-                });
-
-                peer.on('error', (err) => {
-                    console.error('Peer error:', err);
-                    alert('Error de conexión: ' + err.type);
-                });
-            }
-
-            function setupConnection(connection) {
-                conn = connection;
-                remotePeerId = conn.peer;
-                remotePeerIdSpan.textContent = remotePeerId;
-                connectionStatusDiv.textContent = '🟢 Conectado';
-                connectionStatusDiv.classList.remove('disconnected');
-                remoteAvatar.visible = true;
-
-                conn.on('data', (data) => {
-                    handleMessage(data);
-                });
-
-                conn.on('close', () => {
-                    remotePeerId = '';
-                    remotePeerIdSpan.textContent = '---';
-                    connectionStatusDiv.textContent = '🔴 Desconectado';
-                    connectionStatusDiv.classList.add('disconnected');
-                    remoteAvatar.visible = false;
-                });
-            }
-
-            function sendMessage(msg) {
-                if (conn && conn.open) {
-                    conn.send(msg);
-                }
-            }
-
-            function sendWorldState() {
-                const blocks = [];
-                for (const [key, type] of Object.entries(world)) {
-                    const [x, y, z] = key.split(',').map(Number);
-                    blocks.push({ x, y, z, type });
-                }
-                sendMessage({ type: 'worldState', blocks });
-            }
-
-            function handleMessage(data) {
-                switch (data.type) {
-                    case 'worldState':
-                        // Reiniciar mundo local y reconstruir
-                        world = {};
-                        data.blocks.forEach(b => setBlock(b.x, b.y, b.z, b.type));
-                        rebuildInstancesFromWorld();
-                        break;
-                    case 'blockAdd':
-                        addBlockInstance(data.x, data.y, data.z, data.blockType, true);
-                        break;
-                    case 'blockRemove':
-                        removeBlockInstance(data.x, data.y, data.z, true);
-                        break;
-                    case 'playerPos':
-                        // Actualizar avatar remoto
-                        if (remoteAvatar) {
-                            remoteAvatar.position.set(data.x, data.y, data.z);
-                        }
-                        break;
-                }
-            }
-
-            // Enviar posición periódicamente
-            function updateNetwork() {
-                if (conn && conn.open) {
-                    const now = Date.now();
-                    if (now - lastPositionUpdate > POSITION_UPDATE_INTERVAL) {
-                        lastPositionUpdate = now;
-                        const pos = controls.getObject().position;
-                        sendMessage({ type: 'playerPos', x: pos.x, y: pos.y, z: pos.z });
-                    }
-                }
-            }
-
-            // --- UI y eventos ---
-            document.getElementById('create-room').addEventListener('click', () => {
-                initPeer(true);
-                document.getElementById('create-room').style.display = 'none';
-                document.getElementById('join-room').style.display = 'none';
-                peerIdContainer.style.display = 'block';
+    if (intersects.length > 0) {
+        const intersect = intersects[0];
+        if (e.button === 0) { // Click Izquierdo: Romper
+            scene.remove(intersect.object);
+            const p = intersect.object.position;
+            voxelMap.delete(`${p.x},${p.y},${p.z}`);
+            broadcast({ type: 'break', pos: {x:p.x, y:p.y, z:p.z} });
+        } else if (e.button === 2) { // Click Derecho: Poner
+            const pos = intersect.object.position.clone().add(intersect.face.normal);
+            createBlockMesh(pos.x, pos.y, pos.z, creator.selectedBlockId);
+            broadcast({ 
+                type: 'place', 
+                pos: {x:pos.x, y:pos.y, z:pos.z}, 
+                blockId: creator.selectedBlockId,
+                config: creator.registry[creator.selectedBlockId] 
             });
+        }
+    }
+});
 
-            document.getElementById('join-room').addEventListener('click', () => {
-                document.getElementById('create-room').style.display = 'none';
-                document.getElementById('join-room').style.display = 'none';
-                joinContainer.style.display = 'block';
-            });
+// --- NETWORKING (PEERJS) ---
+const peer = new Peer();
+let connections = [];
 
-            document.getElementById('back-btn').addEventListener('click', () => {
-                joinContainer.style.display = 'none';
-                peerIdContainer.style.display = 'none';
-                document.getElementById('create-room').style.display = 'inline-block';
-                document.getElementById('join-room').style.display = 'inline-block';
-            });
+peer.on('open', id => {
+    document.getElementById('peer-id').innerText = `Tu ID: ${id}`;
+    document.getElementById('status').innerText = "PeerJS: Listo";
+});
 
-            document.getElementById('connect-btn').addEventListener('click', () => {
-                const targetId = document.getElementById('peer-id-input').value.trim();
-                if (!targetId) return;
-                initPeer(false);
-                // Esperar a que peer esté listo para conectar
-                const tryConnect = setInterval(() => {
-                    if (peer && myPeerId) {
-                        clearInterval(tryConnect);
-                        conn = peer.connect(targetId);
-                        if (conn) {
-                            setupConnection(conn);
-                            menuOverlay.style.display = 'none'; // Ocultar menú al conectar
-                        } else {
-                            alert('No se pudo conectar');
-                        }
-                    }
-                }, 200);
-            });
+peer.on('connection', conn => setupConn(conn));
 
-            document.getElementById('copy-id').addEventListener('click', () => {
-                navigator.clipboard.writeText(myPeerId);
-                alert('ID copiado');
-            });
+document.getElementById('connect-btn').onclick = () => {
+    const remoteId = document.getElementById('conn-id').value;
+    const conn = peer.connect(remoteId);
+    setupConn(conn);
+};
 
-            // Ocultar menú cuando se conecta (en caso de creador, esperar conexión)
-            // Se ocultará manualmente cuando se establezca conexión? Mejor esperar a que conn esté abierto
-            function checkConnectionAndHideMenu() {
-                if (conn && conn.open) {
-                    menuOverlay.style.display = 'none';
-                }
+function setupConn(conn) {
+    conn.on('open', () => {
+        connections.push(conn);
+        document.getElementById('status').innerText = "Conectado";
+    });
+    conn.on('data', data => {
+        if(data.type === 'place') {
+            if(!creator.registry[data.blockId]) {
+                creator.registry[data.blockId] = data.config;
+                creator.updateHotbar();
             }
-
-            // --- Animación y loop principal ---
-            function animate() {
-                requestAnimationFrame(animate);
-
-                if (controls.isLocked) {
-                    updatePhysics();
-                    updateNetwork();
-                }
-
-                // Actualizar avatar remoto con su última posición (ya se hace en handleMessage)
-                checkConnectionAndHideMenu();
-
-                renderer.render(scene, camera);
+            createBlockMesh(data.pos.x, data.pos.y, data.pos.z, data.blockId);
+        }
+        if(data.type === 'break') {
+            const key = `${data.pos.x},${data.pos.y},${data.pos.z}`;
+            if(voxelMap.has(key)) {
+                scene.remove(voxelMap.get(key));
+                voxelMap.delete(key);
             }
+        }
+    });
+}
 
-            // --- Inicio ---
-            window.addEventListener('load', () => {
-                initThree();
+function broadcast(data) {
+    connections.forEach(c => c.send(data));
+}
 
-                // Evento para bloquear el puntero al hacer clic en el canvas
-                renderer.domElement.addEventListener('click', () => {
-                    if (!controls.isLocked && menuOverlay.style.display === 'none') {
-                        controls.lock();
-                    }
-                });
+// --- LOOP PRINCIPAL ---
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
 
-                // Manejar resize
-                window.addEventListener('resize', () => {
-                    camera.aspect = window.innerWidth / window.innerHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-            });
+    // Físicas simples
+    velocity.y -= 9.8 * delta; // Gravedad
+    const direction = new THREE.Vector3();
+    if(moveForward) direction.z -= 1;
+    if(moveBackward) direction.z += 1;
+    if(moveLeft) direction.x -= 1;
+    if(moveRight) direction.x += 1;
+    
+    direction.normalize().applyQuaternion(yaw.quaternion);
+    yaw.position.add(direction.multiplyScalar(5 * delta));
+    yaw.position.y += velocity.y * delta;
 
-        })();
-    </script>
+    // Colisión básica con el suelo (y=0)
+    if (yaw.position.y < 2) {
+        velocity.y = 0;
+        yaw.position.y = 2;
+        canJump = true;
+    }
+
+    renderer.render(scene, camera);
+}
+
+// --- EVENTOS UI ---
+document.getElementById('create-block-btn').onclick = () => {
+    const name = document.getElementById('block-name').value;
+    const color = document.getElementById('block-color').value;
+    const opacity = document.getElementById('block-opacity').value;
+    creator.defineBlock(name, color, opacity);
+};
+
+creator.updateHotbar();
+animate();
+</script>
 </body>
 </html>
