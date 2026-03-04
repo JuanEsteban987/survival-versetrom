@@ -2,341 +2,706 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMod 2008 · Versión simplificada</title>
+    <title>GMod 2D · Survivor.io style</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'VT323', monospace; background: #111; }
-        #info {
-            position: absolute; top: 10px; left: 10px; background: #000; color: #0f0;
-            padding: 8px 16px; border: 3px solid #0a0; font-size: 24px; z-index: 100;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
         }
-        #toolbar {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #b0b7b0; border: 4px solid #222; padding: 8px 16px; display: flex;
-            gap: 20px; box-shadow: 6px 6px 0 #3a3a3a; z-index: 200;
+        body {
+            background: #1a1e2c;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
-        .tool-btn {
-            background: #dbdddb; border: 3px solid #222; color: #111; font-family: 'VT323';
-            font-size: 28px; padding: 5px 20px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 3px 3px 0 #3c3c3c;
+        .game-container {
+            background: #0f1219;
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
-        .tool-btn.active { background: #acc7e6; transform: translate(2px, 2px); }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
-            transform: translate(-50%, -50%); border: 2px solid white; z-index: 150;
-            box-shadow: 0 0 0 2px black;
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 16px;
+            background: #2a2f3f;
+            box-shadow: inset 0 0 20px #00000055, 0 10px 10px rgba(0,0,0,0.3);
+            cursor: crosshair;
         }
-        #status {
-            position: absolute; top: 10px; right: 10px; background: #000; color: #ffcc00;
-            padding: 8px 16px; border: 3px solid #ffaa00; font-size: 22px; z-index: 100;
+        .panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            color: #ddd;
+            font-weight: 600;
+            text-shadow: 2px 2px 0 #0a0c14;
+        }
+        .stats {
+            display: flex;
+            gap: 32px;
+            background: #1e2333;
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid #4a516b;
+        }
+        .stats span {
+            color: #b7e05e;
+            font-size: 1.5rem;
+            margin-left: 8px;
+        }
+        button {
+            background: #3d455e;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1b1f2b, 0 8px 12px black;
+            transition: 0.07s ease;
+            border: 1px solid #7f8aa8;
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            background: #55607f;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #1b1f2b, 0 12px 18px black;
+        }
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #1b1f2b, 0 8px 12px black;
+        }
+        .info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .key-hint {
+            background: #262d40;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            border: 1px solid #5d6988;
+        }
+        .key-hint kbd {
+            background: #0f1219;
+            color: #f7df6e;
+            padding: 3px 8px;
+            border-radius: 30px;
+            font-weight: 900;
+            margin: 0 4px;
         }
     </style>
-    <!-- Three.js desde CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="info">🛠️ GMod 2008 · Lite</div>
-    <div id="status">HERRAMIENTA: <span id="toolName">PROP</span></div>
-    <div id="crosshair"></div>
-    <div id="toolbar">
-        <button class="tool-btn active" data-tool="prop">📦 PROP</button>
-        <button class="tool-btn" data-tool="remove">❌ REMOVE</button>
+<div class="game-container">
+    <canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+    <div class="panel">
+        <div class="stats">
+            <div>❤️ <span id="healthDisplay">100</span></div>
+            <div>🎯 <span id="scoreDisplay">0</span></div>
+        </div>
+        <div class="info">
+            <div class="key-hint">
+                <kbd>WASD</kbd> mover · <kbd>🖱️</kbd> disparar · <kbd>E</kbd> caja
+            </div>
+            <button id="spawnBoxBtn">➕ SPAWN CAJA</button>
+        </div>
     </div>
+</div>
 
-    <script>
-        // --- Inicialización básica ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Cielo azul claro
+<script>
+    (function() {
+        // --- CONFIGURACIÓN ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 3, 8);
+        // Mostradores
+        const healthSpan = document.getElementById('healthDisplay');
+        const scoreSpan = document.getElementById('scoreDisplay');
 
-        const renderer = new THREE.WebGLRenderer({ antialias: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // Sombras para más realismo
-        document.body.appendChild(renderer.domElement);
+        // --- CONSTANTES DEL JUEGO ---
+        const PLAYER_RADIUS = 18;
+        const ENEMY_RADIUS = 16;
+        const BULLET_RADIUS = 6;
+        const BULLET_SPEED = 8;
+        const PLAYER_SPEED = 3.8;
+        const ENEMY_SPEED = 1.2;
+        const SHOT_COOLDOWN = 12; // frames
+        const FRICTION = 0.98;
+        const BOX_WIDTH = 44;
+        const BOX_HEIGHT = 44;
 
-        // --- Luces potentes (para que todo se vea) ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Luz ambiental clara
-        scene.add(ambientLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(5, 10, 7);
-        dirLight.castShadow = true;
-        dirLight.receiveShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
-        dirLight.shadow.camera.near = 0.5;
-        dirLight.shadow.camera.far = 25;
-        dirLight.shadow.camera.left = -10;
-        dirLight.shadow.camera.right = 10;
-        dirLight.shadow.camera.top = 10;
-        dirLight.shadow.camera.bottom = -10;
-        scene.add(dirLight);
-
-        // Luz puntual extra para iluminar desde abajo
-        const pointLight = new THREE.PointLight(0xffffff, 0.5);
-        pointLight.position.set(0, 5, 5);
-        scene.add(pointLight);
-
-        // --- Suelo con cuadrícula (visible) ---
-        const gridHelper = new THREE.GridHelper(30, 20, 0x88ff88, 0x335533);
-        gridHelper.position.y = 0;
-        scene.add(gridHelper);
-
-        const planeGeo = new THREE.PlaneGeometry(30, 30);
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x3c6e3c, side: THREE.DoubleSide });
-        const plane = new THREE.Mesh(planeGeo, planeMat);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = 0;
-        plane.receiveShadow = true;
-        scene.add(plane);
-
-        // --- Paredes invisibles para no caerse (no se renderizan, pero limitan el movimiento) ---
-        // Simularemos límites con un simple check en el movimiento, sin físicas complejas.
-
-        // --- Variables globales ---
-        const keyState = { w: false, a: false, s: false, d: false, space: false };
-        const player = {
-            mesh: null,
-            velocity: new THREE.Vector3(0, 0, 0),
-            onGround: false,
-            radius: 0.5,
-            height: 1.8
+        // --- VARIABLES GLOBALES ---
+        let player = {
+            x: 400, y: 300,
+            vx: 0, vy: 0,
+            radius: PLAYER_RADIUS,
+            health: 100,
+            maxHealth: 100
         };
-        const props = []; // almacena los meshes de props
-        let currentTool = 'prop';
 
-        // --- Crear jugador (un grupo con cuerpo y cabeza) ---
-        const playerGroup = new THREE.Group();
-        
-        // Cuerpo (camisa roja)
-        const torsoGeo = new THREE.BoxGeometry(0.9, 1.4, 0.6);
-        const torsoMat = new THREE.MeshStandardMaterial({ color: 0xff5555 });
-        const torso = new THREE.Mesh(torsoGeo, torsoMat);
-        torso.position.y = 0.7;
-        torso.castShadow = true;
-        torso.receiveShadow = true;
-        playerGroup.add(torso);
-        
-        // Cabeza
-        const headGeo = new THREE.SphereGeometry(0.4, 16, 16);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
-        const head = new THREE.Mesh(headGeo, headMat);
-        head.position.y = 1.5;
-        head.castShadow = true;
-        head.receiveShadow = true;
-        playerGroup.add(head);
-        
-        // Ojos
-        const eyeGeo = new THREE.SphereGeometry(0.1, 8);
-        const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-        const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-        eyeL.position.set(-0.15, 1.6, 0.35);
-        playerGroup.add(eyeL);
-        const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-        eyeR.position.set(0.15, 1.6, 0.35);
-        playerGroup.add(eyeR);
+        let enemies = [];
+        let bullets = [];
+        let boxes = [];
 
-        playerGroup.position.set(0, 1, 0);
-        playerGroup.castShadow = true;
-        playerGroup.receiveShadow = true;
-        scene.add(playerGroup);
-        player.mesh = playerGroup;
+        let score = 0;
 
-        // --- Suelo lógico (para gravedad) ---
-        const groundLevel = 0.9; // altura a la que el jugador toca el suelo (considerando su altura)
+        // Control de teclas
+        const keys = {
+            w: false, a: false, s: false, d: false
+        };
 
-        // --- Controles de teclado ---
+        // Posición del ratón (para apuntar)
+        let mouseX = player.x, mouseY = player.y;
+
+        // Cadencia
+        let shotTimer = 0;
+
+        // Spawn de enemigos (oleadas)
+        let enemySpawnTimer = 0;
+        const ENEMY_SPAWN_RATE = 70; // frames
+
+        // --- INICIALIZACIÓN ---
+        // Añadir algunas cajas de ejemplo
+        boxes.push({ x: 300, y: 200, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT });
+        boxes.push({ x: 600, y: 400, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT });
+        boxes.push({ x: 200, y: 500, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT });
+
+        // --- EVENTOS DE TECLADO ---
         window.addEventListener('keydown', (e) => {
-            switch(e.code) {
-                case 'KeyW': keyState.w = true; e.preventDefault(); break;
-                case 'KeyA': keyState.a = true; e.preventDefault(); break;
-                case 'KeyS': keyState.s = true; e.preventDefault(); break;
-                case 'KeyD': keyState.d = true; e.preventDefault(); break;
-                case 'Space': keyState.space = true; e.preventDefault(); break;
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+                keys[key] = true;
+                e.preventDefault();
+            }
+            // Tecla E para spawnear caja
+            if (key === 'e') {
+                spawnBox();
+                e.preventDefault();
             }
         });
+
         window.addEventListener('keyup', (e) => {
-            switch(e.code) {
-                case 'KeyW': keyState.w = false; e.preventDefault(); break;
-                case 'KeyA': keyState.a = false; e.preventDefault(); break;
-                case 'KeyS': keyState.s = false; e.preventDefault(); break;
-                case 'KeyD': keyState.d = false; e.preventDefault(); break;
-                case 'Space': keyState.space = false; e.preventDefault(); break;
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+                keys[key] = false;
+                e.preventDefault();
             }
         });
 
-        // --- Toolbar ---
-        const toolButtons = document.querySelectorAll('.tool-btn');
-        const toolSpan = document.getElementById('toolName');
-        toolButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                toolButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentTool = btn.dataset.tool;
-                toolSpan.innerText = currentTool.toUpperCase();
+        // --- EVENTOS DE RATÓN (apuntar y disparar) ---
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (e.clientX - rect.left) * scaleX;
+            mouseY = (e.clientY - rect.top) * scaleY;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // clic izquierdo
+                e.preventDefault();
+                // Disparar si el cooldown lo permite
+                if (shotTimer <= 0) {
+                    shootBullet();
+                    shotTimer = SHOT_COOLDOWN;
+                }
+            }
+        });
+
+        // Evitar menú contextual con clic derecho (opcional)
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Botón spawn caja
+        document.getElementById('spawnBoxBtn').addEventListener('click', spawnBox);
+
+        // --- FUNCIONES AUXILIARES ---
+        function spawnBox() {
+            // Aparece cerca del jugador, pero no encima
+            let offsetX = (Math.random() - 0.5) * 150;
+            let offsetY = (Math.random() - 0.5) * 150;
+            let x = Math.min(canvas.width - BOX_WIDTH/2, Math.max(BOX_WIDTH/2, player.x + offsetX));
+            let y = Math.min(canvas.height - BOX_HEIGHT/2, Math.max(BOX_HEIGHT/2, player.y + offsetY));
+            boxes.push({
+                x: x, y: y,
+                vx: 0, vy: 0,
+                w: BOX_WIDTH, h: BOX_HEIGHT
             });
-        });
-
-        // --- Raycaster para interacción ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
-        });
-
-        // --- Spawn de props (cajas de colores) ---
-        function spawnProp(position) {
-            const size = 0.5 + Math.random() * 0.5;
-            const color = new THREE.Color().setHSL(Math.random(), 0.9, 0.6);
-            const geo = new THREE.BoxGeometry(size, size, size);
-            const mat = new THREE.MeshStandardMaterial({ color: color });
-            const cube = new THREE.Mesh(geo, mat);
-            cube.position.copy(position);
-            cube.castShadow = true;
-            cube.receiveShadow = true;
-            scene.add(cube);
-            props.push(cube);
         }
 
-        // --- Eliminar prop bajo el cursor ---
-        function removeProp() {
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(props);
-            if (intersects.length > 0) {
-                const hit = intersects[0].object;
-                scene.remove(hit);
-                const index = props.indexOf(hit);
-                if (index > -1) props.splice(index, 1);
+        function shootBullet() {
+            // Dirección hacia el ratón
+            const dx = mouseX - player.x;
+            const dy = mouseY - player.y;
+            const len = Math.hypot(dx, dy);
+            if (len < 0.001) return; // justo encima
+
+            const normDx = dx / len;
+            const normDy = dy / len;
+
+            bullets.push({
+                x: player.x + normDx * (PLAYER_RADIUS + BULLET_RADIUS + 2),
+                y: player.y + normDy * (PLAYER_RADIUS + BULLET_RADIUS + 2),
+                vx: normDx * BULLET_SPEED,
+                vy: normDy * BULLET_SPEED,
+                radius: BULLET_RADIUS,
+                active: true
+            });
+        }
+
+        function spawnEnemy() {
+            // Aparece en un borde aleatorio
+            let side = Math.floor(Math.random() * 4); // 0: izquierda, 1: derecha, 2: arriba, 3: abajo
+            let x, y;
+            const pad = 50;
+            if (side === 0) { // izquierda
+                x = -pad;
+                y = Math.random() * canvas.height;
+            } else if (side === 1) { // derecha
+                x = canvas.width + pad;
+                y = Math.random() * canvas.height;
+            } else if (side === 2) { // arriba
+                x = Math.random() * canvas.width;
+                y = -pad;
+            } else { // abajo
+                x = Math.random() * canvas.width;
+                y = canvas.height + pad;
+            }
+            enemies.push({
+                x: x, y: y,
+                vx: 0, vy: 0,
+                radius: ENEMY_RADIUS,
+            });
+        }
+
+        // --- COLISIONES Y FÍSICA ---
+
+        // Detección círculo - rectángulo (centro del círculo, radio, rectángulo)
+        function circleRectCollision(cx, cy, r, rect) {
+            let closestX = Math.max(rect.x - rect.w/2, Math.min(cx, rect.x + rect.w/2));
+            let closestY = Math.max(rect.y - rect.h/2, Math.min(cy, rect.y + rect.h/2));
+            let dx = cx - closestX;
+            let dy = cy - closestY;
+            let dist = Math.hypot(dx, dy);
+            if (dist < r) {
+                // devolvemos la normal (desde el rect al círculo) y la profundidad
+                if (dist === 0) {
+                    // excepcional: el centro está dentro del rectángulo
+                    // empujamos hacia arriba por defecto
+                    return { collides: true, nx: 0, ny: -1, depth: r };
+                }
+                let nx = dx / dist;
+                let ny = dy / dist;
+                return { collides: true, nx: nx, ny: ny, depth: r - dist };
+            }
+            return { collides: false };
+        }
+
+        // Resolver colisión entre dos círculos (jugador-enemigo, etc.) 
+        // Devuelve {collides, nx, ny, depth}
+        function circleCollision(c1, r1, c2, r2) {
+            let dx = c2.x - c1.x;
+            let dy = c2.y - c1.y;
+            let dist = Math.hypot(dx, dy);
+            let minDist = r1 + r2;
+            if (dist < minDist) {
+                if (dist === 0) {
+                    return { collides: true, nx: 1, ny: 0, depth: minDist };
+                }
+                let nx = dx / dist;
+                let ny = dy / dist;
+                return { collides: true, nx: nx, ny: ny, depth: minDist - dist };
+            }
+            return { collides: false };
+        }
+
+        // Aplicar rozamiento a todas las entidades con velocidad
+        function applyFriction() {
+            player.vx *= FRICTION;
+            player.vy *= FRICTION;
+
+            for (let b of boxes) {
+                b.vx *= FRICTION;
+                b.vy *= FRICTION;
+            }
+            // Los enemigos también tienen rozamiento (para que no se deslicen infinito)
+            for (let e of enemies) {
+                e.vx *= FRICTION;
+                e.vy *= FRICTION;
+            }
+            // Las balas no tienen rozamiento (van a velocidad constante hasta impactar)
+        }
+
+        // Mover según velocidad
+        function moveObjects() {
+            player.x += player.vx;
+            player.y += player.vy;
+
+            for (let b of boxes) {
+                b.x += b.vx;
+                b.y += b.vy;
+                // Mantener dentro del canvas (rebote simple)
+                if (b.x - b.w/2 < 0) { b.x = b.w/2; b.vx *= -0.3; }
+                if (b.x + b.w/2 > canvas.width) { b.x = canvas.width - b.w/2; b.vx *= -0.3; }
+                if (b.y - b.h/2 < 0) { b.y = b.h/2; b.vy *= -0.3; }
+                if (b.y + b.h/2 > canvas.height) { b.y = canvas.height - b.h/2; b.vy *= -0.3; }
+            }
+
+            for (let e of enemies) {
+                e.x += e.vx;
+                e.y += e.vy;
+                // Mantener dentro (opcional, pero si salen mucho los traemos de vuelta)
+                if (e.x - e.radius < 0) { e.x = e.radius; e.vx *= -0.3; }
+                if (e.x + e.radius > canvas.width) { e.x = canvas.width - e.radius; e.vx *= -0.3; }
+                if (e.y - e.radius < 0) { e.y = e.radius; e.vy *= -0.3; }
+                if (e.y + e.radius > canvas.height) { e.y = canvas.height - e.radius; e.vy *= -0.3; }
+            }
+
+            for (let b of bullets) {
+                b.x += b.vx;
+                b.y += b.vy;
+                // Eliminar si sale del canvas
+                if (b.x < -50 || b.x > canvas.width + 50 || b.y < -50 || b.y > canvas.height + 50) {
+                    b.active = false;
+                }
+            }
+            // Filtrar balas inactivas
+            bullets = bullets.filter(b => b.active);
+        }
+
+        // --- MANEJO DE COLISIONES (versión simplificada pero entretenida) ---
+        function handleCollisions() {
+            // 1. Jugador contra cajas (círculo - rect)
+            for (let box of boxes) {
+                let col = circleRectCollision(player.x, player.y, player.radius, box);
+                if (col.collides) {
+                    // Separar jugador
+                    player.x += col.nx * col.depth;
+                    player.y += col.ny * col.depth;
+                    // Transferir velocidad (empujar caja)
+                    let impulse = 0.6;
+                    box.vx += col.nx * impulse * (Math.hypot(player.vx, player.vy) + 0.5);
+                    box.vy += col.ny * impulse * (Math.hypot(player.vx, player.vy) + 0.5);
+                    // El jugador rebota un poco
+                    player.vx -= col.nx * 0.5;
+                    player.vy -= col.ny * 0.5;
+                }
+            }
+
+            // 2. Jugador contra enemigos (círculo - círculo)
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                let col = circleCollision(player, player.radius, e, e.radius);
+                if (col.collides) {
+                    // Separar
+                    player.x -= col.nx * col.depth * 0.6;
+                    player.y -= col.ny * col.depth * 0.6;
+                    e.x += col.nx * col.depth * 0.6;
+                    e.y += col.ny * col.depth * 0.6;
+
+                    // Daño al jugador (con enfriamiento implícito por frames)
+                    player.health = Math.max(0, player.health - 12);
+                    healthSpan.innerText = Math.floor(player.health);
+
+                    // Empujón
+                    let push = 2.5;
+                    player.vx -= col.nx * push;
+                    player.vy -= col.ny * push;
+                    e.vx += col.nx * push * 0.7;
+                    e.vy += col.ny * push * 0.7;
+
+                    if (player.health <= 0) {
+                        // Game over simple: reiniciamos (por ahora)
+                        resetGame();
+                        return;
+                    }
+                }
+            }
+
+            // 3. Balas contra enemigos
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let bullet = bullets[i];
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    let enemy = enemies[j];
+                    let col = circleCollision(bullet, bullet.radius, enemy, enemy.radius);
+                    if (col.collides) {
+                        // Eliminar bala y enemigo
+                        bullets.splice(i, 1);
+                        enemies.splice(j, 1);
+                        score += 10;
+                        scoreSpan.innerText = score;
+                        break; // bala desaparece, salir del bucle interno
+                    }
+                }
+            }
+
+            // 4. Balas contra cajas
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let bullet = bullets[i];
+                for (let j = boxes.length - 1; j >= 0; j--) {
+                    let box = boxes[j];
+                    let col = circleRectCollision(bullet.x, bullet.y, bullet.radius, box);
+                    if (col.collides) {
+                        // Empujar caja
+                        let impulse = 3.0;
+                        box.vx += col.nx * impulse;
+                        box.vy += col.ny * impulse;
+                        // Eliminar bala
+                        bullets.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            // 5. (Opcional) Cajas entre sí? Las omitimos por simplicidad.
+        }
+
+        // --- COMPORTAMIENTO DE ENEMIGOS (perseguir al jugador) ---
+        function updateEnemies() {
+            for (let e of enemies) {
+                let dx = player.x - e.x;
+                let dy = player.y - e.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist > 0.1) {
+                    let normX = dx / dist;
+                    let normY = dy / dist;
+                    // Acelerar hacia el jugador
+                    e.vx += normX * ENEMY_SPEED * 0.15;
+                    e.vy += normY * ENEMY_SPEED * 0.15;
+                    // Limitar velocidad máxima
+                    let sp = Math.hypot(e.vx, e.vy);
+                    let maxSp = ENEMY_SPEED * 1.8;
+                    if (sp > maxSp) {
+                        e.vx = (e.vx / sp) * maxSp;
+                        e.vy = (e.vy / sp) * maxSp;
+                    }
+                }
             }
         }
 
-        // --- Eventos de clic ---
-        window.addEventListener('click', (e) => {
-            if (currentTool === 'prop') {
-                // Colocar prop donde mira la cámara, a 5 unidades de distancia
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction);
-                const spawnPos = camera.position.clone().add(direction.multiplyScalar(5));
-                spawnPos.y = Math.max(1, spawnPos.y); // evitar que aparezca bajo tierra
-                spawnProp(spawnPos);
-            } else if (currentTool === 'remove') {
-                removeProp();
-            }
-        });
-
-        // Bloquear menú contextual para clic derecho
-        window.addEventListener('contextmenu', e => e.preventDefault());
-
-        // --- Físicas simples (gravedad y movimiento) ---
-        const gravity = -15; // unidades por segundo²
-        const moveSpeed = 8;
-        const jumpSpeed = 7;
-
-        function updatePlayer(deltaTime) {
-            // Aplicar gravedad
-            player.velocity.y += gravity * deltaTime;
-
-            // Movimiento horizontal (solo si está en el suelo o con poco control en aire)
-            const moveDir = new THREE.Vector3(0, 0, 0);
-            if (keyState.w) moveDir.z -= 1;
-            if (keyState.s) moveDir.z += 1;
-            if (keyState.a) moveDir.x -= 1;
-            if (keyState.d) moveDir.x += 1;
-            if (moveDir.length() > 0) {
-                moveDir.normalize();
-                // Convertir dirección relativa a la cámara
-                const cameraDir = new THREE.Vector3();
-                camera.getWorldDirection(cameraDir);
-                cameraDir.y = 0;
-                cameraDir.normalize();
-                const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), cameraDir).normalize();
-                
-                const move = new THREE.Vector3(0, 0, 0);
-                if (keyState.w) move.add(cameraDir);
-                if (keyState.s) move.sub(cameraDir);
-                if (keyState.a) move.add(right);
-                if (keyState.d) move.sub(right);
-                move.normalize();
-                player.velocity.x = move.x * moveSpeed;
-                player.velocity.z = move.z * moveSpeed;
-            } else {
-                // Frenar suavemente
-                player.velocity.x *= 0.8;
-                player.velocity.z *= 0.8;
-            }
-
-            // Salto
-            if (keyState.space && player.onGround) {
-                player.velocity.y = jumpSpeed;
-                player.onGround = false;
-            }
-
-            // Actualizar posición
-            player.mesh.position.x += player.velocity.x * deltaTime;
-            player.mesh.position.y += player.velocity.y * deltaTime;
-            player.mesh.position.z += player.velocity.z * deltaTime;
-
-            // Colisión con el suelo
-            if (player.mesh.position.y < groundLevel) {
-                player.mesh.position.y = groundLevel;
-                player.velocity.y = 0;
-                player.onGround = true;
-            } else {
-                player.onGround = false;
-            }
-
-            // Límites del mundo (para no irse al infinito)
-            const boundary = 14;
-            if (player.mesh.position.x > boundary) player.mesh.position.x = boundary;
-            if (player.mesh.position.x < -boundary) player.mesh.position.x = -boundary;
-            if (player.mesh.position.z > boundary) player.mesh.position.z = boundary;
-            if (player.mesh.position.z < -boundary) player.mesh.position.z = -boundary;
+        // --- RESET RÁPIDO (cuando muere) ---
+        function resetGame() {
+            player = { x: 400, y: 300, vx: 0, vy: 0, radius: PLAYER_RADIUS, health: 100, maxHealth: 100 };
+            enemies = [];
+            bullets = [];
+            boxes = [
+                { x: 300, y: 200, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT },
+                { x: 600, y: 400, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT },
+                { x: 200, y: 500, vx: 0, vy: 0, w: BOX_WIDTH, h: BOX_HEIGHT }
+            ];
+            score = 0;
+            shotTimer = 0;
+            healthSpan.innerText = '100';
+            scoreSpan.innerText = '0';
         }
 
-        // --- Cámara en tercera persona ---
-        function updateCamera() {
-            const playerPos = player.mesh.position.clone();
-            const offset = new THREE.Vector3(-3, 2, 4); // detrás y arriba
-            // Rotar offset según la dirección del jugador? En este caso lo fijamos relativo al mundo
-            camera.position.copy(playerPos.clone().add(offset));
-            camera.lookAt(playerPos.clone().add(new THREE.Vector3(0, 1.2, 0)));
+        // --- ACTUALIZACIÓN DEL JUGADOR POR TECLAS ---
+        function updatePlayerInput() {
+            let moveX = 0, moveY = 0;
+            if (keys.w) moveY -= 1;
+            if (keys.s) moveY += 1;
+            if (keys.a) moveX -= 1;
+            if (keys.d) moveX += 1;
+            if (moveX !== 0 || moveY !== 0) {
+                let len = Math.hypot(moveX, moveY);
+                moveX = moveX / len * PLAYER_SPEED;
+                moveY = moveY / len * PLAYER_SPEED;
+                player.vx += moveX * 0.25;
+                player.vy += moveY * 0.25;
+                // Limitar velocidad
+                let sp = Math.hypot(player.vx, player.vy);
+                let maxSp = PLAYER_SPEED * 1.2;
+                if (sp > maxSp) {
+                    player.vx = (player.vx / sp) * maxSp;
+                    player.vy = (player.vy / sp) * maxSp;
+                }
+            }
         }
 
-        // --- Reloj para deltaTime ---
-        const clock = new THREE.Clock();
+        // --- BUCLE PRINCIPAL ---
+        function gameLoop() {
+            // Disparo cooldown
+            if (shotTimer > 0) shotTimer--;
 
-        // --- Animación ---
-        function animate() {
-            requestAnimationFrame(animate);
+            // Spawn de enemigos automático
+            enemySpawnTimer--;
+            if (enemySpawnTimer <= 0) {
+                spawnEnemy();
+                enemySpawnTimer = ENEMY_SPAWN_RATE;
+            }
 
-            const deltaTime = Math.min(clock.getDelta(), 0.1); // seguridad
+            // Entrada jugador
+            updatePlayerInput();
 
-            updatePlayer(deltaTime);
-            updateCamera();
+            // Actualizar enemigos (IA)
+            updateEnemies();
 
-            renderer.render(scene, camera);
+            // Aplicar rozamiento a casi todo
+            applyFriction();
+
+            // Mover según velocidades
+            moveObjects();
+
+            // Colisiones
+            handleCollisions();
+
+            // Mantener jugador dentro del canvas
+            player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+            // Actualizar UI de salud (por si cambió fuera de colisión)
+            healthSpan.innerText = Math.floor(player.health);
+            scoreSpan.innerText = score;
+
+            // Dibujar todo
+            draw();
+
+            requestAnimationFrame(gameLoop);
         }
 
-        animate();
+        // --- DIBUJADO ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- Ajustar tamaño de ventana ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+            // Dibujar cuadrícula de fondo estilo "sandbox"
+            ctx.strokeStyle = "#3f4a5e";
+            ctx.lineWidth = 0.6;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.strokeStyle = "#353f52";
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.strokeStyle = "#353f52";
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
 
-        // --- Añadir algunos props iniciales ---
-        setTimeout(() => {
-            spawnProp(new THREE.Vector3(2, 1, 3));
-            spawnProp(new THREE.Vector3(-1, 1, 2));
-            spawnProp(new THREE.Vector3(0, 1, 5));
-        }, 100);
-    </script>
+            // Dibujar cajas (props)
+            ctx.shadowColor = "#00000080";
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 4;
+            for (let b of boxes) {
+                ctx.fillStyle = "#b08968";
+                ctx.strokeStyle = "#4e3e2e";
+                ctx.lineWidth = 3;
+                ctx.fillRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
+                ctx.strokeRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h);
+                // Dibujar línea de "madera"
+                ctx.fillStyle = "#8b6b4d";
+                ctx.fillRect(b.x - 15, b.y - 5, 30, 10);
+                ctx.fillStyle = "#6d4f36";
+                ctx.fillRect(b.x - 10, b.y - 15, 20, 8);
+            }
+
+            // Dibujar enemigos
+            for (let e of enemies) {
+                ctx.fillStyle = "#e24b4b";
+                ctx.shadowColor = "#a00";
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = "#510000";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                // Ojos agresivos
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(e.x-6, e.y-4, 4, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(e.x+6, e.y-4, 4, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#03101c";
+                ctx.beginPath();
+                ctx.arc(e.x-7, e.y-6, 2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(e.x+5, e.y-6, 2, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Dibujar balas
+            for (let b of bullets) {
+                ctx.fillStyle = "#fdde5b";
+                ctx.shadowColor = "#fcb045";
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Dibujar jugador
+            ctx.shadowColor = "#2a9df4";
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = "#4aa3ff";
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = "#0011aa";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Dirección (línea hacia el ratón)
+            ctx.shadowBlur = 8;
+            ctx.strokeStyle = "#e6ff73";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+
+            // Ojos del jugador (miran hacia el ratón)
+            let dx = mouseX - player.x;
+            let dy = mouseY - player.y;
+            let lookDist = Math.hypot(dx, dy);
+            if (lookDist > 1) {
+                let lookX = dx / lookDist;
+                let lookY = dy / lookDist;
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(player.x + lookX*8 - 3, player.y + lookY*8 - 4, 4, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(player.x + lookX*8 + 3, player.y + lookY*8 - 4, 4, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.fillStyle = "#152238";
+                ctx.beginPath();
+                ctx.arc(player.x + lookX*8 - 4, player.y + lookY*8 - 6, 2, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(player.x + lookX*8 + 2, player.y + lookY*8 - 6, 2, 0, 2*Math.PI);
+                ctx.fill();
+            }
+
+            // Barra de vida sobre el jugador
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#3b2b1e";
+            ctx.fillRect(player.x-25, player.y-35, 50, 8);
+            ctx.fillStyle = "#e04444";
+            let healthPercent = player.health / player.maxHealth;
+            ctx.fillRect(player.x-25, player.y-35, 50 * healthPercent, 8);
+
+            // Reiniciar sombra
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = "transparent";
+        }
+
+        // Arrancar el bucle
+        resetGame(); // Asegurar valores iniciales
+        gameLoop();
+    })();
+</script>
 </body>
 </html>
