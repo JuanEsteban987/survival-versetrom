@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>GMod P2P Mejorado</title>
+    <title>GMod P2P Mejorado (Corregido)</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #ui {
@@ -162,13 +162,13 @@
 
         // --- Clase para manejar objetos del juego ---
         class GameObject {
-            constructor(type, position, quaternion = null, color = null, id = null) {
+            constructor(type, position, material, quaternion = null, color = null, id = null) {
                 this.type = type; // 'cube', 'sphere', 'cone'
                 this.id = id !== null ? id : this.generateId();
                 this.color = color !== null ? color : this.randomColor();
 
-                // Crear cuerpo físico
-                this.body = this.createBody(position, quaternion);
+                // Crear cuerpo físico con el material proporcionado
+                this.body = this.createBody(position, material, quaternion);
                 // Crear malla visual
                 this.mesh = this.createMesh();
 
@@ -184,7 +184,7 @@
                 return config.colors[Math.floor(Math.random() * config.colors.length)];
             }
 
-            createBody(position, quaternion) {
+            createBody(position, material, quaternion) {
                 let shape;
                 const size = config.objectSize;
                 switch (this.type) {
@@ -195,14 +195,14 @@
                         shape = new CANNON.Sphere(size/2);
                         break;
                     case 'cone':
-                        // Aproximación con un cilindro (Cannon no tiene cono nativo, usamos cilindro)
+                        // Aproximación con un cilindro (Cannon no tiene cono nativo)
                         shape = new CANNON.Cylinder(size/2, size/2, size, 8);
                         break;
                     default:
                         shape = new CANNON.Box(new CANNON.Vec3(size/2, size/2, size/2));
                 }
 
-                const body = new CANNON.Body({ mass: 1, material: game.cubeMaterial });
+                const body = new CANNON.Body({ mass: 1, material: material });
                 body.addShape(shape);
                 body.position.set(position.x, position.y, position.z);
                 if (quaternion) {
@@ -284,8 +284,8 @@
                 });
                 this.world.addContactMaterial(contactMaterial);
 
-                // Objetos en el mundo
-                this.objects = []; // GameObjects
+                // Objetos dinámicos en el mundo
+                this.objects = [];
 
                 // Inicializar mapa y luces
                 this.initLights();
@@ -474,8 +474,15 @@
                     targetPos = this.camera.position.clone().add(direction.multiplyScalar(config.spawnDistance));
                 }
 
-                // Crear objeto
-                const newObj = new GameObject(this.currentMode, targetPos, null, null, null);
+                // Crear objeto pasando el material adecuado
+                const newObj = new GameObject(
+                    this.currentMode,
+                    targetPos,
+                    this.cubeMaterial,  // Pasamos el material de los cubos
+                    null,
+                    null,
+                    null
+                );
                 this.addObject(newObj);
 
                 // Enviar por red
@@ -585,14 +592,28 @@
                     data.objects.forEach(objData => {
                         const pos = new CANNON.Vec3(objData.x, objData.y, objData.z);
                         const quat = new CANNON.Quaternion(objData.qx, objData.qy, objData.qz, objData.qw);
-                        const obj = new GameObject(objData.type, pos, quat, objData.color, objData.id);
+                        const obj = new GameObject(
+                            objData.type,
+                            pos,
+                            this.cubeMaterial,
+                            quat,
+                            objData.color,
+                            objData.id
+                        );
                         this.addObject(obj);
                     });
                 } else if (data.type === 'newObject') {
                     const d = data.data;
                     const pos = new CANNON.Vec3(d.x, d.y, d.z);
                     const quat = new CANNON.Quaternion(d.qx, d.qy, d.qz, d.qw);
-                    const obj = new GameObject(d.type, pos, quat, d.color, d.id);
+                    const obj = new GameObject(
+                        d.type,
+                        pos,
+                        this.cubeMaterial,
+                        quat,
+                        d.color,
+                        d.id
+                    );
                     this.addObject(obj);
                 }
             }
@@ -618,8 +639,7 @@
             }
 
             clearAllObjects() {
-                // Eliminar todos los objetos dinámicos (no los estáticos del mapa)
-                // Los estáticos no están en this.objects
+                // Eliminar todos los objetos dinámicos
                 this.objects.forEach(obj => {
                     this.world.removeBody(obj.body);
                     this.scene.remove(obj.mesh);
@@ -654,7 +674,13 @@
 
         // Inicializar el juego cuando la página cargue
         window.onload = () => {
-            window.game = new Game();
+            try {
+                window.game = new Game();
+                console.log('Juego inicializado correctamente');
+            } catch (error) {
+                console.error('Error al inicializar el juego:', error);
+                document.body.innerHTML += `<div style="color:red; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:black; padding:20px;">Error: ${error.message}</div>`;
+            }
         };
     </script>
 </body>
