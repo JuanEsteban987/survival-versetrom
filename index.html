@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GMod 2008 · 3D Sandbox</title>
+    <title>GMod 2008 · 3D Sandbox (iluminado)</title>
     <style>
         body {
             margin: 0;
@@ -118,25 +118,27 @@
 
             // --- Escena Three.js ---
             const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xaaccff); // cielo azilllo 2008
+            scene.background = new THREE.Color(0xaaccff); // cielo azul 2008
 
             // Cámara
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(5, 5, 10);
 
             // Renderer
-            const renderer = new THREE.WebGLRenderer({ antialias: false }); // desactivar antialias para look más retro
+            const renderer = new THREE.WebGLRenderer({ antialias: false }); // desactivar antialias para look retro
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true; // sombras para más realismo retro (pero simples)
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap; // sombras suavecillas
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
 
-            // Luces
-            const ambientLight = new THREE.AmbientLight(0x404060);
+            // --- LUCES CORREGIDAS (más intensidad y variedad) ---
+            // Luz ambiental clara para iluminar todo
+            const ambientLight = new THREE.AmbientLight(0xcccccc); // Gris muy claro
             scene.add(ambientLight);
-            
-            const dirLight = new THREE.DirectionalLight(0xffeedd, 1);
-            dirLight.position.set(5, 10, 7);
+
+            // Luz direccional principal (sombra)
+            const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.8); // Intensidad alta
+            dirLight.position.set(5, 12, 8);
             dirLight.castShadow = true;
             dirLight.receiveShadow = true;
             dirLight.shadow.mapSize.width = 1024;
@@ -150,13 +152,23 @@
             dirLight.shadow.camera.far = 25;
             scene.add(dirLight);
 
+            // Luz puntual de relleno desde atrás
+            const pointLight = new THREE.PointLight(0xffffff, 0.9);
+            pointLight.position.set(-2, 5, 5);
+            scene.add(pointLight);
+
+            // Una segunda luz direccional desde el otro lado para eliminar sombras muy oscuras
+            const backLight = new THREE.DirectionalLight(0xffeedd, 0.8);
+            backLight.position.set(-3, 5, -5);
+            scene.add(backLight);
+
             // Suelo con cuadrícula retro
             const gridHelper = new THREE.GridHelper(30, 20, 0x88ff88, 0x335533);
             gridHelper.position.y = 0;
             scene.add(gridHelper);
 
             const planeGeometry = new THREE.PlaneGeometry(30, 30);
-            const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x4a704a, side: THREE.DoubleSide, roughness: 0.8 });
+            const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x6a8c6a, side: THREE.DoubleSide, roughness: 0.7, emissive: 0x000000 });
             const plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.rotation.x = -Math.PI / 2;
             plane.position.y = 0;
@@ -192,12 +204,12 @@
             playerBody.updateMassProperties();
             world.addBody(playerBody);
 
-            // Representación visual del jugador (un cubo con cabeza)
+            // Representación visual del jugador (colores brillantes)
             const playerGroup = new THREE.Group();
             
-            // Cuerpo (camisa)
+            // Cuerpo (camisa roja)
             const torsoGeo = new THREE.BoxGeometry(0.9, 1.4, 0.6);
-            const torsoMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+            const torsoMat = new THREE.MeshStandardMaterial({ color: 0xff5555, emissive: 0x000000 });
             const torso = new THREE.Mesh(torsoGeo, torsoMat);
             torso.position.y = 0.7;
             torso.castShadow = true;
@@ -206,7 +218,7 @@
             
             // Cabeza
             const headGeo = new THREE.SphereGeometry(0.4, 8, 8);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, emissive: 0x000000 });
             const head = new THREE.Mesh(headGeo, headMat);
             head.position.y = 1.5;
             head.castShadow = true;
@@ -255,7 +267,7 @@
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
-            // --- Spawn de props ---
+            // --- Spawn de props (con colores brillantes) ---
             function spawnProp(position) {
                 // Crear cuerpo físico (caja o esfera aleatoria)
                 const isBox = Math.random() > 0.3;
@@ -271,16 +283,17 @@
                 body.position.set(position.x, position.y, position.z);
                 world.addBody(body);
                 
-                // Crear mesh visual
+                // Crear mesh visual con color aleatorio brillante
                 let mesh;
-                const color = Math.random() * 0xffffff;
+                const hue = Math.random();
+                const color = new THREE.Color().setHSL(hue, 0.9, 0.6); // colores vivos
                 if (isBox) {
                     const geo = new THREE.BoxGeometry(size, size, size);
-                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x222222 });
+                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x000000 });
                     mesh = new THREE.Mesh(geo, mat);
                 } else {
                     const geo = new THREE.SphereGeometry(size/2, 8, 8);
-                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x222222 });
+                    const mat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x000000 });
                     mesh = new THREE.Mesh(geo, mat);
                 }
                 mesh.castShadow = true;
@@ -293,24 +306,21 @@
             }
 
             function spawnRagdoll(position) {
-                // Versión simplificada: un grupo de cubos con constraints (muy básico)
-                // Para no complicar, spawnearé un "ragdoll" como un par de cubos articulados? 
-                // Pero mejor lo dejamos como un "muñeco" estático por ahora, o simplemente varios cubos.
-                // Dado que es una demo, vamos a poner un grupo de esferas que simulen un ragdoll.
-                const colors = [0xffaaaa, 0xaaffaa, 0xaaaaff];
-                for (let i = 0; i < 5; i++) {
-                    const offX = (Math.random() - 0.5) * 0.5;
-                    const offY = i * 0.4 + 0.2;
-                    const offZ = (Math.random() - 0.5) * 0.3;
+                // Versión simplificada: un grupo de esferas que simulan un ragdoll
+                const colors = [0xffaaaa, 0xaaffaa, 0xaaaaff, 0xffdd88, 0xff88ff];
+                for (let i = 0; i < 6; i++) {
+                    const offX = (Math.random() - 0.5) * 0.6;
+                    const offY = i * 0.35 + 0.2;
+                    const offZ = (Math.random() - 0.5) * 0.4;
                     const pos = new THREE.Vector3(position.x + offX, position.y + offY, position.z + offZ);
-                    const shape = new CANNON.Sphere(0.3);
-                    const body = new CANNON.Body({ mass: 3, material: material });
+                    const shape = new CANNON.Sphere(0.25);
+                    const body = new CANNON.Body({ mass: 2, material: material });
                     body.addShape(shape);
                     body.position.set(pos.x, pos.y, pos.z);
                     world.addBody(body);
                     
-                    const geo = new THREE.SphereGeometry(0.3, 6);
-                    const mat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length] });
+                    const geo = new THREE.SphereGeometry(0.25, 6);
+                    const mat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length], emissive: 0x222222 });
                     const mesh = new THREE.Mesh(geo, mat);
                     mesh.castShadow = true;
                     mesh.receiveShadow = true;
@@ -350,9 +360,9 @@
                 if (currentTool === 'prop') {
                     // Disparar un rayo para colocar el objeto donde mira la cámara, a cierta distancia
                     raycaster.setFromCamera(mouse, camera);
-                    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // plano del suelo
+                    const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // plano del suelo
                     const targetPoint = new THREE.Vector3();
-                    if (raycaster.ray.intersectPlane(plane, targetPoint)) {
+                    if (raycaster.ray.intersectPlane(planeGround, targetPoint)) {
                         spawnProp(targetPoint);
                     } else {
                         // Si no toca suelo, poner enfrente del jugador
@@ -363,9 +373,9 @@
                     }
                 } else if (currentTool === 'ragdoll') {
                     raycaster.setFromCamera(mouse, camera);
-                    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+                    const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
                     const targetPoint = new THREE.Vector3();
-                    if (raycaster.ray.intersectPlane(plane, targetPoint)) {
+                    if (raycaster.ray.intersectPlane(planeGround, targetPoint)) {
                         spawnRagdoll(targetPoint);
                     } else {
                         const dir = new THREE.Vector3();
@@ -443,15 +453,11 @@
 
                 // Actualizar cámara: sigue al jugador desde atrás
                 const playerPos = playerGroup.position.clone();
-                const cameraDir = new THREE.Vector3();
-                camera.getWorldDirection(cameraDir);
-                // Queremos que la cámara siempre esté detrás del jugador según su orientación? 
-                // Mejor usar la orientación del jugador para el offset
                 const playerQuat = playerGroup.quaternion.clone();
-                const offset = new THREE.Vector3(-3, 2, 3); // detrás y arriba
+                const offset = new THREE.Vector3(-3, 2.5, 4); // ajustado para mejor vista
                 offset.applyQuaternion(playerQuat);
                 camera.position.copy(playerPos.clone().add(offset));
-                camera.lookAt(playerPos.clone().add(new THREE.Vector3(0, 1, 0)));
+                camera.lookAt(playerPos.clone().add(new THREE.Vector3(0, 1.2, 0)));
 
                 renderer.render(scene, camera);
             }
@@ -468,11 +474,12 @@
             // --- Bloquear menú contextual para usar clic derecho sin interrupciones ---
             window.addEventListener('contextmenu', e => e.preventDefault());
 
-            // --- Añadir algunos objetos de ejemplo al inicio ---
+            // --- Añadir algunos objetos de ejemplo al inicio (visibles) ---
             setTimeout(() => {
                 spawnProp(new THREE.Vector3(3, 1, 2));
                 spawnProp(new THREE.Vector3(-2, 1, -1));
                 spawnRagdoll(new THREE.Vector3(0, 1, 5));
+                spawnProp(new THREE.Vector3(1, 1, 4));
             }, 500);
         })();
     </script>
