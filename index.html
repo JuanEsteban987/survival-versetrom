@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 VisualScript - Biblioteca Completa de Nodos</title>
+    <title>🎮 VisualScript 2008 - ¡Qué Recuerdos!</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Trebuchet MS', 'Tahoma', 'Arial', sans-serif;
         }
 
         body {
-            background: #1a1a1a;
+            background: #003399; /* Azul Windows clásico */
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 L 90 10 L 90 90 L 10 90 Z" fill="none" stroke="%233366cc" stroke-width="1" opacity="0.3"/></svg>');
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,47 +24,59 @@
         }
 
         .visual-script-container {
-            width: 1600px;
+            width: 1400px;
             max-width: 100%;
-            height: 900px;
-            max-height: 95vh;
-            background: #1e1e1e;
-            border-radius: 10px;
+            height: 800px;
+            max-height: 90vh;
+            background: #ece9d8; /* Fondo beige XP */
+            border-radius: 8px 8px 0 0;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 #ffffff;
+            border: 2px solid #0a2472;
             display: flex;
             flex-direction: column;
         }
 
-        /* VS Code Title Bar */
+        /* Windows XP Title Bar */
         .title-bar {
-            background: #3c3c3c;
-            padding: 8px 16px;
+            background: linear-gradient(180deg, #0058e3 0%, #1f3d8a 100%);
+            padding: 6px 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #0e0e0e;
+            gap: 8px;
+            border-bottom: 2px solid #16387e;
         }
 
         .window-controls {
             display: flex;
-            gap: 8px;
+            gap: 4px;
         }
 
         .window-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+            width: 21px;
+            height: 21px;
+            background: #3b3b3b;
+            border-radius: 3px;
+            border: 1px solid #003399;
+            box-shadow: inset 0 1px 0 #8b8b8b, 0 1px 0 #000;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 19px;
         }
 
-        .close { background: #ff5f56; }
-        .minimize { background: #ffbd2e; }
-        .maximize { background: #27c93f; }
+        .close { background: #c7504a; }
+        .minimize { background: #f5b63f; }
+        .maximize { background: #6fa86f; }
 
         .title-text {
-            color: #cccccc;
+            color: white;
             font-size: 14px;
+            font-weight: bold;
             flex: 1;
+            text-shadow: 1px 1px 0 #003399;
+            letter-spacing: 0.5px;
         }
 
         /* Main Layout */
@@ -71,88 +84,100 @@
             display: flex;
             flex: 1;
             overflow: hidden;
+            background: #d4d0c8; /* Gris plata XP */
         }
 
-        /* Toolbox Sidebar */
+        /* Toolbox Sidebar - Estilo Windows XP */
         .toolbox {
-            width: 250px;
-            background: #252526;
-            border-right: 1px solid #3e3e42;
+            width: 220px;
+            background: #d4d0c8;
+            border-right: 2px solid #0a2472;
             display: flex;
             flex-direction: column;
+            border-right: 2px solid #6b6b6b;
+            box-shadow: inset -1px 0 0 #ffffff;
         }
 
         .toolbox-header {
-            padding: 10px;
-            color: #cccccc;
+            background: #b9b3a3;
+            padding: 6px 10px;
+            color: #1e3b6b;
             font-size: 11px;
+            font-weight: bold;
             text-transform: uppercase;
-            font-weight: 600;
-            border-bottom: 1px solid #3e3e42;
+            border-bottom: 2px solid #6b6b6b;
+            border-top: 1px solid #ffffff;
+            text-shadow: 0 1px 0 #ffffff;
+            letter-spacing: 0.5px;
         }
 
         .toolbox-content {
-            padding: 10px;
+            padding: 8px;
             overflow-y: auto;
             flex: 1;
+            background: #d4d0c8;
         }
 
         .node-category {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            border: 2px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            background: #c0b9aa;
         }
 
         .node-category-title {
-            color: #969696;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            background: #003399;
+            color: white;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #002070;
+            text-shadow: 1px 1px 0 #000;
         }
 
         .node-item {
-            background: #2d2d2d;
-            border: 1px solid #3e3e42;
-            border-radius: 4px;
-            padding: 8px;
-            margin-bottom: 6px;
-            color: #cccccc;
-            font-size: 12px;
+            background: #e9e4d8;
+            border: 2px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            border-radius: 0;
+            padding: 6px 8px;
+            margin: 4px;
+            color: #000000;
+            font-size: 11px;
+            font-weight: bold;
             cursor: grab;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.2s;
+            transition: all 0.1s;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .node-item:hover {
-            background: #3e3e42;
-            border-color: #007acc;
+            background: #fef9e7;
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
+            transform: scale(1.02);
         }
 
         .node-icon {
             width: 24px;
             height: 24px;
-            border-radius: 4px;
+            background: #003399;
+            border: 2px solid;
+            border-color: #6b9eff #001f6b #001f6b #6b9eff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 0 #000;
         }
 
-        .node-icon.event { background: #804000; }
-        .node-icon.action { background: #005a9e; }
-        .node-icon.condition { background: #6c4f8c; }
-        .node-icon.math { background: #2e7d32; }
-        .node-icon.variable { background: #8c4f4f; }
-        .node-icon.game { background: #008b8b; }
-        .node-icon.enemy { background: #8b0000; }
-
-        /* Visual Scripting Canvas */
+        /* Visual Scripting Canvas - Estilo Paint */
         .script-canvas-area {
             flex: 1;
-            background: #1e1e1e;
+            background: #c0c0c0;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -160,50 +185,53 @@
         }
 
         .canvas-toolbar {
-            background: #2d2d2d;
-            padding: 8px;
-            border-bottom: 1px solid #3e3e42;
+            background: #b9b3a3;
+            padding: 4px;
+            border-bottom: 2px solid #6b6b6b;
             display: flex;
-            gap: 8px;
-            z-index: 10;
+            gap: 4px;
             flex-wrap: wrap;
+            border-top: 1px solid #ffffff;
         }
 
         .canvas-button {
-            background: #3e3e42;
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
+            background: #e9e4d8;
+            border: 2px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            color: #000;
+            font-weight: bold;
+            padding: 4px 8px;
+            font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 4px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .canvas-button:hover {
-            background: #4a4a4a;
+            background: #fef9e7;
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
         }
 
         .canvas-button.primary {
-            background: #007acc;
-        }
-
-        .canvas-button.primary:hover {
-            background: #0098ff;
+            background: #003399;
+            border-color: #6b9eff #001f6b #001f6b #6b9eff;
+            color: white;
+            text-shadow: 1px 1px 0 #000;
         }
 
         #visualScriptCanvas {
             flex: 1;
-            background: #1a1a1a;
+            background: #a7abac; /* Fondo gris oscuro como MS Paint */
             background-image: 
-                linear-gradient(rgba(60, 60, 60, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(60, 60, 60, 0.3) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
             background-size: 20px 20px;
             position: relative;
             overflow: hidden;
             cursor: default;
+            border: 2px inset #6b6b6b;
         }
 
         .canvas-inner {
@@ -225,64 +253,70 @@
         }
 
         .connection-line {
-            stroke: #007acc;
-            stroke-width: 2;
+            stroke: #003399;
+            stroke-width: 3;
             stroke-dasharray: none;
-            filter: drop-shadow(0 0 3px #007acc);
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
         }
 
         .connection-line.temporary {
-            stroke: #ffaa00;
-            stroke-dasharray: 5,5;
+            stroke: #ff6600;
+            stroke-dasharray: 8,4;
         }
 
-        /* Nodes */
+        /* Nodes - Estilo 2008 con botones 3D */
         .visual-node {
             position: absolute;
-            background: #2d2d2d;
-            border: 1px solid #3e3e42;
-            border-radius: 6px;
-            min-width: 170px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background: #e9e4d8;
+            border: 3px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            border-radius: 0;
+            min-width: 160px;
+            box-shadow: 4px 4px 6px rgba(0,0,0,0.3);
             user-select: none;
             z-index: 10;
-            transition: box-shadow 0.2s;
+            transition: all 0.1s;
         }
 
         .visual-node.selected {
-            box-shadow: 0 0 0 2px #007acc, 0 4px 8px rgba(0,0,0,0.3);
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
+            box-shadow: 0 0 0 2px #ffcc00, 4px 4px 8px rgba(0,0,0,0.5);
         }
 
         .node-header {
-            padding: 6px 10px;
-            border-radius: 5px 5px 0 0;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: bold;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: move;
+            color: white;
+            text-shadow: 1px 1px 0 #000;
+            border-bottom: 2px solid #6b6b6b;
         }
 
-        .node-header.event { background: #804000; color: white; }
-        .node-header.action { background: #005a9e; color: white; }
-        .node-header.condition { background: #6c4f8c; color: white; }
-        .node-header.math { background: #2e7d32; color: white; }
-        .node-header.variable { background: #8c4f4f; color: white; }
-        .node-header.game { background: #008b8b; color: white; }
-        .node-header.enemy { background: #8b0000; color: white; }
+        .node-header.event { background: #804000; }
+        .node-header.action { background: #005a9e; }
+        .node-header.condition { background: #6c4f8c; }
+        .node-header.math { background: #2e7d32; }
+        .node-header.variable { background: #8c4f4f; }
+        .node-header.game { background: #008b8b; }
+        .node-header.enemy { background: #8b0000; }
 
         .node-content {
             padding: 10px;
+            background: #e9e4d8;
         }
 
         .node-pin {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             margin: 8px 0;
             font-size: 11px;
-            color: #cccccc;
+            font-weight: bold;
+            color: #000;
             position: relative;
         }
 
@@ -291,145 +325,165 @@
         }
 
         .pin-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #007acc;
+            width: 16px;
+            height: 16px;
+            border-radius: 0;
+            background: #003399;
             cursor: crosshair;
-            border: 2px solid #1e1e1e;
-            transition: all 0.2s;
+            border: 2px solid;
+            border-color: #6b9eff #001f6b #001f6b #6b9eff;
+            transition: all 0.1s;
             z-index: 20;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .pin-dot:hover {
-            transform: scale(1.3);
-            background: #0098ff;
+            transform: scale(1.2);
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
         }
 
         .pin-dot.output {
-            background: #ffaa00;
-        }
-
-        .pin-dot.output:hover {
-            background: #ffc107;
+            background: #ff6600;
+            border-color: #ffb366 #993300 #993300 #ffb366;
         }
 
         .pin-dot.connected {
             background: #4caf50;
-            box-shadow: 0 0 10px #4caf50;
+            border-color: #8bc34a #2e7d32 #2e7d32 #8bc34a;
+            box-shadow: 0 0 8px #4caf50;
         }
 
         .pin-dot.data {
-            background: #ff6b6b;
-        }
-
-        .pin-dot.data.output {
-            background: #ff8c8c;
+            background: #993399;
+            border-color: #cc66cc #660066 #660066 #cc66cc;
         }
 
         .pin-label {
             font-size: 11px;
-            color: #969696;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 1px 0 #fff;
         }
 
-        /* Game Preview */
+        /* Game Preview - Estilo Windows Media Player */
         .preview-panel {
-            width: 350px;
-            background: #252526;
-            border-left: 1px solid #3e3e42;
+            width: 300px;
+            background: #d4d0c8;
+            border-left: 2px solid #6b6b6b;
             display: flex;
             flex-direction: column;
+            border-left: 2px solid #0a2472;
+            box-shadow: inset 1px 0 0 #ffffff;
         }
 
         .preview-header {
-            padding: 10px;
-            color: #cccccc;
-            border-bottom: 1px solid #3e3e42;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #b9b3a3;
+            padding: 6px 10px;
+            color: #1e3b6b;
+            font-size: 11px;
+            font-weight: bold;
+            border-bottom: 2px solid #6b6b6b;
+            border-top: 1px solid #ffffff;
+            text-shadow: 0 1px 0 #ffffff;
         }
 
         .preview-content {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            background: #a7abac;
         }
 
         #gameCanvas {
-            width: 300px;
-            height: 300px;
-            background: #2d2d2d;
-            border-radius: 4px;
-            border: 1px solid #3e3e42;
+            width: 250px;
+            height: 250px;
+            background: #000;
+            border: 4px inset #6b6b6b;
+            image-rendering: pixelated;
         }
 
         .game-controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .game-button {
-            background: #0e639c;
-            color: white;
-            border: none;
+            background: #e9e4d8;
+            border: 2px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            color: #000;
+            font-weight: bold;
             padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
-        .game-button.secondary {
-            background: #3e3e42;
+        .game-button:hover {
+            background: #fef9e7;
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
+        }
+
+        .stats-panel {
+            background: #e9e4d8;
+            border: 3px inset #6b6b6b;
+            padding: 8px;
+            width: 100%;
+            color: #000;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .stats-panel div {
+            margin: 3px 0;
+            border-bottom: 1px solid #b9b3a3;
+            padding: 2px;
         }
 
         .node-properties {
-            background: #2d2d2d;
-            border-top: 1px solid #3e3e42;
-            padding: 10px;
-            max-height: 200px;
+            background: #b9b3a3;
+            border-top: 2px solid #6b6b6b;
+            padding: 8px;
+            max-height: 150px;
             overflow-y: auto;
+            border-bottom: 1px solid #ffffff;
         }
 
         .node-properties h4 {
-            color: #cccccc;
-            font-size: 12px;
-            margin-bottom: 8px;
+            color: #1e3b6b;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 0 #ffffff;
         }
 
         .property-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
-            color: #cccccc;
-            font-size: 12px;
+            margin-bottom: 4px;
+            color: #000;
+            font-size: 11px;
+            font-weight: bold;
+            background: #d4d0c8;
+            padding: 3px;
+            border: 1px solid #6b6b6b;
         }
 
         .property-row input, .property-row select {
-            width: 130px;
-            background: #3c3c3c;
-            border: 1px solid #0e0e0e;
-            color: white;
-            padding: 4px;
-            border-radius: 3px;
+            width: 120px;
+            background: #ffffff;
+            border: 2px inset #6b6b6b;
+            color: #000;
+            padding: 2px;
+            font-size: 11px;
+            font-family: 'Tahoma', sans-serif;
         }
 
-        .key-indicator {
-            display: inline-block;
-            background: #3c3c3c;
-            border: 1px solid #0e0e0e;
-            border-radius: 4px;
-            padding: 2px 8px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #ffaa00;
-        }
-
-        /* Modal */
+        /* Modal estilo XP */
         .modal {
             display: none;
             position: fixed;
@@ -437,274 +491,158 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 51, 153, 0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background: #252526;
-            border-radius: 8px;
-            padding: 30px;
+            background: #d4d0c8;
+            border: 4px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+            padding: 20px;
             max-width: 400px;
             width: 90%;
-            border: 1px solid #3e3e42;
+            box-shadow: 8px 8px 12px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h3 {
+            background: #003399;
             color: white;
+            padding: 6px;
+            margin: -20px -20px 15px -20px;
+            font-size: 12px;
+            font-weight: bold;
+            border-bottom: 2px solid #001f6b;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .modal-content p {
+            color: #000;
+            font-size: 11px;
+            line-height: 1.4;
+            margin: 10px 0;
+        }
+
+        /* Scrollbar estilo 2008 */
+        ::-webkit-scrollbar {
+            width: 16px;
+            background: #b9b3a3;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e9e4d8;
+            border: 2px solid;
+            border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
+        }
+
+        ::-webkit-scrollbar-button {
+            background: #b9b3a3;
+            height: 16px;
+            border: 2px solid #6b6b6b;
+        }
+
+        /* Reloj estilo XP */
+        .windows-clock {
+            background: #b9b3a3;
+            border: 2px inset #6b6b6b;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+            margin-left: auto;
         }
     </style>
 </head>
 <body>
     <div class="visual-script-container">
-        <!-- Title Bar -->
+        <!-- Windows XP Title Bar -->
         <div class="title-bar">
             <div class="window-controls">
-                <div class="window-btn close"></div>
-                <div class="window-btn minimize"></div>
-                <div class="window-btn maximize"></div>
+                <div class="window-btn close">✕</div>
+                <div class="window-btn minimize">─</div>
+                <div class="window-btn maximize">□</div>
             </div>
-            <span class="title-text">🔷 VisualScript - Biblioteca Completa de Nodos</span>
+            <span class="title-text">🎮 VisualScript 2008 - Windows XP Edition</span>
+            <div class="windows-clock" id="windowsClock">12:00 PM</div>
         </div>
 
         <!-- Main Layout -->
         <div class="main-layout">
             <!-- Toolbox -->
             <div class="toolbox">
-                <div class="toolbox-header">📦 NODE TOOLBOX (42 NODOS)</div>
+                <div class="toolbox-header">📦 Caja de Herramientas 2008</div>
                 <div class="toolbox-content" id="nodeToolbox">
                     <div class="node-category">
                         <div class="node-category-title">🎯 EVENTOS</div>
                         <div class="node-item" draggable="true" data-type="event" data-subtype="start" ondragstart="dragNode(event)">
-                            <div class="node-icon event">▶</div>
-                            On Game Start
+                            <div class="node-icon">▶</div>
+                            Al Iniciar Juego
                         </div>
                         <div class="node-item" draggable="true" data-type="event" data-subtype="update" ondragstart="dragNode(event)">
-                            <div class="node-icon event">⟳</div>
-                            On Update
-                        </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="fixedupdate" ondragstart="dragNode(event)">
-                            <div class="node-icon event">⏱️</div>
-                            On Fixed Update
+                            <div class="node-icon">⟳</div>
+                            Cada Frame
                         </div>
                         <div class="node-item" draggable="true" data-type="event" data-subtype="collision" ondragstart="dragNode(event)">
-                            <div class="node-icon event">💥</div>
-                            On Collision
-                        </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="trigger" ondragstart="dragNode(event)">
-                            <div class="node-icon event">🔘</div>
-                            On Trigger Enter
-                        </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="mouse" ondragstart="dragNode(event)">
-                            <div class="node-icon event">🖱️</div>
-                            On Mouse Click
+                            <div class="node-icon">💥</div>
+                            Al Colisionar
                         </div>
                     </div>
                     
                     <div class="node-category">
-                        <div class="node-category-title">⌨️ INPUT</div>
+                        <div class="node-category-title">⌨️ TECLADO</div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⌨️</div>
-                            Key Pressed
+                            <div class="node-icon">⌨️</div>
+                            Tecla Presionada
                         </div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="keydown" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⬇️</div>
-                            Key Down
+                            <div class="node-icon">⬇️</div>
+                            Tecla Baja
                         </div>
                         <div class="node-item" draggable="true" data-type="condition" data-subtype="keyup" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">⬆️</div>
-                            Key Up
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="mousepos" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">📌</div>
-                            Mouse Position
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="mousedown" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">🖱️⬇️</div>
-                            Mouse Button Down
+                            <div class="node-icon">⬆️</div>
+                            Tecla Sube
                         </div>
                     </div>
                     
                     <div class="node-category">
                         <div class="node-category-title">🎮 MOVIMIENTO</div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="move" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⬆️</div>
-                            Move Direction
-                        </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="move_arrow" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⬅️➡️</div>
-                            Arrow Keys Move
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_wasd" ondragstart="dragNode(event)">
-                            <div class="node-icon action">WASD</div>
-                            WASD Move
+                            <div class="node-icon">⬅️➡️</div>
+                            Flechas Mover
                         </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="jump" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⬆️⬆️</div>
-                            Jump
+                            <div class="node-icon">⬆️⬆️</div>
+                            Saltar
                         </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="gravity" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🌍</div>
-                            Apply Gravity
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="teleport" ondragstart="dragNode(event)">
-                            <div class="node-icon action">✨</div>
-                            Teleport To
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="follow" ondragstart="dragNode(event)">
-                            <div class="node-icon action">👁️</div>
-                            Follow Player
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="patrol" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🔄</div>
-                            Patrol
+                            <div class="node-icon">🌍</div>
+                            Gravedad
                         </div>
                     </div>
                     
                     <div class="node-category">
                         <div class="node-category-title">➕ MATEMÁTICAS</div>
                         <div class="node-item" draggable="true" data-type="math" data-subtype="add" ondragstart="dragNode(event)">
-                            <div class="node-icon math">➕</div>
-                            Add
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="subtract" ondragstart="dragNode(event)">
-                            <div class="node-icon math">➖</div>
-                            Subtract
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="multiply" ondragstart="dragNode(event)">
-                            <div class="node-icon math">✖️</div>
-                            Multiply
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="divide" ondragstart="dragNode(event)">
-                            <div class="node-icon math">➗</div>
-                            Divide
+                            <div class="node-icon">➕</div>
+                            Sumar
                         </div>
                         <div class="node-item" draggable="true" data-type="math" data-subtype="random" ondragstart="dragNode(event)">
-                            <div class="node-icon math">🎲</div>
-                            Random
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="distance" ondragstart="dragNode(event)">
-                            <div class="node-icon math">📏</div>
-                            Distance
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="clamp" ondragstart="dragNode(event)">
-                            <div class="node-icon math">📐</div>
-                            Clamp
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="lerp" ondragstart="dragNode(event)">
-                            <div class="node-icon math">📈</div>
-                            Lerp
-                        </div>
-                    </div>
-                    
-                    <div class="node-category">
-                        <div class="node-category-title">🔀 CONDICIONES</div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="if" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">❓</div>
-                            If Condition
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="compare" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">≟</div>
-                            Compare
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="greater" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">></div>
-                            Greater Than
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="less" ondragstart="dragNode(event)">
-                            <div class="node-icon condition"><</div>
-                            Less Than
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="and" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">&&</div>
-                            AND
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="or" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">||</div>
-                            OR
-                        </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="not" ondragstart="dragNode(event)">
-                            <div class="node-icon condition">!</div>
-                            NOT
-                        </div>
-                    </div>
-                    
-                    <div class="node-category">
-                        <div class="node-category-title">📊 VARIABLES</div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="number" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">#</div>
-                            Number
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="string" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">A</div>
-                            String
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="boolean" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">✓</div>
-                            Boolean
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="vector2" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">⬛</div>
-                            Vector 2
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="color" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">🎨</div>
-                            Color
-                        </div>
-                        <div class="node-item" draggable="true" data-type="variable" data-subtype="array" ondragstart="dragNode(event)">
-                            <div class="node-icon variable">📋</div>
-                            Array
+                            <div class="node-icon">🎲</div>
+                            Aleatorio
                         </div>
                     </div>
                     
                     <div class="node-category">
                         <div class="node-category-title">🎯 JUEGO</div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🏆</div>
-                            Add Score
+                            <div class="node-icon">🏆</div>
+                            Sumar Puntos
                         </div>
                         <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
-                            <div class="node-icon action">✨</div>
-                            Spawn Object
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="destroy" ondragstart="dragNode(event)">
-                            <div class="node-icon action">💀</div>
-                            Destroy Object
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="timer" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⏰</div>
-                            Timer
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="delay" ondragstart="dragNode(event)">
-                            <div class="node-icon action">⏳</div>
-                            Delay
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="repeat" ondragstart="dragNode(event)">
-                            <div class="node-icon action">🔄</div>
-                            Repeat
-                        </div>
-                    </div>
-                    
-                    <div class="node-category">
-                        <div class="node-category-title">👾 ENEMIGOS</div>
-                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="chase" ondragstart="dragNode(event)">
-                            <div class="node-icon enemy">🏃</div>
-                            Chase Player
-                        </div>
-                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="shoot" ondragstart="dragNode(event)">
-                            <div class="node-icon enemy">🔫</div>
-                            Shoot
-                        </div>
-                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="patrol" ondragstart="dragNode(event)">
-                            <div class="node-icon enemy">🔄</div>
-                            Enemy Patrol
-                        </div>
-                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="health" ondragstart="dragNode(event)">
-                            <div class="node-icon enemy">❤️</div>
-                            Enemy Health
-                        </div>
-                        <div class="node-item" draggable="true" data-type="enemy" data-subtype="spawner" ondragstart="dragNode(event)">
-                            <div class="node-icon enemy">🪺</div>
-                            Enemy Spawner
+                            <div class="node-icon">✨</div>
+                            Crear Enemigo
                         </div>
                     </div>
                 </div>
@@ -714,25 +652,22 @@
             <div class="script-canvas-area">
                 <div class="canvas-toolbar">
                     <button class="canvas-button primary" onclick="compileAndRun()">
-                        ▶ Compile & Run
+                        ▶ Ejecutar
                     </button>
                     <button class="canvas-button" onclick="stopGame()">
-                        ⏹ Stop
+                        ⏹ Parar
                     </button>
                     <button class="canvas-button" onclick="clearCanvas()">
-                        🗑 Clear All
+                        🗑 Limpiar
                     </button>
                     <button class="canvas-button" onclick="saveProject()">
-                        💾 Save
+                        💾 Guardar
                     </button>
                     <button class="canvas-button" onclick="loadProject()">
-                        📂 Load
-                    </button>
-                    <button class="canvas-button" onclick="deleteSelectedConnection()">
-                        🔗 Delete Connection
+                        📂 Cargar
                     </button>
                     <button class="canvas-button" onclick="createExampleGame()">
-                        📝 Example Game
+                        📝 Ejemplo
                     </button>
                 </div>
                 <div id="visualScriptCanvas" ondragover="allowDrop(event)" ondrop="dropNode(event)">
@@ -746,30 +681,29 @@
             <!-- Preview Panel -->
             <div class="preview-panel">
                 <div class="preview-header">
-                    <span>🎮 Game Preview</span>
+                    <span>🎮 Vista Previa</span>
                 </div>
                 <div class="preview-content">
-                    <canvas id="gameCanvas" width="300" height="300"></canvas>
+                    <canvas id="gameCanvas" width="250" height="250"></canvas>
                     <div class="game-controls">
                         <button class="game-button" onclick="startGame()">▶ Start</button>
-                        <button class="game-button secondary" onclick="stopGame()">⏹ Stop</button>
-                        <button class="game-button secondary" onclick="resetGame()">⟲ Reset</button>
+                        <button class="game-button" onclick="stopGame()">⏹ Stop</button>
+                        <button class="game-button" onclick="resetGame()">⟲ Reset</button>
                     </div>
-                    <div style="color: #cccccc; font-size: 12px; width: 100%;">
-                        <div>Score: <span id="gameScore">0</span></div>
-                        <div>Pos: <span id="playerPos">150,150</span></div>
-                        <div>Enemies: <span id="enemyCount">0</span></div>
-                        <div>Connections: <span id="connectionCount">0</span></div>
-                        <div id="keyStatus" style="margin-top: 5px; color: #ffaa00;">⌨️ Press keys...</div>
+                    <div class="stats-panel">
+                        <div>Puntos: <span id="gameScore">0</span></div>
+                        <div>Posición: <span id="playerPos">125,125</span></div>
+                        <div>Enemigos: <span id="enemyCount">0</span></div>
+                        <div>Conexiones: <span id="connectionCount">0</span></div>
                     </div>
                 </div>
                 
                 <!-- Node Properties -->
                 <div class="node-properties">
-                    <h4>🔧 Node Properties</h4>
+                    <h4>🔧 Propiedades del Nodo</h4>
                     <div id="nodeProperties">
                         <div class="property-row">
-                            <span>Click a node to edit</span>
+                            <span>Haz clic en un nodo</span>
                         </div>
                     </div>
                 </div>
@@ -777,22 +711,19 @@
         </div>
     </div>
 
-    <!-- Help Modal -->
-    <div class="modal" id="helpModal" style="display: none;">
+    <!-- Modal estilo XP -->
+    <div class="modal" id="helpModal">
         <div class="modal-content">
-            <h3>📖 VisualScript - 42 Nodos</h3>
-            <p style="margin: 15px 0; color: #cccccc; max-height: 300px; overflow-y: auto;">
-                <strong>Eventos:</strong> Game Start, Update, Collision, Mouse<br>
-                <strong>Input:</strong> Key Pressed, Mouse Position, Mouse Button<br>
-                <strong>Movimiento:</strong> Arrow Keys, WASD, Jump, Gravity, Follow<br>
-                <strong>Matemáticas:</strong> Add, Subtract, Multiply, Random, Distance<br>
-                <strong>Condiciones:</strong> If, Compare, AND, OR, NOT<br>
-                <strong>Variables:</strong> Number, String, Boolean, Vector, Color<br>
-                <strong>Juego:</strong> Score, Spawn, Destroy, Timer, Repeat<br>
-                <strong>Enemigos:</strong> Chase, Shoot, Patrol, Health, Spawner<br><br>
-                <button class="game-button" onclick="createExampleGame()">Crear Juego Ejemplo</button>
+            <h3>📖 Ayuda de VisualScript 2008</h3>
+            <p>
+                <strong>¡Bienvenido a VisualScript 2008!</strong><br><br>
+                🔷 Arrastra nodos desde la caja de herramientas<br>
+                🔷 Conecta los puntos naranja (salida) a azules (entrada)<br>
+                🔷 Haz clic en nodos para cambiar propiedades<br>
+                🔷 Presiona "Ejecutar" para probar tu juego<br><br>
+                <span style="color: #003399; font-weight: bold;">¡Como en los viejos tiempos!</span>
             </p>
-            <button class="game-button" onclick="closeHelp()">Cerrar</button>
+            <button class="game-button" onclick="closeHelp()" style="margin-top: 10px;">Aceptar</button>
         </div>
     </div>
 
@@ -818,46 +749,39 @@
         let gameRunning = false;
         let gameScore = 0;
         let gameLoop = null;
-        let player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+        let player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
         let enemies = [];
-        let bullets = [];
-        let variables = {};
-        let timers = {};
         
         // Keyboard state
         let keyStates = {};
         
+        // Reloj de Windows
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const hour12 = hours % 12 || 12;
+            const timeString = `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+            document.getElementById('windowsClock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        
         // Initialize
         window.onload = function() {
-            showHelp();
+            document.getElementById('helpModal').style.display = 'flex';
             
             // Keyboard event listeners
             window.addEventListener('keydown', (e) => {
                 keyStates[e.key] = true;
-                updateKeyStatus();
                 e.preventDefault();
             });
             
             window.addEventListener('keyup', (e) => {
                 keyStates[e.key] = false;
-                updateKeyStatus();
-            });
-            
-            // Mouse event listeners
-            canvas.addEventListener('click', (e) => {
-                if (gameRunning) {
-                    const rect = canvas.getBoundingClientRect();
-                    const mouseX = e.clientX - rect.left;
-                    const mouseY = e.clientY - rect.top;
-                    handleMouseClick(mouseX, mouseY);
-                }
             });
         };
-
-        function updateKeyStatus() {
-            const activeKeys = Object.keys(keyStates).filter(key => keyStates[key]).join(', ');
-            document.getElementById('keyStatus').innerHTML = `⌨️ Keys: ${activeKeys || 'none'}`;
-        }
 
         // Drag and Drop
         function allowDrop(ev) {
@@ -895,82 +819,24 @@
 
         function getDefaultProperties(subtype) {
             switch(subtype) {
-                // Movimiento
-                case 'move':
-                    return { speed: 5, direction: 'right' };
                 case 'move_arrow':
-                case 'move_wasd':
-                    return { speed: 5 };
+                    return { velocidad: 5 };
                 case 'jump':
-                    return { force: 10, cooldown: 0 };
+                    return { fuerza: 12 };
                 case 'gravity':
-                    return { strength: 0.5, maxSpeed: 10 };
-                case 'teleport':
-                    return { x: 150, y: 150 };
-                case 'follow':
-                    return { speed: 3, distance: 50 };
-                case 'patrol':
-                    return { speed: 2, range: 100 };
-                    
-                // Matemáticas
-                case 'add':
-                case 'subtract':
-                case 'multiply':
-                case 'divide':
-                    return { a: 0, b: 0 };
-                case 'random':
-                    return { min: 0, max: 100 };
-                case 'distance':
-                    return { x1: 0, y1: 0, x2: 0, y2: 0 };
-                case 'clamp':
-                    return { value: 0, min: 0, max: 100 };
-                case 'lerp':
-                    return { a: 0, b: 0, t: 0.5 };
-                    
-                // Input
+                    return { fuerza: 0.5 };
                 case 'key':
                 case 'keydown':
                 case 'keyup':
-                    return { key: 'Space' };
-                case 'mousepos':
-                    return { output: 'vector' };
-                    
-                // Juego
+                    return { tecla: 'Space' };
                 case 'score':
-                    return { amount: 10 };
+                    return { puntos: 10 };
                 case 'spawn':
-                    return { type: 'enemy', count: 1 };
-                case 'timer':
-                    return { seconds: 1, repeat: false };
-                case 'delay':
-                    return { seconds: 1 };
-                case 'repeat':
-                    return { times: 3, delay: 0.5 };
-                    
-                // Enemigos
-                case 'chase':
-                    return { speed: 2, damage: 10 };
-                case 'shoot':
-                    return { speed: 5, cooldown: 1 };
-                case 'health':
-                    return { maxHealth: 100, currentHealth: 100 };
-                case 'spawner':
-                    return { rate: 2, maxEnemies: 5 };
-                    
-                // Variables
-                case 'number':
-                    return { value: 0 };
-                case 'string':
-                    return { value: '' };
-                case 'boolean':
-                    return { value: true };
-                case 'vector2':
-                    return { x: 0, y: 0 };
-                case 'color':
-                    return { r: 255, g: 255, b: 255 };
-                case 'array':
-                    return { values: [] };
-                    
+                    return { cantidad: 1 };
+                case 'add':
+                    return { a: 0, b: 0 };
+                case 'random':
+                    return { min: 0, max: 100 };
                 default:
                     return {};
             }
@@ -990,12 +856,9 @@
                 const header = document.createElement('div');
                 header.className = `node-header ${node.type}`;
                 
-                // Show value in header for some nodes
                 let headerText = getNodeName(node.subtype);
-                if (node.subtype === 'number' && node.properties.value !== undefined) {
-                    headerText += ` [${node.properties.value}]`;
-                } else if ((node.subtype === 'key' || node.subtype === 'keydown' || node.subtype === 'keyup') && node.properties.key) {
-                    headerText += ` [${node.properties.key}]`;
+                if (node.subtype === 'key' && node.properties.tecla) {
+                    headerText += ` [${node.properties.tecla}]`;
                 }
                 
                 header.innerHTML = `
@@ -1012,7 +875,6 @@
                 nodeEl.appendChild(header);
                 nodeEl.appendChild(content);
                 
-                // Add click handler
                 nodeEl.onclick = (e) => {
                     if (!e.target.classList.contains('pin-dot')) {
                         selectNode(node.id);
@@ -1022,7 +884,6 @@
                 canvasInner.appendChild(nodeEl);
             });
             
-            // Add pin click handlers
             document.querySelectorAll('.pin-dot').forEach(pin => {
                 pin.addEventListener('mousedown', startPinDrag);
             });
@@ -1032,44 +893,41 @@
         }
 
         function generateNodePins(node) {
-            let pins = '';
-            
-            // Base pins based on node type
             if (node.type === 'event') {
-                pins = `
+                return `
                     <div class="node-pin pin-output">
-                        <span class="pin-label">Out</span>
+                        <span class="pin-label">Salida</span>
                         <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
                     </div>
                 `;
-            } else if (node.type === 'action' || node.type === 'enemy') {
-                pins = `
+            } else if (node.type === 'action') {
+                return `
                     <div class="node-pin">
                         <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
-                        <span class="pin-label">In</span>
+                        <span class="pin-label">Entrada</span>
                     </div>
                     <div class="node-pin pin-output">
-                        <span class="pin-label">Out</span>
+                        <span class="pin-label">Salida</span>
                         <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
                     </div>
                 `;
             } else if (node.type === 'condition') {
-                pins = `
+                return `
                     <div class="node-pin">
                         <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
-                        <span class="pin-label">In</span>
+                        <span class="pin-label">Entrada</span>
                     </div>
                     <div class="node-pin pin-output">
-                        <span class="pin-label">True</span>
+                        <span class="pin-label">Verdad</span>
                         <div class="pin-dot output" data-node="${node.id}" data-pin="true"></div>
                     </div>
                     <div class="node-pin pin-output">
-                        <span class="pin-label">False</span>
+                        <span class="pin-label">Falso</span>
                         <div class="pin-dot output" data-node="${node.id}" data-pin="false"></div>
                     </div>
                 `;
             } else if (node.type === 'math') {
-                pins = `
+                return `
                     <div class="node-pin">
                         <div class="pin-dot data" data-node="${node.id}" data-pin="a"></div>
                         <span class="pin-label">A</span>
@@ -1083,23 +941,32 @@
                         <div class="pin-dot output data" data-node="${node.id}" data-pin="result"></div>
                     </div>
                 `;
-            } else if (node.type === 'variable') {
-                pins = `
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Get</span>
-                        <div class="pin-dot output data" data-node="${node.id}" data-pin="get"></div>
-                    </div>
-                    <div class="node-pin">
-                        <div class="pin-dot data" data-node="${node.id}" data-pin="set"></div>
-                        <span class="pin-label">Set</span>
-                    </div>
-                `;
             }
-            
-            return pins;
+            return '';
         }
 
-        // Pin connection handling
+        function getNodeIcon(subtype) {
+            const icons = {
+                start: '▶', update: '⟳', collision: '💥',
+                key: '⌨️', keydown: '⬇️', keyup: '⬆️',
+                move_arrow: '⬅️➡️', jump: '⬆️⬆️', gravity: '🌍',
+                add: '➕', random: '🎲',
+                score: '🏆', spawn: '✨'
+            };
+            return icons[subtype] || '●';
+        }
+
+        function getNodeName(subtype) {
+            const names = {
+                start: 'Inicio', update: 'Actualizar', collision: 'Colisión',
+                key: 'Tecla', keydown: 'Tecla Baja', keyup: 'Tecla Sube',
+                move_arrow: 'Mover Flechas', jump: 'Saltar', gravity: 'Gravedad',
+                add: 'Sumar', random: 'Aleatorio',
+                score: 'Puntos', spawn: 'Crear Enemigo'
+            };
+            return names[subtype] || subtype;
+        }
+
         function startPinDrag(e) {
             e.stopPropagation();
             
@@ -1108,7 +975,6 @@
             const pinName = pin.dataset.pin;
             const isOutput = pin.classList.contains('output');
             
-            // Only allow dragging from output pins
             if (!isOutput) return;
             
             draggingConnection = {
@@ -1131,10 +997,8 @@
 
         function onPinDragMove(e) {
             if (!draggingConnection) return;
-            
             tempConnection.toX = e.clientX;
             tempConnection.toY = e.clientY;
-            
             renderConnections();
         }
 
@@ -1149,7 +1013,6 @@
                 const targetPinName = targetPin.dataset.pin;
                 const isTargetOutput = targetPin.classList.contains('output');
                 
-                // Valid connection: output -> input (target should be input)
                 if (!isTargetOutput) {
                     createConnection(draggingConnection.fromNode, draggingConnection.fromPin, targetNodeId, targetPinName);
                 }
@@ -1176,7 +1039,6 @@
                     toNode: toNodeId,
                     toPin: toPin
                 });
-                
                 renderConnections();
             }
         }
@@ -1234,83 +1096,7 @@
         function findPinElement(nodeId, pinName) {
             const nodeEl = document.querySelector(`.visual-node[data-id="${nodeId}"]`);
             if (!nodeEl) return null;
-            
             return nodeEl.querySelector(`.pin-dot[data-node="${nodeId}"][data-pin="${pinName}"]`);
-        }
-
-        function deleteConnection(index) {
-            if (index !== undefined) {
-                connections.splice(index, 1);
-            } else if (selectedConnection !== null) {
-                connections.splice(selectedConnection, 1);
-                selectedConnection = null;
-            }
-            renderConnections();
-        }
-
-        function deleteSelectedConnection() {
-            if (selectedConnection !== null) {
-                deleteConnection(selectedConnection);
-            }
-        }
-
-        function getNodeIcon(subtype) {
-            const icons = {
-                start: '▶', update: '⟳', fixedupdate: '⏱️', collision: '💥', trigger: '🔘', mouse: '🖱️',
-                key: '⌨️', keydown: '⬇️', keyup: '⬆️', mousepos: '📌', mousedown: '🖱️⬇️',
-                move: '⬆️', move_arrow: '⬅️➡️', move_wasd: 'WASD', jump: '⬆️⬆️', gravity: '🌍',
-                teleport: '✨', follow: '👁️', patrol: '🔄',
-                add: '➕', subtract: '➖', multiply: '✖️', divide: '➗', random: '🎲',
-                distance: '📏', clamp: '📐', lerp: '📈',
-                if: '❓', compare: '≟', greater: '>', less: '<', and: '&&', or: '||', not: '!',
-                number: '#', string: 'A', boolean: '✓', vector2: '⬛', color: '🎨', array: '📋',
-                score: '🏆', spawn: '✨', destroy: '💀', timer: '⏰', delay: '⏳', repeat: '🔄',
-                chase: '🏃', shoot: '🔫', health: '❤️', spawner: '🪺'
-            };
-            return icons[subtype] || '●';
-        }
-
-        function getNodeName(subtype) {
-            const names = {
-                start: 'Game Start', update: 'Update', fixedupdate: 'Fixed Update', collision: 'Collision', trigger: 'Trigger', mouse: 'Mouse Click',
-                key: 'Key Pressed', keydown: 'Key Down', keyup: 'Key Up', mousepos: 'Mouse Pos', mousedown: 'Mouse Down',
-                move: 'Move', move_arrow: 'Arrow Keys', move_wasd: 'WASD', jump: 'Jump', gravity: 'Gravity',
-                teleport: 'Teleport', follow: 'Follow', patrol: 'Patrol',
-                add: 'Add', subtract: 'Subtract', multiply: 'Multiply', divide: 'Divide', random: 'Random',
-                distance: 'Distance', clamp: 'Clamp', lerp: 'Lerp',
-                if: 'If', compare: 'Compare', greater: 'Greater', less: 'Less', and: 'AND', or: 'OR', not: 'NOT',
-                number: 'Number', string: 'String', boolean: 'Boolean', vector2: 'Vector2', color: 'Color', array: 'Array',
-                score: 'Add Score', spawn: 'Spawn', destroy: 'Destroy', timer: 'Timer', delay: 'Delay', repeat: 'Repeat',
-                chase: 'Chase', shoot: 'Shoot', health: 'Health', spawner: 'Spawner'
-            };
-            return names[subtype] || subtype;
-        }
-
-        function startDragNode(e, nodeId) {
-            e.preventDefault();
-            const node = nodes.find(n => n.id === nodeId);
-            if (!node) return;
-            
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const nodeStartX = node.x;
-            const nodeStartY = node.y;
-            
-            function onMouseMove(e) {
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                node.x = nodeStartX + dx;
-                node.y = nodeStartY + dy;
-                renderNodes();
-            }
-            
-            function onMouseUp() {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-            
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
         }
 
         function deleteNode(nodeId) {
@@ -1334,46 +1120,23 @@
             const node = nodes.find(n => n.id === selectedNode);
             
             if (!node) {
-                propertiesDiv.innerHTML = '<div class="property-row">Click a node to edit</div>';
+                propertiesDiv.innerHTML = '<div class="property-row">Haz clic en un nodo</div>';
                 return;
             }
             
             let html = '';
             for (let [key, value] of Object.entries(node.properties)) {
-                if (key === 'direction') {
+                if (key === 'tecla') {
                     html += `
                         <div class="property-row">
                             <span>${key}:</span>
                             <select onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
-                                <option value="right" ${value === 'right' ? 'selected' : ''}>Right</option>
-                                <option value="left" ${value === 'left' ? 'selected' : ''}>Left</option>
-                                <option value="up" ${value === 'up' ? 'selected' : ''}>Up</option>
-                                <option value="down" ${value === 'down' ? 'selected' : ''}>Down</option>
-                            </select>
-                        </div>
-                    `;
-                } else if (key === 'key') {
-                    html += `
-                        <div class="property-row">
-                            <span>${key}:</span>
-                            <select onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
-                                <option value="Space" ${value === 'Space' ? 'selected' : ''}>Space</option>
+                                <option value="Space" ${value === 'Space' ? 'selected' : ''}>Espacio</option>
                                 <option value="Enter" ${value === 'Enter' ? 'selected' : ''}>Enter</option>
-                                <option value="Shift" ${value === 'Shift' ? 'selected' : ''}>Shift</option>
-                                <option value="Control" ${value === 'Control' ? 'selected' : ''}>Control</option>
-                                <option value="Alt" ${value === 'Alt' ? 'selected' : ''}>Alt</option>
-                                <option value="Tab" ${value === 'Tab' ? 'selected' : ''}>Tab</option>
-                                <option value="Escape" ${value === 'Escape' ? 'selected' : ''}>Escape</option>
-                                <option value="ArrowUp" ${value === 'ArrowUp' ? 'selected' : ''}>Arrow Up</option>
-                                <option value="ArrowDown" ${value === 'ArrowDown' ? 'selected' : ''}>Arrow Down</option>
-                                <option value="ArrowLeft" ${value === 'ArrowLeft' ? 'selected' : ''}>Arrow Left</option>
-                                <option value="ArrowRight" ${value === 'ArrowRight' ? 'selected' : ''}>Arrow Right</option>
-                                <option value="a" ${value === 'a' ? 'selected' : ''}>A</option>
-                                <option value="b" ${value === 'b' ? 'selected' : ''}>B</option>
-                                <option value="c" ${value === 'c' ? 'selected' : ''}>C</option>
-                                <option value="d" ${value === 'd' ? 'selected' : ''}>D</option>
-                                <option value="w" ${value === 'w' ? 'selected' : ''}>W</option>
-                                <option value="s" ${value === 's' ? 'selected' : ''}>S</option>
+                                <option value="ArrowUp" ${value === 'ArrowUp' ? 'selected' : ''}>↑</option>
+                                <option value="ArrowDown" ${value === 'ArrowDown' ? 'selected' : ''}>↓</option>
+                                <option value="ArrowLeft" ${value === 'ArrowLeft' ? 'selected' : ''}>←</option>
+                                <option value="ArrowRight" ${value === 'ArrowRight' ? 'selected' : ''}>→</option>
                             </select>
                         </div>
                     `;
@@ -1407,21 +1170,17 @@
             nodes = [];
             connections = [];
             selectedNode = null;
-            selectedConnection = null;
             renderNodes();
         }
 
         function saveProject() {
-            const project = {
-                nodes: nodes,
-                connections: connections
-            };
-            localStorage.setItem('visualScriptProject', JSON.stringify(project));
-            alert('Proyecto guardado!');
+            const project = { nodes, connections };
+            localStorage.setItem('visualScript2008', JSON.stringify(project));
+            alert('Proyecto guardado en 2008!');
         }
 
         function loadProject() {
-            const saved = localStorage.getItem('visualScriptProject');
+            const saved = localStorage.getItem('visualScript2008');
             if (saved) {
                 const project = JSON.parse(saved);
                 nodes = project.nodes;
@@ -1435,37 +1194,24 @@
         function createExampleGame() {
             clearCanvas();
             
-            // Create a simple platformer example
-            addNode('event', 'start', 50, 50);
-            addNode('event', 'update', 50, 120);
-            
-            addNode('condition', 'key', 50, 200, { key: 'Space' });
-            addNode('action', 'jump', 250, 200, { force: 12 });
-            
-            addNode('action', 'move_arrow', 250, 280, { speed: 5 });
-            addNode('action', 'gravity', 250, 350, { strength: 0.5 });
-            
-            addNode('action', 'score', 450, 50, { amount: 1 });
-            addNode('enemy', 'spawner', 450, 120, { rate: 3 });
+            addNode('event', 'update', 50, 50);
+            addNode('condition', 'key', 50, 120, { tecla: 'Space' });
+            addNode('action', 'jump', 250, 120, { fuerza: 12 });
+            addNode('action', 'move_arrow', 250, 200, { velocidad: 5 });
+            addNode('action', 'gravity', 250, 280, { fuerza: 0.5 });
             
             setTimeout(() => {
-                if (nodes.length >= 7) {
-                    createConnection(nodes[1].id, 'out', nodes[2].id, 'in');
-                    createConnection(nodes[2].id, 'true', nodes[3].id, 'in');
-                    createConnection(nodes[1].id, 'out', nodes[4].id, 'in');
-                    createConnection(nodes[1].id, 'out', nodes[5].id, 'in');
+                if (nodes.length >= 5) {
+                    createConnection(nodes[0].id, 'out', nodes[1].id, 'in');
+                    createConnection(nodes[1].id, 'true', nodes[2].id, 'in');
+                    createConnection(nodes[0].id, 'out', nodes[3].id, 'in');
+                    createConnection(nodes[0].id, 'out', nodes[4].id, 'in');
                 }
             }, 100);
-            
-            alert('¡Juego ejemplo creado! Conecta: Update → Jump (con Space) y Update → Move y Gravity');
         }
 
         function closeHelp() {
             document.getElementById('helpModal').style.display = 'none';
-        }
-
-        function showHelp() {
-            document.getElementById('helpModal').style.display = 'flex';
         }
 
         // Game functions
@@ -1479,8 +1225,7 @@
             gameRunning = true;
             gameScore = 0;
             enemies = [];
-            bullets = [];
-            player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+            player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
             
             document.getElementById('gameScore').innerText = '0';
             
@@ -1493,11 +1238,10 @@
                 // Apply gravity
                 if (player.velocityY !== undefined) {
                     player.y += player.velocityY;
-                    player.velocityY += 0.5; // Gravity
+                    player.velocityY += 0.5;
                     
-                    // Ground collision
-                    if (player.y > 280) {
-                        player.y = 280;
+                    if (player.y > 235) {
+                        player.y = 235;
                         player.velocityY = 0;
                         player.onGround = true;
                     } else {
@@ -1505,30 +1249,13 @@
                     }
                 }
                 
-                // Keep player in bounds
-                player.x = Math.max(10, Math.min(290, player.x));
-                player.y = Math.max(10, Math.min(290, player.y));
-                
-                // Update enemies
-                enemies = enemies.filter(e => {
-                    if (e.health <= 0) return false;
-                    
-                    // Simple chase behavior
-                    if (e.type === 'chase') {
-                        if (player.x > e.x) e.x += e.speed || 1;
-                        if (player.x < e.x) e.x -= e.speed || 1;
-                        if (player.y > e.y) e.y += e.speed || 1;
-                        if (player.y < e.y) e.y -= e.speed || 1;
-                    }
-                    
-                    return true;
-                });
+                player.x = Math.max(8, Math.min(242, player.x));
+                player.y = Math.max(8, Math.min(242, player.y));
                 
                 document.getElementById('playerPos').innerText = `${Math.round(player.x)},${Math.round(player.y)}`;
                 document.getElementById('enemyCount').innerText = enemies.length;
                 
                 draw();
-                
             }, 1000/60);
         }
 
@@ -1541,28 +1268,15 @@
                 
                 let conditionMet = true;
                 
-                // Check conditions for condition nodes
-                if (fromNode.type === 'condition') {
-                    if (fromNode.subtype === 'key' || fromNode.subtype === 'keydown' || fromNode.subtype === 'keyup') {
-                        const targetKey = fromNode.properties.key || 'Space';
-                        
-                        if (fromNode.subtype === 'key') {
-                            conditionMet = keyStates[targetKey] === true;
-                        } else if (fromNode.subtype === 'keydown') {
-                            conditionMet = keyStates[targetKey] === true;
-                        } else if (fromNode.subtype === 'keyup') {
-                            conditionMet = keyStates[targetKey] === false;
-                        }
-                    }
+                if (fromNode.type === 'condition' && fromNode.subtype === 'key') {
+                    const targetKey = fromNode.properties.tecla || 'Space';
+                    conditionMet = keyStates[targetKey] === true;
                 }
                 
-                // Execute based on pin
                 if (conditionMet) {
-                    if (conn.fromPin === 'true' || conn.fromPin === 'out' || conn.fromPin === 'result' || conn.fromPin === 'get') {
+                    if (conn.fromPin === 'true' || conn.fromPin === 'out') {
                         executeNode(toNode);
                     }
-                } else if (conn.fromPin === 'false') {
-                    executeNode(toNode);
                 }
             });
         }
@@ -1571,126 +1285,76 @@
             if (!node) return;
             
             switch(node.subtype) {
-                // Movimiento
-                case 'move':
-                    const speed = parseInt(node.properties.speed) || 5;
-                    if (node.properties.direction === 'right') player.x += speed;
-                    if (node.properties.direction === 'left') player.x -= speed;
-                    if (node.properties.direction === 'up') player.y -= speed;
-                    if (node.properties.direction === 'down') player.y += speed;
-                    break;
-                    
                 case 'move_arrow':
-                    const arrowSpeed = parseInt(node.properties.speed) || 5;
-                    if (keyStates['ArrowRight']) player.x += arrowSpeed;
-                    if (keyStates['ArrowLeft']) player.x -= arrowSpeed;
-                    if (keyStates['ArrowUp']) player.y -= arrowSpeed;
-                    if (keyStates['ArrowDown']) player.y += arrowSpeed;
-                    break;
-                    
-                case 'move_wasd':
-                    const wasdSpeed = parseInt(node.properties.speed) || 5;
-                    if (keyStates['d'] || keyStates['D']) player.x += wasdSpeed;
-                    if (keyStates['a'] || keyStates['A']) player.x -= wasdSpeed;
-                    if (keyStates['w'] || keyStates['W']) player.y -= wasdSpeed;
-                    if (keyStates['s'] || keyStates['S']) player.y += wasdSpeed;
+                    const speed = parseInt(node.properties.velocidad) || 5;
+                    if (keyStates['ArrowRight']) player.x += speed;
+                    if (keyStates['ArrowLeft']) player.x -= speed;
                     break;
                     
                 case 'jump':
                     if (player.onGround) {
-                        player.velocityY = -(parseInt(node.properties.force) || 10);
+                        player.velocityY = -(parseInt(node.properties.fuerza) || 12);
                         player.onGround = false;
                     }
                     break;
                     
-                case 'gravity':
-                    // Already handled in main loop
-                    break;
-                    
-                case 'teleport':
-                    player.x = parseInt(node.properties.x) || 150;
-                    player.y = parseInt(node.properties.y) || 150;
-                    break;
-                    
                 case 'spawn':
-                    const count = parseInt(node.properties.count) || 1;
+                    const count = parseInt(node.properties.cantidad) || 1;
                     for (let i = 0; i < count; i++) {
                         enemies.push({
-                            x: Math.random() * 280 + 10,
-                            y: Math.random() * 280 + 10,
-                            health: 100,
-                            type: 'chase',
-                            speed: 2
+                            x: Math.random() * 230 + 10,
+                            y: Math.random() * 230 + 10
                         });
                     }
                     break;
                     
                 case 'score':
-                    const amount = parseInt(node.properties.amount) || 10;
-                    gameScore += amount;
+                    const points = parseInt(node.properties.puntos) || 10;
+                    gameScore += points;
                     document.getElementById('gameScore').innerText = gameScore;
-                    break;
-                    
-                case 'destroy':
-                    // Simplified - remove first enemy
-                    if (enemies.length > 0) enemies.pop();
                     break;
             }
         }
 
-        function handleMouseClick(x, y) {
-            // Check if clicked on enemy
-            enemies = enemies.filter(e => {
-                const dist = Math.sqrt((x - e.x)**2 + (y - e.y)**2);
-                if (dist < 15) {
-                    gameScore += 10;
-                    document.getElementById('gameScore').innerText = gameScore;
-                    return false; // Remove enemy
-                }
-                return true;
-            });
-        }
-
         function draw() {
-            ctx.clearRect(0, 0, 300, 300);
+            ctx.clearRect(0, 0, 250, 250);
             
-            // Draw grid
-            ctx.strokeStyle = '#3e3e42';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i <= 300; i += 30) {
+            // Retro grid
+            ctx.strokeStyle = '#3366cc';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 250; i += 25) {
                 ctx.beginPath();
                 ctx.moveTo(i, 0);
-                ctx.lineTo(i, 300);
+                ctx.lineTo(i, 250);
+                ctx.strokeStyle = '#3366cc';
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(0, i);
-                ctx.lineTo(300, i);
+                ctx.lineTo(250, i);
                 ctx.stroke();
             }
             
             // Draw enemies
             enemies.forEach(enemy => {
-                ctx.fillStyle = '#ff6b6b';
-                ctx.shadowColor = '#ff6b6b';
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.arc(enemy.x, enemy.y, 10, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = '#ff0000';
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 5;
+                ctx.fillRect(enemy.x - 5, enemy.y - 5, 10, 10);
             });
             
             // Draw player
-            ctx.fillStyle = '#4ecdc4';
-            ctx.shadowColor = '#4ecdc4';
-            ctx.shadowBlur = 10;
-            ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
+            ctx.fillStyle = '#00cc00';
+            ctx.shadowColor = '#00cc00';
+            ctx.shadowBlur = 5;
+            ctx.fillRect(player.x - 7, player.y - 7, 14, 14);
             ctx.shadowBlur = 0;
             
-            // Draw ground line
+            // Ground line
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, 290);
-            ctx.lineTo(300, 290);
+            ctx.moveTo(0, 240);
+            ctx.lineTo(250, 240);
             ctx.stroke();
         }
 
@@ -1704,13 +1368,13 @@
 
         function resetGame() {
             stopGame();
-            player = { x: 150, y: 150, size: 20, velocityY: 0, onGround: true };
+            player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
             enemies = [];
             gameScore = 0;
             document.getElementById('gameScore').innerText = '0';
-            document.getElementById('playerPos').innerText = '150,150';
+            document.getElementById('playerPos').innerText = '125,125';
             document.getElementById('enemyCount').innerText = '0';
-            ctx.clearRect(0, 0, 300, 300);
+            ctx.clearRect(0, 0, 250, 250);
             draw();
         }
 
@@ -1723,15 +1387,12 @@
         window.saveProject = saveProject;
         window.loadProject = loadProject;
         window.deleteNode = deleteNode;
-        window.deleteConnection = deleteConnection;
-        window.deleteSelectedConnection = deleteSelectedConnection;
         window.updateNodeProperty = updateNodeProperty;
         window.startGame = startGame;
         window.stopGame = stopGame;
         window.resetGame = resetGame;
         window.selectNode = selectNode;
         window.closeHelp = closeHelp;
-        window.showHelp = showHelp;
         window.createExampleGame = createExampleGame;
     </script>
 </body>
