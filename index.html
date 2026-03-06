@@ -3,421 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador Visual Script 2008</title>
+    <title>Game Maker 2008 - Visual Script</title>
     <style>
+        /* RESET Y ESTILOS GENERALES */
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', 'Lucida Console', monospace;
         }
 
         body {
-            background: #265987; /* fondo azul oscuro tipo XP */
-            font-family: 'Segoe UI', Tahoma, 'Lucida Grande', Verdana, Arial, sans-serif;
+            background: #26475f; /* azul oscuro GM */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 20px;
-        }
-
-        /* contenedor principal — estilo ventana 2008 */
-        .ventana {
-            width: 950px;
-            background: #eef3f7;
-            border: 3px outset #ffffff;
-            border-radius: 12px 12px 8px 8px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5), inset 0 0 0 1px #d0dbe8;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        /* barra de título con brillo */
-        .barra-titulo {
-            background: linear-gradient(180deg, #3c6ea0, #1e3f66);
-            padding: 8px 15px;
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #0a1c2e;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #f5c63f;
-            box-shadow: inset 0 -2px 0 #9bb9d9;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .barra-titulo span {
-            font-size: 18px;
-            font-style: italic;
-            background: #ffd966;
-            color: #1e3f66;
-            padding: 3px 12px;
-            border-radius: 30px;
-            border: 1px solid #ffe484;
-            box-shadow: inset -1px -1px 0 #a57c2b, 0 2px 4px black;
-        }
-
-        /* contenido principal */
-        .contenido {
-            display: flex;
             padding: 15px;
-            gap: 20px;
-            background: #d9e2ef url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1.5" fill="%23ffffff30"/></svg>'); /* textura tenue */
         }
 
-        /* panel del juego (izquierda) */
-        .panel-juego {
-            flex: 1;
-            background: #b8c9dd;
-            border: 3px inset #f0f8ff;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: inset 2px 2px 5px #2b3f54, inset -2px -2px 5px #eaf0fa;
+        /* VENTANA PRINCIPAL - como GM */
+        .ventana-gm {
+            width: 1100px;
+            background: #b0b9c9; /* gris GM */
+            border: 4px solid;
+            border-color: #f0f0f0 #6a6a6a #6a6a6a #f0f0f0;
+            border-radius: 0;
+            box-shadow: 4px 4px 8px #1f2f3f;
+            padding: 4px;
         }
 
-        .titulo-panel {
-            background: linear-gradient(180deg, #e3eefb, #b3c9e3);
-            padding: 5px 8px;
+        /* BARRA DE TÍTULO DE VENTANA (como GM) */
+        .titulo-ventana {
+            background: linear-gradient(90deg, #0a2c4e, #296c9c);
+            color: white;
             font-weight: bold;
-            font-size: 16px;
-            border: 2px outset #ffffff;
-            border-radius: 20px;
-            text-align: center;
-            color: #1a3a5e;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px #2f4f6e;
-        }
-
-        canvas {
-            display: block;
-            margin: 10px auto;
-            border: 4px solid #2d4d6e;
-            border-radius: 8px;
-            background: #c0d3e8;
-            box-shadow: 0 0 0 2px #eaf1fc, 4px 4px 8px #1f2f40;
-            image-rendering: pixelated;
-        }
-
-        .info-juego {
-            background: #f0f8ff;
-            border: 1px solid #abc0d6;
-            border-radius: 30px;
-            padding: 8px 12px;
-            text-align: center;
-            font-weight: bold;
-            color: #00264d;
-            box-shadow: inset 0 0 0 2px white, 2px 2px 0 #768ea8;
-        }
-
-        /* panel de script visual (derecha) */
-        .panel-script {
-            width: 400px;
-            background: #cddef5;
-            border: 3px inset #ffffff;
-            border-radius: 12px;
-            padding: 10px;
-            box-shadow: inset 1px 1px 5px #62738b, inset -1px -1px 5px #f0f8ff;
-        }
-
-        /* botonera estilo 2008 */
-        .botonera {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-            background: #aac1db;
-            padding: 12px;
-            border-radius: 30px;
-            border: 2px inset #e1efff;
-        }
-
-        .boton {
-            background: linear-gradient(180deg, #f0f9ff, #c0d6f0);
-            border: 2px outset #ffffff;
-            border-radius: 30px;
-            padding: 8px 14px;
-            font-weight: bold;
-            font-size: 14px;
-            color: #002b55;
-            cursor: pointer;
-            box-shadow: 0 3px 0 #7b92b0, 0 5px 8px #1f3145;
-            transition: 0.05s linear;
-            flex: 1 0 auto;
-            text-shadow: 1px 1px 0 white;
-            font-family: inherit;
-        }
-
-        .boton:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #7b92b0, 0 3px 6px #1f3145;
-            border-style: inset;
-        }
-
-        .boton:disabled {
-            opacity: 0.45;
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #7b92b0;
-            cursor: not-allowed;
-            border-style: inset;
-            filter: grayscale(20%);
-        }
-
-        /* área de bloques (lista visual) */
-        .lista-bloques {
-            background: #b7ceea;
-            border: 3px inset #ddeeff;
-            border-radius: 18px;
-            padding: 12px;
-            min-height: 280px;
-            max-height: 380px;
-            overflow-y: auto;
-            box-shadow: inset 0 0 10px #2f4965;
-        }
-
-        .bloque-item {
-            background: linear-gradient(180deg, #fefcd0, #f8e071);
-            border: 2px outset #ffffe0;
-            border-radius: 30px;
+            font-size: 18px;
             padding: 6px 12px;
+            border: 2px solid;
+            border-color: #e0e0e0 #2b2b2b #2b2b2b #e0e0e0;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 2px 2px 0 #987e2c, 0 4px 6px #18293e;
+            gap: 10px;
+            text-shadow: 2px 2px 0 #1a3f5a;
+            letter-spacing: 1px;
+        }
+
+        .titulo-ventana span {
+            background: #f0c060;
+            color: #202020;
+            font-size: 14px;
+            padding: 2px 16px;
+            border: 2px solid;
+            border-color: #ffffa0 #a0a040 #a0a040 #ffffa0;
+        }
+
+        /* CONTENEDOR COLUMNAS */
+        .contenedor-columnas {
+            display: flex;
+            gap: 12px;
+            padding: 4px;
+        }
+
+        /* PANEL IZQUIERDO: ROOM */
+        .panel-room {
+            flex: 1;
+            background: #8b9bb5;
+            border: 4px solid;
+            border-color: #e0e8f0 #4f5f77 #4f5f77 #e0e8f0;
+            padding: 12px;
+        }
+
+        .sub-titulo {
+            background: #a0b0c8;
+            border: 2px solid;
+            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
             font-weight: bold;
-            color: #2a1f0c;
+            font-size: 16px;
+            padding: 4px 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #101010;
+            text-transform: uppercase;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+            background: #4a607a;
+            padding: 12px;
+            border: 4px solid;
+            border-color: #708090 #2a3a4a #2a3a4a #708090;
+        }
+
+        canvas {
+            border: 4px solid #2b3f59;
+            background: #b7d0e8;
+            box-shadow: inset 0 0 0 2px #d0e4ff, 4px 4px 0 #1e2f40;
+            image-rendering: pixelated;
+        }
+
+        .info-object {
+            background: #b0c0d0;
+            border: 4px solid;
+            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
+            padding: 8px;
+            font-weight: bold;
+            color: #1e2f3f;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* PANEL DERECHO: SCRIPT VISUAL (estilo GM) */
+        .panel-script {
+            width: 460px;
+            background: #8b9bb5;
+            border: 4px solid;
+            border-color: #e0e8f0 #4f5f77 #4f5f77 #e0e8f0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* BARRA DE HERRAMIENTAS (iconos de acción) */
+        .toolbar-acciones {
+            background: #a0b0c8;
+            border: 4px solid;
+            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .boton-accion {
+            width: 80px;
+            height: 70px;
+            background: #e0e8f0;
+            border: 4px solid;
+            border-color: #ffffff #8a9ab0 #8a9ab0 #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #101010;
+            box-shadow: 2px 2px 0 #3a4a60;
+            transition: 0.05s linear;
+            user-select: none;
+            padding: 4px;
+        }
+
+        .boton-accion:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+            border-color: #8a9ab0 #ffffff #ffffff #8a9ab0;
+        }
+
+        .boton-accion.disabled, .boton-accion:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+
+        .icono-accion {
+            font-size: 32px;
+            line-height: 1;
+            filter: drop-shadow(2px 2px 0 #a0b0c0);
+        }
+
+        .etiqueta-accion {
+            font-size: 12px;
+            background: #265987;
+            color: white;
+            padding: 2px 6px;
+            margin-top: 2px;
+            border: 2px solid #a0c0e0;
+            text-transform: uppercase;
+        }
+
+        /* CAJA DE SCRIPT (lista de acciones) */
+        .script-container {
+            background: #3a4f69;
+            border: 4px solid;
+            border-color: #708090 #1e2f3f #1e2f3f #708090;
+            padding: 10px;
+            min-height: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .script-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bloque-accion {
+            background: #d0d8e8;
+            border: 4px solid;
+            border-color: #f8fcff #8a98b0 #8a98b0 #f8fcff;
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            box-shadow: 2px 2px 0 #1f2f40;
         }
 
         .bloque-icono {
-            font-size: 22px;
-            margin-right: 8px;
-            filter: drop-shadow(2px 2px 0 #f5f0b0);
+            font-size: 28px;
+            width: 48px;
+            text-align: center;
+            background: #2f4f6f;
+            color: white;
+            border: 2px solid #b0d0f0;
+            margin-right: 12px;
+            padding: 2px;
+            text-shadow: 2px 2px 0 #102030;
         }
 
         .bloque-texto {
             flex: 1;
+            font-weight: bold;
             font-size: 16px;
+            color: #101820;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+        }
+
+        .bloque-controles {
+            display: flex;
+            gap: 6px;
         }
 
         .bloque-controles button {
-            background: #e6b422;
-            border: 2px outset #fcd975;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            background: #c0d0e0;
+            border: 4px solid;
+            border-color: #f0f8ff #7b8ba3 #7b8ba3 #f0f8ff;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            margin-left: 4px;
-            box-shadow: 1px 2px 0 #7f6600;
-            color: #2a2a0a;
             line-height: 1;
+            color: #101010;
         }
 
         .bloque-controles button:active {
-            transform: translate(1px, 2px);
-            box-shadow: none;
+            transform: translate(2px, 2px);
+            border-color: #7b8ba3 #f0f8ff #f0f8ff #7b8ba3;
         }
 
         .bloque-controles button:disabled {
             opacity: 0.3;
-            transform: none;
-            box-shadow: 1px 1px 0 #7f6600;
+            pointer-events: none;
         }
 
-        /* mensajes */
-        .mensaje {
+        /* BOTONES DE CONTROL INFERIORES (estilo GM) */
+        .botones-control {
+            display: flex;
+            gap: 12px;
             margin-top: 15px;
-            background: #fffbcc;
-            border: 2px solid #daa520;
-            border-radius: 30px;
+            justify-content: flex-end;
+        }
+
+        .btn-gm {
+            background: #b0c0d0;
+            border: 4px solid;
+            border-color: #f0f8ff #6f7f97 #6f7f97 #f0f8ff;
+            padding: 8px 20px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            color: #102030;
+            box-shadow: 2px 2px 0 #2a3a4a;
+        }
+
+        .btn-gm:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+            border-color: #6f7f97 #f0f8ff #f0f8ff #6f7f97;
+        }
+
+        .btn-gm:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* mensajes estilo GM */
+        .mensaje-gm {
+            margin-top: 12px;
+            background: #e0e8f0;
+            border: 4px solid;
+            border-color: #ffffff #7b8ba3 #7b8ba3 #ffffff;
             padding: 8px;
             font-weight: bold;
+            color: #102030;
             text-align: center;
-            color: #3f3a1f;
-            box-shadow: inset 0 0 0 2px #ffffe0, 2px 2px 0 #b99b48;
-        }
-
-        /* pie 2008 */
-        .pie {
-            background: #2e4d77;
-            color: white;
-            padding: 8px 20px;
-            font-size: 13px;
-            border-top: 3px solid #ffc966;
-            text-align: right;
-            text-shadow: 1px 1px 0 #001122;
-        }
-
-        .pie a {
-            color: #ffd966;
-            font-weight: bold;
-            text-decoration: none;
         }
     </style>
 </head>
 <body>
-<div class="ventana">
-    <div class="barra-titulo">
-        🎮 VISUAL SCRIPT GAME CREATOR 2008
-        <span>BETA</span>
+<div class="ventana-gm">
+    <!-- Barra de título principal -->
+    <div class="titulo-ventana">
+        🎮 GameMaker 8.0 - Visual Script 2008
+        <span>drag & drop style</span>
     </div>
 
-    <div class="contenido">
-        <!-- panel del juego -->
-        <div class="panel-juego">
-            <div class="titulo-panel">▶ ZONA DE JUEGO ◀</div>
-            <canvas id="gameCanvas" width="200" height="200"></canvas>
-            <div class="info-juego" id="estadoJuego">⚡ Jugador en (0,0) · Meta (4,4)</div>
+    <div class="contenedor-columnas">
+        <!-- PANEL ROOM (juego) -->
+        <div class="panel-room">
+            <div class="sub-titulo">📦 room0 - objeto player</div>
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="200" height="200"></canvas>
+            </div>
+            <div class="info-object">
+                <span id="posJugador">posición: (0,0)</span>
+                <span>✨ meta: (4,4)</span>
+            </div>
         </div>
 
-        <!-- panel script visual -->
+        <!-- PANEL SCRIPT VISUAL (estilo Game Maker) -->
         <div class="panel-script">
-            <div class="titulo-panel">📦 SCRIPT VISUAL (apila bloques)</div>
+            <div class="sub-titulo">🧩 object0 - script (d&d)</div>
 
-            <div class="botonera">
-                <button class="boton" id="btnArriba">⬆ ARRIBA</button>
-                <button class="boton" id="btnAbajo">⬇ ABAJO</button>
-                <button class="boton" id="btnIzq">⬅ IZQUIERDA</button>
-                <button class="boton" id="btnDer">➜ DERECHA</button>
-                <button class="boton" id="btnEjecutar">▶ EJECUTAR</button>
-                <button class="boton" id="btnResetJuego">⟲ RESET</button>
-                <button class="boton" id="btnLimpiar">✖ LIMPIAR</button>
+            <!-- Barra de herramientas con iconos de acciones -->
+            <div class="toolbar-acciones">
+                <div class="boton-accion" id="btnAddUp" title="Mover arriba">
+                    <div class="icono-accion">⬆️</div>
+                    <div class="etiqueta-accion">UP</div>
+                </div>
+                <div class="boton-accion" id="btnAddDown" title="Mover abajo">
+                    <div class="icono-accion">⬇️</div>
+                    <div class="etiqueta-accion">DOWN</div>
+                </div>
+                <div class="boton-accion" id="btnAddLeft" title="Mover izquierda">
+                    <div class="icono-accion">⬅️</div>
+                    <div class="etiqueta-accion">LEFT</div>
+                </div>
+                <div class="boton-accion" id="btnAddRight" title="Mover derecha">
+                    <div class="icono-accion">➡️</div>
+                    <div class="etiqueta-accion">RIGHT</div>
+                </div>
             </div>
 
-            <!-- lista de bloques visuales -->
-            <div id="listaBloques" class="lista-bloques">
-                <!-- los bloques se generan dinámicamente -->
+            <!-- Contenedor de la lista de script (acciones) -->
+            <div class="script-container">
+                <div id="scriptList" class="script-lista">
+                    <!-- Los bloques se generan dinámicamente -->
+                </div>
             </div>
 
-            <div id="mensajeBox" class="mensaje">
-                🧩 Arrastra mentalmente los bloques ;)
+            <!-- Botones de control: ejecutar, reset, limpiar -->
+            <div class="botones-control">
+                <button class="btn-gm" id="btnRun">▶ EJECUTAR</button>
+                <button class="btn-gm" id="btnResetRoom">⟲ RESET</button>
+                <button class="btn-gm" id="btnClearScript">✖ LIMPIAR</button>
+            </div>
+
+            <!-- Área de mensajes -->
+            <div id="gmMessage" class="mensaje-gm">
+                💾 Arrastra acciones al script (botones)
             </div>
         </div>
-    </div>
-
-    <div class="pie">
-        ⚡ 2008 visual style · <a href="#">creador de juegos</a> · funcional!
     </div>
 </div>
 
 <script>
     (function() {
-        // ---------- CONSTANTES Y ESTADO ----------
+        // ---------- CONFIGURACIÓN ----------
         const GRID_SIZE = 5;
-        const CELL_SIZE = 40; // 200/5
+        const CELL_SIZE = 40;
         const META = { x: 4, y: 4 };
 
-        // Posición del jugador
+        // Estado del juego
         let jugador = { x: 0, y: 0 };
 
-        // Lista de comandos (script visual)
-        let comandos = [];  // ej: ['up', 'down', 'left', 'right']
+        // Lista de acciones (script visual)
+        let acciones = []; // valores: 'up','down','left','right'
 
         // Control de ejecución
         let ejecutando = false;
         let timeoutId = null;
 
-        // Elementos del DOM
+        // Elementos DOM
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const listaDiv = document.getElementById('listaBloques');
-        const mensajeDiv = document.getElementById('mensajeBox');
-        const estadoJuegoDiv = document.getElementById('estadoJuego');
+        const scriptListDiv = document.getElementById('scriptList');
+        const mensajeDiv = document.getElementById('gmMessage');
+        const posJugadorSpan = document.getElementById('posJugador');
 
-        // Botones de acción (para habilitar/deshabilitar)
-        const btnArriba = document.getElementById('btnArriba');
-        const btnAbajo = document.getElementById('btnAbajo');
-        const btnIzq = document.getElementById('btnIzq');
-        const btnDer = document.getElementById('btnDer');
-        const btnEjecutar = document.getElementById('btnEjecutar');
-        const btnResetJuego = document.getElementById('btnResetJuego');
-        const btnLimpiar = document.getElementById('btnLimpiar');
+        // Botones de acción
+        const btnAddUp = document.getElementById('btnAddUp');
+        const btnAddDown = document.getElementById('btnAddDown');
+        const btnAddLeft = document.getElementById('btnAddLeft');
+        const btnAddRight = document.getElementById('btnAddRight');
+        const btnRun = document.getElementById('btnRun');
+        const btnResetRoom = document.getElementById('btnResetRoom');
+        const btnClearScript = document.getElementById('btnClearScript');
 
-        const todosBotones = [btnArriba, btnAbajo, btnIzq, btnDer, btnEjecutar, btnResetJuego, btnLimpiar];
+        // Colección para habilitar/deshabilitar
+        const todosBotones = [btnAddUp, btnAddDown, btnAddLeft, btnAddRight, btnRun, btnResetRoom, btnClearScript];
 
-        // ---------- DIBUJAR JUEGO (estilo retro 2008) ----------
-        function dibujarGrid() {
+        // ---------- DIBUJAR ROOM (estilo GM) ----------
+        function dibujarRoom() {
             ctx.clearRect(0, 0, 200, 200);
 
-            // Dibujar celdas con relieve
+            // cuadrícula estilo GM
             for (let i = 0; i < GRID_SIZE; i++) {
                 for (let j = 0; j < GRID_SIZE; j++) {
                     let x = i * CELL_SIZE;
                     let y = j * CELL_SIZE;
-
-                    // Fondo tipo tablero
-                    ctx.fillStyle = (i + j) % 2 === 0 ? '#afc9eb' : '#8fb0da';
+                    ctx.fillStyle = (i + j) % 2 === 0 ? '#aac6e8' : '#8fb0da';
                     ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-
-                    // Borde biselado
-                    ctx.strokeStyle = '#eef5ff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(x+1, y+1, CELL_SIZE-2, CELL_SIZE-2);
+                    ctx.strokeStyle = '#4a6c8f';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
                 }
             }
 
-            // Dibujar meta (estrella roja con brillo)
+            // dibujar meta (GM star)
             let mx = META.x * CELL_SIZE;
             let my = META.y * CELL_SIZE;
+            ctx.fillStyle = '#e03a3a';
+            ctx.shadowColor = '#f0c060';
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.arc(mx + CELL_SIZE/2, my + CELL_SIZE/2, 15, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ff3333';
-            ctx.shadowColor = '#ffd966';
-            ctx.shadowBlur = 12;
+            ctx.arc(mx + CELL_SIZE/2, my + CELL_SIZE/2, 15, 0, 2*Math.PI);
             ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#ffff99';
-            ctx.font = 'bold 20px "Segoe UI", Arial';
+            ctx.fillStyle = '#ffffb0';
+            ctx.font = 'bold 24px "Courier New", monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('⭐', mx + CELL_SIZE/2, my + CELL_SIZE/2 - 1);
+            ctx.fillText('⭐', mx + CELL_SIZE/2, my + CELL_SIZE/2 - 2);
 
-            // Dibujar jugador (carita sonriente 2008)
+            // dibujar jugador (sprite GM: balón sonriente)
             let px = jugador.x * CELL_SIZE;
             let py = jugador.y * CELL_SIZE;
+            // cuerpo
+            ctx.fillStyle = '#fcdb6a';
+            ctx.shadowColor = '#b37b2e';
+            ctx.shadowBlur = 6;
             ctx.beginPath();
-            ctx.arc(px + CELL_SIZE/2, py + CELL_SIZE/2, 14, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ffe066';
-            ctx.shadowColor = '#b8860b';
-            ctx.shadowBlur = 8;
+            ctx.arc(px + CELL_SIZE/2, py + CELL_SIZE/2, 16, 0, 2*Math.PI);
             ctx.fill();
-            ctx.strokeStyle = '#a67c1e';
+            ctx.strokeStyle = '#7f5f2a';
             ctx.lineWidth = 2;
             ctx.stroke();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#1a1a1a';
+            // ojos
+            ctx.fillStyle = '#000';
             ctx.beginPath();
             ctx.arc(px + 25, py + 15, 3, 0, 2*Math.PI);
             ctx.arc(px + 15, py + 15, 3, 0, 2*Math.PI);
             ctx.fill();
+            // boca
             ctx.beginPath();
             ctx.strokeStyle = '#422013';
             ctx.lineWidth = 3;
-            ctx.arc(px + 20, py + 28, 6, 0.1, Math.PI - 0.1);
+            ctx.arc(px + 20, py + 27, 6, 0.2, Math.PI - 0.2);
             ctx.stroke();
 
-            // Actualizar texto de estado
-            estadoJuegoDiv.innerText = `🎮 Jugador (${jugador.x},${jugador.y})  ·  Meta (4,4)`;
+            // actualizar info
+            posJugadorSpan.innerText = `posición: (${jugador.x},${jugador.y})`;
         }
 
-        // ---------- MANEJAR MOVIMIENTO (con límites) ----------
-        function moverJugador(dx, dy) {
-            let nuevoX = jugador.x + dx;
-            let nuevoY = jugador.y + dy;
-            if (nuevoX >= 0 && nuevoX < GRID_SIZE && nuevoY >= 0 && nuevoY < GRID_SIZE) {
-                jugador.x = nuevoX;
-                jugador.y = nuevoY;
+        // ---------- MANIPULACIÓN DE ACCIONES (script) ----------
+        function renderizarScript() {
+            if (acciones.length === 0) {
+                scriptListDiv.innerHTML = '<div style="padding:20px; text-align:center; background:#5a6f8a; border:4px inset #2f405a; color:#ddd; font-weight:bold;">⬅️ Arrastra acciones aquí</div>';
+                return;
             }
-            dibujarGrid();
+
+            let html = '';
+            acciones.forEach((acc, index) => {
+                let icono = '';
+                let texto = '';
+                switch(acc) {
+                    case 'up': icono = '⬆️'; texto = 'MOVER ARRIBA'; break;
+                    case 'down': icono = '⬇️'; texto = 'MOVER ABAJO'; break;
+                    case 'left': icono = '⬅️'; texto = 'MOVER IZQUIERDA'; break;
+                    case 'right': icono = '➡️'; texto = 'MOVER DERECHA'; break;
+                }
+                html += `<div class="bloque-accion" data-index="${index}">
+                    <div class="bloque-icono">${icono}</div>
+                    <div class="bloque-texto">${texto}</div>
+                    <div class="bloque-controles">
+                        <button class="btn-up" data-index="${index}" ${ejecutando ? 'disabled' : ''}>↑</button>
+                        <button class="btn-down" data-index="${index}" ${ejecutando ? 'disabled' : ''}>↓</button>
+                        <button class="btn-delete" data-index="${index}" ${ejecutando ? 'disabled' : ''}>✖</button>
+                    </div>
+                </div>`;
+            });
+            scriptListDiv.innerHTML = html;
         }
 
-        // ---------- COMPROBAR VICTORIA ----------
-        function verificarVictoria() {
+        // Agregar acción
+        function agregarAccion(dir) {
+            if (ejecutando) return;
+            acciones.push(dir);
+            renderizarScript();
+            mensajeDiv.innerHTML = `➕ Acción añadida: ${dir}`;
+        }
+
+        // Eliminar
+        function eliminarAccion(index) {
+            if (ejecutando) return;
+            if (index >= 0 && index < acciones.length) {
+                acciones.splice(index, 1);
+                renderizarScript();
+            }
+        }
+
+        // Mover arriba
+        function moverArriba(index) {
+            if (ejecutando || index <= 0) return;
+            [acciones[index-1], acciones[index]] = [acciones[index], acciones[index-1]];
+            renderizarScript();
+        }
+
+        // Mover abajo
+        function moverAbajo(index) {
+            if (ejecutando || index >= acciones.length-1) return;
+            [acciones[index], acciones[index+1]] = [acciones[index+1], acciones[index]];
+            renderizarScript();
+        }
+
+        // Limpiar script
+        function limpiarScript() {
+            if (ejecutando) detenerEjecucion();
+            acciones = [];
+            renderizarScript();
+            mensajeDiv.innerHTML = '🧹 Script limpiado.';
+        }
+
+        // Reset jugador
+        function resetJugador() {
+            if (ejecutando) detenerEjecucion();
+            jugador = { x: 0, y: 0 };
+            dibujarRoom();
+            mensajeDiv.innerHTML = '🔄 Jugador reiniciado a (0,0)';
+        }
+
+        // Movimiento con límites
+        function moverJugador(dx, dy) {
+            let nx = jugador.x + dx;
+            let ny = jugador.y + dy;
+            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                jugador.x = nx;
+                jugador.y = ny;
+            }
+            dibujarRoom();
+        }
+
+        // Verificar victoria
+        function checkVictoria() {
             if (jugador.x === META.x && jugador.y === META.y) {
                 mensajeDiv.innerHTML = '🏆 ¡VICTORIA! ¡Has ganado! 🏆';
                 return true;
@@ -425,93 +572,7 @@
             return false;
         }
 
-        // ---------- RENDERIZAR LISTA DE BLOQUES VISUALES ----------
-        function renderBloques() {
-            if (comandos.length === 0) {
-                listaDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#2b4b6f; font-style:italic;">⬆️ Añade bloques con los botones ⬆️</div>';
-                return;
-            }
-
-            let html = '';
-            comandos.forEach((cmd, idx) => {
-                let icono = '';
-                let texto = '';
-                switch (cmd) {
-                    case 'up': icono = '⬆️'; texto = 'MOVER ARRIBA'; break;
-                    case 'down': icono = '⬇️'; texto = 'MOVER ABAJO'; break;
-                    case 'left': icono = '⬅️'; texto = 'MOVER IZQUIERDA'; break;
-                    case 'right': icono = '➡️'; texto = 'MOVER DERECHA'; break;
-                    default: icono = '🔷'; texto = cmd;
-                }
-                html += `<div class="bloque-item" data-index="${idx}">
-                    <div style="display: flex; align-items: center;">
-                        <span class="bloque-icono">${icono}</span>
-                        <span class="bloque-texto">${texto}</span>
-                    </div>
-                    <div class="bloque-controles">
-                        <button class="btn-up" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>↑</button>
-                        <button class="btn-down" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>↓</button>
-                        <button class="btn-delete" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>✖</button>
-                    </div>
-                </div>`;
-            });
-            listaDiv.innerHTML = html;
-
-            // Deshabilitar botones internos si estamos ejecutando (por si acaso)
-            if (ejecutando) {
-                document.querySelectorAll('.bloque-controles button').forEach(btn => btn.disabled = true);
-            }
-        }
-
-        // ---------- FUNCIONES DE MODIFICACIÓN DE SCRIPT ----------
-        function agregarComando(cmd) {
-            if (ejecutando) return;
-            comandos.push(cmd);
-            renderBloques();
-            mensajeDiv.innerHTML = '➕ Bloque añadido. ¡Ejecuta el script!';
-        }
-
-        function eliminarComando(index) {
-            if (ejecutando) return;
-            if (index >= 0 && index < comandos.length) {
-                comandos.splice(index, 1);
-                renderBloques();
-            }
-        }
-
-        function moverArriba(index) {
-            if (ejecutando) return;
-            if (index > 0) {
-                [comandos[index-1], comandos[index]] = [comandos[index], comandos[index-1]];
-                renderBloques();
-            }
-        }
-
-        function moverAbajo(index) {
-            if (ejecutando) return;
-            if (index < comandos.length - 1) {
-                [comandos[index], comandos[index+1]] = [comandos[index+1], comandos[index]];
-                renderBloques();
-            }
-        }
-
-        function limpiarScript() {
-            if (ejecutando) return;
-            comandos = [];
-            renderBloques();
-            mensajeDiv.innerHTML = '🧽 Script limpiado. Crea uno nuevo.';
-        }
-
-        function resetJugador() {
-            if (ejecutando) {
-                detenerEjecucion();
-            }
-            jugador = { x: 0, y: 0 };
-            dibujarGrid();
-            mensajeDiv.innerHTML = '🔁 Jugador reiniciado a (0,0)';
-        }
-
-        // ---------- EJECUCIÓN DEL SCRIPT (con retardo) ----------
+        // Detener ejecución
         function detenerEjecucion() {
             if (timeoutId) {
                 clearTimeout(timeoutId);
@@ -519,66 +580,69 @@
             }
             ejecutando = false;
             habilitarBotones(true);
-            renderBloques(); // para habilitar botones internos
-            mensajeDiv.innerHTML = '⏸️ Ejecución detenida.';
+            renderizarScript(); // rehabilita botones de bloque
         }
 
-        function habilitarBotones(habilitar) {
-            todosBotones.forEach(btn => btn.disabled = !habilitar);
-            // los botones de bloque se actualizan en renderBloques
+        function habilitarBotones(estado) {
+            todosBotones.forEach(btn => btn.disabled = !estado);
         }
 
+        // Ejecutar script paso a paso
         function ejecutarScript() {
             if (ejecutando) return;
-            if (comandos.length === 0) {
-                mensajeDiv.innerHTML = '⚠️ No hay bloques en el script. Añade algunos.';
+            if (acciones.length === 0) {
+                mensajeDiv.innerHTML = '⚠️ No hay acciones en el script.';
                 return;
             }
 
-            // Reiniciar posición si se desea, pero respetamos posición actual
-            // Podríamos preguntar, pero lo dejamos así. El usuario puede reset manual.
             ejecutando = true;
             habilitarBotones(false);
-            renderBloques();  // deshabilita los botones de bloque
+            renderizarScript(); // deshabilita controles de bloque
             mensajeDiv.innerHTML = '⚙️ Ejecutando script...';
 
             let indice = 0;
 
             function paso() {
-                if (!ejecutando) return; // se detuvo externamente
+                if (!ejecutando) return;
 
-                if (indice >= comandos.length) {
-                    // Terminó
+                if (indice >= acciones.length) {
                     mensajeDiv.innerHTML = '✅ Script finalizado.';
                     detenerEjecucion();
                     return;
                 }
 
-                const cmd = comandos[indice];
-                switch (cmd) {
+                const acc = acciones[indice];
+                switch(acc) {
                     case 'up': moverJugador(0, -1); break;
                     case 'down': moverJugador(0, 1); break;
                     case 'left': moverJugador(-1, 0); break;
                     case 'right': moverJugador(1, 0); break;
                 }
 
-                // Comprobar victoria
-                if (verificarVictoria()) {
+                if (checkVictoria()) {
                     detenerEjecucion();
                     return;
                 }
 
                 indice++;
-                timeoutId = setTimeout(paso, 400); // velocidad 2008: pausita
+                timeoutId = setTimeout(paso, 400); // velocidad retro
             }
 
             paso();
         }
 
-        // ---------- EVENTOS (delegación en lista de bloques) ----------
-        listaDiv.addEventListener('click', (e) => {
-            if (ejecutando) return;
+        // ---------- EVENTOS ----------
+        btnAddUp.addEventListener('click', () => agregarAccion('up'));
+        btnAddDown.addEventListener('click', () => agregarAccion('down'));
+        btnAddLeft.addEventListener('click', () => agregarAccion('left'));
+        btnAddRight.addEventListener('click', () => agregarAccion('right'));
+        btnRun.addEventListener('click', ejecutarScript);
+        btnResetRoom.addEventListener('click', resetJugador);
+        btnClearScript.addEventListener('click', limpiarScript);
 
+        // Delegación para botones de los bloques
+        scriptListDiv.addEventListener('click', (e) => {
+            if (ejecutando) return;
             const target = e.target;
             if (target.classList.contains('btn-up')) {
                 const idx = target.getAttribute('data-index');
@@ -588,27 +652,16 @@
                 if (idx !== null) moverAbajo(parseInt(idx));
             } else if (target.classList.contains('btn-delete')) {
                 const idx = target.getAttribute('data-index');
-                if (idx !== null) eliminarComando(parseInt(idx));
+                if (idx !== null) eliminarAccion(parseInt(idx));
             }
         });
 
-        // Botones principales
-        btnArriba.addEventListener('click', () => agregarComando('up'));
-        btnAbajo.addEventListener('click', () => agregarComando('down'));
-        btnIzq.addEventListener('click', () => agregarComando('left'));
-        btnDer.addEventListener('click', () => agregarComando('right'));
-        btnEjecutar.addEventListener('click', ejecutarScript);
-        btnResetJuego.addEventListener('click', resetJugador);
-        btnLimpiar.addEventListener('click', limpiarScript);
-
         // Inicializar
-        dibujarGrid();
-        renderBloques();
-
-        // Ejemplo de script precargado para que se vea "visual" desde el inicio
-        comandos = ['up', 'right', 'down', 'right', 'up']; // pequeña rutina
-        renderBloques();
-        mensajeDiv.innerHTML = '🎮 Script de ejemplo cargado. ¡Pulsa EJECUTAR!';
+        dibujarRoom();
+        // precargar algunas acciones para que se vea con contenido
+        acciones = ['up', 'right', 'down', 'right', 'up'];
+        renderizarScript();
+        mensajeDiv.innerHTML = '🎲 Script de demostración. ¡Ejecuta!';
     })();
 </script>
 </body>
