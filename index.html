@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>▀▄ SCRATCH 1999 · DRAG & DROP ▄▀</title>
+    <title>▀▄ SCRATCH 1999 · BLOQUES ENCAJABLES ▄▀</title>
+    <!-- SortableJS para reordenar bloques como en Scratch -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        /* ========== ESTÉTICA RETRO 1999 (WINDOWS 98 / GEOCITIES) ========== */
+        /* ========== ESTÉTICA RETRO 1999 ========== */
         body {
             background: #008080;
             font-family: 'Courier New', Courier, 'MS Sans Serif', Tahoma, sans-serif;
@@ -16,7 +18,7 @@
             min-height: 100vh;
         }
         .window {
-            width: 1150px;
+            width: 1250px;
             background: #C0C0C0;
             padding: 6px;
             border: 4px ridge #FFFFFF #808080 #808080 #FFFFFF;
@@ -35,9 +37,6 @@
             margin-bottom: 8px;
             letter-spacing: 2px;
         }
-        .title-bar span:first-child {
-            filter: drop-shadow(2px 2px 0 #808080);
-        }
         .title-bar span:last-child {
             background: #C0C0C0;
             color: #000;
@@ -49,7 +48,7 @@
             display: flex;
             gap: 12px;
         }
-        /* ========== COLUMNA IZQUIERDA: ESCENARIO Y OBJETOS ========== */
+        /* ========== COLUMNA IZQUIERDA: ESCENARIO ========== */
         .stage-area {
             flex: 2;
             border: 3px inset #FFFFFF #808080;
@@ -72,13 +71,37 @@
         }
         #gameCanvas {
             display: block;
-            width: 480px;
-            height: 320px;
+            width: 520px;
+            height: 340px;
             image-rendering: pixelated;
             border: 4px inset #FFFFFF #808080;
             background: #E0E0E0;
             margin: 0 auto;
             cursor: crosshair;
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+            background: #BFBFBF;
+            border: 4px inset #FFFFFF #808080;
+            padding: 8px;
+        }
+        .flag-btn {
+            background: #00FF00;
+            border: 4px outset #FFFFFF #008000;
+            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flag-btn:active {
+            border: 4px inset #008000 #FFFFFF;
+            transform: translate(2px,2px);
         }
         .object-bar {
             background: #BFBFBF;
@@ -88,7 +111,6 @@
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
-            margin-top: 12px;
         }
         .object-icon {
             background: #FFD700;
@@ -100,24 +122,21 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             box-shadow: 2px 2px 0px #000;
-            transition: none;
         }
         .object-icon.active {
             border: 4px inset #B8860B #FFFFCC;
             background: #FFA500;
-            transform: translate(2px, 2px);
+            transform: translate(2px,2px);
             box-shadow: none;
         }
-        .object-icon img { display: none; } /* usamos texto */
         .add-object-btn {
             background: #00FF00;
             border: 4px outset #FFFFFF #008000;
             padding: 8px 16px;
             font-weight: bold;
-            font-family: inherit;
             cursor: pointer;
             text-transform: uppercase;
         }
@@ -125,14 +144,14 @@
             border: 4px inset #008000 #FFFFFF;
             transform: translate(2px,2px);
         }
-        /* ========== COLUMNA DERECHA: BLOQUES Y PROGRAMACIÓN ========== */
+        /* ========== COLUMNA DERECHA: BLOQUES Y SCRIPTS ========== */
         .code-area {
-            flex: 1.5;
+            flex: 1.8;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        /* paleta de bloques (arrastrables) */
+        /* Paleta de bloques (arrastrables) */
         .blocks-palette {
             background: #BFBFBF;
             border: 4px inset #FFFFFF #808080;
@@ -147,17 +166,17 @@
         }
         .block-category {
             font-weight: bold;
-            margin: 8px 0 4px;
+            margin: 12px 0 4px;
             border-bottom: 2px groove #808080;
             text-transform: uppercase;
             color: #000080;
         }
-        .block-drag {
-            background: #4C6EF5; /* motion */
+        .block {
+            background: #4C6EF5; /* motion por defecto */
             border: 4px outset #B0C4FF #002080;
             color: white;
             font-weight: bold;
-            padding: 8px 12px;
+            padding: 10px 16px;
             margin: 6px 4px;
             display: inline-block;
             font-family: 'Courier New', monospace;
@@ -165,18 +184,25 @@
             box-shadow: 3px 3px 0px #000;
             cursor: grab;
             user-select: none;
-            width: 140px;
+            min-width: 160px;
             text-align: center;
-            transition: none;
+            border-radius: 8px 8px 4px 4px; /* forma de bloque Scratch */
+            position: relative;
         }
-        .block-drag.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
-        .block-drag.control { background: #E67E22; border-color: #FFB27F #8A4500; }
-        .block-drag.motion { background: #4C6EF5; }
-        .block-drag:active {
+        .block.event {
+            background: #FFD700;
+            color: #000;
+            border-color: #FFFFAA #CC9900;
+            border-radius: 20px 20px 8px 8px; /* forma de evento */
+        }
+        .block.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
+        .block.control { background: #E67E22; border-color: #FFB27F #8A4500; }
+        .block.motion { background: #4C6EF5; }
+        .block:active {
             cursor: grabbing;
-            opacity: 0.8;
+            opacity: 0.9;
         }
-        /* área de script del objeto seleccionado */
+        /* Área de scripts del objeto seleccionado */
         .script-panel {
             background: #BFBFBF;
             border: 4px inset #FFFFFF #808080;
@@ -194,33 +220,45 @@
         .script-container {
             background: #FFFFFF;
             border: 4px inset #808080;
-            min-height: 200px;
-            max-height: 300px;
+            min-height: 280px;
+            max-height: 350px;
             overflow-y: auto;
-            padding: 6px;
-            list-style: none;
+            padding: 10px;
             margin: 8px 0;
-            font-family: 'Courier New', monospace;
+            list-style: none;
         }
         .script-block {
-            background: #FFFFCC;
-            border: 3px outset #CCCCCC;
-            margin: 4px 0;
-            padding: 8px 12px;
+            background: #4C6EF5;
+            border: 4px outset #B0C4FF #002080;
+            color: white;
+            font-weight: bold;
+            padding: 10px 16px;
+            margin: 6px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            border-radius: 8px 8px 4px 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: bold;
-            color: #000080;
-            font-size: 15px;
+            cursor: move;
+            box-shadow: 2px 2px 0px #000;
         }
+        .script-block.event {
+            background: #FFD700;
+            color: #000;
+            border-color: #FFFFAA #CC9900;
+            border-radius: 20px 20px 8px 8px;
+        }
+        .script-block.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
+        .script-block.control { background: #E67E22; border-color: #FFB27F #8A4500; }
         .script-block .delete-btn {
             background: #FF6666;
             border: 2px outset #FFB2B2 #800000;
             color: black;
             font-weight: bold;
-            padding: 2px 8px;
+            padding: 2px 10px;
             cursor: pointer;
+            border-radius: 4px;
             font-size: 14px;
         }
         .script-block .delete-btn:active {
@@ -267,7 +305,7 @@
             font-size: 14px;
         }
         .footer marquee {
-            width: 350px;
+            width: 400px;
             background: #000;
             color: #0F0;
             padding: 4px;
@@ -290,76 +328,80 @@
 <body>
 <div class="window">
     <div class="title-bar">
-        <span>◈ SCRATCH 1999 · DRAG & DROP ◈</span>
-        <span>MULTIOBJECT</span>
+        <span>◈ SCRATCH 1999 · BLOQUES QUE ENCAJAN ◈</span>
+        <span>EVENTOS + DRAG & DROP</span>
     </div>
 
     <div class="main-layout">
         <!-- COLUMNA IZQUIERDA: ESCENARIO Y SPRITES -->
         <div class="stage-area">
             <fieldset>
-                <legend>🎬 ESCENARIO (480x320)</legend>
-                <canvas id="gameCanvas" width="480" height="320"></canvas>
+                <legend>🎬 ESCENARIO (520x340)</legend>
+                <canvas id="gameCanvas" width="520" height="340"></canvas>
             </fieldset>
 
-            <!-- BARRA DE OBJETOS (MÚLTIPLES SPRITES) -->
-            <div class="object-bar">
-                <div style="font-weight:bold; margin-right:8px;">📦 OBJETOS:</div>
+            <!-- Barra de herramientas: bandera y objetos -->
+            <div class="toolbar">
+                <div class="flag-btn" id="greenFlag" title="Hacer clic en bandera (ejecutar eventos de bandera)">🚩</div>
+                <div style="font-weight:bold;">OBJETOS:</div>
                 <div id="spriteIcons" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-                <button class="add-object-btn" id="addSpriteBtn">➕ NUEVO OBJETO</button>
+                <button class="add-object-btn" id="addSpriteBtn">➕ NUEVO</button>
             </div>
-            <div style="margin-top:8px; font-size:14px; background:#BFBFBF; border:2px inset; padding:4px;">
-                <span id="activeSpriteName">🐱 GATO</span> · <span>X: <span id="coordX">0</span> Y: <span id="coordY">0</span>  DIR: <span id="dirValue">0°</span></span>
+            <div style="margin-top:8px; background:#BFBFBF; border:2px inset; padding:6px;">
+                <span id="activeSpriteName">🐱 GATO</span> · X:<span id="coordX">0</span> Y:<span id="coordY">0</span> DIR:<span id="dirValue">0°</span>
             </div>
         </div>
 
         <!-- COLUMNA DERECHA: PALETA DE BLOQUES Y SCRIPT -->
         <div class="code-area">
-            <!-- PALETA CON BLOQUES ARRASTRABLES (MÁS BLOQUES) -->
+            <!-- PALETA CON BLOQUES ARRASTRABLES (EVENTOS Y ACCIONES) -->
             <div class="blocks-palette">
                 <legend>🔷 BLOQUES (arrástralos al script)</legend>
 
+                <div class="block-category">🏁 EVENTOS</div>
+                <div class="block event" draggable="true" data-type="event_flag" data-val="">🏁 al hacer clic en bandera</div>
+                <div class="block event" draggable="true" data-type="event_click" data-val="">👆 al hacer clic en este objeto</div>
+
                 <div class="block-category">⚡ MOVIMIENTO</div>
-                <div class="block-drag motion" draggable="true" data-type="move" data-val="10">⚡ MOVER 10</div>
-                <div class="block-drag motion" draggable="true" data-type="turn" data-val="15">↻ GIRAR 15°</div>
-                <div class="block-drag motion" draggable="true" data-type="move" data-val="-10">⚡ MOVER -10</div>
-                <div class="block-drag motion" draggable="true" data-type="turn" data-val="-15">↺ GIRAR -15°</div>
-                <div class="block-drag motion" draggable="true" data-type="gotoxy" data-val="150,150">⤷ IR A (150,150)</div>
+                <div class="block motion" draggable="true" data-type="move" data-val="10">⚡ mover 10 pasos</div>
+                <div class="block motion" draggable="true" data-type="turn" data-val="15">↻ girar 15 grados</div>
+                <div class="block motion" draggable="true" data-type="move" data-val="-10">⚡ mover -10 pasos</div>
+                <div class="block motion" draggable="true" data-type="turn" data-val="-15">↺ girar -15 grados</div>
+                <div class="block motion" draggable="true" data-type="gotoxy" data-val="150,150">⤷ ir a (150,150)</div>
 
                 <div class="block-category">💬 APARIENCIA</div>
-                <div class="block-drag looks" draggable="true" data-type="say" data-val="HOLA">💬 DECIR "HOLA"</div>
-                <div class="block-drag looks" draggable="true" data-type="say" data-val="CHAU">💬 DECIR "CHAU"</div>
-                <div class="block-drag looks" draggable="true" data-type="color" data-val="#FF0000">🎨 COLOR ROJO</div>
-                <div class="block-drag looks" draggable="true" data-type="color" data-val="#00FF00">🎨 COLOR VERDE</div>
+                <div class="block looks" draggable="true" data-type="say" data-val="HOLA">💬 decir "HOLA"</div>
+                <div class="block looks" draggable="true" data-type="say" data-val="CHAU">💬 decir "CHAU"</div>
+                <div class="block looks" draggable="true" data-type="color" data-val="#FF0000">🎨 color rojo</div>
+                <div class="block looks" draggable="true" data-type="color" data-val="#00FF00">🎨 color verde</div>
 
                 <div class="block-category">⏳ CONTROL</div>
-                <div class="block-drag control" draggable="true" data-type="wait" data-val="0.5">⏱️ ESPERAR 0.5s</div>
-                <div class="block-drag control" draggable="true" data-type="wait" data-val="1">⏱️ ESPERAR 1s</div>
+                <div class="block control" draggable="true" data-type="wait" data-val="0.5">⏱️ esperar 0.5 seg</div>
+                <div class="block control" draggable="true" data-type="wait" data-val="1">⏱️ esperar 1 seg</div>
             </div>
 
-            <!-- SCRIPT DEL OBJETO SELECCIONADO -->
+            <!-- SCRIPT DEL OBJETO SELECCIONADO (con Sortable) -->
             <div class="script-panel">
-                <legend>📜 SCRIPT: <span id="scriptOwner">GATO</span></legend>
+                <legend>📜 SCRIPT DE <span id="scriptOwner">GATO</span></legend>
                 <div class="script-container" id="scriptContainer">
-                    <!-- Los bloques del script se inyectan aquí -->
+                    <!-- Los bloques se inyectan aquí -->
                 </div>
                 <div class="execution-bar">
-                    <button class="exec-btn" id="runScriptBtn">▶ EJECUTAR</button>
+                    <button class="exec-btn" id="runScriptBtn">▶ EJECUTAR SCRIPT</button>
                     <button class="exec-btn" id="stopScriptBtn" disabled>⏹ DETENER</button>
                     <button class="exec-btn" id="clearScriptBtn">🗑 LIMPIAR</button>
                 </div>
-                <div style="margin-top:6px; font-size:12px; text-align:center; border-top:2px groove #808080; padding:4px;">
-                    <span class="glitch">¡AHORA CON DRAG & DROP!</span>
+                <div style="margin-top:6px; text-align:center; border-top:2px groove #808080; padding:4px;">
+                    <span class="glitch">¡ARRASTRA BLOQUES PARA ENCAJARLOS!</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PIE DE PÁGINA (RETRO) -->
     <div class="footer">
-        <span>⏺ 56k MODEM · AOL 4.0</span>
-        <marquee scrollamount="4" behavior="scroll">🚀 1999 · BLOQUES ARRASTRABLES · MULTISPRITE · MÁS DE 10 BLOQUES 🚀</marquee>
-        <span>VISITOR: 0042</span>
+        <span>⏺ 56k MODEM · NETSCAPE 4.0</span>
+        <marquee scrollamount="4" behavior="scroll">🚀 1999 · BLOQUES ENCAJABLES · EVENTOS · MULTISPRITE 🚀</marquee>
+        <span>HITS: 0042</span>
     </div>
 </div>
 
@@ -391,6 +433,7 @@
         const stopBtn = document.getElementById('stopScriptBtn');
         const clearBtn = document.getElementById('clearScriptBtn');
         const addSpriteBtn = document.getElementById('addSpriteBtn');
+        const greenFlag = document.getElementById('greenFlag');
 
         // ----- FUNCIONES DE DIBUJO -----
         function drawGrid() {
@@ -418,7 +461,7 @@
             const dir = spr.direction;
             // cuerpo
             ctx.beginPath();
-            ctx.arc(x, y, 18, 0, 2 * Math.PI);
+            ctx.arc(x, y, 20, 0, 2 * Math.PI);
             ctx.fillStyle = spr.color;
             ctx.fill();
             ctx.strokeStyle = '#000';
@@ -427,15 +470,15 @@
             // ojos
             ctx.fillStyle = '#000';
             ctx.beginPath();
-            ctx.arc(x - 6, y - 5, 3, 0, 2 * Math.PI);
+            ctx.arc(x - 7, y - 6, 3, 0, 2 * Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x + 6, y - 5, 3, 0, 2 * Math.PI);
+            ctx.arc(x + 7, y - 6, 3, 0, 2 * Math.PI);
             ctx.fill();
             // dirección (flecha roja)
             const rad = dir * Math.PI / 180;
-            const arrowX = x + 24 * Math.cos(rad);
-            const arrowY = y - 24 * Math.sin(rad);
+            const arrowX = x + 26 * Math.cos(rad);
+            const arrowY = y - 26 * Math.sin(rad);
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.lineTo(arrowX, arrowY);
@@ -453,14 +496,14 @@
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.ellipse(x, y - 35, 50, 20, 0, 0, 2 * Math.PI);
+                ctx.ellipse(x, y - 40, 60, 25, 0, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.stroke();
                 ctx.fillStyle = '#000080';
-                ctx.font = 'bold 14px "Courier New", monospace';
+                ctx.font = 'bold 16px "Courier New", monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(spr.message, x, y - 35);
+                ctx.fillText(spr.message, x, y - 40);
             }
         }
 
@@ -469,7 +512,6 @@
             drawGrid();
             sprites.forEach(s => drawSprite(s));
 
-            // actualizar info del sprite activo
             const active = getActiveSprite();
             if (active) {
                 coordXSpan.innerText = Math.round(active.x);
@@ -490,15 +532,13 @@
             redraw();
         }
 
-        // actualizar iconos de objetos en la barra
         function updateSpriteIcons() {
             let html = '';
             sprites.forEach(s => {
                 const activeClass = (s.id === activeSpriteId) ? 'active' : '';
-                html += `<div class="object-icon ${activeClass}" data-id="${s.id}" style="background:${s.color};">${s.name}<br><span style="font-size:10px;">[${Math.round(s.x)},${Math.round(s.y)}]</span></div>`;
+                html += `<div class="object-icon ${activeClass}" data-id="${s.id}" style="background:${s.color};">${s.name}<br><span style="font-size:9px;">[${Math.round(s.x)},${Math.round(s.y)}]</span></div>`;
             });
             spriteIconsDiv.innerHTML = html;
-            // añadir event listeners a cada icono
             document.querySelectorAll('.object-icon').forEach(icon => {
                 icon.addEventListener('click', (e) => {
                     const id = icon.dataset.id;
@@ -518,23 +558,26 @@
             if (!active) return;
             const script = active.script;
             if (script.length === 0) {
-                scriptContainer.innerHTML = '<div style="color:#888; padding:8px;">-- Arrastra bloques aquí --</div>';
+                scriptContainer.innerHTML = '<div style="color:#888; padding:8px;">-- Arrastra bloques aquí para apilarlos --</div>';
                 return;
             }
             let html = '';
             script.forEach((block, index) => {
                 let text = '';
+                let blockClass = 'script-block';
                 switch (block.type) {
-                    case 'move': text = `⚡ MOVER ${block.val}`; break;
-                    case 'turn': text = `↻ GIRAR ${block.val}°`; break;
-                    case 'gotoxy': text = `⤷ IR A (${block.val})`; break;
-                    case 'say': text = `💬 DECIR "${block.val}"`; break;
-                    case 'color': text = `🎨 CAMBIAR COLOR`; break;
-                    case 'wait': text = `⏱️ ESPERAR ${block.val}s`; break;
+                    case 'event_flag': text = '🏁 al hacer clic en bandera'; blockClass += ' event'; break;
+                    case 'event_click': text = '👆 al hacer clic en este objeto'; blockClass += ' event'; break;
+                    case 'move': text = `⚡ mover ${block.val} pasos`; blockClass += ' motion'; break;
+                    case 'turn': text = `↻ girar ${block.val}°`; blockClass += ' motion'; break;
+                    case 'gotoxy': text = `⤷ ir a (${block.val})`; blockClass += ' motion'; break;
+                    case 'say': text = `💬 decir "${block.val}"`; blockClass += ' looks'; break;
+                    case 'color': text = `🎨 cambiar color`; blockClass += ' looks'; break;
+                    case 'wait': text = `⏱️ esperar ${block.val} seg`; blockClass += ' control'; break;
                     default: text = block.type;
                 }
-                html += `<div class="script-block" data-index="${index}">
-                    <span>${index+1}. ${text}</span>
+                html += `<div class="${blockClass}" data-index="${index}" data-type="${block.type}" data-val="${block.val}">
+                    <span>${text}</span>
                     <span class="delete-btn" data-index="${index}">✖</span>
                 </div>`;
             });
@@ -547,19 +590,42 @@
                     removeScriptBlock(parseInt(idx));
                 });
             });
+            // Inicializar Sortable para reordenar bloques dentro del script
+            new Sortable(scriptContainer, {
+                animation: 150,
+                handle: '.script-block',
+                onEnd: function(evt) {
+                    if (isRunning) return;
+                    const active = getActiveSprite();
+                    if (!active) return;
+                    // Reordenar el array según el nuevo orden de los hijos
+                    const items = Array.from(scriptContainer.children);
+                    const newScript = [];
+                    items.forEach(item => {
+                        if (item.classList && item.classList.contains('script-block')) {
+                            const index = item.dataset.index; // índice original
+                            if (index !== undefined) {
+                                newScript.push(active.script[parseInt(index)]);
+                            }
+                        }
+                    });
+                    active.script = newScript;
+                    renderScript(); // re-render para actualizar índices
+                }
+            });
         }
 
         function removeScriptBlock(index) {
+            if (isRunning) return;
             const active = getActiveSprite();
-            if (active && !isRunning) {
+            if (active) {
                 active.script.splice(index, 1);
                 renderScript();
             }
         }
 
-        // ----- DRAG & DROP (bloques al script) -----
-        // Hacer que los bloques de la paleta sean arrastrables
-        document.querySelectorAll('.block-drag').forEach(block => {
+        // ----- DRAG & DROP DESDE PALETA AL SCRIPT -----
+        document.querySelectorAll('.block').forEach(block => {
             block.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', JSON.stringify({
                     type: block.dataset.type,
@@ -569,7 +635,6 @@
             });
         });
 
-        // Permitir soltar en el contenedor de script
         scriptContainer.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
@@ -577,50 +642,42 @@
 
         scriptContainer.addEventListener('drop', (e) => {
             e.preventDefault();
-            if (isRunning) return; // no modificar durante ejecución
+            if (isRunning) return;
             const rawData = e.dataTransfer.getData('text/plain');
             if (!rawData) return;
             try {
                 const blockData = JSON.parse(rawData);
                 const active = getActiveSprite();
                 if (!active) return;
-                // Añadir bloque al script del sprite activo
                 active.script.push({ type: blockData.type, val: blockData.val });
                 renderScript();
                 redraw();
-            } catch (ex) {
-                console.warn('drop error', ex);
-            }
+            } catch (ex) {}
         });
 
-        // ----- EJECUCIÓN DEL SCRIPT (paso a paso) -----
-        async function runScript() {
+        // ----- EJECUCIÓN DE SCRIPT (con eventos) -----
+        async function runScript(scriptArray, sprite) {
             if (isRunning) return;
-            const active = getActiveSprite();
-            if (!active || active.script.length === 0) return;
-
             isRunning = true;
             stopRequested = false;
             runBtn.disabled = true;
             stopBtn.disabled = false;
-            // Deshabilitar acciones de modificación
-            document.querySelectorAll('.delete-btn, .add-object-btn, .block-drag').forEach(el => el.style.pointerEvents = 'none');
+            // Deshabilitar interacciones
+            document.querySelectorAll('.delete-btn, .add-object-btn, .block, .object-icon').forEach(el => el.style.pointerEvents = 'none');
 
-            for (let i = 0; i < active.script.length; i++) {
+            for (let i = 0; i < scriptArray.length; i++) {
                 if (stopRequested) break;
-                const block = active.script[i];
-                await executeBlock(block, active);
+                const block = scriptArray[i];
+                await executeBlock(block, sprite);
                 redraw();
-                // pequeña pausa entre comandos
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 300));
             }
 
-            // Finalizar
             isRunning = false;
             stopRequested = false;
             runBtn.disabled = false;
             stopBtn.disabled = true;
-            document.querySelectorAll('.delete-btn, .add-object-btn, .block-drag').forEach(el => el.style.pointerEvents = 'auto');
+            document.querySelectorAll('.delete-btn, .add-object-btn, .block, .object-icon').forEach(el => el.style.pointerEvents = 'auto');
             redraw();
         }
 
@@ -633,57 +690,116 @@
                         let dy = -parseInt(block.val) * Math.sin(rad);
                         sprite.x += dx;
                         sprite.y += dy;
-                        // límites (radio 18)
-                        sprite.x = Math.min(Math.max(sprite.x, 20), 460);
-                        sprite.y = Math.min(Math.max(sprite.y, 20), 300);
+                        sprite.x = Math.min(Math.max(sprite.x, 20), 500);
+                        sprite.y = Math.min(Math.max(sprite.y, 20), 320);
+                        setTimeout(resolve, 200);
                         break;
                     case 'turn':
                         sprite.direction = (sprite.direction + parseInt(block.val) + 360) % 360;
+                        setTimeout(resolve, 200);
                         break;
                     case 'gotoxy':
                         const coords = block.val.split(',').map(Number);
                         if (coords.length === 2) {
-                            sprite.x = Math.min(Math.max(coords[0], 20), 460);
-                            sprite.y = Math.min(Math.max(coords[1], 20), 300);
+                            sprite.x = Math.min(Math.max(coords[0], 20), 500);
+                            sprite.y = Math.min(Math.max(coords[1], 20), 320);
                         }
+                        setTimeout(resolve, 200);
                         break;
                     case 'say':
                         sprite.message = block.val;
-                        setTimeout(() => { sprite.message = null; redraw(); }, 800);
-                        break;
+                        setTimeout(() => { sprite.message = null; redraw(); resolve(); }, 800);
+                        return; // resolve después del timeout
                     case 'color':
                         sprite.color = block.val;
+                        setTimeout(resolve, 200);
                         break;
                     case 'wait':
-                        // esperar el tiempo indicado (segundos)
                         setTimeout(resolve, parseFloat(block.val) * 1000);
-                        return; // no llamar a resolve inmediatamente
-                    default: break;
+                        return;
+                    case 'event_flag':
+                    case 'event_click':
+                        // estos no ejecutan acción, solo son marcadores
+                        setTimeout(resolve, 100);
+                        break;
+                    default:
+                        setTimeout(resolve, 100);
                 }
-                setTimeout(resolve, 200); // duración mínima del bloque
             });
         }
 
-        // ----- DETENER EJECUCIÓN -----
-        function stopExecution() {
+        // ----- EVENTOS -----
+        // Bandera verde: ejecutar scripts de todos los objetos que empiecen con event_flag
+        greenFlag.addEventListener('click', () => {
+            if (isRunning) {
+                stopRequested = true;
+                return;
+            }
+            // Buscar todos los sprites cuyo primer bloque sea event_flag
+            sprites.forEach(sprite => {
+                if (sprite.script.length > 0 && sprite.script[0].type === 'event_flag') {
+                    // Ejecutar el script completo (excepto el primer bloque de evento)
+                    const scriptToRun = sprite.script.slice(1); // omitimos el evento
+                    if (scriptToRun.length > 0) {
+                        // Lanzamos cada script en paralelo (para no bloquear)
+                        (function(spr, scr) {
+                            setTimeout(() => {
+                                runScript(scr, spr);
+                            }, 10);
+                        })(sprite, scriptToRun);
+                    }
+                }
+            });
+        });
+
+        // Detectar clic en canvas sobre algún sprite (evento clic en objeto)
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            // Buscar sprite que contenga el punto (radio 20)
+            const clickedSprite = sprites.find(s => {
+                const dx = mouseX - s.x;
+                const dy = mouseY - s.y;
+                return Math.sqrt(dx*dx + dy*dy) < 25;
+            });
+
+            if (clickedSprite && clickedSprite.script.length > 0 && clickedSprite.script[0].type === 'event_click') {
+                const scriptToRun = clickedSprite.script.slice(1);
+                if (scriptToRun.length > 0) {
+                    runScript(scriptToRun, clickedSprite);
+                }
+            }
+        });
+
+        // Botones de control manual
+        runBtn.addEventListener('click', () => {
+            const active = getActiveSprite();
+            if (active && active.script.length > 0) {
+                runScript(active.script, active); // ejecuta todo, incluyendo eventos (que no hacen nada)
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
             if (isRunning) {
                 stopRequested = true;
                 stopBtn.disabled = true;
             }
-        }
+        });
 
-        // ----- LIMPIAR SCRIPT DEL SPRITE ACTIVO -----
-        function clearActiveScript() {
+        clearBtn.addEventListener('click', () => {
             if (isRunning) return;
             const active = getActiveSprite();
             if (active) {
                 active.script = [];
                 renderScript();
             }
-        }
+        });
 
-        // ----- AÑADIR NUEVO SPRITE -----
-        function addSprite() {
+        addSpriteBtn.addEventListener('click', () => {
             if (isRunning) return;
             const newId = 'sprite' + Date.now();
             const newName = `👾 OBJ${sprites.length+1}`;
@@ -700,19 +816,14 @@
             });
             updateSpriteIcons();
             redraw();
-        }
-
-        // ----- EVENTOS -----
-        runBtn.addEventListener('click', runScript);
-        stopBtn.addEventListener('click', stopExecution);
-        clearBtn.addEventListener('click', clearActiveScript);
-        addSpriteBtn.addEventListener('click', addSprite);
+        });
 
         // Inicializar
         updateSpriteIcons();
         redraw();
+        renderScript();
 
-        // Prevenir que el propio canvas interfiera con drag
+        // Prevenir drag por defecto en canvas
         canvas.addEventListener('dragover', (e) => e.preventDefault());
         canvas.addEventListener('drop', (e) => e.preventDefault());
     })();
