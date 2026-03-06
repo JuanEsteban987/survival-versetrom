@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Visual Node Script · estética 2008</title>
+    <title>🎮 VISUAL NODE 2008 · edición extremo</title>
     <style>
+        /* ESTÉTICA 2008 VIEJÍSIMA: brillos, reflejos, burbujas, gradientes extremos */
         * {
             box-sizing: border-box;
             user-select: none;
@@ -13,179 +14,251 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #a8d5ff, #4f8bc9);
-            font-family: 'Segoe UI', 'Tahoma', sans-serif;
+            background: #0a4c7a;  /* color base */
+            /* Rayos de sol típicos de fondos 2008 */
+            background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 220, 0.8) 0%, rgba(200, 230, 255, 0.4) 40%, transparent 70%),
+                              radial-gradient(circle at 80% 70%, rgba(255, 250, 180, 0.7) 0%, rgba(180, 220, 255, 0.3) 50%, transparent 70%),
+                              linear-gradient(125deg, #2779b0 0%, #6ab0e0 100%);
+            font-family: 'Segoe UI', 'Trebuchet MS', Tahoma, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: auto;
         }
 
-        /* Ventana principal con cristal aero */
+        /* burbujas flotantes (muy 2008) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 5%, transparent 15%),
+                        radial-gradient(circle at 95% 80%, rgba(255,255,255,0.25) 8%, transparent 20%),
+                        radial-gradient(circle at 40% 60%, rgba(255,255,255,0.2) 10%, transparent 25%),
+                        radial-gradient(circle at 70% 15%, rgba(255,255,240,0.35) 7%, transparent 18%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .main-window {
-            width: 1400px;
+            width: 1450px;
             max-width: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(4px);
-            border-radius: 35px 35px 25px 25px;
-            box-shadow: 0 25px 45px rgba(0, 20, 40, 0.6), inset 0 1px 5px rgba(255,255,255,0.9);
-            border: 2px solid rgba(255,255,255,0.8);
-            padding: 25px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6), inset 0 0 0 2px rgba(255,255,255,0.8), inset 0 0 30px rgba(255,255,240,0.7);
+            border: 1px solid rgba(255,255,255,0.9);
+            padding: 30px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* cabecera glossy */
+        /* Cabecera super-glossy */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(220,240,255,0.9) 60%, rgba(170,210,240,0.8) 100%);
-            border-radius: 50px 50px 30px 30px;
-            padding: 15px 40px;
-            margin-bottom: 30px;
-            border: 1px solid white;
-            box-shadow: 0 7px 15px #1e3f5e, inset 0 2px 8px white;
+            background: linear-gradient(175deg, 
+                rgba(255,255,255,0.95) 0%, 
+                rgba(230, 250, 255, 0.9) 40%,
+                rgba(180, 220, 250, 0.8) 70%,
+                rgba(130, 190, 240, 0.7) 100%);
+            border-radius: 90px 90px 50px 50px;
+            padding: 20px 50px;
+            margin-bottom: 40px;
+            border: 3px solid white;
+            box-shadow: 0 15px 20px #00263b, inset 0 4px 15px white;
+            position: relative;
+            overflow: hidden;
+        }
+        /* reflejo extra en la cabecera */
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -20%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shine 6s infinite;
+        }
+        @keyframes shine {
+            0% { left: -20%; }
+            20% { left: 120%; }
+            100% { left: 120%; }
         }
 
         .header h1 {
-            font-size: 2.8rem;
-            font-weight: 500;
-            color: #003153;
-            text-shadow: 0 3px 5px white, 0 0 15px #b7e1ff;
+            font-size: 3.2rem;
+            font-weight: 600;
+            color: #002c4b;
+            text-shadow: 0 3px 0 white, 0 5px 15px #c0e4ff, 2px 5px 5px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .header h1 span {
-            background: #ffffffd0;
-            padding: 8px 25px;
-            border-radius: 60px;
-            font-size: 1.9rem;
-            border: 2px solid white;
-            box-shadow: inset 0 -3px 0 #8eb3d0, 0 5px 8px #0b314a;
+            background: rgba(255,255,255,0.9);
+            padding: 12px 35px;
+            border-radius: 100px;
+            font-size: 2.2rem;
+            border: 3px solid white;
+            box-shadow: inset 0 -5px 0 #7fadcc, 0 8px 15px #001e33;
+            backdrop-filter: blur(2px);
         }
 
         .toolbar {
             display: flex;
-            gap: 20px;
+            gap: 25px;
         }
 
         .btn {
-            background: linear-gradient(180deg, #f1faff, #c0daf5);
+            background: linear-gradient(180deg, #f4fcff, #b3d9f5);
             border: none;
-            border-radius: 60px;
-            padding: 12px 35px;
-            font-size: 1.5rem;
+            border-radius: 100px;
+            padding: 15px 45px;
+            font-size: 1.8rem;
             font-weight: bold;
-            color: #0b3e5c;
-            text-shadow: 0 1px 3px white;
-            box-shadow: 0 7px 0 #799bb9, 0 10px 18px rgba(0,0,0,0.25), inset 0 2px 8px white;
+            color: #003459;
+            text-shadow: 0 2px 3px white;
+            box-shadow: 0 12px 0 #5480a0, 0 15px 25px #001a2b, inset 0 3px 10px white;
             cursor: pointer;
-            transition: 0.06s;
-            border: 1px solid white;
+            transition: all 0.07s;
+            border: 2px solid white;
+            letter-spacing: 1px;
+            position: relative;
         }
 
         .btn:active {
-            transform: translateY(7px);
-            box-shadow: 0 2px 0 #799bb9, 0 8px 15px rgba(0,0,0,0.2);
+            transform: translateY(10px);
+            box-shadow: 0 5px 0 #5480a0, 0 12px 20px #001a2b, inset 0 2px 8px white;
         }
 
         .btn.play {
-            background: linear-gradient(180deg, #d0f0c0, #8ec97c);
-            box-shadow: 0 7px 0 #4e7a3f, 0 10px 18px #1f3a27;
-            color: #194d1e;
+            background: linear-gradient(180deg, #dafac8, #7fc96b);
+            box-shadow: 0 12px 0 #3f7335, 0 15px 25px #1e4020, inset 0 3px 10px #e9ffe0;
+            color: #113d13;
         }
 
         .btn.stop {
-            background: linear-gradient(180deg, #ffcfc0, #f59882);
-            box-shadow: 0 7px 0 #b1513e, 0 10px 18px #4e2920;
-            color: #621f1f;
+            background: linear-gradient(180deg, #ffdbd0, #f78b73);
+            box-shadow: 0 12px 0 #ad4f3e, 0 15px 25px #4f2b1f, inset 0 3px 10px #fff0ea;
+            color: #631f1f;
         }
 
-        /* Área de trabajo dividida */
+        /* Workspace */
         .workspace {
             display: flex;
-            gap: 25px;
+            gap: 30px;
             flex-wrap: wrap;
         }
 
-        /* Panel de juego (canvas) */
+        /* Panel del juego */
         .game-panel {
-            flex: 1 1 450px;
-            background: linear-gradient(145deg, #d9ecfc, #acc9e5);
-            border-radius: 40px;
-            padding: 20px;
-            box-shadow: inset 0 -4px 8px white, inset 0 5px 12px #6f97c0, 0 20px 30px #10354b;
-            border: 3px solid white;
+            flex: 1 1 480px;
+            background: linear-gradient(145deg, #e2f2ff, #aac9ed);
+            border-radius: 70px;
+            padding: 25px;
+            box-shadow: inset 0 -8px 12px white, inset 0 8px 20px #8eb6db, 0 30px 40px #002d49;
+            border: 4px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.6) 0%, transparent 60%);
+            pointer-events: none;
+            border-radius: 70px;
         }
 
         .game-panel h2 {
-            color: #002c44;
-            text-shadow: 0 2px 7px white;
-            font-size: 2rem;
-            padding-left: 20px;
+            color: #00263b;
+            text-shadow: 0 3px 8px white;
+            font-size: 2.3rem;
+            padding-left: 25px;
+            margin: 5px 0 15px;
+            position: relative;
+            z-index: 2;
         }
 
         canvas#gameCanvas {
             width: 100%;
             aspect-ratio: 6/4;
-            border-radius: 35px;
-            background: linear-gradient(180deg, #b1e2ff, #7fbde0, #c0e0a0);
-            box-shadow: inset 0 -6px 12px #1b5375, 0 0 0 3px white, 0 15px 30px black;
+            border-radius: 55px;
+            background: linear-gradient(180deg, #b3e4ff, #6eb3dc, #b8e09f);
+            box-shadow: inset 0 -10px 15px #10547a, 0 0 0 5px white, 0 25px 40px black;
             display: block;
+            position: relative;
+            z-index: 3;
         }
 
         .score {
-            margin-top: 20px;
+            margin-top: 25px;
             background: rgba(255,255,255,0.6);
-            border-radius: 60px;
-            padding: 10px 30px;
-            font-size: 2.3rem;
+            border-radius: 100px;
+            padding: 15px 40px;
+            font-size: 2.6rem;
             display: inline-block;
-            color: #003153;
+            color: #002845;
             font-weight: bold;
-            backdrop-filter: blur(3px);
-            border: 2px solid white;
-            box-shadow: inset 0 -3px 0 #7da2c0, 0 8px 12px #173f58;
+            backdrop-filter: blur(8px);
+            border: 4px solid white;
+            box-shadow: inset 0 -6px 0 #9bbde0, 0 12px 20px #0c314a;
+            text-shadow: 0 2px 5px white;
         }
 
-        /* Panel de nodos visuales */
+        /* Panel de nodos */
         .node-editor {
-            flex: 2 1 700px;
-            background: rgba(255,255,255,0.3);
-            backdrop-filter: blur(6px);
-            border-radius: 45px;
-            padding: 20px;
-            box-shadow: inset 0 0 45px white, 0 20px 30px #0a3147;
-            border: 2px solid white;
-            display: flex;
-            flex-direction: column;
+            flex: 2 1 750px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 80px;
+            padding: 25px;
+            box-shadow: inset 0 0 60px white, 0 30px 45px #002e4b, 0 0 0 3px rgba(255,255,255,0.8);
+            border: 3px solid white;
         }
 
         .node-editor h2 {
-            color: #003c5e;
-            text-shadow: 0 2px 7px white;
-            font-size: 2rem;
-            margin: 0 0 15px 20px;
+            color: #002d4e;
+            text-shadow: 0 3px 8px white;
+            font-size: 2.3rem;
+            margin: 0 0 20px 30px;
         }
 
         #nodeCanvas {
             width: 100%;
-            height: 520px;
-            border-radius: 35px;
-            background: #ebf5ff;
-            box-shadow: inset 0 0 0 3px white, 0 8px 20px #0a293f;
+            height: 550px;
+            border-radius: 60px;
+            background: #e5f2ff;
+            box-shadow: inset 0 0 0 4px white, 0 15px 35px #00263f;
             cursor: crosshair;
         }
 
         .legend {
             display: flex;
-            gap: 30px;
-            margin-top: 15px;
-            color: #003256;
+            gap: 40px;
+            margin-top: 25px;
+            color: #003968;
             font-weight: bold;
-            text-shadow: 0 1px 4px white;
-            font-size: 1.2rem;
+            text-shadow: 0 2px 6px white;
+            font-size: 1.4rem;
+            background: rgba(255,255,255,0.3);
+            padding: 15px 30px;
+            border-radius: 90px;
+            backdrop-filter: blur(5px);
+            border: 2px solid white;
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
@@ -203,20 +276,18 @@
     </div>
 
     <div class="workspace">
-        <!-- panel del juego -->
         <div class="game-panel">
             <h2>🎾 ZONA DE JUEGO</h2>
             <canvas id="gameCanvas" width="600" height="400"></canvas>
             <div class="score" id="scoreDisplay">🏆 0</div>
         </div>
 
-        <!-- editor de nodos visuales -->
         <div class="node-editor">
             <h2>🔌 CONECTA NODOS (arrastra conexiones)</h2>
-            <canvas id="nodeCanvas" width="700" height="520"></canvas>
+            <canvas id="nodeCanvas" width="750" height="550"></canvas>
             <div class="legend">
-                <span>🟢 Eventos (verde)</span>
-                <span>🔵 Acciones (azul)</span>
+                <span><span style="background:#8cc88c; width:20px;height:20px;border-radius:10px;box-shadow:0 0 0 2px white;"></span> Eventos (verde)</span>
+                <span><span style="background:#66aaff; width:20px;height:20px;border-radius:10px;box-shadow:0 0 0 2px white;"></span> Acciones (azul)</span>
                 <span>⚪ Pines: entrada / salida</span>
                 <span>✏️ Click y arrastra para conectar</span>
             </div>
@@ -226,12 +297,11 @@
 
 <script>
     (function() {
-        // -------------------- JUEGO (canvas y física) --------------------
+        // -------------------- JUEGO --------------------
         const gameCanvas = document.getElementById('gameCanvas');
         const ctx = gameCanvas.getContext('2d');
         const scoreSpan = document.getElementById('scoreDisplay');
 
-        // Jugador
         let player = { x: 280, y: 300, vx: 0, vy: 0, w: 20, h: 20 };
         let coin = { x: 150, y: 150, r: 12 };
         let score = 0;
@@ -244,7 +314,6 @@
         let gameRunning = false;
         let animFrame = null;
 
-        // Teclas
         const keys = {};
 
         window.addEventListener('keydown', (e) => {
@@ -271,20 +340,19 @@
 
         function drawGame() {
             ctx.clearRect(0, 0, 600, 400);
-            // cielo
             const grad = ctx.createLinearGradient(0, 0, 0, 400);
             grad.addColorStop(0, '#b9e3ff');
             grad.addColorStop(0.7, '#9ac5e0');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, 600, 400);
-            // nubes gloss
+            // nubes glossy
             ctx.shadowColor = 'white';
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 30;
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.beginPath();
-            ctx.arc(110, 60, 35, 0, 2*Math.PI);
-            ctx.arc(160, 40, 40, 0, 2*Math.PI);
-            ctx.arc(450, 90, 45, 0, 2*Math.PI);
+            ctx.arc(110, 60, 40, 0, 2*Math.PI);
+            ctx.arc(160, 40, 45, 0, 2*Math.PI);
+            ctx.arc(450, 90, 50, 0, 2*Math.PI);
             ctx.fill();
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
@@ -292,13 +360,13 @@
             ctx.fillStyle = '#78b13e';
             ctx.fillRect(0, GROUND, 600, 20);
             ctx.fillStyle = '#a0d86c';
-            ctx.globalAlpha = 0.4;
+            ctx.globalAlpha = 0.5;
             ctx.fillRect(0, GROUND, 600, 8);
             ctx.globalAlpha = 1;
 
             // moneda
             ctx.shadowColor = 'gold';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.beginPath();
             ctx.arc(coin.x, coin.y, coin.r, 0, 2*Math.PI);
             ctx.fillStyle = '#ffd966';
@@ -306,158 +374,66 @@
             ctx.strokeStyle = '#b8860b';
             ctx.lineWidth = 2;
             ctx.stroke();
-            // reflejo
-            ctx.shadowBlur = 6;
+            ctx.shadowBlur = 8;
             ctx.beginPath();
-            ctx.arc(coin.x-3, coin.y-3, 4, 0, 2*Math.PI);
+            ctx.arc(coin.x-3, coin.y-3, 5, 0, 2*Math.PI);
             ctx.fillStyle = 'white';
             ctx.fill();
 
             // jugador
             ctx.shadowColor = '#0066aa';
-            ctx.shadowBlur = 18;
+            ctx.shadowBlur = 25;
             ctx.fillStyle = '#3f8ab3';
             ctx.fillRect(player.x, player.y, player.w, player.h);
             ctx.fillStyle = '#9ad0f0';
-            ctx.globalAlpha = 0.5;
-            ctx.fillRect(player.x+2, player.y+2, player.w-4, 6);
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(player.x+2, player.y+2, player.w-4, 7);
             ctx.globalAlpha = 1;
             ctx.shadowBlur = 0;
         }
 
-        // -------------------- NODOS VISUALES (editor) --------------------
+        // -------------------- NODOS --------------------
         const nodeCanvas = document.getElementById('nodeCanvas');
         const nctx = nodeCanvas.getContext('2d');
 
-        // Definición de nodos (estáticos)
         const nodes = [
-            { id: 'start', type: 'event', label: 'INICIO', x: 100, y: 70, w: 100, h: 40, outputs: ['out'] },
-            { id: 'keyA', type: 'event', label: 'TECLA A', x: 100, y: 160, w: 100, h: 40, outputs: ['out'] },
-            { id: 'keyD', type: 'event', label: 'TECLA D', x: 100, y: 250, w: 100, h: 40, outputs: ['out'] },
-            { id: 'keySpace', type: 'event', label: 'ESPACIO', x: 100, y: 340, w: 100, h: 40, outputs: ['out'] },
-            { id: 'coinTouch', type: 'event', label: 'TOCA MONEDA', x: 100, y: 430, w: 120, h: 40, outputs: ['out'] },
-            { id: 'moveLeft', type: 'action', label: 'MOVER IZQ', x: 350, y: 70, w: 100, h: 40, inputs: ['in'] },
-            { id: 'moveRight', type: 'action', label: 'MOVER DER', x: 350, y: 140, w: 100, h: 40, inputs: ['in'] },
-            { id: 'jump', type: 'action', label: 'SALTAR', x: 350, y: 210, w: 100, h: 40, inputs: ['in'] },
-            { id: 'addScore', type: 'action', label: 'SUMA 5', x: 350, y: 280, w: 100, h: 40, inputs: ['in'] },
-            { id: 'setScore0', type: 'action', label: 'PUNTOS 0', x: 350, y: 350, w: 100, h: 40, inputs: ['in'] }
+            { id: 'start', type: 'event', label: 'INICIO', x: 120, y: 70, w: 110, h: 45, outputs: ['out'] },
+            { id: 'keyA', type: 'event', label: 'TECLA A', x: 120, y: 160, w: 110, h: 45, outputs: ['out'] },
+            { id: 'keyD', type: 'event', label: 'TECLA D', x: 120, y: 250, w: 110, h: 45, outputs: ['out'] },
+            { id: 'keySpace', type: 'event', label: 'ESPACIO', x: 120, y: 340, w: 110, h: 45, outputs: ['out'] },
+            { id: 'coinTouch', type: 'event', label: 'TOCA MONEDA', x: 120, y: 430, w: 130, h: 45, outputs: ['out'] },
+            { id: 'moveLeft', type: 'action', label: 'MOVER IZQ', x: 390, y: 70, w: 110, h: 45, inputs: ['in'] },
+            { id: 'moveRight', type: 'action', label: 'MOVER DER', x: 390, y: 150, w: 110, h: 45, inputs: ['in'] },
+            { id: 'jump', type: 'action', label: 'SALTAR', x: 390, y: 230, w: 110, h: 45, inputs: ['in'] },
+            { id: 'addScore', type: 'action', label: 'SUMA 5', x: 390, y: 310, w: 110, h: 45, inputs: ['in'] },
+            { id: 'setScore0', type: 'action', label: 'PUNTOS 0', x: 390, y: 390, w: 110, h: 45, inputs: ['in'] }
         ];
 
-        // Conexiones: cada una { from: nodeId, to: nodeId }
         let connections = [
-            { from: 'start', to: 'setScore0' },   // ejemplo por defecto
+            { from: 'start', to: 'setScore0' },
             { from: 'keyA', to: 'moveLeft' },
             { from: 'keyD', to: 'moveRight' },
             { from: 'keySpace', to: 'jump' },
             { from: 'coinTouch', to: 'addScore' }
         ];
 
-        // Estado de arrastre de conexión
-        let draggingFrom = null;        // { nodeId, pin } (pin es 'out' siempre)
+        let draggingFrom = null;
         let mouseX = 0, mouseY = 0;
 
-        // Hit test de nodos
         function getNodeAt(px, py) {
             for (let n of nodes) {
-                if (px >= n.x && px <= n.x + n.w && py >= n.y && py <= n.y + n.h) {
-                    return n;
-                }
+                if (px >= n.x && px <= n.x + n.w && py >= n.y && py <= n.y + n.h) return n;
             }
             return null;
         }
 
-        // Obtener la posición del pin de salida de un nodo
         function getOutputPos(node) {
             return { x: node.x + node.w, y: node.y + node.h/2 };
         }
-
-        // Obtener posición del pin de entrada
         function getInputPos(node) {
             return { x: node.x, y: node.y + node.h/2 };
         }
 
-        // Dibujar nodos y conexiones
-        function drawNodes() {
-            nctx.clearRect(0, 0, 700, 520);
-            // Dibujar conexiones primero (detrás)
-            nctx.strokeStyle = '#5f9ed0';
-            nctx.lineWidth = 4;
-            nctx.shadowColor = '#b0e0ff';
-            nctx.shadowBlur = 8;
-            connections.forEach(c => {
-                const fromNode = nodes.find(n => n.id === c.from);
-                const toNode = nodes.find(n => n.id === c.to);
-                if (!fromNode || !toNode) return;
-                const fromPos = getOutputPos(fromNode);
-                const toPos = getInputPos(toNode);
-                nctx.beginPath();
-                nctx.moveTo(fromPos.x, fromPos.y);
-                nctx.lineTo(toPos.x, toPos.y);
-                nctx.stroke();
-            });
-            nctx.shadowBlur = 0;
-            // Dibujar línea de arrastre
-            if (draggingFrom) {
-                const fromNode = nodes.find(n => n.id === draggingFrom.nodeId);
-                if (fromNode) {
-                    const start = getOutputPos(fromNode);
-                    nctx.beginPath();
-                    nctx.strokeStyle = '#ffb347';
-                    nctx.lineWidth = 4;
-                    nctx.setLineDash([8, 6]);
-                    nctx.moveTo(start.x, start.y);
-                    nctx.lineTo(mouseX, mouseY);
-                    nctx.stroke();
-                    nctx.setLineDash([]);
-                }
-            }
-
-            // Dibujar nodos
-            nodes.forEach(n => {
-                // color según tipo
-                nctx.shadowColor = 'white';
-                nctx.shadowBlur = 10;
-                if (n.type === 'event') {
-                    nctx.fillStyle = '#88cc88'; // verde gloss
-                } else {
-                    nctx.fillStyle = '#66aaff'; // azul
-                }
-                // borde blanco
-                nctx.strokeStyle = 'white';
-                nctx.lineWidth = 3;
-                // rectángulo redondeado
-                nctx.beginPath();
-                nctx.roundRect(n.x, n.y, n.w, n.h, 15);
-                nctx.fill();
-                nctx.stroke();
-
-                // texto
-                nctx.shadowBlur = 5;
-                nctx.font = 'bold 14px "Segoe UI", Tahoma';
-                nctx.fillStyle = '#0a2f44';
-                nctx.textAlign = 'center';
-                nctx.textBaseline = 'middle';
-                nctx.fillText(n.label, n.x + n.w/2, n.y + n.h/2);
-
-                // pines
-                nctx.shadowBlur = 0;
-                nctx.fillStyle = '#ffffff';
-                nctx.beginPath();
-                // entrada (izquierda)
-                nctx.arc(n.x, n.y + n.h/2, 6, 0, 2*Math.PI);
-                nctx.fill();
-                nctx.strokeStyle = '#2277aa';
-                nctx.lineWidth = 2;
-                nctx.stroke();
-                // salida (derecha)
-                nctx.beginPath();
-                nctx.arc(n.x + n.w, n.y + n.h/2, 6, 0, 2*Math.PI);
-                nctx.fill();
-                nctx.stroke();
-            });
-        }
-
-        // helper roundRect
         CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
             if (w < 2 * r) r = w / 2;
             if (h < 2 * r) r = h / 2;
@@ -473,20 +449,101 @@
             return this;
         };
 
-        // Eventos del mouse en nodeCanvas
-        function handleMouseDown(e) {
+        function drawNodes() {
+            nctx.clearRect(0, 0, 750, 550);
+            // conexiones
+            nctx.strokeStyle = '#4f9ed0';
+            nctx.lineWidth = 5;
+            nctx.shadowColor = '#b0e0ff';
+            nctx.shadowBlur = 12;
+            connections.forEach(c => {
+                const fromNode = nodes.find(n => n.id === c.from);
+                const toNode = nodes.find(n => n.id === c.to);
+                if (!fromNode || !toNode) return;
+                const fromPos = getOutputPos(fromNode);
+                const toPos = getInputPos(toNode);
+                nctx.beginPath();
+                nctx.moveTo(fromPos.x, fromPos.y);
+                nctx.lineTo(toPos.x, toPos.y);
+                nctx.stroke();
+            });
+            nctx.shadowBlur = 0;
+            // línea de arrastre
+            if (draggingFrom) {
+                const fromNode = nodes.find(n => n.id === draggingFrom.nodeId);
+                if (fromNode) {
+                    const start = getOutputPos(fromNode);
+                    nctx.beginPath();
+                    nctx.strokeStyle = '#ffb347';
+                    nctx.lineWidth = 5;
+                    nctx.setLineDash([10, 8]);
+                    nctx.moveTo(start.x, start.y);
+                    nctx.lineTo(mouseX, mouseY);
+                    nctx.stroke();
+                    nctx.setLineDash([]);
+                }
+            }
+
+            // nodos
+            nodes.forEach(n => {
+                nctx.shadowColor = 'white';
+                nctx.shadowBlur = 20;
+                if (n.type === 'event') {
+                    nctx.fillStyle = '#8cc88c'; // verde glossy
+                } else {
+                    nctx.fillStyle = '#66aaff'; // azul
+                }
+                nctx.strokeStyle = 'white';
+                nctx.lineWidth = 4;
+                nctx.beginPath();
+                nctx.roundRect(n.x, n.y, n.w, n.h, 20);
+                nctx.fill();
+                nctx.stroke();
+
+                // reflejo interno (super glossy)
+                nctx.shadowBlur = 8;
+                nctx.fillStyle = 'rgba(255,255,255,0.35)';
+                nctx.beginPath();
+                nctx.roundRect(n.x+2, n.y+2, n.w-4, 10, 10);
+                nctx.fill();
+
+                nctx.shadowBlur = 6;
+                nctx.font = 'bold 16px "Segoe UI", Tahoma';
+                nctx.fillStyle = '#002244';
+                nctx.textAlign = 'center';
+                nctx.textBaseline = 'middle';
+                nctx.fillText(n.label, n.x + n.w/2, n.y + n.h/2);
+
+                // pines
+                nctx.shadowBlur = 0;
+                nctx.fillStyle = 'white';
+                // entrada
+                nctx.beginPath();
+                nctx.arc(n.x, n.y + n.h/2, 8, 0, 2*Math.PI);
+                nctx.fill();
+                nctx.strokeStyle = '#2277aa';
+                nctx.lineWidth = 3;
+                nctx.stroke();
+                // salida
+                nctx.beginPath();
+                nctx.arc(n.x + n.w, n.y + n.h/2, 8, 0, 2*Math.PI);
+                nctx.fill();
+                nctx.stroke();
+            });
+        }
+
+        // Eventos ratón
+        nodeCanvas.addEventListener('mousedown', (e) => {
             const rect = nodeCanvas.getBoundingClientRect();
             const scaleX = nodeCanvas.width / rect.width;
             const scaleY = nodeCanvas.height / rect.height;
             const canvasX = (e.clientX - rect.left) * scaleX;
             const canvasY = (e.clientY - rect.top) * scaleY;
 
-            // Buscar si se hizo clic en un pin de salida (derecha del nodo)
             for (let n of nodes) {
                 const pinX = n.x + n.w;
                 const pinY = n.y + n.h/2;
-                const dist = Math.hypot(canvasX - pinX, canvasY - pinY);
-                if (dist < 10) {
+                if (Math.hypot(canvasX - pinX, canvasY - pinY) < 12) {
                     draggingFrom = { nodeId: n.id, pin: 'out' };
                     mouseX = canvasX;
                     mouseY = canvasY;
@@ -494,9 +551,9 @@
                     return;
                 }
             }
-        }
+        });
 
-        function handleMouseMove(e) {
+        nodeCanvas.addEventListener('mousemove', (e) => {
             if (!draggingFrom) return;
             const rect = nodeCanvas.getBoundingClientRect();
             const scaleX = nodeCanvas.width / rect.width;
@@ -504,77 +561,52 @@
             mouseX = (e.clientX - rect.left) * scaleX;
             mouseY = (e.clientY - rect.top) * scaleY;
             drawNodes();
-        }
+        });
 
-        function handleMouseUp(e) {
+        nodeCanvas.addEventListener('mouseup', (e) => {
             if (!draggingFrom) return;
-
             const rect = nodeCanvas.getBoundingClientRect();
             const scaleX = nodeCanvas.width / rect.width;
             const scaleY = nodeCanvas.height / rect.height;
             const canvasX = (e.clientX - rect.left) * scaleX;
             const canvasY = (e.clientY - rect.top) * scaleY;
 
-            // Buscar si soltó sobre un pin de entrada de algún nodo (excluyendo el mismo)
             let targetNode = null;
             for (let n of nodes) {
-                if (n.id === draggingFrom.nodeId) continue; // no auto-conexión
+                if (n.id === draggingFrom.nodeId) continue;
                 const pinX = n.x;
                 const pinY = n.y + n.h/2;
-                const dist = Math.hypot(canvasX - pinX, canvasY - pinY);
-                if (dist < 10) {
+                if (Math.hypot(canvasX - pinX, canvasY - pinY) < 12) {
                     targetNode = n;
                     break;
                 }
             }
 
             if (targetNode) {
-                // Agregar o reemplazar conexión? simplificamos: agregar, pero evitamos duplicados
                 const exists = connections.some(c => c.from === draggingFrom.nodeId && c.to === targetNode.id);
                 if (!exists) {
                     connections.push({ from: draggingFrom.nodeId, to: targetNode.id });
                 }
             }
-
             draggingFrom = null;
             drawNodes();
-        }
+        });
 
-        nodeCanvas.addEventListener('mousedown', handleMouseDown);
-        nodeCanvas.addEventListener('mousemove', handleMouseMove);
-        nodeCanvas.addEventListener('mouseup', handleMouseUp);
         nodeCanvas.addEventListener('mouseleave', () => {
             draggingFrom = null;
             drawNodes();
         });
 
-        // Inicial
         drawNodes();
 
-        // -------------------- INTERPRETACIÓN DEL GRAFO --------------------
-        // Función que ejecuta las acciones según eventos activados
-        function processGraph() {
-            // Disparo de eventos según estado
-            // Inicio (se ejecuta al correr el juego, pero no en cada frame)
-            // Lo ejecutaremos una vez en run.
-
-            // Eventos de tecla: necesitamos saber si se activan en este frame
-            // Para simplificar, usaremos el mismo sistema: cuando se pulsa una tecla (keydown) ejecutamos las acciones conectadas a esa tecla.
-            // Esto lo haremos en los event listeners de teclado (modificamos keys)
-
-            // Evento tocar moneda: se comprueba en el gameLoop y se ejecuta si colisión nueva.
-        }
-
-        // Para ejecutar acciones según conexiones
+        // -------------------- LÓGICA DE ACCIONES --------------------
         function runActionsForEvent(eventNodeId) {
-            // Buscar todas las conexiones que salen de eventNodeId
             const targets = connections.filter(c => c.from === eventNodeId).map(c => c.to);
             targets.forEach(targetId => {
                 const node = nodes.find(n => n.id === targetId);
                 if (!node) return;
-                // ejecutar acción según label
                 switch (node.id) {
-                    case 'moveLeft':  player.vx -= MOVE_FORCE; break;
+                    case 'moveLeft': player.vx -= MOVE_FORCE; break;
                     case 'moveRight': player.vx += MOVE_FORCE; break;
                     case 'jump': if (player.y + player.h >= GROUND - 0.5) player.vy = JUMP_FORCE; break;
                     case 'addScore': score += 5; updateScore(); break;
@@ -583,10 +615,9 @@
             });
         }
 
-        // Integración con teclado
-        function handleGameKeyDown(e) {
-            const code = e.code;
+        window.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
+            const code = e.code;
             let eventId = null;
             if (code === 'KeyA') eventId = 'keyA';
             else if (code === 'KeyD') eventId = 'keyD';
@@ -595,40 +626,24 @@
                 e.preventDefault();
                 runActionsForEvent(eventId);
             }
-        }
+        });
 
-        window.addEventListener('keydown', handleGameKeyDown);
-
-        // Bucle del juego
         function gameLoop() {
             if (!gameRunning) return;
-
-            // Física y acciones continuas (por ahora solo impulso por teclas, pero no manejamos while)
-            // Añadimos también acciones continuas si quisieramos, pero no hay nodos "while"
-
-            // Integración con teclas para movimiento continuo (usamos las mismas conexiones, pero se disparan una vez.
-            // Para mantener presión, necesitariamos nodos "mientras". Lo dejamos como ejemplo de pulsación.
-
-            // Avanzar física
             player.vx *= FRICTION;
             player.vy += GRAVITY;
             player.x += player.vx;
             player.y += player.vy;
 
-            // límites
             if (player.x < 0) { player.x = 0; player.vx = 0; }
             if (player.x + player.w > 600) { player.x = 600 - player.w; player.vx = 0; }
             if (player.y + player.h > GROUND) { player.y = GROUND - player.h; player.vy = 0; }
             if (player.y < 0) { player.y = 0; player.vy = 0; }
 
-            // colisión con moneda
             const dx = (player.x + player.w/2) - coin.x;
             const dy = (player.y + player.h/2) - coin.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < player.w/2 + coin.r) {
-                // evento toca moneda
+            if (Math.hypot(dx, dy) < player.w/2 + coin.r) {
                 runActionsForEvent('coinTouch');
-                // recolocar moneda
                 coin.x = 50 + Math.random() * 500;
                 coin.y = 50 + Math.random() * (GROUND - 70);
             }
@@ -637,11 +652,9 @@
             animFrame = requestAnimationFrame(gameLoop);
         }
 
-        // Botones
         document.getElementById('runBtn').addEventListener('click', () => {
             if (gameRunning) return;
             resetGame();
-            // ejecutar evento inicio
             runActionsForEvent('start');
             gameRunning = true;
             gameLoop();
@@ -654,7 +667,6 @@
             drawGame();
         });
 
-        // Inicial
         drawGame();
     })();
 </script>
