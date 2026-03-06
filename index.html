@@ -3,244 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>▀▄ GAME MAKER 99 ▄▀ (estilo Scratch)</title>
+    <title>▀▄ SCRATCH 1999 · DRAG & DROP ▄▀</title>
     <style>
-        /* ESTÉTICA VIEJA 1999 — Windows 98 / Geocities */
+        /* ========== ESTÉTICA RETRO 1999 (WINDOWS 98 / GEOCITIES) ========== */
         body {
-            background: #008080; /* ese verde azulado clásico de fondo de escritorio */
+            background: #008080;
             font-family: 'Courier New', Courier, 'MS Sans Serif', Tahoma, sans-serif;
-            margin: 0;
-            padding: 24px 0;
+            margin: 20px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
         }
         .window {
-            width: 980px;
-            background: #C0C0C0; /* gris plata */
+            width: 1150px;
+            background: #C0C0C0;
             padding: 6px;
             border: 4px ridge #FFFFFF #808080 #808080 #FFFFFF;
-            box-shadow: 4px 4px 0px 0px #00000033;
+            box-shadow: 6px 6px 0px 0px #00000066;
         }
         .title-bar {
-            background: #000080; /* azul oscuro Win98 */
+            background: #000080;
             color: #FFFFFF;
             font-weight: bold;
             font-size: 18px;
-            padding: 6px 10px;
-            letter-spacing: 1px;
+            padding: 6px 12px;
             display: flex;
             justify-content: space-between;
             border: 2px inset #FFFFFF #808080;
             text-transform: uppercase;
             margin-bottom: 8px;
+            letter-spacing: 2px;
         }
         .title-bar span:first-child {
             filter: drop-shadow(2px 2px 0 #808080);
         }
         .title-bar span:last-child {
-            font-size: 14px;
             background: #C0C0C0;
             color: #000;
-            padding: 2px 8px;
+            padding: 2px 10px;
             border: 2px inset #FFFFFF #808080;
-            line-height: 1.4;
+            font-size: 14px;
         }
-        .main-row {
+        .main-layout {
             display: flex;
             gap: 12px;
-            flex-wrap: nowrap;
         }
-        /* Panel izquierdo — ESCENARIO */
-        .stage-panel {
+        /* ========== COLUMNA IZQUIERDA: ESCENARIO Y OBJETOS ========== */
+        .stage-area {
             flex: 2;
             border: 3px inset #FFFFFF #808080;
             background: #808080;
             padding: 8px;
         }
-        .stage-panel fieldset {
+        .stage-area fieldset {
             border: 2px ridge #FFFFFF #808080;
             background: #BFBFBF;
-            margin: 0;
+            margin: 0 0 12px 0;
             padding: 8px;
         }
-        .stage-panel legend {
+        .stage-area legend {
             background: #C0C0C0;
             border: 2px outset #FFFFFF #808080;
-            padding: 4px 12px;
+            padding: 4px 16px;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 14px;
+            font-size: 15px;
         }
         #gameCanvas {
             display: block;
-            margin: 0 auto;
-            width: 400px;
-            height: 300px;
+            width: 480px;
+            height: 320px;
             image-rendering: pixelated;
             border: 4px inset #FFFFFF #808080;
             background: #E0E0E0;
+            margin: 0 auto;
             cursor: crosshair;
         }
-        .status-bar {
-            background: #BFBFBF;
-            border: 2px inset #FFFFFF #808080;
-            padding: 6px 10px;
-            margin-top: 12px;
-            font-size: 15px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-bar span {
-            background: #FFFFFF;
-            border: 2px inset #808080;
-            padding: 4px 12px;
-            color: #000;
-        }
-        /* Panel derecho — PROGRAMACIÓN */
-        .code-panel {
-            flex: 1.4;
-            border: 3px inset #FFFFFF #808080;
-            background: #808080;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .script-box {
+        .object-bar {
             background: #BFBFBF;
             border: 4px inset #FFFFFF #808080;
-            padding: 6px;
-        }
-        .script-box legend {
-            font-size: 16px;
-            font-weight: bold;
-            background: #C0C0C0;
-            border: 2px outset #FFFFFF #808080;
-            padding: 2px 12px;
-        }
-        .script-list {
-            background: #FFFFFF;
-            border: 2px inset #808080;
-            height: 180px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            padding: 6px;
-            list-style-type: none;
-            margin: 0 0 8px 0;
-        }
-        .script-list li {
-            background: #FFFFCC;
-            border: 2px outset #CCCCCC;
-            margin-bottom: 4px;
-            padding: 4px 8px;
-            color: #000080;
-            font-weight: bold;
-            word-break: break-word;
-        }
-        .block-panel {
-            background: #BFBFBF;
-            border: 4px inset #FFFFFF #808080;
-            padding: 8px;
-        }
-        .block-panel legend {
-            font-size: 16px;
-            font-weight: bold;
-            background: #C0C0C0;
-            border: 2px outset #FFFFFF #808080;
-            padding: 2px 12px;
-        }
-        .blocks-grid {
+            padding: 10px;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin: 12px 0;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
         }
-        .block-btn {
-            background: #FFCC66;
-            border: 4px outset #FFFFCC #996633;
-            color: #000;
-            font-size: 18px;
+        .object-icon {
+            background: #FFD700;
+            border: 4px outset #FFFFCC #B8860B;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            padding: 10px 16px;
-            min-width: 120px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-            box-shadow: 2px 2px 0px #000;
+            font-size: 12px;
             cursor: pointer;
+            box-shadow: 2px 2px 0px #000;
             transition: none;
         }
-        .block-btn:active {
-            border: 4px inset #996633 #FFFFCC;
+        .object-icon.active {
+            border: 4px inset #B8860B #FFFFCC;
+            background: #FFA500;
             transform: translate(2px, 2px);
             box-shadow: none;
         }
-        .block-btn.motion { background: #4C6EF5; color: white; border-color: #B0C4FF #002080; }
-        .block-btn.look   { background: #9B59B6; color: white; border-color: #D4A5FF #4A235A; }
-        .block-btn.sound  { background: #E67E22; color: white; border-color: #FFB27F #8A4500; }
-
-        .action-buttons {
+        .object-icon img { display: none; } /* usamos texto */
+        .add-object-btn {
+            background: #00FF00;
+            border: 4px outset #FFFFFF #008000;
+            padding: 8px 16px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .add-object-btn:active {
+            border: 4px inset #008000 #FFFFFF;
+            transform: translate(2px,2px);
+        }
+        /* ========== COLUMNA DERECHA: BLOQUES Y PROGRAMACIÓN ========== */
+        .code-area {
+            flex: 1.5;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
+        }
+        /* paleta de bloques (arrastrables) */
+        .blocks-palette {
+            background: #BFBFBF;
+            border: 4px inset #FFFFFF #808080;
+            padding: 12px;
+        }
+        .blocks-palette legend {
+            background: #C0C0C0;
+            border: 2px outset #FFFFFF #808080;
+            padding: 2px 16px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .block-category {
+            font-weight: bold;
+            margin: 8px 0 4px;
+            border-bottom: 2px groove #808080;
+            text-transform: uppercase;
+            color: #000080;
+        }
+        .block-drag {
+            background: #4C6EF5; /* motion */
+            border: 4px outset #B0C4FF #002080;
+            color: white;
+            font-weight: bold;
+            padding: 8px 12px;
+            margin: 6px 4px;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            box-shadow: 3px 3px 0px #000;
+            cursor: grab;
+            user-select: none;
+            width: 140px;
+            text-align: center;
+            transition: none;
+        }
+        .block-drag.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
+        .block-drag.control { background: #E67E22; border-color: #FFB27F #8A4500; }
+        .block-drag.motion { background: #4C6EF5; }
+        .block-drag:active {
+            cursor: grabbing;
+            opacity: 0.8;
+        }
+        /* área de script del objeto seleccionado */
+        .script-panel {
+            background: #BFBFBF;
+            border: 4px inset #FFFFFF #808080;
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .script-panel legend {
+            background: #C0C0C0;
+            border: 2px outset #FFFFFF #808080;
+            padding: 2px 16px;
+            font-weight: bold;
+        }
+        .script-container {
+            background: #FFFFFF;
+            border: 4px inset #808080;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 6px;
+            list-style: none;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .script-block {
+            background: #FFFFCC;
+            border: 3px outset #CCCCCC;
+            margin: 4px 0;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #000080;
+            font-size: 15px;
+        }
+        .script-block .delete-btn {
+            background: #FF6666;
+            border: 2px outset #FFB2B2 #800000;
+            color: black;
+            font-weight: bold;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .script-block .delete-btn:active {
+            border: 2px inset #800000 #FFB2B2;
+            transform: translate(1px,1px);
+        }
+        .execution-bar {
+            display: flex;
             gap: 8px;
             margin-top: 10px;
-            justify-content: space-between;
+            flex-wrap: wrap;
         }
-        .action-btn {
+        .exec-btn {
             background: #C0C0C0;
             border: 4px outset #FFFFFF #808080;
             font-size: 16px;
             font-weight: bold;
-            padding: 8px 12px;
+            padding: 10px 18px;
             font-family: 'Courier New', monospace;
             cursor: pointer;
-            flex: 1 0 auto;
+            flex: 1;
             text-transform: uppercase;
         }
-        .action-btn:active {
+        .exec-btn:active {
             border: 4px inset #808080 #FFFFFF;
-            transform: translate(2px, 2px);
+            transform: translate(2px,2px);
         }
-        .action-btn:disabled, .block-btn:disabled {
+        .exec-btn:disabled {
             border: 4px inset #808080 #FFFFFF !important;
             color: #808080;
-            background: #A0A0A0 !important;
-            transform: translate(2px, 2px);
+            background: #A0A0A0;
+            transform: translate(2px,2px);
             cursor: not-allowed;
-            pointer-events: none;
         }
         .footer {
             margin-top: 18px;
             background: #000080;
             color: silver;
-            padding: 6px 12px;
+            padding: 6px 16px;
             border: 2px ridge #FFFFFF #808080;
-            font-size: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 14px;
         }
         .footer marquee {
-            width: 300px;
+            width: 350px;
             background: #000;
-            color: #00FF00;
+            color: #0F0;
             padding: 4px;
-            font-family: 'Courier New', monospace;
             border: 2px inset #808080;
         }
         .glitch {
-            background: #FFFF00;
-            color: #0000FF;
-            padding: 4px 12px;
-            border: 4px dotted #FF0000;
-            font-weight: bold;
+            background: #FF00FF;
+            color: #00FFFF;
+            padding: 4px 8px;
+            border: 4px dotted #FFFF00;
             animation: blink 1s infinite;
         }
         @keyframes blink {
@@ -253,108 +290,109 @@
 <body>
 <div class="window">
     <div class="title-bar">
-        <span>◈ GAME MAKER 99 ◈  (estilo Scratch™)</span>
-        <span>VISITOR 0042</span>
+        <span>◈ SCRATCH 1999 · DRAG & DROP ◈</span>
+        <span>MULTIOBJECT</span>
     </div>
 
-    <div class="main-row">
-        <!-- PANEL IZQUIERDO: ESCENARIO -->
-        <div class="stage-panel">
+    <div class="main-layout">
+        <!-- COLUMNA IZQUIERDA: ESCENARIO Y SPRITES -->
+        <div class="stage-area">
             <fieldset>
-                <legend>🎮 STAGE · 320x240</legend>
-                <canvas id="gameCanvas" width="400" height="300"></canvas>
-
-                <div class="status-bar">
-                    <span>X: <span id="coordX">150</span></span>
-                    <span>Y: <span id="coordY">150</span></span>
-                    <span>DIR: <span id="dirValue">0°</span></span>
-                </div>
+                <legend>🎬 ESCENARIO (480x320)</legend>
+                <canvas id="gameCanvas" width="480" height="320"></canvas>
             </fieldset>
 
-            <div style="margin-top: 12px;">
-                <button class="action-btn" id="resetSpriteBtn" style="background: #FF9999;">⟲ RESET SPRITE</button>
+            <!-- BARRA DE OBJETOS (MÚLTIPLES SPRITES) -->
+            <div class="object-bar">
+                <div style="font-weight:bold; margin-right:8px;">📦 OBJETOS:</div>
+                <div id="spriteIcons" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                <button class="add-object-btn" id="addSpriteBtn">➕ NUEVO OBJETO</button>
+            </div>
+            <div style="margin-top:8px; font-size:14px; background:#BFBFBF; border:2px inset; padding:4px;">
+                <span id="activeSpriteName">🐱 GATO</span> · <span>X: <span id="coordX">0</span> Y: <span id="coordY">0</span>  DIR: <span id="dirValue">0°</span></span>
             </div>
         </div>
 
-        <!-- PANEL DERECHO: PROGRAMACIÓN CON BLOQUES -->
-        <div class="code-panel">
-            <!-- VENTANA DE SCRIPT -->
-            <div class="script-box">
-                <legend>📜 TU SCRIPT (PILA)</legend>
-                <ul class="script-list" id="scriptList">
-                    <li style="color:#888;">-- bloques aparecen aquí --</li>
-                </ul>
-                <div style="display: flex; gap: 5px;">
-                    <button class="action-btn" id="clearScriptBtn" style="flex:2;">🗑 LIMPIAR</button>
-                    <button class="action-btn" id="removeLastBtn" style="flex:1;">⌫ QUITAR ÚLTIMO</button>
-                </div>
+        <!-- COLUMNA DERECHA: PALETA DE BLOQUES Y SCRIPT -->
+        <div class="code-area">
+            <!-- PALETA CON BLOQUES ARRASTRABLES (MÁS BLOQUES) -->
+            <div class="blocks-palette">
+                <legend>🔷 BLOQUES (arrástralos al script)</legend>
+
+                <div class="block-category">⚡ MOVIMIENTO</div>
+                <div class="block-drag motion" draggable="true" data-type="move" data-val="10">⚡ MOVER 10</div>
+                <div class="block-drag motion" draggable="true" data-type="turn" data-val="15">↻ GIRAR 15°</div>
+                <div class="block-drag motion" draggable="true" data-type="move" data-val="-10">⚡ MOVER -10</div>
+                <div class="block-drag motion" draggable="true" data-type="turn" data-val="-15">↺ GIRAR -15°</div>
+                <div class="block-drag motion" draggable="true" data-type="gotoxy" data-val="150,150">⤷ IR A (150,150)</div>
+
+                <div class="block-category">💬 APARIENCIA</div>
+                <div class="block-drag looks" draggable="true" data-type="say" data-val="HOLA">💬 DECIR "HOLA"</div>
+                <div class="block-drag looks" draggable="true" data-type="say" data-val="CHAU">💬 DECIR "CHAU"</div>
+                <div class="block-drag looks" draggable="true" data-type="color" data-val="#FF0000">🎨 COLOR ROJO</div>
+                <div class="block-drag looks" draggable="true" data-type="color" data-val="#00FF00">🎨 COLOR VERDE</div>
+
+                <div class="block-category">⏳ CONTROL</div>
+                <div class="block-drag control" draggable="true" data-type="wait" data-val="0.5">⏱️ ESPERAR 0.5s</div>
+                <div class="block-drag control" draggable="true" data-type="wait" data-val="1">⏱️ ESPERAR 1s</div>
             </div>
 
-            <!-- BLOQUES DE COMANDOS (ESTILO SCRATCH, pero 1999) -->
-            <div class="block-panel">
-                <legend>🔷 BLOQUES (haz clic para apilar)</legend>
-                <div class="blocks-grid">
-                    <button class="block-btn motion" id="moveBtn">⚡ MOVER 10</button>
-                    <button class="block-btn motion" id="turnBtn">↻ GIRAR 15°</button>
-                    <button class="block-btn look" id="sayBtn">💬 DECIR "HOLA"</button>
+            <!-- SCRIPT DEL OBJETO SELECCIONADO -->
+            <div class="script-panel">
+                <legend>📜 SCRIPT: <span id="scriptOwner">GATO</span></legend>
+                <div class="script-container" id="scriptContainer">
+                    <!-- Los bloques del script se inyectan aquí -->
                 </div>
-
-                <!-- BOTONES DE CONTROL DEL JUEGO -->
-                <div class="action-buttons">
-                    <button class="action-btn" id="runBtn" style="background:#90EE90;">▶ EJECUTAR SCRIPT</button>
-                    <button class="action-btn" id="stopBtn" style="background:#FFB6C1;">⏹ DETENER</button>
+                <div class="execution-bar">
+                    <button class="exec-btn" id="runScriptBtn">▶ EJECUTAR</button>
+                    <button class="exec-btn" id="stopScriptBtn" disabled>⏹ DETENER</button>
+                    <button class="exec-btn" id="clearScriptBtn">🗑 LIMPIAR</button>
                 </div>
-                <div style="font-size:12px; margin-top:8px; text-align:center; border-top:2px groove #808080; padding-top:6px;">
-                    <span class="glitch">¡BAJO CONSTRUCCIÓN! 1999 RULES</span>
+                <div style="margin-top:6px; font-size:12px; text-align:center; border-top:2px groove #808080; padding:4px;">
+                    <span class="glitch">¡AHORA CON DRAG & DROP!</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PIE DE PÁGINA CON ESTÉTICA VIEJA WEB -->
+    <!-- PIE DE PÁGINA (RETRO) -->
     <div class="footer">
-        <span>⏺ BEST VIEWED WITH NETSCAPE NAVIGATOR 4.0</span>
-        <marquee scrollamount="3" behavior="scroll">🚀 1999 · 56k MODEM · AOL FREE TRIAL · WINAMP SKINS 🚀</marquee>
-        <span>HITS: 000042</span>
+        <span>⏺ 56k MODEM · AOL 4.0</span>
+        <marquee scrollamount="4" behavior="scroll">🚀 1999 · BLOQUES ARRASTRABLES · MULTISPRITE · MÁS DE 10 BLOQUES 🚀</marquee>
+        <span>VISITOR: 0042</span>
     </div>
 </div>
 
 <script>
     (function() {
-        // ---------- SPRITE Y ESCENARIO ----------
+        // ----- CONFIGURACIÓN INICIAL -----
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // estado del sprite
-        let sprite = {
-            x: 150,
-            y: 150,
-            direction: 0,      // 0° = derecha, 90° = arriba
-            message: null
-        };
-
-        // script: array de comandos { tipo, valor }
-        let script = [];
-
-        // control de ejecución
+        // Sprites múltiples
+        let sprites = [
+            { id: 'sprite0', name: '🐱 GATO', x: 150, y: 150, direction: 0, color: '#FFD700', message: null, script: [] },
+            { id: 'sprite1', name: '🐶 PERRO', x: 300, y: 200, direction: 90, color: '#B78A5B', message: null, script: [] }
+        ];
+        let activeSpriteId = 'sprite0';
         let isRunning = false;
         let stopRequested = false;
+        let executionTimer = null;
 
-        // elementos DOM
+        // Elementos DOM
+        const spriteIconsDiv = document.getElementById('spriteIcons');
+        const activeSpriteNameSpan = document.getElementById('activeSpriteName');
+        const scriptOwnerSpan = document.getElementById('scriptOwner');
+        const scriptContainer = document.getElementById('scriptContainer');
         const coordXSpan = document.getElementById('coordX');
         const coordYSpan = document.getElementById('coordY');
         const dirSpan = document.getElementById('dirValue');
-        const scriptListEl = document.getElementById('scriptList');
-        const moveBtn = document.getElementById('moveBtn');
-        const turnBtn = document.getElementById('turnBtn');
-        const sayBtn = document.getElementById('sayBtn');
-        const runBtn = document.getElementById('runBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const resetSpriteBtn = document.getElementById('resetSpriteBtn');
-        const clearScriptBtn = document.getElementById('clearScriptBtn');
-        const removeLastBtn = document.getElementById('removeLastBtn');
+        const runBtn = document.getElementById('runScriptBtn');
+        const stopBtn = document.getElementById('stopScriptBtn');
+        const clearBtn = document.getElementById('clearScriptBtn');
+        const addSpriteBtn = document.getElementById('addSpriteBtn');
 
-        // ---------- FUNCIONES DE DIBUJO (retro 1999) ----------
+        // ----- FUNCIONES DE DIBUJO -----
         function drawGrid() {
             ctx.strokeStyle = '#A0A0A0';
             ctx.lineWidth = 0.5;
@@ -374,258 +412,311 @@
             }
         }
 
-        function drawSprite() {
-            const x = sprite.x;
-            const y = sprite.y;
-            const dir = sprite.direction;
-
-            // dibujar cuerpo (gato amarillo)
+        function drawSprite(spr) {
+            const x = spr.x;
+            const y = spr.y;
+            const dir = spr.direction;
+            // cuerpo
             ctx.beginPath();
-            ctx.arc(x, y, 20, 0, 2 * Math.PI);
-            ctx.fillStyle = '#FFD700';
+            ctx.arc(x, y, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = spr.color;
             ctx.fill();
-            ctx.strokeStyle = '#B8860B';
+            ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.stroke();
-
-            // orejas
-            ctx.beginPath(); // oreja izquierda (desde perspectiva del gato)
-            ctx.moveTo(x - 12, y - 18);
-            ctx.lineTo(x - 22, y - 32);
-            ctx.lineTo(x - 6, y - 26);
-            ctx.closePath();
-            ctx.fillStyle = '#FFA500';
-            ctx.fill();
-            ctx.strokeStyle = '#B8860B';
-            ctx.stroke();
-
-            ctx.beginPath(); // oreja derecha
-            ctx.moveTo(x + 12, y - 18);
-            ctx.lineTo(x + 22, y - 32);
-            ctx.lineTo(x + 6, y - 26);
-            ctx.closePath();
-            ctx.fillStyle = '#FFA500';
-            ctx.fill();
-            ctx.stroke();
-
             // ojos
             ctx.fillStyle = '#000';
             ctx.beginPath();
-            ctx.arc(x - 7, y - 5, 3, 0, 2 * Math.PI);
+            ctx.arc(x - 6, y - 5, 3, 0, 2 * Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x + 7, y - 5, 3, 0, 2 * Math.PI);
+            ctx.arc(x + 6, y - 5, 3, 0, 2 * Math.PI);
             ctx.fill();
-            // brillo
-            ctx.fillStyle = '#FFF';
-            ctx.beginPath();
-            ctx.arc(x - 8, y - 7, 1, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 6, y - 7, 1, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // bigotes (opcional, para más estilo)
-            ctx.beginPath();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
-            ctx.moveTo(x + 12, y - 2);
-            ctx.lineTo(x + 28, y - 6);
-            ctx.moveTo(x + 12, y + 2);
-            ctx.lineTo(x + 28, y + 2);
-            ctx.moveTo(x - 12, y - 2);
-            ctx.lineTo(x - 28, y - 6);
-            ctx.moveTo(x - 12, y + 2);
-            ctx.lineTo(x - 28, y + 2);
-            ctx.stroke();
-
-            // línea de dirección (para que se note hacia donde mira)
+            // dirección (flecha roja)
             const rad = dir * Math.PI / 180;
-            const arrowX = x + 28 * Math.cos(rad);
-            const arrowY = y - 28 * Math.sin(rad);  // negativo porque Y hacia abajo
+            const arrowX = x + 24 * Math.cos(rad);
+            const arrowY = y - 24 * Math.sin(rad);
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.lineTo(arrowX, arrowY);
             ctx.strokeStyle = '#FF0000';
             ctx.lineWidth = 2;
             ctx.stroke();
-            // puntita de flecha
             ctx.beginPath();
             ctx.fillStyle = '#FF0000';
             ctx.arc(arrowX, arrowY, 4, 0, 2 * Math.PI);
             ctx.fill();
-        }
 
-        function drawMessage() {
-            if (sprite.message) {
+            // mensaje si tiene
+            if (spr.message) {
                 ctx.fillStyle = '#FFFFCC';
-                ctx.strokeStyle = '#000000';
+                ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.ellipse(sprite.x, sprite.y - 40, 50, 25, 0, 0, 2 * Math.PI);
+                ctx.ellipse(x, y - 35, 50, 20, 0, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.stroke();
                 ctx.fillStyle = '#000080';
-                ctx.font = 'bold 16px "Courier New", monospace';
+                ctx.font = 'bold 14px "Courier New", monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(sprite.message, sprite.x, sprite.y - 40);
+                ctx.fillText(spr.message, x, y - 35);
             }
         }
 
         function redraw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawGrid();
-            drawSprite();
-            drawMessage();
+            sprites.forEach(s => drawSprite(s));
 
-            // actualizar coordenadas en el panel
-            coordXSpan.innerText = Math.round(sprite.x);
-            coordYSpan.innerText = Math.round(sprite.y);
-            dirSpan.innerText = sprite.direction + '°';
+            // actualizar info del sprite activo
+            const active = getActiveSprite();
+            if (active) {
+                coordXSpan.innerText = Math.round(active.x);
+                coordYSpan.innerText = Math.round(active.y);
+                dirSpan.innerText = active.direction + '°';
+            }
         }
 
-        // ---------- MANEJO DEL SCRIPT (pila de bloques) ----------
-        function updateScriptDisplay() {
+        // ----- UTILIDADES SPRITE -----
+        function getActiveSprite() {
+            return sprites.find(s => s.id === activeSpriteId);
+        }
+
+        function setActiveSprite(id) {
+            activeSpriteId = id;
+            updateSpriteIcons();
+            renderScript();
+            redraw();
+        }
+
+        // actualizar iconos de objetos en la barra
+        function updateSpriteIcons() {
+            let html = '';
+            sprites.forEach(s => {
+                const activeClass = (s.id === activeSpriteId) ? 'active' : '';
+                html += `<div class="object-icon ${activeClass}" data-id="${s.id}" style="background:${s.color};">${s.name}<br><span style="font-size:10px;">[${Math.round(s.x)},${Math.round(s.y)}]</span></div>`;
+            });
+            spriteIconsDiv.innerHTML = html;
+            // añadir event listeners a cada icono
+            document.querySelectorAll('.object-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const id = icon.dataset.id;
+                    setActiveSprite(id);
+                });
+            });
+            const active = getActiveSprite();
+            if (active) {
+                activeSpriteNameSpan.innerText = active.name;
+                scriptOwnerSpan.innerText = active.name;
+            }
+        }
+
+        // ----- GESTIÓN DE SCRIPT (bloques en el contenedor) -----
+        function renderScript() {
+            const active = getActiveSprite();
+            if (!active) return;
+            const script = active.script;
             if (script.length === 0) {
-                scriptListEl.innerHTML = '<li style="color:#888;">-- bloques aparecen aquí --</li>';
+                scriptContainer.innerHTML = '<div style="color:#888; padding:8px;">-- Arrastra bloques aquí --</div>';
                 return;
             }
             let html = '';
-            script.forEach((cmd, index) => {
-                let texto = '';
-                if (cmd.type === 'move') texto = `⚡ MOVER ${cmd.valor}`;
-                else if (cmd.type === 'turn') texto = `↻ GIRAR ${cmd.valor}°`;
-                else if (cmd.type === 'say') texto = `💬 DECIR "${cmd.valor}"`;
-                html += `<li>#${index+1} · ${texto}</li>`;
-            });
-            scriptListEl.innerHTML = html;
-        }
-
-        function addScriptBlock(type, valor) {
-            script.push({ type: type, valor: valor });
-            updateScriptDisplay();
-        }
-
-        // ---------- EJECUCIÓN DE COMANDOS (con pausa retro) ----------
-        function disableControls(disable) {
-            const btns = [moveBtn, turnBtn, sayBtn, runBtn, clearScriptBtn, removeLastBtn, resetSpriteBtn];
-            btns.forEach(btn => btn.disabled = disable);
-            // stopBtn se maneja aparte, siempre que no esté running se habilita, pero lo manejamos en stop
-            if (!disable) {
-                stopBtn.disabled = false; // cuando se desactivan todos, stop se habilita
-            } else {
-                // cuando se desactivan, stop permanece habilitado para poder pulsarlo
-                stopBtn.disabled = false;
-            }
-        }
-
-        // ejecuta un comando y retorna una promesa que resuelve tras 500ms
-        function executeCommand(cmd) {
-            return new Promise((resolve) => {
-                switch (cmd.type) {
-                    case 'move':
-                        const rad = sprite.direction * Math.PI / 180;
-                        let dx = cmd.valor * Math.cos(rad);
-                        let dy = -cmd.valor * Math.sin(rad); // negativo por Y hacia abajo
-                        sprite.x += dx;
-                        sprite.y += dy;
-                        // límites (para que no se salga del canvas, considerando radio 20)
-                        sprite.x = Math.min(Math.max(sprite.x, 20), 380);
-                        sprite.y = Math.min(Math.max(sprite.y, 20), 280);
-                        redraw();
-                        break;
-                    case 'turn':
-                        sprite.direction = (sprite.direction + cmd.valor) % 360;
-                        redraw();
-                        break;
-                    case 'say':
-                        sprite.message = cmd.valor;
-                        redraw();
-                        break;
+            script.forEach((block, index) => {
+                let text = '';
+                switch (block.type) {
+                    case 'move': text = `⚡ MOVER ${block.val}`; break;
+                    case 'turn': text = `↻ GIRAR ${block.val}°`; break;
+                    case 'gotoxy': text = `⤷ IR A (${block.val})`; break;
+                    case 'say': text = `💬 DECIR "${block.val}"`; break;
+                    case 'color': text = `🎨 CAMBIAR COLOR`; break;
+                    case 'wait': text = `⏱️ ESPERAR ${block.val}s`; break;
+                    default: text = block.type;
                 }
-
-                // esperar 500ms para efecto "paso a paso"
-                setTimeout(() => {
-                    // si era un say, borramos el mensaje después de la pausa
-                    if (cmd.type === 'say') {
-                        sprite.message = null;
-                        redraw();
-                    }
-                    resolve();
-                }, 500);
+                html += `<div class="script-block" data-index="${index}">
+                    <span>${index+1}. ${text}</span>
+                    <span class="delete-btn" data-index="${index}">✖</span>
+                </div>`;
+            });
+            scriptContainer.innerHTML = html;
+            // Añadir eventos a los botones de eliminar
+            document.querySelectorAll('.script-block .delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = btn.dataset.index;
+                    removeScriptBlock(parseInt(idx));
+                });
             });
         }
 
-        async function runScriptAsync() {
-            if (isRunning) return;
-            if (script.length === 0) {
-                alert('🖥️ No hay bloques en el script. ¡Añade algunos!');
-                return;
+        function removeScriptBlock(index) {
+            const active = getActiveSprite();
+            if (active && !isRunning) {
+                active.script.splice(index, 1);
+                renderScript();
             }
+        }
+
+        // ----- DRAG & DROP (bloques al script) -----
+        // Hacer que los bloques de la paleta sean arrastrables
+        document.querySelectorAll('.block-drag').forEach(block => {
+            block.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: block.dataset.type,
+                    val: block.dataset.val
+                }));
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        // Permitir soltar en el contenedor de script
+        scriptContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        scriptContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (isRunning) return; // no modificar durante ejecución
+            const rawData = e.dataTransfer.getData('text/plain');
+            if (!rawData) return;
+            try {
+                const blockData = JSON.parse(rawData);
+                const active = getActiveSprite();
+                if (!active) return;
+                // Añadir bloque al script del sprite activo
+                active.script.push({ type: blockData.type, val: blockData.val });
+                renderScript();
+                redraw();
+            } catch (ex) {
+                console.warn('drop error', ex);
+            }
+        });
+
+        // ----- EJECUCIÓN DEL SCRIPT (paso a paso) -----
+        async function runScript() {
+            if (isRunning) return;
+            const active = getActiveSprite();
+            if (!active || active.script.length === 0) return;
 
             isRunning = true;
             stopRequested = false;
-            disableControls(true);      // deshabilitar todo menos stop
-            stopBtn.disabled = false;    // aseguramos stop habilitado
+            runBtn.disabled = true;
+            stopBtn.disabled = false;
+            // Deshabilitar acciones de modificación
+            document.querySelectorAll('.delete-btn, .add-object-btn, .block-drag').forEach(el => el.style.pointerEvents = 'none');
 
-            for (let i = 0; i < script.length; i++) {
-                if (stopRequested) {
-                    break;
-                }
-                await executeCommand(script[i]);
+            for (let i = 0; i < active.script.length; i++) {
+                if (stopRequested) break;
+                const block = active.script[i];
+                await executeBlock(block, active);
+                redraw();
+                // pequeña pausa entre comandos
+                await new Promise(r => setTimeout(r, 400));
             }
 
-            // al terminar o parar, limpiamos
+            // Finalizar
             isRunning = false;
             stopRequested = false;
-            disableControls(false);
-            stopBtn.disabled = false;    // por si acaso
+            runBtn.disabled = false;
+            stopBtn.disabled = true;
+            document.querySelectorAll('.delete-btn, .add-object-btn, .block-drag').forEach(el => el.style.pointerEvents = 'auto');
             redraw();
         }
 
-        // ---------- EVENTOS ----------
-        moveBtn.addEventListener('click', () => addScriptBlock('move', 10));
-        turnBtn.addEventListener('click', () => addScriptBlock('turn', 15));
-        sayBtn.addEventListener('click', () => addScriptBlock('say', 'HOLA'));
+        function executeBlock(block, sprite) {
+            return new Promise((resolve) => {
+                switch (block.type) {
+                    case 'move':
+                        const rad = sprite.direction * Math.PI / 180;
+                        let dx = parseInt(block.val) * Math.cos(rad);
+                        let dy = -parseInt(block.val) * Math.sin(rad);
+                        sprite.x += dx;
+                        sprite.y += dy;
+                        // límites (radio 18)
+                        sprite.x = Math.min(Math.max(sprite.x, 20), 460);
+                        sprite.y = Math.min(Math.max(sprite.y, 20), 300);
+                        break;
+                    case 'turn':
+                        sprite.direction = (sprite.direction + parseInt(block.val) + 360) % 360;
+                        break;
+                    case 'gotoxy':
+                        const coords = block.val.split(',').map(Number);
+                        if (coords.length === 2) {
+                            sprite.x = Math.min(Math.max(coords[0], 20), 460);
+                            sprite.y = Math.min(Math.max(coords[1], 20), 300);
+                        }
+                        break;
+                    case 'say':
+                        sprite.message = block.val;
+                        setTimeout(() => { sprite.message = null; redraw(); }, 800);
+                        break;
+                    case 'color':
+                        sprite.color = block.val;
+                        break;
+                    case 'wait':
+                        // esperar el tiempo indicado (segundos)
+                        setTimeout(resolve, parseFloat(block.val) * 1000);
+                        return; // no llamar a resolve inmediatamente
+                    default: break;
+                }
+                setTimeout(resolve, 200); // duración mínima del bloque
+            });
+        }
 
-        runBtn.addEventListener('click', runScriptAsync);
-
-        stopBtn.addEventListener('click', () => {
+        // ----- DETENER EJECUCIÓN -----
+        function stopExecution() {
             if (isRunning) {
                 stopRequested = true;
-                stopBtn.disabled = true;  // feedback de que se pulsó
+                stopBtn.disabled = true;
             }
-        });
+        }
 
-        resetSpriteBtn.addEventListener('click', () => {
-            sprite.x = 150;
-            sprite.y = 150;
-            sprite.direction = 0;
-            sprite.message = null;
+        // ----- LIMPIAR SCRIPT DEL SPRITE ACTIVO -----
+        function clearActiveScript() {
+            if (isRunning) return;
+            const active = getActiveSprite();
+            if (active) {
+                active.script = [];
+                renderScript();
+            }
+        }
+
+        // ----- AÑADIR NUEVO SPRITE -----
+        function addSprite() {
+            if (isRunning) return;
+            const newId = 'sprite' + Date.now();
+            const newName = `👾 OBJ${sprites.length+1}`;
+            const newColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+            sprites.push({
+                id: newId,
+                name: newName,
+                x: 100 + Math.random() * 200,
+                y: 100 + Math.random() * 150,
+                direction: 0,
+                color: newColor,
+                message: null,
+                script: []
+            });
+            updateSpriteIcons();
             redraw();
-        });
+        }
 
-        clearScriptBtn.addEventListener('click', () => {
-            if (isRunning) return;
-            script = [];
-            updateScriptDisplay();
-        });
+        // ----- EVENTOS -----
+        runBtn.addEventListener('click', runScript);
+        stopBtn.addEventListener('click', stopExecution);
+        clearBtn.addEventListener('click', clearActiveScript);
+        addSpriteBtn.addEventListener('click', addSprite);
 
-        removeLastBtn.addEventListener('click', () => {
-            if (isRunning) return;
-            script.pop();
-            updateScriptDisplay();
-        });
-
-        // inicializar canvas
+        // Inicializar
+        updateSpriteIcons();
         redraw();
 
-        // pequeños detalles 1999: actualizar cada cierto tiempo el mensaje (no necesario)
-        // También podemos hacer parpadear algo, pero con eso basta.
+        // Prevenir que el propio canvas interfiera con drag
+        canvas.addEventListener('dragover', (e) => e.preventDefault());
+        canvas.addEventListener('drop', (e) => e.preventDefault());
     })();
 </script>
-
 <!-- CONTADOR OCULTO Y COSAS DE LA ÉPOCA -->
 <div style="display: none;">© 1999 Geocities AngelFire Tripod — Best viewed with 640x480</div>
 </body>
