@@ -3,665 +3,821 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Maker 2008 - Visual Script</title>
+    <title>Visual Pong · Creador de juegos con scripting visual</title>
+    <!-- Font Awesome para iconos sutiles (opcional) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* RESET Y ESTILOS GENERALES */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', 'Lucida Console', monospace;
-        }
-
-        body {
-            background: #26475f; /* azul oscuro GM */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-
-        /* VENTANA PRINCIPAL - como GM */
-        .ventana-gm {
-            width: 1100px;
-            background: #b0b9c9; /* gris GM */
-            border: 4px solid;
-            border-color: #f0f0f0 #6a6a6a #6a6a6a #f0f0f0;
-            border-radius: 0;
-            box-shadow: 4px 4px 8px #1f2f3f;
-            padding: 4px;
-        }
-
-        /* BARRA DE TÍTULO DE VENTANA (como GM) */
-        .titulo-ventana {
-            background: linear-gradient(90deg, #0a2c4e, #296c9c);
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 6px 12px;
-            border: 2px solid;
-            border-color: #e0e0e0 #2b2b2b #2b2b2b #e0e0e0;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-shadow: 2px 2px 0 #1a3f5a;
-            letter-spacing: 1px;
-        }
-
-        .titulo-ventana span {
-            background: #f0c060;
-            color: #202020;
-            font-size: 14px;
-            padding: 2px 16px;
-            border: 2px solid;
-            border-color: #ffffa0 #a0a040 #a0a040 #ffffa0;
-        }
-
-        /* CONTENEDOR COLUMNAS */
-        .contenedor-columnas {
-            display: flex;
-            gap: 12px;
-            padding: 4px;
-        }
-
-        /* PANEL IZQUIERDO: ROOM */
-        .panel-room {
-            flex: 1;
-            background: #8b9bb5;
-            border: 4px solid;
-            border-color: #e0e8f0 #4f5f77 #4f5f77 #e0e8f0;
-            padding: 12px;
-        }
-
-        .sub-titulo {
-            background: #a0b0c8;
-            border: 2px solid;
-            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
-            font-weight: bold;
-            font-size: 16px;
-            padding: 4px 8px;
-            margin-bottom: 12px;
-            text-align: center;
-            color: #101010;
-            text-transform: uppercase;
-        }
-
-        .canvas-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 12px;
-            background: #4a607a;
-            padding: 12px;
-            border: 4px solid;
-            border-color: #708090 #2a3a4a #2a3a4a #708090;
-        }
-
-        canvas {
-            border: 4px solid #2b3f59;
-            background: #b7d0e8;
-            box-shadow: inset 0 0 0 2px #d0e4ff, 4px 4px 0 #1e2f40;
-            image-rendering: pixelated;
-        }
-
-        .info-object {
-            background: #b0c0d0;
-            border: 4px solid;
-            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
-            padding: 8px;
-            font-weight: bold;
-            color: #1e2f3f;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* PANEL DERECHO: SCRIPT VISUAL (estilo GM) */
-        .panel-script {
-            width: 460px;
-            background: #8b9bb5;
-            border: 4px solid;
-            border-color: #e0e8f0 #4f5f77 #4f5f77 #e0e8f0;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* BARRA DE HERRAMIENTAS (iconos de acción) */
-        .toolbar-acciones {
-            background: #a0b0c8;
-            border: 4px solid;
-            border-color: #f0f8ff #5f6f88 #5f6f88 #f0f8ff;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .boton-accion {
-            width: 80px;
-            height: 70px;
-            background: #e0e8f0;
-            border: 4px solid;
-            border-color: #ffffff #8a9ab0 #8a9ab0 #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            color: #101010;
-            box-shadow: 2px 2px 0 #3a4a60;
-            transition: 0.05s linear;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             user-select: none;
-            padding: 4px;
         }
-
-        .boton-accion:active {
-            transform: translate(2px, 2px);
-            box-shadow: none;
-            border-color: #8a9ab0 #ffffff #ffffff #8a9ab0;
+        body {
+            background: #1a1d23;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
         }
-
-        .boton-accion.disabled, .boton-accion:disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            filter: grayscale(0.5);
-        }
-
-        .icono-accion {
-            font-size: 32px;
-            line-height: 1;
-            filter: drop-shadow(2px 2px 0 #a0b0c0);
-        }
-
-        .etiqueta-accion {
-            font-size: 12px;
-            background: #265987;
-            color: white;
-            padding: 2px 6px;
-            margin-top: 2px;
-            border: 2px solid #a0c0e0;
-            text-transform: uppercase;
-        }
-
-        /* CAJA DE SCRIPT (lista de acciones) */
-        .script-container {
-            background: #3a4f69;
-            border: 4px solid;
-            border-color: #708090 #1e2f3f #1e2f3f #708090;
-            padding: 10px;
-            min-height: 320px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .script-lista {
+        /* contenedor principal imita ventana del editor */
+        .godot-editor {
+            width: 1400px;
+            height: 900px;
+            background: #2b2f38;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            overflow: hidden;
+            border: 1px solid #4a4f5a;
         }
-
-        .bloque-accion {
-            background: #d0d8e8;
-            border: 4px solid;
-            border-color: #f8fcff #8a98b0 #8a98b0 #f8fcff;
+        /* barra de menú superior */
+        .top-menu {
+            background: #20232a;
+            padding: 6px 15px;
             display: flex;
             align-items: center;
-            padding: 4px 8px;
-            box-shadow: 2px 2px 0 #1f2f40;
+            gap: 24px;
+            border-bottom: 1px solid #3a3f4a;
+            color: #b0b6c4;
+            font-size: 13px;
+            font-weight: 500;
         }
-
-        .bloque-icono {
-            font-size: 28px;
-            width: 48px;
-            text-align: center;
-            background: #2f4f6f;
-            color: white;
-            border: 2px solid #b0d0f0;
-            margin-right: 12px;
-            padding: 2px;
-            text-shadow: 2px 2px 0 #102030;
+        .top-menu span {
+            cursor: default;
         }
-
-        .bloque-texto {
+        .top-menu i {
+            margin-right: 5px;
+            opacity: 0.8;
+        }
+        .top-menu .spacer {
             flex: 1;
-            font-weight: bold;
-            font-size: 16px;
-            color: #101820;
+        }
+        .top-menu .online-docs {
+            background: #373e4b;
+            padding: 3px 10px;
+            border-radius: 4px;
+            color: #ddd;
+        }
+        /* contenido principal con grid */
+        .main-grid {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        /* panel izquierdo (FileSystem + nodos) */
+        .left-panel {
+            width: 260px;
+            background: #262b33;
+            border-right: 1px solid #3d424c;
+            display: flex;
+            flex-direction: column;
+            color: #b7bdcb;
+            font-size: 12px;
+        }
+        .panel-header {
+            padding: 8px 12px;
+            background: #2f343e;
+            font-weight: 600;
+            border-bottom: 1px solid #3f4551;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        .bloque-controles {
+        .panel-header i {
+            color: #7a8090;
+        }
+        .tree {
+            padding: 10px 0 0 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .tree-item {
+            padding: 4px 0 4px 20px;
             display: flex;
+            align-items: center;
             gap: 6px;
+            cursor: default;
+            border-left: 2px solid transparent;
         }
-
-        .bloque-controles button {
-            background: #c0d0e0;
-            border: 4px solid;
-            border-color: #f0f8ff #7b8ba3 #7b8ba3 #f0f8ff;
-            font-weight: bold;
-            font-size: 18px;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            line-height: 1;
-            color: #101010;
+        .tree-item:hover {
+            background: #3a3f4b;
         }
-
-        .bloque-controles button:active {
-            transform: translate(2px, 2px);
-            border-color: #7b8ba3 #f0f8ff #f0f8ff #7b8ba3;
+        .tree-item i {
+            width: 18px;
+            color: #7e879b;
         }
-
-        .bloque-controles button:disabled {
-            opacity: 0.3;
-            pointer-events: none;
+        .tree-item .vs-icon {
+            background: #5d4e6b;
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 9px;
+            color: #d0bfff;
         }
-
-        /* BOTONES DE CONTROL INFERIORES (estilo GM) */
-        .botones-control {
+        .separator {
+            height: 1px;
+            background: #3d424c;
+            margin: 12px 0;
+        }
+        .favorites {
+            padding: 10px;
+        }
+        .filter-box {
+            background: #1f232a;
+            border: 1px solid #3f4551;
+            border-radius: 4px;
+            margin: 10px;
+            padding: 5px 8px;
             display: flex;
-            gap: 12px;
-            margin-top: 15px;
-            justify-content: flex-end;
+            align-items: center;
+            color: #888;
         }
-
-        .btn-gm {
-            background: #b0c0d0;
-            border: 4px solid;
-            border-color: #f0f8ff #6f7f97 #6f7f97 #f0f8ff;
-            padding: 8px 20px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            text-transform: uppercase;
-            color: #102030;
-            box-shadow: 2px 2px 0 #2a3a4a;
+        .filter-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ddd;
+            margin-left: 5px;
+            width: 100%;
         }
-
-        .btn-gm:active {
-            transform: translate(2px, 2px);
-            box-shadow: none;
-            border-color: #6f7f97 #f0f8ff #f0f8ff #6f7f97;
+        /* panel central (escena + gráfico) */
+        .center-panel {
+            flex: 1;
+            background: #1e2128;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-
-        .btn-gm:disabled {
-            opacity: 0.4;
+        /* pestañas superiores (Scene / Import / etc) */
+        .tabs {
+            background: #1b1e24;
+            display: flex;
+            padding: 0 10px;
+            border-bottom: 1px solid #3a3f4a;
+            gap: 20px;
+        }
+        .tab {
+            padding: 8px 12px 6px;
+            color: #9aa1af;
+            font-size: 13px;
+            border-bottom: 2px solid transparent;
+            cursor: default;
+        }
+        .tab.active {
+            color: #e0e6f5;
+            border-bottom: 2px solid #5d7dbb;
+        }
+        /* vista previa del juego (canvas) */
+        .game-preview {
+            height: 200px;
+            background: #0f1116;
+            border-bottom: 1px solid #3f4551;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #pongCanvas {
+            width: 400px;
+            height: 180px;
+            background: #1c1f27;
+            border-radius: 6px;
+            box-shadow: inset 0 0 10px #00000055;
+            image-rendering: crisp-edges;
+        }
+        /* área de scripting visual (graph) */
+        .graph-area {
+            flex: 1;
+            background: #1a1d25;
+            position: relative;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 1px 1px, #3a4050 1px, transparent 0);
+            background-size: 30px 30px;
+        }
+        #graphContainer {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: default;
+        }
+        /* nodos arrastrables */
+        .visual-node {
+            position: absolute;
+            background: #313844;
+            border: 1px solid #545b6b;
+            border-radius: 8px;
+            min-width: 150px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.6);
+            color: #dde2f0;
+            font-size: 12px;
+            pointer-events: all;
+            z-index: 10;
+        }
+        .node-header {
+            background: #232833;
+            padding: 8px 10px;
+            border-radius: 7px 7px 0 0;
+            font-weight: 600;
+            border-bottom: 1px solid #4a5162;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: move;
+        }
+        .node-header i {
+            color: #abb7d4;
+        }
+        .node-content {
+            padding: 12px 8px 8px 8px;
+        }
+        .port-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            align-items: center;
+        }
+        .port {
+            width: 16px;
+            height: 16px;
+            background: #4f5b70;
+            border: 2px solid #818fa7;
+            border-radius: 50%;
+            cursor: crosshair;
+            transition: 0.1s;
+        }
+        .port.left-port {
+            margin-right: 8px;
+        }
+        .port.right-port {
+            margin-left: 8px;
+        }
+        .port:hover {
+            background: #7d95c0;
+            border-color: #b7ceff;
+            transform: scale(1.2);
+        }
+        .port-label {
+            color: #b5c4e0;
+            font-size: 11px;
+        }
+        /* Inspector (panel derecho) */
+        .right-panel {
+            width: 240px;
+            background: #262b33;
+            border-left: 1px solid #3d424c;
+            display: flex;
+            flex-direction: column;
+            color: #b7bdcb;
+        }
+        .inspector-section {
+            padding: 12px;
+            border-bottom: 1px solid #373d48;
+        }
+        .inspector-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        .inspector-value {
+            background: #1e222a;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #ccdcff;
+        }
+        .badge-function {
+            background: #3b3f5c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        /* panel inferior (output) */
+        .bottom-panel {
+            height: 140px;
+            background: #20232b;
+            border-top: 1px solid #3f4551;
+            display: flex;
+            flex-direction: column;
+        }
+        .bottom-tabs {
+            display: flex;
+            padding: 4px 15px;
+            background: #1b1f27;
+            gap: 20px;
+            font-size: 12px;
+            color: #8f97a8;
+        }
+        .bottom-content {
+            padding: 8px 15px;
+            color: #a0a8bb;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        /* canvas de conexiones (overlay) */
+        .connection-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
+            z-index: 5;
         }
-
-        /* mensajes estilo GM */
-        .mensaje-gm {
-            margin-top: 12px;
-            background: #e0e8f0;
-            border: 4px solid;
-            border-color: #ffffff #7b8ba3 #7b8ba3 #ffffff;
-            padding: 8px;
+        #connectionCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* botón run/stop (extra) */
+        .run-btn {
+            background: #3f564b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 16px;
             font-weight: bold;
-            color: #102030;
-            text-align: center;
+            margin-left: 20px;
+            cursor: pointer;
+        }
+        .run-btn:hover {
+            background: #4e7868;
         }
     </style>
 </head>
 <body>
-<div class="ventana-gm">
-    <!-- Barra de título principal -->
-    <div class="titulo-ventana">
-        🎮 GameMaker 8.0 - Visual Script 2008
-        <span>drag & drop style</span>
+<div class="godot-editor">
+    <!-- Barra superior -->
+    <div class="top-menu">
+        <span><i class="fas fa-cube"></i> Scene</span>
+        <span><i class="fas fa-project-diagram"></i> Project</span>
+        <span><i class="fas fa-bug"></i> Debug</span>
+        <span><i class="fas fa-pen"></i> Editor</span>
+        <span><i class="fas fa-question-circle"></i> Help</span>
+        <span class="spacer"></span>
+        <span class="online-docs"><i class="fas fa-globe"></i> Online Docs</span>
+        <span>Classes</span>
+        <span>Search</span>
+        <span><i class="fas fa-filter"></i></span>
     </div>
 
-    <div class="contenedor-columnas">
-        <!-- PANEL ROOM (juego) -->
-        <div class="panel-room">
-            <div class="sub-titulo">📦 room0 - objeto player</div>
-            <div class="canvas-container">
-                <canvas id="gameCanvas" width="200" height="200"></canvas>
+    <!-- Grid principal -->
+    <div class="main-grid">
+        <!-- IZQUIERDA: FileSystem y librería de nodos -->
+        <div class="left-panel">
+            <div class="panel-header"><i class="fas fa-folder-open"></i> FileSystem</div>
+            <div class="filter-box"><i class="fas fa-search"></i><input placeholder="Filter nodes" value="res://"></div>
+            <div class="tree">
+                <div class="tree-item"><i class="fas fa-folder"></i> res://</div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs <span class="vs-icon">VS</span></div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs <span class="vs-icon">VS</span></div>
+                <div class="tree-item"><i class="fas fa-image"></i> ball.png</div>
+                <div class="tree-item"><i class="fas fa-image"></i> left_pallete.png</div>
+                <div class="tree-item"><i class="fas fa-image"></i> right_pallete.png</div>
+                <div class="tree-item"><i class="fas fa-file"></i> pong.tscn</div>
+                <div class="separator"></div>
+                <div class="panel-header"><i class="fas fa-star"></i> Favorites:</div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs</div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs</div>
+                <div class="tree-item"><i class="fas fa-code-branch"></i> Function</div>
+                <div class="tree-item"><i class="fas fa-shield-alt"></i> collision</div>
             </div>
-            <div class="info-object">
-                <span id="posJugador">posición: (0,0)</span>
-                <span>✨ meta: (4,4)</span>
+            <div style="padding: 10px; color:#7e88a0;">
+                <div><i class="fas fa-cubes"></i> Base Type: Area2D</div>
+                <div><i class="fas fa-list"></i> Members: Valuex, ConstructX</div>
             </div>
         </div>
 
-        <!-- PANEL SCRIPT VISUAL (estilo Game Maker) -->
-        <div class="panel-script">
-            <div class="sub-titulo">🧩 object0 - script (d&d)</div>
-
-            <!-- Barra de herramientas con iconos de acciones -->
-            <div class="toolbar-acciones">
-                <div class="boton-accion" id="btnAddUp" title="Mover arriba">
-                    <div class="icono-accion">⬆️</div>
-                    <div class="etiqueta-accion">UP</div>
-                </div>
-                <div class="boton-accion" id="btnAddDown" title="Mover abajo">
-                    <div class="icono-accion">⬇️</div>
-                    <div class="etiqueta-accion">DOWN</div>
-                </div>
-                <div class="boton-accion" id="btnAddLeft" title="Mover izquierda">
-                    <div class="icono-accion">⬅️</div>
-                    <div class="etiqueta-accion">LEFT</div>
-                </div>
-                <div class="boton-accion" id="btnAddRight" title="Mover derecha">
-                    <div class="icono-accion">➡️</div>
-                    <div class="etiqueta-accion">RIGHT</div>
+        <!-- CENTRO: Vista previa y grafico -->
+        <div class="center-panel">
+            <div class="tabs">
+                <span class="tab active">Scene</span>
+                <span class="tab">Import</span>
+                <span class="tab">res://</span>
+                <span style="flex:1"></span>
+                <span class="tab">File</span>
+                <span class="tab">Edit</span>
+                <span class="tab">Debug</span>
+            </div>
+            <!-- minijuego pong (canvas) -->
+            <div class="game-preview">
+                <canvas id="pongCanvas" width="400" height="180"></canvas>
+            </div>
+            <!-- area de scripting visual con nodos -->
+            <div class="graph-area">
+                <div id="graphContainer">
+                    <!-- nodos se generan con JS -->
+                    <canvas id="connectionCanvas" class="connection-layer"></canvas>
                 </div>
             </div>
+        </div>
 
-            <!-- Contenedor de la lista de script (acciones) -->
-            <div class="script-container">
-                <div id="scriptList" class="script-lista">
-                    <!-- Los bloques se generan dinámicamente -->
-                </div>
+        <!-- DERECHA: Inspector y nodos disponibles -->
+        <div class="right-panel">
+            <div class="panel-header"><i class="fas fa-info-circle"></i> Inspector</div>
+            <div class="inspector-section">
+                <div class="inspector-row"><span>Node:</span><span class="inspector-value">ball</span></div>
+                <div class="inspector-row"><span>direction</span><span class="inspector-value">(1, -1)</span></div>
+                <div class="inspector-row"><span>on_area_entered</span><span class="badge-function">connected</span></div>
+                <div class="inspector-row"><span>value flt</span><span class="inspector-value">0.2</span></div>
             </div>
+            <div class="inspector-section">
+                <div><i class="fas fa-cog"></i> Process</div>
+                <div class="inspector-row"><span>BuiltinFunc</span><span>rand_range</span></div>
+                <div class="inspector-row"><span>ball_dir</span><span class="inspector-value">1</span></div>
+            </div>
+            <div class="inspector-section">
+                <div><i class="fas fa-wave-square"></i> Signals</div>
+                <div>ftlto1</div>
+            </div>
+            <div class="inspector-section">
+                <div><i class="fas fa-shapes"></i> Available Nodes:</div>
+                <div class="tree-item">> Constant</div>
+                <div class="tree-item">> Property</div>
+                <div class="tree-item">> Index</div>
+                <div class="tree-item">> Flow Control</div>
+                <div class="tree-item">> Resource</div>
+                <div class="tree-item">pong.tscn</div>
+            </div>
+        </div>
+    </div>
 
-            <!-- Botones de control: ejecutar, reset, limpiar -->
-            <div class="botones-control">
-                <button class="btn-gm" id="btnRun">▶ EJECUTAR</button>
-                <button class="btn-gm" id="btnResetRoom">⟲ RESET</button>
-                <button class="btn-gm" id="btnClearScript">✖ LIMPIAR</button>
-            </div>
-
-            <!-- Área de mensajes -->
-            <div id="gmMessage" class="mensaje-gm">
-                💾 Arrastra acciones al script (botones)
-            </div>
+    <!-- Panel inferior (Output/Debugger) -->
+    <div class="bottom-panel">
+        <div class="bottom-tabs">
+            <span>Output</span>
+            <span>Debugger</span>
+            <span>Audio</span>
+            <span>Animation</span>
+            <span style="flex:1"></span>
+            <span><i class="fas fa-terminal"></i></span>
+        </div>
+        <div class="bottom-content">
+            [visual script] ball_dir set to -1 from collision<br>
+            [pong] left paddle updated · frame 128
         </div>
     </div>
 </div>
 
 <script>
     (function() {
-        // ---------- CONFIGURACIÓN ----------
-        const GRID_SIZE = 5;
-        const CELL_SIZE = 40;
-        const META = { x: 4, y: 4 };
-
-        // Estado del juego
-        let jugador = { x: 0, y: 0 };
-
-        // Lista de acciones (script visual)
-        let acciones = []; // valores: 'up','down','left','right'
-
-        // Control de ejecución
-        let ejecutando = false;
-        let timeoutId = null;
-
-        // Elementos DOM
-        const canvas = document.getElementById('gameCanvas');
+        // --- Lógica del juego Pong (simple, con IA) ---
+        const canvas = document.getElementById('pongCanvas');
         const ctx = canvas.getContext('2d');
-        const scriptListDiv = document.getElementById('scriptList');
-        const mensajeDiv = document.getElementById('gmMessage');
-        const posJugadorSpan = document.getElementById('posJugador');
+        let gameRunning = true;
 
-        // Botones de acción
-        const btnAddUp = document.getElementById('btnAddUp');
-        const btnAddDown = document.getElementById('btnAddDown');
-        const btnAddLeft = document.getElementById('btnAddLeft');
-        const btnAddRight = document.getElementById('btnAddRight');
-        const btnRun = document.getElementById('btnRun');
-        const btnResetRoom = document.getElementById('btnResetRoom');
-        const btnClearScript = document.getElementById('btnClearScript');
+        // estado del pong
+        let ball = {
+            x: 200, y: 90,
+            vx: 1.7, vy: 1.2,
+            radius: 5
+        };
+        const paddleWidth = 6, paddleHeight = 30;
+        let leftPaddleY = 70, rightPaddleY = 70;
+        const paddleSpeed = 1.5;
 
-        // Colección para habilitar/deshabilitar
-        const todosBotones = [btnAddUp, btnAddDown, btnAddLeft, btnAddRight, btnRun, btnResetRoom, btnClearScript];
-
-        // ---------- DIBUJAR ROOM (estilo GM) ----------
-        function dibujarRoom() {
-            ctx.clearRect(0, 0, 200, 200);
-
-            // cuadrícula estilo GM
-            for (let i = 0; i < GRID_SIZE; i++) {
-                for (let j = 0; j < GRID_SIZE; j++) {
-                    let x = i * CELL_SIZE;
-                    let y = j * CELL_SIZE;
-                    ctx.fillStyle = (i + j) % 2 === 0 ? '#aac6e8' : '#8fb0da';
-                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-                    ctx.strokeStyle = '#4a6c8f';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
-                }
-            }
-
-            // dibujar meta (GM star)
-            let mx = META.x * CELL_SIZE;
-            let my = META.y * CELL_SIZE;
-            ctx.fillStyle = '#e03a3a';
-            ctx.shadowColor = '#f0c060';
-            ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(mx + CELL_SIZE/2, my + CELL_SIZE/2, 15, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#ffffb0';
-            ctx.font = 'bold 24px "Courier New", monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⭐', mx + CELL_SIZE/2, my + CELL_SIZE/2 - 2);
-
-            // dibujar jugador (sprite GM: balón sonriente)
-            let px = jugador.x * CELL_SIZE;
-            let py = jugador.y * CELL_SIZE;
-            // cuerpo
-            ctx.fillStyle = '#fcdb6a';
-            ctx.shadowColor = '#b37b2e';
-            ctx.shadowBlur = 6;
-            ctx.beginPath();
-            ctx.arc(px + CELL_SIZE/2, py + CELL_SIZE/2, 16, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.strokeStyle = '#7f5f2a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-            // ojos
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(px + 25, py + 15, 3, 0, 2*Math.PI);
-            ctx.arc(px + 15, py + 15, 3, 0, 2*Math.PI);
-            ctx.fill();
-            // boca
-            ctx.beginPath();
-            ctx.strokeStyle = '#422013';
-            ctx.lineWidth = 3;
-            ctx.arc(px + 20, py + 27, 6, 0.2, Math.PI - 0.2);
-            ctx.stroke();
-
-            // actualizar info
-            posJugadorSpan.innerText = `posición: (${jugador.x},${jugador.y})`;
+        function resetBall() {
+            ball.x = 200; ball.y = 90;
+            ball.vx = (Math.random() > 0.5 ? 1.5 : -1.5);
+            ball.vy = (Math.random() * 2 - 1) * 1.2;
         }
 
-        // ---------- MANIPULACIÓN DE ACCIONES (script) ----------
-        function renderizarScript() {
-            if (acciones.length === 0) {
-                scriptListDiv.innerHTML = '<div style="padding:20px; text-align:center; background:#5a6f8a; border:4px inset #2f405a; color:#ddd; font-weight:bold;">⬅️ Arrastra acciones aquí</div>';
-                return;
+        function updateGame() {
+            if (!gameRunning) return;
+
+            // mover bola
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // colisiones superior/inferior
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > 180) {
+                ball.vy *= -1;
             }
 
-            let html = '';
-            acciones.forEach((acc, index) => {
-                let icono = '';
-                let texto = '';
-                switch(acc) {
-                    case 'up': icono = '⬆️'; texto = 'MOVER ARRIBA'; break;
-                    case 'down': icono = '⬇️'; texto = 'MOVER ABAJO'; break;
-                    case 'left': icono = '⬅️'; texto = 'MOVER IZQUIERDA'; break;
-                    case 'right': icono = '➡️'; texto = 'MOVER DERECHA'; break;
+            // IA de palas (siguen la bola)
+            if (ball.y > leftPaddleY + paddleHeight/2) leftPaddleY += paddleSpeed;
+            else leftPaddleY -= paddleSpeed;
+            if (ball.y > rightPaddleY + paddleHeight/2) rightPaddleY += paddleSpeed;
+            else rightPaddleY -= paddleSpeed;
+
+            // límites palas
+            leftPaddleY = Math.max(0, Math.min(180 - paddleHeight, leftPaddleY));
+            rightPaddleY = Math.max(0, Math.min(180 - paddleHeight, rightPaddleY));
+
+            // colisión izquierda
+            if (ball.x - ball.radius < 20 && ball.x - ball.radius > 10) {
+                if (ball.y > leftPaddleY && ball.y < leftPaddleY + paddleHeight) {
+                    ball.vx *= -1.05; // efecto
+                    ball.x = 20 + ball.radius;
+                } else if (ball.x < 5) {
+                    resetBall();
                 }
-                html += `<div class="bloque-accion" data-index="${index}">
-                    <div class="bloque-icono">${icono}</div>
-                    <div class="bloque-texto">${texto}</div>
-                    <div class="bloque-controles">
-                        <button class="btn-up" data-index="${index}" ${ejecutando ? 'disabled' : ''}>↑</button>
-                        <button class="btn-down" data-index="${index}" ${ejecutando ? 'disabled' : ''}>↓</button>
-                        <button class="btn-delete" data-index="${index}" ${ejecutando ? 'disabled' : ''}>✖</button>
-                    </div>
-                </div>`;
+            }
+            // colisión derecha
+            if (ball.x + ball.radius > 380 && ball.x + ball.radius < 390) {
+                if (ball.y > rightPaddleY && ball.y < rightPaddleY + paddleHeight) {
+                    ball.vx *= -1.05;
+                    ball.x = 380 - ball.radius;
+                } else if (ball.x > 395) {
+                    resetBall();
+                }
+            }
+
+            drawGame();
+            requestAnimationFrame(updateGame);
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, 400, 180);
+            // fondo
+            ctx.fillStyle = '#1a1e2c';
+            ctx.fillRect(0, 0, 400, 180);
+            // línea central
+            ctx.strokeStyle = '#3f4b62';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(200, 10);
+            ctx.lineTo(200, 170);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // pelota
+            ctx.fillStyle = '#d0e0ff';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2*Math.PI);
+            ctx.fill();
+
+            // palas
+            ctx.fillStyle = '#aab9de';
+            ctx.fillRect(15, leftPaddleY, paddleWidth, paddleHeight);
+            ctx.fillRect(380 - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
+
+            // texto depuración
+            ctx.font = '8px monospace';
+            ctx.fillStyle = '#8b9aca';
+            ctx.fillText('pong preview', 10, 20);
+        }
+
+        updateGame();
+
+        // --- Sistema de nodos visuales y conexiones ---
+        const container = document.getElementById('graphContainer');
+        const connectionCanvas = document.getElementById('connectionCanvas');
+        const ctxLines = connectionCanvas.getContext('2d');
+
+        // ajustar tamaño del canvas de líneas
+        function resizeConnectionCanvas() {
+            const rect = container.getBoundingClientRect();
+            connectionCanvas.width = rect.width;
+            connectionCanvas.height = rect.height;
+            connectionCanvas.style.width = rect.width + 'px';
+            connectionCanvas.style.height = rect.height + 'px';
+            drawAllConnections();
+        }
+        window.addEventListener('resize', resizeConnectionCanvas);
+        const resizeObserver = new ResizeObserver(() => resizeConnectionCanvas());
+        resizeObserver.observe(container);
+
+        // datos de nodos y conexiones
+        let nodes = [];
+        let connections = [];
+        let selectedPortStart = null; // { nodeId, portType, portIndex, element }
+
+        // definición de nodos (coordenadas iniciales)
+        const nodeData = [
+            { id: 'ball', title: 'ball.vs', posX: 80, posY: 60, inputs: [], outputs: ['direction', 'position'] },
+            { id: 'paddle', title: 'paddle.vs', posX: 280, posY: 140, inputs: ['collision'], outputs: ['y'] },
+            { id: 'collision', title: 'collision', posX: 400, posY: 40, inputs: ['area'], outputs: ['obj'] },
+            { id: 'on_area', title: 'on_area_entered', posX: 130, posY: 230, inputs: ['body'], outputs: ['signal'] },
+            { id: 'is_ball', title: 'Is ball.vs?', posX: 350, posY: 260, inputs: ['check'], outputs: ['true','false'] },
+            { id: 'set_dir', title: 'set direction', posX: 520, posY: 180, inputs: ['vector'], outputs: [] }
+        ];
+
+        // crear nodos en el DOM
+        nodeData.forEach((n, index) => {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'visual-node';
+            nodeDiv.id = `node-${n.id}`;
+            nodeDiv.style.left = n.posX + 'px';
+            nodeDiv.style.top = n.posY + 'px';
+            nodeDiv.setAttribute('data-id', n.id);
+
+            // header
+            const header = document.createElement('div');
+            header.className = 'node-header';
+            header.innerHTML = `<i class="fas fa-cube"></i> ${n.title}`;
+            nodeDiv.appendChild(header);
+
+            // content
+            const content = document.createElement('div');
+            content.className = 'node-content';
+
+            // crear puertos de entrada
+            n.inputs.forEach((inp, i) => {
+                const row = document.createElement('div');
+                row.className = 'port-container';
+                row.innerHTML = `
+                    <div class="port left-port" data-port-type="input" data-port-index="${i}" data-node-id="${n.id}"></div>
+                    <span class="port-label">${inp}</span>
+                    <span></span>
+                `;
+                content.appendChild(row);
             });
-            scriptListDiv.innerHTML = html;
+
+            // crear puertos de salida
+            n.outputs.forEach((out, i) => {
+                const row = document.createElement('div');
+                row.className = 'port-container';
+                row.innerHTML = `
+                    <span></span>
+                    <span class="port-label">${out}</span>
+                    <div class="port right-port" data-port-type="output" data-port-index="${i}" data-node-id="${n.id}"></div>
+                `;
+                content.appendChild(row);
+            });
+
+            nodeDiv.appendChild(content);
+            container.appendChild(nodeDiv);
+
+            // guardar referencia
+            nodes.push({
+                id: n.id,
+                element: nodeDiv,
+                inputs: n.inputs,
+                outputs: n.outputs
+            });
+
+            // hacer arrastrable
+            let offsetX, offsetY, isDragging = false;
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const rect = nodeDiv.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                nodeDiv.style.zIndex = 20;
+                e.preventDefault();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const containerRect = container.getBoundingClientRect();
+                let newLeft = e.clientX - containerRect.left - offsetX;
+                let newTop = e.clientY - containerRect.top - offsetY;
+                // límites suaves
+                newLeft = Math.max(0, Math.min(containerRect.width - nodeDiv.offsetWidth, newLeft));
+                newTop = Math.max(0, Math.min(containerRect.height - nodeDiv.offsetHeight, newTop));
+                nodeDiv.style.left = newLeft + 'px';
+                nodeDiv.style.top = newTop + 'px';
+                drawAllConnections(); // redibujar líneas mientras mueve
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (isDragging) {
+                    isDragging = false;
+                    nodeDiv.style.zIndex = 10;
+                    drawAllConnections();
+                }
+            });
+        });
+
+        // manejo de conexiones con puertos
+        function getPortCenter(portEl) {
+            const containerRect = container.getBoundingClientRect();
+            const rect = portEl.getBoundingClientRect();
+            const centerX = rect.left + rect.width/2 - containerRect.left;
+            const centerY = rect.top + rect.height/2 - containerRect.top;
+            return { x: centerX, y: centerY };
         }
 
-        // Agregar acción
-        function agregarAccion(dir) {
-            if (ejecutando) return;
-            acciones.push(dir);
-            renderizarScript();
-            mensajeDiv.innerHTML = `➕ Acción añadida: ${dir}`;
+        function drawAllConnections() {
+            ctxLines.clearRect(0, 0, connectionCanvas.width, connectionCanvas.height);
+            if (!connectionCanvas.width || !connectionCanvas.height) return;
+
+            ctxLines.strokeStyle = '#aaccff';
+            ctxLines.lineWidth = 2.5;
+            ctxLines.shadowColor = '#8ab3ff';
+            ctxLines.shadowBlur = 6;
+
+            connections.forEach(conn => {
+                const startPort = document.querySelector(`[data-node-id="${conn.startNode}"][data-port-index="${conn.startIndex}"][data-port-type="${conn.startType}"]`);
+                const endPort = document.querySelector(`[data-node-id="${conn.endNode}"][data-port-index="${conn.endIndex}"][data-port-type="${conn.endType}"]`);
+                if (startPort && endPort) {
+                    const start = getPortCenter(startPort);
+                    const end = getPortCenter(endPort);
+                    ctxLines.beginPath();
+                    ctxLines.moveTo(start.x, start.y);
+                    // curva bezier
+                    const cp1x = start.x + 50;
+                    const cp1y = start.y;
+                    const cp2x = end.x - 50;
+                    const cp2y = end.y;
+                    ctxLines.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, end.x, end.y);
+                    ctxLines.stroke();
+                }
+            });
+            ctxLines.shadowBlur = 0;
         }
 
-        // Eliminar
-        function eliminarAccion(index) {
-            if (ejecutando) return;
-            if (index >= 0 && index < acciones.length) {
-                acciones.splice(index, 1);
-                renderizarScript();
-            }
-        }
-
-        // Mover arriba
-        function moverArriba(index) {
-            if (ejecutando || index <= 0) return;
-            [acciones[index-1], acciones[index]] = [acciones[index], acciones[index-1]];
-            renderizarScript();
-        }
-
-        // Mover abajo
-        function moverAbajo(index) {
-            if (ejecutando || index >= acciones.length-1) return;
-            [acciones[index], acciones[index+1]] = [acciones[index+1], acciones[index]];
-            renderizarScript();
-        }
-
-        // Limpiar script
-        function limpiarScript() {
-            if (ejecutando) detenerEjecucion();
-            acciones = [];
-            renderizarScript();
-            mensajeDiv.innerHTML = '🧹 Script limpiado.';
-        }
-
-        // Reset jugador
-        function resetJugador() {
-            if (ejecutando) detenerEjecucion();
-            jugador = { x: 0, y: 0 };
-            dibujarRoom();
-            mensajeDiv.innerHTML = '🔄 Jugador reiniciado a (0,0)';
-        }
-
-        // Movimiento con límites
-        function moverJugador(dx, dy) {
-            let nx = jugador.x + dx;
-            let ny = jugador.y + dy;
-            if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
-                jugador.x = nx;
-                jugador.y = ny;
-            }
-            dibujarRoom();
-        }
-
-        // Verificar victoria
-        function checkVictoria() {
-            if (jugador.x === META.x && jugador.y === META.y) {
-                mensajeDiv.innerHTML = '🏆 ¡VICTORIA! ¡Has ganado! 🏆';
-                return true;
-            }
-            return false;
-        }
-
-        // Detener ejecución
-        function detenerEjecucion() {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-                timeoutId = null;
-            }
-            ejecutando = false;
-            habilitarBotones(true);
-            renderizarScript(); // rehabilita botones de bloque
-        }
-
-        function habilitarBotones(estado) {
-            todosBotones.forEach(btn => btn.disabled = !estado);
-        }
-
-        // Ejecutar script paso a paso
-        function ejecutarScript() {
-            if (ejecutando) return;
-            if (acciones.length === 0) {
-                mensajeDiv.innerHTML = '⚠️ No hay acciones en el script.';
+        // eventos en puertos (delegación)
+        container.addEventListener('click', (e) => {
+            const port = e.target.closest('.port');
+            if (!port) {
+                if (selectedPortStart) {
+                    selectedPortStart = null; // cancelar
+                }
                 return;
             }
 
-            ejecutando = true;
-            habilitarBotones(false);
-            renderizarScript(); // deshabilita controles de bloque
-            mensajeDiv.innerHTML = '⚙️ Ejecutando script...';
+            const nodeId = port.dataset.nodeId;
+            const portType = port.dataset.portType;
+            const portIndex = parseInt(port.dataset.portIndex);
 
-            let indice = 0;
-
-            function paso() {
-                if (!ejecutando) return;
-
-                if (indice >= acciones.length) {
-                    mensajeDiv.innerHTML = '✅ Script finalizado.';
-                    detenerEjecucion();
+            if (!selectedPortStart) {
+                // seleccionar primer puerto (solo output puede iniciar, o permitimos ambos pero forzamos lógica)
+                if (portType === 'output') {
+                    selectedPortStart = { nodeId, portType, portIndex, element: port };
+                    port.style.background = '#ffd966';
+                } else {
+                    // si es input, no empezamos
                     return;
                 }
-
-                const acc = acciones[indice];
-                switch(acc) {
-                    case 'up': moverJugador(0, -1); break;
-                    case 'down': moverJugador(0, 1); break;
-                    case 'left': moverJugador(-1, 0); break;
-                    case 'right': moverJugador(1, 0); break;
-                }
-
-                if (checkVictoria()) {
-                    detenerEjecucion();
+            } else {
+                // tenemos un puerto inicio, intentar conectar
+                const start = selectedPortStart;
+                // evitar auto-conexión y solo permitir output->input
+                if (start.nodeId === nodeId) {
+                    selectedPortStart = null;
+                    resetPortStyle(start.element);
                     return;
                 }
-
-                indice++;
-                timeoutId = setTimeout(paso, 400); // velocidad retro
-            }
-
-            paso();
-        }
-
-        // ---------- EVENTOS ----------
-        btnAddUp.addEventListener('click', () => agregarAccion('up'));
-        btnAddDown.addEventListener('click', () => agregarAccion('down'));
-        btnAddLeft.addEventListener('click', () => agregarAccion('left'));
-        btnAddRight.addEventListener('click', () => agregarAccion('right'));
-        btnRun.addEventListener('click', ejecutarScript);
-        btnResetRoom.addEventListener('click', resetJugador);
-        btnClearScript.addEventListener('click', limpiarScript);
-
-        // Delegación para botones de los bloques
-        scriptListDiv.addEventListener('click', (e) => {
-            if (ejecutando) return;
-            const target = e.target;
-            if (target.classList.contains('btn-up')) {
-                const idx = target.getAttribute('data-index');
-                if (idx !== null) moverArriba(parseInt(idx));
-            } else if (target.classList.contains('btn-down')) {
-                const idx = target.getAttribute('data-index');
-                if (idx !== null) moverAbajo(parseInt(idx));
-            } else if (target.classList.contains('btn-delete')) {
-                const idx = target.getAttribute('data-index');
-                if (idx !== null) eliminarAccion(parseInt(idx));
+                if (start.portType === 'output' && portType === 'input') {
+                    // crear conexión
+                    connections.push({
+                        startNode: start.nodeId,
+                        startIndex: start.portIndex,
+                        startType: 'output',
+                        endNode: nodeId,
+                        endIndex: portIndex,
+                        endType: 'input'
+                    });
+                } else if (start.portType === 'input' && portType === 'output') {
+                    // inversa, también válida (output siempre inicio)
+                    connections.push({
+                        startNode: nodeId,
+                        startIndex: portIndex,
+                        startType: 'output',
+                        endNode: start.nodeId,
+                        endIndex: start.portIndex,
+                        endType: 'input'
+                    });
+                }
+                // reset estilo
+                resetPortStyle(start.element);
+                selectedPortStart = null;
+                drawAllConnections();
             }
         });
 
-        // Inicializar
-        dibujarRoom();
-        // precargar algunas acciones para que se vea con contenido
-        acciones = ['up', 'right', 'down', 'right', 'up'];
-        renderizarScript();
-        mensajeDiv.innerHTML = '🎲 Script de demostración. ¡Ejecuta!';
+        function resetPortStyle(portEl) {
+            if (portEl) portEl.style.background = '';
+        }
+
+        // limpiar selección si se hace clic en fondo
+        container.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.port') && selectedPortStart) {
+                resetPortStyle(selectedPortStart.element);
+                selectedPortStart = null;
+                drawAllConnections();
+            }
+        });
+
+        // inicializar canvas y dibujar líneas periódicamente
+        setTimeout(() => {
+            resizeConnectionCanvas();
+            drawAllConnections();
+        }, 100);
+        setInterval(drawAllConnections, 200); // por si acaso
+
+        // agregar un par de conexiones de ejemplo para que se vea funcional
+        setTimeout(() => {
+            connections.push({ startNode: 'ball', startIndex: 0, startType: 'output', endNode: 'set_dir', endIndex: 0, endType: 'input' });
+            connections.push({ startNode: 'collision', startIndex: 0, startType: 'output', endNode: 'is_ball', endIndex: 0, endType: 'input' });
+            drawAllConnections();
+        }, 500);
+
+        // botón de ejecución (opcional, lo añadimos visualmente)
+        const runButton = document.createElement('button');
+        runButton.innerText = '▶ Ejecutar';
+        runButton.className = 'run-btn';
+        document.querySelector('.top-menu').appendChild(runButton);
+        runButton.addEventListener('click', () => {
+            gameRunning = !gameRunning;
+            runButton.innerText = gameRunning ? '⏸ Pausa' : '▶ Ejecutar';
+            if (gameRunning) updateGame();
+        });
     })();
 </script>
 </body>
