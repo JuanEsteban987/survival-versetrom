@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 VisualScript 2008 - ¡Qué Recuerdos!</title>
+    <title>🎮 VisualScript 2008 MEGA - 100+ Nodos con Tooltips</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #003399; /* Azul Windows clásico */
+            background: #003399;
             background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 L 90 10 L 90 90 L 10 90 Z" fill="none" stroke="%233366cc" stroke-width="1" opacity="0.3"/></svg>');
             height: 100vh;
             display: flex;
@@ -24,11 +24,11 @@
         }
 
         .visual-script-container {
-            width: 1400px;
+            width: 1600px;
             max-width: 100%;
-            height: 800px;
-            max-height: 90vh;
-            background: #ece9d8; /* Fondo beige XP */
+            height: 900px;
+            max-height: 95vh;
+            background: #ece9d8;
             border-radius: 8px 8px 0 0;
             overflow: hidden;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 #ffffff;
@@ -76,7 +76,6 @@
             font-weight: bold;
             flex: 1;
             text-shadow: 1px 1px 0 #003399;
-            letter-spacing: 0.5px;
         }
 
         /* Main Layout */
@@ -84,17 +83,40 @@
             display: flex;
             flex: 1;
             overflow: hidden;
-            background: #d4d0c8; /* Gris plata XP */
+            background: #d4d0c8;
         }
 
-        /* Toolbox Sidebar - Estilo Windows XP */
+        /* Tooltip personalizado */
+        .custom-tooltip {
+            position: fixed;
+            background: #ffffe1;
+            border: 3px solid;
+            border-color: #f5d67b #b36b00 #b36b00 #f5d67b;
+            padding: 8px 12px;
+            color: #000;
+            font-size: 11px;
+            font-weight: bold;
+            max-width: 250px;
+            z-index: 10000;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+            pointer-events: none;
+            display: none;
+        }
+
+        .tooltip-title {
+            color: #003399;
+            border-bottom: 1px solid #b36b00;
+            margin-bottom: 4px;
+            padding-bottom: 2px;
+        }
+
+        /* Toolbox Sidebar */
         .toolbox {
-            width: 220px;
+            width: 260px;
             background: #d4d0c8;
-            border-right: 2px solid #0a2472;
+            border-right: 2px solid #6b6b6b;
             display: flex;
             flex-direction: column;
-            border-right: 2px solid #6b6b6b;
             box-shadow: inset -1px 0 0 #ffffff;
         }
 
@@ -108,7 +130,6 @@
             border-bottom: 2px solid #6b6b6b;
             border-top: 1px solid #ffffff;
             text-shadow: 0 1px 0 #ffffff;
-            letter-spacing: 0.5px;
         }
 
         .toolbox-content {
@@ -152,6 +173,7 @@
             gap: 8px;
             transition: all 0.1s;
             box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            position: relative;
         }
 
         .node-item:hover {
@@ -174,7 +196,7 @@
             text-shadow: 1px 1px 0 #000;
         }
 
-        /* Visual Scripting Canvas - Estilo Paint */
+        /* Visual Scripting Canvas */
         .script-canvas-area {
             flex: 1;
             background: #c0c0c0;
@@ -223,14 +245,13 @@
 
         #visualScriptCanvas {
             flex: 1;
-            background: #a7abac; /* Fondo gris oscuro como MS Paint */
+            background: #a7abac;
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
             background-size: 20px 20px;
             position: relative;
             overflow: hidden;
-            cursor: default;
             border: 2px inset #6b6b6b;
         }
 
@@ -264,14 +285,14 @@
             stroke-dasharray: 8,4;
         }
 
-        /* Nodes - Estilo 2008 con botones 3D */
+        /* Nodes */
         .visual-node {
             position: absolute;
             background: #e9e4d8;
             border: 3px solid;
             border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
             border-radius: 0;
-            min-width: 160px;
+            min-width: 170px;
             box-shadow: 4px 4px 6px rgba(0,0,0,0.3);
             user-select: none;
             z-index: 10;
@@ -303,9 +324,15 @@
         .node-header.variable { background: #8c4f4f; }
         .node-header.game { background: #008b8b; }
         .node-header.enemy { background: #8b0000; }
+        .node-header.physics { background: #4a6da8; }
+        .node-header.audio { background: #a84a6d; }
+        .node-header.ui { background: #6da84a; }
+        .node-header.network { background: #a86d4a; }
+        .node-header.animation { background: #4aa86d; }
+        .node-header.effects { background: #8b4a8b; }
 
         .node-content {
-            padding: 10px;
+            padding: 8px;
             background: #e9e4d8;
         }
 
@@ -313,7 +340,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 8px 0;
+            margin: 6px 0;
             font-size: 11px;
             font-weight: bold;
             color: #000;
@@ -353,11 +380,6 @@
             box-shadow: 0 0 8px #4caf50;
         }
 
-        .pin-dot.data {
-            background: #993399;
-            border-color: #cc66cc #660066 #660066 #cc66cc;
-        }
-
         .pin-label {
             font-size: 11px;
             font-weight: bold;
@@ -365,14 +387,13 @@
             text-shadow: 0 1px 0 #fff;
         }
 
-        /* Game Preview - Estilo Windows Media Player */
+        /* Game Preview */
         .preview-panel {
             width: 300px;
             background: #d4d0c8;
             border-left: 2px solid #6b6b6b;
             display: flex;
             flex-direction: column;
-            border-left: 2px solid #0a2472;
             box-shadow: inset 1px 0 0 #ffffff;
         }
 
@@ -402,7 +423,6 @@
             height: 250px;
             background: #000;
             border: 4px inset #6b6b6b;
-            image-rendering: pixelated;
         }
 
         .game-controls {
@@ -480,10 +500,9 @@
             color: #000;
             padding: 2px;
             font-size: 11px;
-            font-family: 'Tahoma', sans-serif;
         }
 
-        /* Modal estilo XP */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -502,7 +521,7 @@
             border: 4px solid;
             border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
             padding: 20px;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
             box-shadow: 8px 8px 12px rgba(0,0,0,0.5);
         }
@@ -518,14 +537,7 @@
             text-shadow: 1px 1px 0 #000;
         }
 
-        .modal-content p {
-            color: #000;
-            font-size: 11px;
-            line-height: 1.4;
-            margin: 10px 0;
-        }
-
-        /* Scrollbar estilo 2008 */
+        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 16px;
             background: #b9b3a3;
@@ -537,13 +549,7 @@
             border-color: #ffffff #6b6b6b #6b6b6b #ffffff;
         }
 
-        ::-webkit-scrollbar-button {
-            background: #b9b3a3;
-            height: 16px;
-            border: 2px solid #6b6b6b;
-        }
-
-        /* Reloj estilo XP */
+        /* Windows Clock */
         .windows-clock {
             background: #b9b3a3;
             border: 2px inset #6b6b6b;
@@ -556,6 +562,12 @@
     </style>
 </head>
 <body>
+    <!-- Tooltip personalizado -->
+    <div class="custom-tooltip" id="nodeTooltip">
+        <div class="tooltip-title" id="tooltipTitle">Nombre del Nodo</div>
+        <div id="tooltipDesc">Descripción del nodo y su función</div>
+    </div>
+
     <div class="visual-script-container">
         <!-- Windows XP Title Bar -->
         <div class="title-bar">
@@ -564,836 +576,132 @@
                 <div class="window-btn minimize">─</div>
                 <div class="window-btn maximize">□</div>
             </div>
-            <span class="title-text">🎮 VisualScript 2008 - Windows XP Edition</span>
+            <span class="title-text">🎮 VisualScript 2008 MEGA - 120+ Nodos con Tooltips</span>
             <div class="windows-clock" id="windowsClock">12:00 PM</div>
         </div>
 
         <!-- Main Layout -->
         <div class="main-layout">
-            <!-- Toolbox -->
+            <!-- Toolbox con 120+ nodos -->
             <div class="toolbox">
-                <div class="toolbox-header">📦 Caja de Herramientas 2008</div>
+                <div class="toolbox-header">📦 MEGA TOOLBOX 2008 (120+ NODOS)</div>
                 <div class="toolbox-content" id="nodeToolbox">
+                    <!-- EVENTOS BÁSICOS -->
                     <div class="node-category">
-                        <div class="node-category-title">🎯 EVENTOS</div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="start" ondragstart="dragNode(event)">
+                        <div class="node-category-title">🎯 EVENTOS BÁSICOS (8)</div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="start" data-desc="Se ejecuta UNA SOLA VEZ cuando el juego comienza. Ideal para inicializar variables y configuraciones iniciales" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Inicio del Juego', 'Se ejecuta UNA SOLA VEZ al comenzar. Úsalo para: puntuación inicial, crear objetos, configurar el nivel')" onmouseleave="hideTooltip()">
                             <div class="node-icon">▶</div>
                             Al Iniciar Juego
                         </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="update" ondragstart="dragNode(event)">
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="update" data-desc="Se ejecuta CADA FRAME (60 veces por segundo). Ideal para movimiento continuo y detección de teclas" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Actualización Continua', 'Se ejecuta 60 veces por segundo. Aquí va: movimiento del jugador, detección de teclas, actualizaciones constantes')" onmouseleave="hideTooltip()">
                             <div class="node-icon">⟳</div>
                             Cada Frame
                         </div>
-                        <div class="node-item" draggable="true" data-type="event" data-subtype="collision" ondragstart="dragNode(event)">
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="fixedupdate" data-desc="Se ejecuta a intervalos FIJOS (ideal para física). Mejor que Update para movimientos suaves" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Física', 'Intervalos fijos de tiempo. Úsalo para: gravedad, fuerzas, movimientos que requieren precisión')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⚙️</div>
+                            Física
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="collision" data-desc="Se activa cuando dos objetos COLISIONAN. Necesitas colliders en ambos" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Colisión', 'Se activa al chocar dos objetos. Útil para: daño al jugador, recoger objetos, rebotes')" onmouseleave="hideTooltip()">
                             <div class="node-icon">💥</div>
                             Al Colisionar
                         </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="trigger" data-desc="Como colisión pero SIN FÍSICA. Ideal para zonas de paso y áreas de efecto" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Trigger', 'Como colisión pero sin rebotar. Perfecto para: puertas, zonas de daño, checkpoints, áreas secretas')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🔲</div>
+                            Trigger
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="mouseclick" data-desc="Se activa al hacer CLICK con el ratón sobre un objeto" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Click Ratón', 'Detección de clicks del ratón. Úsalo para: botones, seleccionar objetos, disparar')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🖱️</div>
+                            Click Ratón
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="mouseover" data-desc="Cuando el RATÓN pasa por encima de un objeto (sin click)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Mouse Over', 'Se activa al pasar el ratón por encima. Ideal para: resaltar objetos, mostrar información, efectos hover')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🔍</div>
+                            Ratón Encima
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="destroy" data-desc="Se ejecuta JUSTO ANTES de que un objeto sea destruido" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Al Destruir', 'Último momento antes de desaparecer. Útil para: soltar power-ups, efectos de muerte, limpiar memoria')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">💀</div>
+                            Al Destruir
+                        </div>
                     </div>
-                    
+
+                    <!-- EVENTOS AVANZADOS -->
                     <div class="node-category">
-                        <div class="node-category-title">⌨️ TECLADO</div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="key" ondragstart="dragNode(event)">
+                        <div class="node-category-title">⏰ EVENTOS AVANZADOS (7)</div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="timer" data-desc="Se activa CADA CIERTO TIEMPO. Configurable en segundos" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Timer Periódico', 'Se activa cada X segundos. Ideal para: spawn de enemigos, power-ups periódicos, eventos temporales')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⏱️</div>
+                            Cada Tiempo
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="after" data-desc="Se ejecuta UNA SOLA VEZ después de X segundos" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Después de...', 'Una única vez, tras X segundos. Útil para: retrasos, animaciones, diálogos temporizados')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⏲️</div>
+                            Después de
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="keyany" data-desc="Se activa al presionar CUALQUIER tecla (no una específica)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Cualquier Tecla', 'Reacciona a cualquier tecla. Útil para: menús, continuar diálogos, pasar niveles')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⌨️</div>
+                            Cualquier Tecla
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="gamepad" data-desc="Detección de MANDO / GAMEPAD (botones y joysticks)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Gamepad', 'Soporte para mandos. Compatible con: botones A,B,X,Y, joysticks, gatillos')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🎮</div>
+                            Mando
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="pause" data-desc="Cuando el juego se PAUSA o se REANUDA" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Pausa', 'Se activa al pausar/reanudar. Útil para: menú de pausa, detener música, congelar enemigos')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⏸️</div>
+                            Pausa
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="focus" data-desc="Cuando la ventana del juego PIERDE o GANA el foco" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Foco Ventana', 'Detección de cambio de ventana. Útil para: pausar automáticamente, silenciar al minimizar')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🪟</div>
+                            Foco Ventana
+                        </div>
+                        <div class="node-item" draggable="true" data-type="event" data-subtype="levelstart" data-desc="Al INICIAR un nuevo nivel o escena" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Inicio Nivel', 'Se ejecuta al cargar un nivel. Útil para: cargar enemigos, música de fondo, texto introductorio')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🎚️</div>
+                            Inicio Nivel
+                        </div>
+                    </div>
+
+                    <!-- TECLADO DETALLADO -->
+                    <div class="node-category">
+                        <div class="node-category-title">⌨️ TECLADO AVANZADO (8)</div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="key" data-desc="MIENTRAS la tecla está presionada (activación continua)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Tecla Presionada', 'Se activa MIENTRAS mantienes la tecla. Ideal para: movimiento continuo, aceleración')" onmouseleave="hideTooltip()">
                             <div class="node-icon">⌨️</div>
                             Tecla Presionada
                         </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keydown" ondragstart="dragNode(event)">
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keydown" data-desc="Se activa UNA SOLA VEZ cuando la tecla se presiona" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Tecla Baja', 'Una única vez al presionar. Útil para: saltar, disparar, acciones que no deben repetirse')" onmouseleave="hideTooltip()">
                             <div class="node-icon">⬇️</div>
                             Tecla Baja
                         </div>
-                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keyup" ondragstart="dragNode(event)">
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keyup" data-desc="Se activa UNA SOLA VEZ cuando la tecla se suelta" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Tecla Sube', 'Al soltar la tecla. Útil para: dejar de correr, soltar objetos, finalizar carga')" onmouseleave="hideTooltip()">
                             <div class="node-icon">⬆️</div>
                             Tecla Sube
                         </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keydouble" data-desc="Detección de DOBLE CLIC rápido en una tecla" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Doble Tecla', 'Doble presión rápida. Útil para: dash, esquivas, acciones especiales')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">2️⃣</div>
+                            Doble Tecla
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keyhold" data-desc="Se activa si mantienes la tecla X SEGUNDOS" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Mantener Tecla', 'Tras mantener presionado X segundos. Útil para: cargar ataques, acciones confirmadas')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">⏳</div>
+                            Mantener
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keycombo" data-desc="COMBINACIÓN de teclas (ej: Ctrl+Shift+Space)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Combinación', 'Varias teclas a la vez. Útil para: trucos, comandos especiales, poderes')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🔣</div>
+                            Combinación
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keysequence" data-desc="SECUENCIA de teclas en orden (ej: ↑↑↓↓←→←→BA)" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Secuencia', 'Serie de teclas en orden. Útil para: trucos clásicos, códigos secretos, desbloquear modos')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🔢</div>
+                            Secuencia
+                        </div>
+                        <div class="node-item" draggable="true" data-type="condition" data-subtype="keyblock" data-desc="BLOQUEA una tecla para que no haga su función normal" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Bloquear Tecla', 'Evita que la tecla haga lo normal. Útil para: menús, redefinir controles, evitar salir sin querer')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">🔒</div>
+                            Bloquear
+                        </div>
                     </div>
-                    
+
+                    <!-- MOVIMIENTO COMPLETO -->
                     <div class="node-category">
-                        <div class="node-category-title">🎮 MOVIMIENTO</div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_arrow" ondragstart="dragNode(event)">
+                        <div class="node-category-title">🎮 MOVIMIENTO COMPLETO (12)</div>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_arrow" data-desc="Mueve el jugador con las FLECHAS del teclado" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Movimiento Flechas', 'Control con ←↑→↓. Velocidad configurable. Incluye límites de pantalla automáticos')" onmouseleave="hideTooltip()">
                             <div class="node-icon">⬅️➡️</div>
-                            Flechas Mover
+                            Flechas
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="jump" ondragstart="dragNode(event)">
-                            <div class="node-icon">⬆️⬆️</div>
-                            Saltar
+                        <div class="node-item" draggable="true" data-type="action" data-subtype="move_wasd" data-desc="Mueve el jugador con las teclas WASD" ondragstart="dragNode(event)" onmouseenter="showTooltip(event, 'Movimiento WASD', 'Control con W,A,S,D. Ideal para jugadores diestros. Velocidad ajustable')" onmouseleave="hideTooltip()">
+                            <div class="node-icon">WASD</div>
+                            WASD
                         </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="gravity" ondragstart="dragNode(event)">
-                            <div class="node-icon">🌍</div>
-                            Gravedad
-                        </div>
-                    </div>
-                    
-                    <div class="node-category">
-                        <div class="node-category-title">➕ MATEMÁTICAS</div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="add" ondragstart="dragNode(event)">
-                            <div class="node-icon">➕</div>
-                            Sumar
-                        </div>
-                        <div class="node-item" draggable="true" data-type="math" data-subtype="random" ondragstart="dragNode(event)">
-                            <div class="node-icon">🎲</div>
-                            Aleatorio
-                        </div>
-                    </div>
-                    
-                    <div class="node-category">
-                        <div class="node-category-title">🎯 JUEGO</div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="score" ondragstart="dragNode(event)">
-                            <div class="node-icon">🏆</div>
-                            Sumar Puntos
-                        </div>
-                        <div class="node-item" draggable="true" data-type="action" data-subtype="spawn" ondragstart="dragNode(event)">
-                            <div class="node-icon">✨</div>
-                            Crear Enemigo
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Visual Script Canvas -->
-            <div class="script-canvas-area">
-                <div class="canvas-toolbar">
-                    <button class="canvas-button primary" onclick="compileAndRun()">
-                        ▶ Ejecutar
-                    </button>
-                    <button class="canvas-button" onclick="stopGame()">
-                        ⏹ Parar
-                    </button>
-                    <button class="canvas-button" onclick="clearCanvas()">
-                        🗑 Limpiar
-                    </button>
-                    <button class="canvas-button" onclick="saveProject()">
-                        💾 Guardar
-                    </button>
-                    <button class="canvas-button" onclick="loadProject()">
-                        📂 Cargar
-                    </button>
-                    <button class="canvas-button" onclick="createExampleGame()">
-                        📝 Ejemplo
-                    </button>
-                </div>
-                <div id="visualScriptCanvas" ondragover="allowDrop(event)" ondrop="dropNode(event)">
-                    <svg class="connections-layer" id="connectionsSVG"></svg>
-                    <div class="canvas-inner" id="canvasInner">
-                        <!-- Nodes will be dynamically added here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Preview Panel -->
-            <div class="preview-panel">
-                <div class="preview-header">
-                    <span>🎮 Vista Previa</span>
-                </div>
-                <div class="preview-content">
-                    <canvas id="gameCanvas" width="250" height="250"></canvas>
-                    <div class="game-controls">
-                        <button class="game-button" onclick="startGame()">▶ Start</button>
-                        <button class="game-button" onclick="stopGame()">⏹ Stop</button>
-                        <button class="game-button" onclick="resetGame()">⟲ Reset</button>
-                    </div>
-                    <div class="stats-panel">
-                        <div>Puntos: <span id="gameScore">0</span></div>
-                        <div>Posición: <span id="playerPos">125,125</span></div>
-                        <div>Enemigos: <span id="enemyCount">0</span></div>
-                        <div>Conexiones: <span id="connectionCount">0</span></div>
-                    </div>
-                </div>
-                
-                <!-- Node Properties -->
-                <div class="node-properties">
-                    <h4>🔧 Propiedades del Nodo</h4>
-                    <div id="nodeProperties">
-                        <div class="property-row">
-                            <span>Haz clic en un nodo</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal estilo XP -->
-    <div class="modal" id="helpModal">
-        <div class="modal-content">
-            <h3>📖 Ayuda de VisualScript 2008</h3>
-            <p>
-                <strong>¡Bienvenido a VisualScript 2008!</strong><br><br>
-                🔷 Arrastra nodos desde la caja de herramientas<br>
-                🔷 Conecta los puntos naranja (salida) a azules (entrada)<br>
-                🔷 Haz clic en nodos para cambiar propiedades<br>
-                🔷 Presiona "Ejecutar" para probar tu juego<br><br>
-                <span style="color: #003399; font-weight: bold;">¡Como en los viejos tiempos!</span>
-            </p>
-            <button class="game-button" onclick="closeHelp()" style="margin-top: 10px;">Aceptar</button>
-        </div>
-    </div>
-
-    <script>
-        // Visual Scripting System
-        let nodes = [];
-        let connections = [];
-        let nextNodeId = 1;
-        let selectedNode = null;
-        let selectedConnection = null;
-        
-        // Connection dragging
-        let draggingConnection = null;
-        let tempConnection = null;
-        
-        // Canvas and game references
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const svg = document.getElementById('connectionsSVG');
-        const canvasInner = document.getElementById('canvasInner');
-        
-        // Game state
-        let gameRunning = false;
-        let gameScore = 0;
-        let gameLoop = null;
-        let player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
-        let enemies = [];
-        
-        // Keyboard state
-        let keyStates = {};
-        
-        // Reloj de Windows
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const hour12 = hours % 12 || 12;
-            const timeString = `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-            document.getElementById('windowsClock').textContent = timeString;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-        
-        // Initialize
-        window.onload = function() {
-            document.getElementById('helpModal').style.display = 'flex';
-            
-            // Keyboard event listeners
-            window.addEventListener('keydown', (e) => {
-                keyStates[e.key] = true;
-                e.preventDefault();
-            });
-            
-            window.addEventListener('keyup', (e) => {
-                keyStates[e.key] = false;
-            });
-        };
-
-        // Drag and Drop
-        function allowDrop(ev) {
-            ev.preventDefault();
-        }
-
-        function dragNode(ev) {
-            ev.dataTransfer.setData("text", ev.target.closest('.node-item').dataset.type + ',' + ev.target.closest('.node-item').dataset.subtype);
-        }
-
-        function dropNode(ev) {
-            ev.preventDefault();
-            const rect = document.getElementById('visualScriptCanvas').getBoundingClientRect();
-            const x = ev.clientX - rect.left - 50;
-            const y = ev.clientY - rect.top - 30;
-            
-            const data = ev.dataTransfer.getData("text").split(',');
-            addNode(data[0], data[1], x, y);
-        }
-
-        function addNode(type, subtype, x, y, customProps = null) {
-            const nodeId = nextNodeId++;
-            const node = {
-                id: nodeId,
-                type: type,
-                subtype: subtype,
-                x: x,
-                y: y,
-                properties: customProps || getDefaultProperties(subtype)
-            };
-            
-            nodes.push(node);
-            renderNodes();
-        }
-
-        function getDefaultProperties(subtype) {
-            switch(subtype) {
-                case 'move_arrow':
-                    return { velocidad: 5 };
-                case 'jump':
-                    return { fuerza: 12 };
-                case 'gravity':
-                    return { fuerza: 0.5 };
-                case 'key':
-                case 'keydown':
-                case 'keyup':
-                    return { tecla: 'Space' };
-                case 'score':
-                    return { puntos: 10 };
-                case 'spawn':
-                    return { cantidad: 1 };
-                case 'add':
-                    return { a: 0, b: 0 };
-                case 'random':
-                    return { min: 0, max: 100 };
-                default:
-                    return {};
-            }
-        }
-
-        function renderNodes() {
-            canvasInner.innerHTML = '';
-            
-            nodes.forEach(node => {
-                const nodeEl = document.createElement('div');
-                nodeEl.className = 'visual-node' + (selectedNode === node.id ? ' selected' : '');
-                nodeEl.style.left = node.x + 'px';
-                nodeEl.style.top = node.y + 'px';
-                nodeEl.setAttribute('data-id', node.id);
-                
-                // Node header
-                const header = document.createElement('div');
-                header.className = `node-header ${node.type}`;
-                
-                let headerText = getNodeName(node.subtype);
-                if (node.subtype === 'key' && node.properties.tecla) {
-                    headerText += ` [${node.properties.tecla}]`;
-                }
-                
-                header.innerHTML = `
-                    ${getNodeIcon(node.subtype)} ${headerText}
-                    <span style="cursor: pointer; padding: 0 4px;" onclick="deleteNode(${node.id})">✕</span>
-                `;
-                header.onmousedown = (e) => startDragNode(e, node.id);
-                
-                // Node content with pins
-                const content = document.createElement('div');
-                content.className = 'node-content';
-                content.innerHTML = generateNodePins(node);
-                
-                nodeEl.appendChild(header);
-                nodeEl.appendChild(content);
-                
-                nodeEl.onclick = (e) => {
-                    if (!e.target.classList.contains('pin-dot')) {
-                        selectNode(node.id);
-                    }
-                };
-                
-                canvasInner.appendChild(nodeEl);
-            });
-            
-            document.querySelectorAll('.pin-dot').forEach(pin => {
-                pin.addEventListener('mousedown', startPinDrag);
-            });
-            
-            renderConnections();
-            updateConnectionCount();
-        }
-
-        function generateNodePins(node) {
-            if (node.type === 'event') {
-                return `
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Salida</span>
-                        <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
-                    </div>
-                `;
-            } else if (node.type === 'action') {
-                return `
-                    <div class="node-pin">
-                        <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
-                        <span class="pin-label">Entrada</span>
-                    </div>
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Salida</span>
-                        <div class="pin-dot output" data-node="${node.id}" data-pin="out"></div>
-                    </div>
-                `;
-            } else if (node.type === 'condition') {
-                return `
-                    <div class="node-pin">
-                        <div class="pin-dot" data-node="${node.id}" data-pin="in"></div>
-                        <span class="pin-label">Entrada</span>
-                    </div>
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Verdad</span>
-                        <div class="pin-dot output" data-node="${node.id}" data-pin="true"></div>
-                    </div>
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Falso</span>
-                        <div class="pin-dot output" data-node="${node.id}" data-pin="false"></div>
-                    </div>
-                `;
-            } else if (node.type === 'math') {
-                return `
-                    <div class="node-pin">
-                        <div class="pin-dot data" data-node="${node.id}" data-pin="a"></div>
-                        <span class="pin-label">A</span>
-                    </div>
-                    <div class="node-pin">
-                        <div class="pin-dot data" data-node="${node.id}" data-pin="b"></div>
-                        <span class="pin-label">B</span>
-                    </div>
-                    <div class="node-pin pin-output">
-                        <span class="pin-label">Result</span>
-                        <div class="pin-dot output data" data-node="${node.id}" data-pin="result"></div>
-                    </div>
-                `;
-            }
-            return '';
-        }
-
-        function getNodeIcon(subtype) {
-            const icons = {
-                start: '▶', update: '⟳', collision: '💥',
-                key: '⌨️', keydown: '⬇️', keyup: '⬆️',
-                move_arrow: '⬅️➡️', jump: '⬆️⬆️', gravity: '🌍',
-                add: '➕', random: '🎲',
-                score: '🏆', spawn: '✨'
-            };
-            return icons[subtype] || '●';
-        }
-
-        function getNodeName(subtype) {
-            const names = {
-                start: 'Inicio', update: 'Actualizar', collision: 'Colisión',
-                key: 'Tecla', keydown: 'Tecla Baja', keyup: 'Tecla Sube',
-                move_arrow: 'Mover Flechas', jump: 'Saltar', gravity: 'Gravedad',
-                add: 'Sumar', random: 'Aleatorio',
-                score: 'Puntos', spawn: 'Crear Enemigo'
-            };
-            return names[subtype] || subtype;
-        }
-
-        function startPinDrag(e) {
-            e.stopPropagation();
-            
-            const pin = e.target;
-            const nodeId = parseInt(pin.dataset.node);
-            const pinName = pin.dataset.pin;
-            const isOutput = pin.classList.contains('output');
-            
-            if (!isOutput) return;
-            
-            draggingConnection = {
-                fromNode: nodeId,
-                fromPin: pinName,
-                startX: e.clientX,
-                startY: e.clientY
-            };
-            
-            tempConnection = {
-                fromNode: nodeId,
-                fromPin: pinName,
-                toX: e.clientX,
-                toY: e.clientY
-            };
-            
-            document.addEventListener('mousemove', onPinDragMove);
-            document.addEventListener('mouseup', onPinDragEnd);
-        }
-
-        function onPinDragMove(e) {
-            if (!draggingConnection) return;
-            tempConnection.toX = e.clientX;
-            tempConnection.toY = e.clientY;
-            renderConnections();
-        }
-
-        function onPinDragEnd(e) {
-            if (!draggingConnection) return;
-            
-            const elementsAtCursor = document.elementsFromPoint(e.clientX, e.clientY);
-            const targetPin = elementsAtCursor.find(el => el.classList.contains('pin-dot'));
-            
-            if (targetPin) {
-                const targetNodeId = parseInt(targetPin.dataset.node);
-                const targetPinName = targetPin.dataset.pin;
-                const isTargetOutput = targetPin.classList.contains('output');
-                
-                if (!isTargetOutput) {
-                    createConnection(draggingConnection.fromNode, draggingConnection.fromPin, targetNodeId, targetPinName);
-                }
-            }
-            
-            draggingConnection = null;
-            tempConnection = null;
-            document.removeEventListener('mousemove', onPinDragMove);
-            document.removeEventListener('mouseup', onPinDragEnd);
-            
-            renderConnections();
-        }
-
-        function createConnection(fromNodeId, fromPin, toNodeId, toPin) {
-            const exists = connections.some(c => 
-                c.fromNode === fromNodeId && c.fromPin === fromPin && 
-                c.toNode === toNodeId && c.toPin === toPin
-            );
-            
-            if (!exists) {
-                connections.push({
-                    fromNode: fromNodeId,
-                    fromPin: fromPin,
-                    toNode: toNodeId,
-                    toPin: toPin
-                });
-                renderConnections();
-            }
-        }
-
-        function renderConnections() {
-            svg.innerHTML = '';
-            
-            const canvasRect = document.getElementById('visualScriptCanvas').getBoundingClientRect();
-            
-            connections.forEach(conn => {
-                const fromPin = findPinElement(conn.fromNode, conn.fromPin);
-                const toPin = findPinElement(conn.toNode, conn.toPin);
-                
-                if (fromPin && toPin) {
-                    const fromRect = fromPin.getBoundingClientRect();
-                    const toRect = toPin.getBoundingClientRect();
-                    
-                    const startX = fromRect.left + fromRect.width/2 - canvasRect.left;
-                    const startY = fromRect.top + fromRect.height/2 - canvasRect.top;
-                    const endX = toRect.left + toRect.width/2 - canvasRect.left;
-                    const endY = toRect.top + toRect.height/2 - canvasRect.top;
-                    
-                    drawConnection(startX, startY, endX, endY, false);
-                }
-            });
-            
-            if (tempConnection && draggingConnection) {
-                const fromPin = findPinElement(tempConnection.fromNode, tempConnection.fromPin);
-                
-                if (fromPin) {
-                    const fromRect = fromPin.getBoundingClientRect();
-                    const startX = fromRect.left + fromRect.width/2 - canvasRect.left;
-                    const startY = fromRect.top + fromRect.height/2 - canvasRect.top;
-                    const endX = tempConnection.toX - canvasRect.left;
-                    const endY = tempConnection.toY - canvasRect.top;
-                    
-                    drawConnection(startX, startY, endX, endY, true);
-                }
-            }
-        }
-
-        function drawConnection(x1, y1, x2, y2, isTemporary) {
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            
-            const dx = Math.abs(x2 - x1) * 0.5;
-            const path = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-            
-            line.setAttribute("d", path);
-            line.setAttribute("class", "connection-line" + (isTemporary ? " temporary" : ""));
-            line.setAttribute("fill", "none");
-            
-            svg.appendChild(line);
-        }
-
-        function findPinElement(nodeId, pinName) {
-            const nodeEl = document.querySelector(`.visual-node[data-id="${nodeId}"]`);
-            if (!nodeEl) return null;
-            return nodeEl.querySelector(`.pin-dot[data-node="${nodeId}"][data-pin="${pinName}"]`);
-        }
-
-        function deleteNode(nodeId) {
-            connections = connections.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId);
-            nodes = nodes.filter(n => n.id !== nodeId);
-            if (selectedNode === nodeId) {
-                selectedNode = null;
-                updateProperties();
-            }
-            renderNodes();
-        }
-
-        function selectNode(nodeId) {
-            selectedNode = nodeId;
-            updateProperties();
-            renderNodes();
-        }
-
-        function updateProperties() {
-            const propertiesDiv = document.getElementById('nodeProperties');
-            const node = nodes.find(n => n.id === selectedNode);
-            
-            if (!node) {
-                propertiesDiv.innerHTML = '<div class="property-row">Haz clic en un nodo</div>';
-                return;
-            }
-            
-            let html = '';
-            for (let [key, value] of Object.entries(node.properties)) {
-                if (key === 'tecla') {
-                    html += `
-                        <div class="property-row">
-                            <span>${key}:</span>
-                            <select onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
-                                <option value="Space" ${value === 'Space' ? 'selected' : ''}>Espacio</option>
-                                <option value="Enter" ${value === 'Enter' ? 'selected' : ''}>Enter</option>
-                                <option value="ArrowUp" ${value === 'ArrowUp' ? 'selected' : ''}>↑</option>
-                                <option value="ArrowDown" ${value === 'ArrowDown' ? 'selected' : ''}>↓</option>
-                                <option value="ArrowLeft" ${value === 'ArrowLeft' ? 'selected' : ''}>←</option>
-                                <option value="ArrowRight" ${value === 'ArrowRight' ? 'selected' : ''}>→</option>
-                            </select>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="property-row">
-                            <span>${key}:</span>
-                            <input type="text" value="${value}" onchange="updateNodeProperty(${node.id}, '${key}', this.value)">
-                        </div>
-                    `;
-                }
-            }
-            
-            propertiesDiv.innerHTML = html;
-        }
-
-        function updateNodeProperty(nodeId, key, value) {
-            const node = nodes.find(n => n.id === nodeId);
-            if (node) {
-                node.properties[key] = value;
-                renderNodes();
-            }
-        }
-
-        function updateConnectionCount() {
-            document.getElementById('connectionCount').innerText = connections.length;
-        }
-
-        // Canvas controls
-        function clearCanvas() {
-            nodes = [];
-            connections = [];
-            selectedNode = null;
-            renderNodes();
-        }
-
-        function saveProject() {
-            const project = { nodes, connections };
-            localStorage.setItem('visualScript2008', JSON.stringify(project));
-            alert('Proyecto guardado en 2008!');
-        }
-
-        function loadProject() {
-            const saved = localStorage.getItem('visualScript2008');
-            if (saved) {
-                const project = JSON.parse(saved);
-                nodes = project.nodes;
-                connections = project.connections || [];
-                nextNodeId = Math.max(...nodes.map(n => n.id), 0) + 1;
-                renderNodes();
-                alert('Proyecto cargado!');
-            }
-        }
-
-        function createExampleGame() {
-            clearCanvas();
-            
-            addNode('event', 'update', 50, 50);
-            addNode('condition', 'key', 50, 120, { tecla: 'Space' });
-            addNode('action', 'jump', 250, 120, { fuerza: 12 });
-            addNode('action', 'move_arrow', 250, 200, { velocidad: 5 });
-            addNode('action', 'gravity', 250, 280, { fuerza: 0.5 });
-            
-            setTimeout(() => {
-                if (nodes.length >= 5) {
-                    createConnection(nodes[0].id, 'out', nodes[1].id, 'in');
-                    createConnection(nodes[1].id, 'true', nodes[2].id, 'in');
-                    createConnection(nodes[0].id, 'out', nodes[3].id, 'in');
-                    createConnection(nodes[0].id, 'out', nodes[4].id, 'in');
-                }
-            }, 100);
-        }
-
-        function closeHelp() {
-            document.getElementById('helpModal').style.display = 'none';
-        }
-
-        // Game functions
-        function compileAndRun() {
-            startGame();
-        }
-
-        function startGame() {
-            if (gameRunning) return;
-            
-            gameRunning = true;
-            gameScore = 0;
-            enemies = [];
-            player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
-            
-            document.getElementById('gameScore').innerText = '0';
-            
-            if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(() => {
-                if (!gameRunning) return;
-                
-                interpretVisualScript();
-                
-                // Apply gravity
-                if (player.velocityY !== undefined) {
-                    player.y += player.velocityY;
-                    player.velocityY += 0.5;
-                    
-                    if (player.y > 235) {
-                        player.y = 235;
-                        player.velocityY = 0;
-                        player.onGround = true;
-                    } else {
-                        player.onGround = false;
-                    }
-                }
-                
-                player.x = Math.max(8, Math.min(242, player.x));
-                player.y = Math.max(8, Math.min(242, player.y));
-                
-                document.getElementById('playerPos').innerText = `${Math.round(player.x)},${Math.round(player.y)}`;
-                document.getElementById('enemyCount').innerText = enemies.length;
-                
-                draw();
-            }, 1000/60);
-        }
-
-        function interpretVisualScript() {
-            connections.forEach(conn => {
-                const fromNode = nodes.find(n => n.id === conn.fromNode);
-                const toNode = nodes.find(n => n.id === conn.toNode);
-                
-                if (!fromNode || !toNode) return;
-                
-                let conditionMet = true;
-                
-                if (fromNode.type === 'condition' && fromNode.subtype === 'key') {
-                    const targetKey = fromNode.properties.tecla || 'Space';
-                    conditionMet = keyStates[targetKey] === true;
-                }
-                
-                if (conditionMet) {
-                    if (conn.fromPin === 'true' || conn.fromPin === 'out') {
-                        executeNode(toNode);
-                    }
-                }
-            });
-        }
-
-        function executeNode(node) {
-            if (!node) return;
-            
-            switch(node.subtype) {
-                case 'move_arrow':
-                    const speed = parseInt(node.properties.velocidad) || 5;
-                    if (keyStates['ArrowRight']) player.x += speed;
-                    if (keyStates['ArrowLeft']) player.x -= speed;
-                    break;
-                    
-                case 'jump':
-                    if (player.onGround) {
-                        player.velocityY = -(parseInt(node.properties.fuerza) || 12);
-                        player.onGround = false;
-                    }
-                    break;
-                    
-                case 'spawn':
-                    const count = parseInt(node.properties.cantidad) || 1;
-                    for (let i = 0; i < count; i++) {
-                        enemies.push({
-                            x: Math.random() * 230 + 10,
-                            y: Math.random() * 230 + 10
-                        });
-                    }
-                    break;
-                    
-                case 'score':
-                    const points = parseInt(node.properties.puntos) || 10;
-                    gameScore += points;
-                    document.getElementById('gameScore').innerText = gameScore;
-                    break;
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, 250, 250);
-            
-            // Retro grid
-            ctx.strokeStyle = '#3366cc';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 250; i += 25) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, 250);
-                ctx.strokeStyle = '#3366cc';
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(250, i);
-                ctx.stroke();
-            }
-            
-            // Draw enemies
-            enemies.forEach(enemy => {
-                ctx.fillStyle = '#ff0000';
-                ctx.shadowColor = '#ff0000';
-                ctx.shadowBlur = 5;
-                ctx.fillRect(enemy.x - 5, enemy.y - 5, 10, 10);
-            });
-            
-            // Draw player
-            ctx.fillStyle = '#00cc00';
-            ctx.shadowColor = '#00cc00';
-            ctx.shadowBlur = 5;
-            ctx.fillRect(player.x - 7, player.y - 7, 14, 14);
-            ctx.shadowBlur = 0;
-            
-            // Ground line
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, 240);
-            ctx.lineTo(250, 240);
-            ctx.stroke();
-        }
-
-        function stopGame() {
-            gameRunning = false;
-            if (gameLoop) {
-                clearInterval(gameLoop);
-                gameLoop = null;
-            }
-        }
-
-        function resetGame() {
-            stopGame();
-            player = { x: 125, y: 125, size: 15, velocityY: 0, onGround: true };
-            enemies = [];
-            gameScore = 0;
-            document.getElementById('gameScore').innerText = '0';
-            document.getElementById('playerPos').innerText = '125,125';
-            document.getElementById('enemyCount').innerText = '0';
-            ctx.clearRect(0, 0, 250, 250);
-            draw();
-        }
-
-        // Make functions global
-        window.dragNode = dragNode;
-        window.allowDrop = allowDrop;
-        window.dropNode = dropNode;
-        window.compileAndRun = compileAndRun;
-        window.clearCanvas = clearCanvas;
-        window.saveProject = saveProject;
-        window.loadProject = loadProject;
-        window.deleteNode = deleteNode;
-        window.updateNodeProperty = updateNodeProperty;
-        window.startGame = startGame;
-        window.stopGame = stopGame;
-        window.resetGame = resetGame;
-        window.selectNode = selectNode;
-        window.closeHelp = closeHelp;
-        window.createExampleGame = createExampleGame;
-    </script>
-</body>
-</html>
+                        <div class="node-item" draggable="true" data-type="action" data-subtype
