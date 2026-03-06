@@ -3,741 +3,659 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Creador de juegos Visual Script · estética 2008</title>
-    <!-- Blockly library (estable, versión 2008 style pero con tecnología actual) -->
-    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
-    <!-- Estilo retro-futurista 2008: glossy, reflejos, curvas suaves, gradientes -->
+    <title>🎮 Visual Node Script · estética 2008</title>
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            user-select: none;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle at 20% 30%, #c7e9ff, #7eb0d0);
+            margin: 0;
             min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #a8d5ff, #4f8bc9);
+            font-family: 'Segoe UI', 'Tahoma', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            margin: 0;
-            box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
         }
 
-        /* contenedor principal — cristal aero */
+        /* Ventana principal con cristal aero */
         .main-window {
-            max-width: 1300px;
-            width: 100%;
+            width: 1400px;
+            max-width: 100%;
             background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(2px);
-            border-radius: 25px 25px 20px 20px;
-            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.5), inset 0 1px 4px rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,255,255,0.7);
-            padding: 20px 25px;
+            backdrop-filter: blur(4px);
+            border-radius: 35px 35px 25px 25px;
+            box-shadow: 0 25px 45px rgba(0, 20, 40, 0.6), inset 0 1px 5px rgba(255,255,255,0.9);
+            border: 2px solid rgba(255,255,255,0.8);
+            padding: 25px;
         }
 
-        /* cabecera glossy como en Windows Vista / Leopard */
+        /* cabecera glossy */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(230,245,255,0.8) 50%, rgba(190,220,240,0.7) 100%);
-            border-radius: 30px 30px 15px 15px;
-            padding: 12px 30px;
-            margin-bottom: 25px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(220,240,255,0.9) 60%, rgba(170,210,240,0.8) 100%);
+            border-radius: 50px 50px 30px 30px;
+            padding: 15px 40px;
+            margin-bottom: 30px;
             border: 1px solid white;
-            box-shadow: 0 5px 10px rgba(0,30,60,0.2), inset 0 1px 5px white;
-            backdrop-filter: blur(1px);
+            box-shadow: 0 7px 15px #1e3f5e, inset 0 2px 8px white;
         }
 
         .header h1 {
-            font-size: 2.4rem;
+            font-size: 2.8rem;
             font-weight: 500;
-            text-shadow: 0 2px 5px white, 0 0 10px #b0e0ff;
-            color: #1b4e6e;
-            letter-spacing: -0.5px;
+            color: #003153;
+            text-shadow: 0 3px 5px white, 0 0 15px #b7e1ff;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .header h1 span {
-            font-size: 1.8rem;
-            background: #ffffffc0;
-            padding: 5px 15px;
-            border-radius: 40px;
-            box-shadow: inset 0 -2px 0 #afc6dd, 0 3px 5px #2f5570;
-            border: 1px solid white;
+            background: #ffffffd0;
+            padding: 8px 25px;
+            border-radius: 60px;
+            font-size: 1.9rem;
+            border: 2px solid white;
+            box-shadow: inset 0 -3px 0 #8eb3d0, 0 5px 8px #0b314a;
         }
 
         .toolbar {
             display: flex;
-            gap: 15px;
+            gap: 20px;
         }
 
-        /* botones tipo 2008: brillantes, redondeados, con reflejo */
         .btn {
-            background: linear-gradient(180deg, #f0f9ff 0%, #c2daf0 90%);
-            border: 1px solid #ffffff;
-            border-radius: 40px;
-            padding: 10px 30px;
-            font-size: 1.2rem;
+            background: linear-gradient(180deg, #f1faff, #c0daf5);
+            border: none;
+            border-radius: 60px;
+            padding: 12px 35px;
+            font-size: 1.5rem;
             font-weight: bold;
-            color: #11445c;
-            text-shadow: 0 1px 2px white;
-            box-shadow: 0 5px 0 #7f9bb3, 0 8px 12px rgba(0,0,0,0.2), inset 0 2px 4px white;
+            color: #0b3e5c;
+            text-shadow: 0 1px 3px white;
+            box-shadow: 0 7px 0 #799bb9, 0 10px 18px rgba(0,0,0,0.25), inset 0 2px 8px white;
             cursor: pointer;
-            transition: 0.07s ease;
-            letter-spacing: 0.5px;
+            transition: 0.06s;
+            border: 1px solid white;
         }
 
         .btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #7f9bb3, 0 5px 8px rgba(0,0,0,0.2);
+            transform: translateY(7px);
+            box-shadow: 0 2px 0 #799bb9, 0 8px 15px rgba(0,0,0,0.2);
         }
 
-        .btn.run {
-            background: linear-gradient(180deg, #d2f0c0, #8fc97f);
-            box-shadow: 0 5px 0 #4f7b3f, 0 8px 12px rgba(0,0,0,0.2);
-            color: #1b4f1b;
+        .btn.play {
+            background: linear-gradient(180deg, #d0f0c0, #8ec97c);
+            box-shadow: 0 7px 0 #4e7a3f, 0 10px 18px #1f3a27;
+            color: #194d1e;
         }
 
         .btn.stop {
-            background: linear-gradient(180deg, #ffd0c0, #f7a38f);
-            box-shadow: 0 5px 0 #b25d4a, 0 8px 12px rgba(0,0,0,0.2);
-            color: #5b1e1e;
+            background: linear-gradient(180deg, #ffcfc0, #f59882);
+            box-shadow: 0 7px 0 #b1513e, 0 10px 18px #4e2920;
+            color: #621f1f;
         }
 
-        /* área de juego + script */
-        .game-studio {
+        /* Área de trabajo dividida */
+        .workspace {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
         }
 
-        .canvas-panel {
+        /* Panel de juego (canvas) */
+        .game-panel {
             flex: 1 1 450px;
-            background: linear-gradient(145deg, #eaf5fc, #bdd3e8);
-            border-radius: 35px 35px 25px 25px;
+            background: linear-gradient(145deg, #d9ecfc, #acc9e5);
+            border-radius: 40px;
             padding: 20px;
-            box-shadow: inset 0 -2px 8px white, inset 0 4px 10px #7c9bc0, 0 15px 25px #1f3b4d;
-            border: 2px solid white;
+            box-shadow: inset 0 -4px 8px white, inset 0 5px 12px #6f97c0, 0 20px 30px #10354b;
+            border: 3px solid white;
         }
 
-        .canvas-panel h2 {
-            color: #0a3346;
-            font-weight: 400;
-            text-shadow: 0 2px 5px white;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-            padding-left: 15px;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            aspect-ratio: 6 / 4;
-            border-radius: 30px;
-            background: linear-gradient(180deg, #bbe4fa 0%, #99c5ed 30%, #d2e8a0 80%);
-            box-shadow: inset 0 -5px 10px #285872, 0 0 0 3px white, 0 15px 25px black;
-            image-rendering: pixelated; /* toque retro */
-        }
-
-        .scoreboard {
-            margin-top: 20px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 50px;
-            padding: 12px 20px;
+        .game-panel h2 {
+            color: #002c44;
+            text-shadow: 0 2px 7px white;
             font-size: 2rem;
+            padding-left: 20px;
+        }
+
+        canvas#gameCanvas {
+            width: 100%;
+            aspect-ratio: 6/4;
+            border-radius: 35px;
+            background: linear-gradient(180deg, #b1e2ff, #7fbde0, #c0e0a0);
+            box-shadow: inset 0 -6px 12px #1b5375, 0 0 0 3px white, 0 15px 30px black;
+            display: block;
+        }
+
+        .score {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 60px;
+            padding: 10px 30px;
+            font-size: 2.3rem;
+            display: inline-block;
+            color: #003153;
             font-weight: bold;
-            color: #0d3752;
-            text-shadow: 0 2px 10px white;
             backdrop-filter: blur(3px);
             border: 2px solid white;
-            display: inline-block;
-            box-shadow: inset 0 -3px 0 #86a3c0, 0 7px 10px #1d3c4f;
+            box-shadow: inset 0 -3px 0 #7da2c0, 0 8px 12px #173f58;
         }
 
-        .blockly-panel {
-            flex: 1 1 550px;
-            background: rgba(255,255,255,0.5);
+        /* Panel de nodos visuales */
+        .node-editor {
+            flex: 2 1 700px;
+            background: rgba(255,255,255,0.3);
             backdrop-filter: blur(6px);
-            border-radius: 40px 40px 30px 30px;
+            border-radius: 45px;
             padding: 20px;
-            box-shadow: inset 0 0 30px white, 0 15px 30px #0c2e44;
+            box-shadow: inset 0 0 45px white, 0 20px 30px #0a3147;
             border: 2px solid white;
+            display: flex;
+            flex-direction: column;
         }
 
-        #blocklyDiv {
+        .node-editor h2 {
+            color: #003c5e;
+            text-shadow: 0 2px 7px white;
+            font-size: 2rem;
+            margin: 0 0 15px 20px;
+        }
+
+        #nodeCanvas {
             width: 100%;
             height: 520px;
-            border-radius: 30px;
-            background: #f0f8ff;
-            box-shadow: inset 0 0 0 2px white, 0 4px 15px rgba(0,0,0,0.3);
+            border-radius: 35px;
+            background: #ebf5ff;
+            box-shadow: inset 0 0 0 3px white, 0 8px 20px #0a293f;
+            cursor: crosshair;
         }
 
-        /* personalizar bloques Blockly con brillo 2008 (colores glossy) */
-        .blocklyPath {
-            filter: drop-shadow(0 3px 2px rgba(0, 20, 30, 0.3));
-        }
-        .blocklyHighlighted {
-            filter: drop-shadow(0 0 6px #d4f0ff);
-        }
-
-        .footer {
-            margin-top: 25px;
-            text-align: center;
-            color: #274e6b;
-            text-shadow: 0 1px 5px white;
+        .legend {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+            color: #003256;
+            font-weight: bold;
+            text-shadow: 0 1px 4px white;
             font-size: 1.2rem;
-            font-style: italic;
-            border-top: 1px dashed white;
-            padding-top: 15px;
         }
     </style>
 </head>
 <body>
 <div class="main-window">
-    <!-- cabecera glossy 2008 -->
     <div class="header">
         <h1>
-            🕹️ Game Forge 2008
+            🧊 NODE FORGE 2008
             <span>visual script</span>
         </h1>
         <div class="toolbar">
-            <button class="btn" id="compileBtn">Compilar</button>
-            <button class="btn run" id="runBtn">▶ Ejecutar</button>
-            <button class="btn stop" id="stopBtn">⏹️ Parar</button>
+            <button class="btn play" id="runBtn">▶ EJECUTAR</button>
+            <button class="btn stop" id="stopBtn">⏹️ PARAR</button>
         </div>
     </div>
 
-    <!-- área de trabajo: canvas (juego) + bloques -->
-    <div class="game-studio">
-        <div class="canvas-panel">
-            <h2>🎾 Zona de juego · 2008</h2>
+    <div class="workspace">
+        <!-- panel del juego -->
+        <div class="game-panel">
+            <h2>🎾 ZONA DE JUEGO</h2>
             <canvas id="gameCanvas" width="600" height="400"></canvas>
-            <div class="scoreboard" id="scoreDisplay">🏆 0</div>
+            <div class="score" id="scoreDisplay">🏆 0</div>
         </div>
-        <div class="blockly-panel">
-            <div id="blocklyDiv"></div>
+
+        <!-- editor de nodos visuales -->
+        <div class="node-editor">
+            <h2>🔌 CONECTA NODOS (arrastra conexiones)</h2>
+            <canvas id="nodeCanvas" width="700" height="520"></canvas>
+            <div class="legend">
+                <span>🟢 Eventos (verde)</span>
+                <span>🔵 Acciones (azul)</span>
+                <span>⚪ Pines: entrada / salida</span>
+                <span>✏️ Click y arrastra para conectar</span>
+            </div>
         </div>
-    </div>
-    <div class="footer">
-        ⚡ Arrastra bloques de Eventos y Acciones. ¡Crea tus reglas! (estética 2008)
     </div>
 </div>
 
 <script>
     (function() {
-        // ----- CONFIGURACIÓN INICIAL: canvas y variables del juego -----
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // -------------------- JUEGO (canvas y física) --------------------
+        const gameCanvas = document.getElementById('gameCanvas');
+        const ctx = gameCanvas.getContext('2d');
         const scoreSpan = document.getElementById('scoreDisplay');
 
-        // Jugador (cuadrado retro)
-        let player = {
-            x: 280, y: 300,
-            vx: 0, vy: 0,
-            width: 20, height: 20
-        };
-
-        let coin = { x: 150, y: 150, size: 12 };
+        // Jugador
+        let player = { x: 280, y: 300, vx: 0, vy: 0, w: 20, h: 20 };
+        let coin = { x: 150, y: 150, r: 12 };
         let score = 0;
-        const groundY = 380; // límite suelo (y base del canvas = 400, el player mide 20, tope en 380)
-
-        // Física sencilla
+        const GROUND = 380;
         const GRAVITY = 0.5;
         const FRICTION = 0.88;
-        const MOVE_FORCE = 2.0;
-        const JUMP_POWER = -10;
+        const MOVE_FORCE = 2.2;
+        const JUMP_FORCE = -10;
 
-        // Estado del teclado
-        const keysDown = {};
-        const onceTriggered = {};
-
-        // Configuración del script (se rellena al compilar)
-        let gameConfig = {
-            keyOnceMap: {},      // eventos "when key pressed"
-            keyContinuousMap: {},// eventos "while key down"
-            collisionActions: [],
-            startActions: []
-        };
-
-        // flags de juego
         let gameRunning = false;
-        let animationFrame = null;
-        let lastCollision = false;
+        let animFrame = null;
 
-        // ----- CARGA DE BLOQUES PERSONALIZADOS (Visual Script 2008) -----
-        Blockly.defineBlocksWithJsonArray([
-            // Bloque de evento: cuando el juego inicia
-            {
-                "type": "when_game_starts",
-                "message0": "when game starts",
-                "args0": [],
-                "message1": "do %1",
-                "args1": [{"type": "input_statement", "name": "ACTIONS"}],
-                "colour": 230,
-                "colourSecondary": "#6fa8dc",
-                "colourTertiary": "#3c78b4",
-                "previousStatement": null,
-                "nextStatement": null
-            },
-            // Bloque: cuando una tecla es presionada (una vez)
-            {
-                "type": "when_key_pressed",
-                "message0": "when key %1 pressed",
-                "args0": [{"type": "field_dropdown", "name": "KEY", "options": [
-                    ["space", "space"],
-                    ["left arrow", "left"],
-                    ["right arrow", "right"],
-                    ["up arrow", "up"],
-                    ["down arrow", "down"],
-                    ["A", "a"],
-                    ["B", "b"],
-                    ["C", "c"],
-                    ["X", "x"],
-                    ["Z", "z"]
-                ]}],
-                "message1": "do %1",
-                "args1": [{"type": "input_statement", "name": "ACTIONS"}],
-                "colour": 160,
-                "previousStatement": null,
-                "nextStatement": null
-            },
-            // Bloque: mientras tecla está pulsada (continuo)
-            {
-                "type": "while_key_down",
-                "message0": "while key %1 down",
-                "args0": [{"type": "field_dropdown", "name": "KEY", "options": [
-                    ["space", "space"],
-                    ["left arrow", "left"],
-                    ["right arrow", "right"],
-                    ["up arrow", "up"],
-                    ["down arrow", "down"],
-                    ["A", "a"],
-                    ["B", "b"],
-                    ["C", "c"]
-                ]}],
-                "message1": "do %1",
-                "args1": [{"type": "input_statement", "name": "ACTIONS"}],
-                "colour": 210,
-                "previousStatement": null,
-                "nextStatement": null
-            },
-            // Bloque: cuando toca la moneda
-            {
-                "type": "when_touches_coin",
-                "message0": "when touches coin",
-                "args0": [],
-                "message1": "do %1",
-                "args1": [{"type": "input_statement", "name": "ACTIONS"}],
-                "colour": 40,
-                "previousStatement": null,
-                "nextStatement": null
-            },
-            // Acciones básicas
-            {
-                "type": "move_left",
-                "message0": "move left",
-                "previousStatement": true,
-                "nextStatement": true,
-                "colour": 120
-            },
-            {
-                "type": "move_right",
-                "message0": "move right",
-                "previousStatement": true,
-                "nextStatement": true,
-                "colour": 120
-            },
-            {
-                "type": "jump",
-                "message0": "jump",
-                "previousStatement": true,
-                "nextStatement": true,
-                "colour": 300
-            },
-            {
-                "type": "change_score",
-                "message0": "change score by %1",
-                "args0": [{"type": "input_number", "name": "VALUE", "value": 1}],
-                "previousStatement": true,
-                "nextStatement": true,
-                "colour": 70
-            },
-            {
-                "type": "set_score",
-                "message0": "set score to %1",
-                "args0": [{"type": "input_number", "name": "VALUE", "value": 0}],
-                "previousStatement": true,
-                "nextStatement": true,
-                "colour": 70
-            }
-        ]);
+        // Teclas
+        const keys = {};
 
-        // Toolbox (categorías al estilo 2008)
-        const toolboxXML = `
-            <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
-                <category name="🎮 Eventos" colour="230">
-                    <block type="when_game_starts"></block>
-                    <block type="when_key_pressed"></block>
-                    <block type="while_key_down"></block>
-                    <block type="when_touches_coin"></block>
-                </category>
-                <category name="⚡ Acciones" colour="120">
-                    <block type="move_left"></block>
-                    <block type="move_right"></block>
-                    <block type="jump"></block>
-                    <block type="change_score"></block>
-                    <block type="set_score"></block>
-                </category>
-            </xml>
-        `;
-
-        // Inyectar Blockly en el div
-        const workspace = Blockly.inject('blocklyDiv', {
-            toolbox: toolboxXML,
-            trashcan: true,
-            scrollbars: true,
-            horizontalLayout: false,
-            toolboxPosition: 'start',
-            zoom: { controls: true, wheel: true },
-            grid: { spacing: 20, length: 3, colour: '#ccc' }
-        });
-
-        // ----- FUNCIÓN DE COMPILACIÓN (lee bloques y genera gameConfig) -----
-        function compileScript() {
-            const topBlocks = workspace.getTopBlocks();
-            const keyOnce = {};
-            const keyCont = {};
-            let collision = [];
-            let start = [];
-
-            // Función que recorre las acciones anidadas en un bloque evento
-            function extractActions(eventBlock) {
-                const actions = [];
-                let statement = eventBlock.getInputTargetBlock('ACTIONS');
-                while (statement) {
-                    let action = { type: statement.type };
-                    if (statement.type === 'change_score' || statement.type === 'set_score') {
-                        // obtener el valor numérico
-                        action.value = Number(statement.getFieldValue('VALUE') || 0);
-                    }
-                    actions.push(action);
-                    statement = statement.getNextBlock();
-                }
-                return actions;
-            }
-
-            topBlocks.forEach(block => {
-                switch (block.type) {
-                    case 'when_game_starts':
-                        start = extractActions(block);
-                        break;
-                    case 'when_key_pressed': {
-                        const key = block.getFieldValue('KEY');
-                        if (!keyOnce[key]) keyOnce[key] = [];
-                        keyOnce[key] = keyOnce[key].concat(extractActions(block));
-                        break;
-                    }
-                    case 'while_key_down': {
-                        const key = block.getFieldValue('KEY');
-                        if (!keyCont[key]) keyCont[key] = [];
-                        keyCont[key] = keyCont[key].concat(extractActions(block));
-                        break;
-                    }
-                    case 'when_touches_coin':
-                        collision = extractActions(block);
-                        break;
-                    default: break;
-                }
-            });
-
-            gameConfig = {
-                keyOnceMap: keyOnce,
-                keyContinuousMap: keyCont,
-                collisionActions: collision,
-                startActions: start
-            };
-
-            console.log('✅ Script compilado (estilo 2008)', gameConfig);
-        }
-
-        // ----- LÓGICA DE APLICAR ACCIONES (según tipo) -----
-        function applyAction(action) {
-            switch (action.type) {
-                case 'move_left':  player.vx -= MOVE_FORCE; break;
-                case 'move_right': player.vx += MOVE_FORCE; break;
-                case 'jump': 
-                    if (player.y + player.height >= groundY - 0.5) { // en suelo
-                        player.vy = JUMP_POWER;
-                    }
-                    break;
-                case 'change_score': score += action.value; break;
-                case 'set_score': score = action.value; break;
-                default: break;
-            }
-        }
-
-        // ----- MANEJADORES DE TECLADO (con estilo 2008) -----
-        function handleKeyDown(e) {
-            const keyMap = {
-                ' ': 'space', 'Space': 'space',
-                'ArrowLeft': 'left', 'ArrowRight': 'right',
-                'ArrowUp': 'up', 'ArrowDown': 'down',
-                'KeyA': 'a', 'KeyB': 'b', 'KeyC': 'c', 'KeyX': 'x', 'KeyZ': 'z'
-            };
-            let code = e.code;
-            let keyName = keyMap[code] || (code.length === 1 ? code.toLowerCase() : null);
-            if (!keyName) return;
-
-            // Prevenir scroll con flechas
-            if (['left','right','up','down','space'].includes(keyName)) {
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            if (k === ' ' || k === 'arrowleft' || k === 'arrowright' || k === 'arrowup' || k === 'a' || k === 'd') {
                 e.preventDefault();
             }
+            keys[e.code] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
 
-            // Si no estaba pulsada, disparar acciones "when key pressed" (una vez)
-            if (!keysDown[keyName]) {
-                const onceActions = gameConfig.keyOnceMap[keyName];
-                if (onceActions) {
-                    onceActions.forEach(act => applyAction(act));
-                }
-            }
-
-            keysDown[keyName] = true;
-        }
-
-        function handleKeyUp(e) {
-            const keyMap = {
-                ' ': 'space', 'Space': 'space',
-                'ArrowLeft': 'left', 'ArrowRight': 'right',
-                'ArrowUp': 'up', 'ArrowDown': 'down',
-                'KeyA': 'a', 'KeyB': 'b', 'KeyC': 'c', 'KeyX': 'x', 'KeyZ': 'z'
-            };
-            let code = e.code;
-            let keyName = keyMap[code] || (code.length === 1 ? code.toLowerCase() : null);
-            if (keyName) {
-                keysDown[keyName] = false;
-            }
-        }
-
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-
-        // ----- FUNCIÓN PARA REINICIAR JUEGO (posición, puntuación) -----
         function resetGame() {
-            player = { x: 280, y: 300, vx: 0, vy: 0, width: 20, height: 20 };
-            coin = { x: 150, y: 150, size: 12 };
+            player = { x: 280, y: 300, vx: 0, vy: 0, w: 20, h: 20 };
+            coin = { x: 150, y: 150, r: 12 };
             score = 0;
-            lastCollision = false;
             updateScore();
-        }
-
-        // ----- BUCLE PRINCIPAL DEL JUEGO (física, entradas continuas, colisión)-----
-        function gameLoop() {
-            if (!gameRunning) return;
-
-            // 1. Aplicar acciones continuas (while key down)
-            for (let [key, actions] of Object.entries(gameConfig.keyContinuousMap)) {
-                if (keysDown[key]) {
-                    actions.forEach(act => applyAction(act));
-                }
-            }
-
-            // 2. Física
-            player.vx *= FRICTION;
-            player.vy += GRAVITY;
-            player.x += player.vx;
-            player.y += player.vy;
-
-            // límites horizontales
-            if (player.x < 0) { player.x = 0; player.vx = 0; }
-            if (player.x + player.width > canvas.width) { player.x = canvas.width - player.width; player.vx = 0; }
-
-            // suelo / techo
-            if (player.y + player.height > groundY) {
-                player.y = groundY - player.height;
-                player.vy = 0;
-            }
-            if (player.y < 0) { player.y = 0; player.vy = 0; }
-
-            // 3. Detectar colisión con moneda
-            const coinRect = { x: coin.x - coin.size/2, y: coin.y - coin.size/2, w: coin.size, h: coin.size };
-            const playerRect = { x: player.x, y: player.y, w: player.width, h: player.height };
-            const collides = (playerRect.x < coinRect.x + coinRect.w &&
-                              playerRect.x + playerRect.w > coinRect.x &&
-                              playerRect.y < coinRect.y + coinRect.h &&
-                              playerRect.y + playerRect.h > coinRect.y);
-
-            if (collides && !lastCollision) {
-                // Disparar acciones de colisión
-                if (gameConfig.collisionActions.length) {
-                    gameConfig.collisionActions.forEach(act => applyAction(act));
-                }
-                // Mover la moneda a un lugar aleatorio (estilo clásico)
-                coin.x = 50 + Math.random() * (canvas.width - 100);
-                coin.y = 50 + Math.random() * (groundY - 70);
-            }
-            lastCollision = collides;
-
-            // dibujar escena
-            drawCanvas();
-
-            // actualizar marcador
-            updateScore();
-
-            animationFrame = requestAnimationFrame(gameLoop);
-        }
-
-        function drawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // cielo con degradé 2008
-            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            grad.addColorStop(0, '#c6e9ff');
-            grad.addColorStop(0.7, '#b0d4e0');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // nubes brillantes (estilo 2008)
-            ctx.shadowColor = 'white';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.beginPath();
-            ctx.arc(120, 60, 35, 0, 2*Math.PI);
-            ctx.arc(180, 40, 40, 0, 2*Math.PI);
-            ctx.arc(450, 90, 50, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.shadowColor = 'transparent';
-
-            // suelo (cesped glossy)
-            ctx.fillStyle = '#78b13e';
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-            // reflejo suelo
-            ctx.fillStyle = '#a0d86c';
-            ctx.globalAlpha = 0.3;
-            ctx.fillRect(0, groundY, canvas.width, 15);
-            ctx.globalAlpha = 1;
-
-            // moneda (brillante)
-            ctx.shadowColor = 'gold';
-            ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.arc(coin.x, coin.y, coin.size, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ffd966';
-            ctx.fill();
-            ctx.strokeStyle = '#b8860b';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // reflejo
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.arc(coin.x-2, coin.y-2, 3, 0, 2*Math.PI);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-
-            // jugador (cuadrado con brillo)
-            ctx.shadowColor = '#0044aa';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = '#3a7ca5';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.fillStyle = '#7dc0e0';
-            ctx.globalAlpha = 0.5;
-            ctx.fillRect(player.x+2, player.y+2, player.width-4, 6);
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 0;
         }
 
         function updateScore() {
             scoreSpan.innerText = `🏆 ${score}`;
         }
 
-        // ----- BOTONES Y CONTROL -----
-        document.getElementById('compileBtn').addEventListener('click', function() {
-            compileScript();
-        });
+        function drawGame() {
+            ctx.clearRect(0, 0, 600, 400);
+            // cielo
+            const grad = ctx.createLinearGradient(0, 0, 0, 400);
+            grad.addColorStop(0, '#b9e3ff');
+            grad.addColorStop(0.7, '#9ac5e0');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 600, 400);
+            // nubes gloss
+            ctx.shadowColor = 'white';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.beginPath();
+            ctx.arc(110, 60, 35, 0, 2*Math.PI);
+            ctx.arc(160, 40, 40, 0, 2*Math.PI);
+            ctx.arc(450, 90, 45, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            // suelo
+            ctx.fillStyle = '#78b13e';
+            ctx.fillRect(0, GROUND, 600, 20);
+            ctx.fillStyle = '#a0d86c';
+            ctx.globalAlpha = 0.4;
+            ctx.fillRect(0, GROUND, 600, 8);
+            ctx.globalAlpha = 1;
 
-        document.getElementById('runBtn').addEventListener('click', function() {
-            if (gameRunning) return;
-            // compilar siempre antes de ejecutar, para tomar cambios
-            compileScript();
-            resetGame();
+            // moneda
+            ctx.shadowColor = 'gold';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(coin.x, coin.y, coin.r, 0, 2*Math.PI);
+            ctx.fillStyle = '#ffd966';
+            ctx.fill();
+            ctx.strokeStyle = '#b8860b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // reflejo
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(coin.x-3, coin.y-3, 4, 0, 2*Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
 
-            // ejecutar acciones de "when game starts"
-            if (gameConfig.startActions.length) {
-                gameConfig.startActions.forEach(act => applyAction(act));
+            // jugador
+            ctx.shadowColor = '#0066aa';
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = '#3f8ab3';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            ctx.fillStyle = '#9ad0f0';
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(player.x+2, player.y+2, player.w-4, 6);
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        // -------------------- NODOS VISUALES (editor) --------------------
+        const nodeCanvas = document.getElementById('nodeCanvas');
+        const nctx = nodeCanvas.getContext('2d');
+
+        // Definición de nodos (estáticos)
+        const nodes = [
+            { id: 'start', type: 'event', label: 'INICIO', x: 100, y: 70, w: 100, h: 40, outputs: ['out'] },
+            { id: 'keyA', type: 'event', label: 'TECLA A', x: 100, y: 160, w: 100, h: 40, outputs: ['out'] },
+            { id: 'keyD', type: 'event', label: 'TECLA D', x: 100, y: 250, w: 100, h: 40, outputs: ['out'] },
+            { id: 'keySpace', type: 'event', label: 'ESPACIO', x: 100, y: 340, w: 100, h: 40, outputs: ['out'] },
+            { id: 'coinTouch', type: 'event', label: 'TOCA MONEDA', x: 100, y: 430, w: 120, h: 40, outputs: ['out'] },
+            { id: 'moveLeft', type: 'action', label: 'MOVER IZQ', x: 350, y: 70, w: 100, h: 40, inputs: ['in'] },
+            { id: 'moveRight', type: 'action', label: 'MOVER DER', x: 350, y: 140, w: 100, h: 40, inputs: ['in'] },
+            { id: 'jump', type: 'action', label: 'SALTAR', x: 350, y: 210, w: 100, h: 40, inputs: ['in'] },
+            { id: 'addScore', type: 'action', label: 'SUMA 5', x: 350, y: 280, w: 100, h: 40, inputs: ['in'] },
+            { id: 'setScore0', type: 'action', label: 'PUNTOS 0', x: 350, y: 350, w: 100, h: 40, inputs: ['in'] }
+        ];
+
+        // Conexiones: cada una { from: nodeId, to: nodeId }
+        let connections = [
+            { from: 'start', to: 'setScore0' },   // ejemplo por defecto
+            { from: 'keyA', to: 'moveLeft' },
+            { from: 'keyD', to: 'moveRight' },
+            { from: 'keySpace', to: 'jump' },
+            { from: 'coinTouch', to: 'addScore' }
+        ];
+
+        // Estado de arrastre de conexión
+        let draggingFrom = null;        // { nodeId, pin } (pin es 'out' siempre)
+        let mouseX = 0, mouseY = 0;
+
+        // Hit test de nodos
+        function getNodeAt(px, py) {
+            for (let n of nodes) {
+                if (px >= n.x && px <= n.x + n.w && py >= n.y && py <= n.y + n.h) {
+                    return n;
+                }
+            }
+            return null;
+        }
+
+        // Obtener la posición del pin de salida de un nodo
+        function getOutputPos(node) {
+            return { x: node.x + node.w, y: node.y + node.h/2 };
+        }
+
+        // Obtener posición del pin de entrada
+        function getInputPos(node) {
+            return { x: node.x, y: node.y + node.h/2 };
+        }
+
+        // Dibujar nodos y conexiones
+        function drawNodes() {
+            nctx.clearRect(0, 0, 700, 520);
+            // Dibujar conexiones primero (detrás)
+            nctx.strokeStyle = '#5f9ed0';
+            nctx.lineWidth = 4;
+            nctx.shadowColor = '#b0e0ff';
+            nctx.shadowBlur = 8;
+            connections.forEach(c => {
+                const fromNode = nodes.find(n => n.id === c.from);
+                const toNode = nodes.find(n => n.id === c.to);
+                if (!fromNode || !toNode) return;
+                const fromPos = getOutputPos(fromNode);
+                const toPos = getInputPos(toNode);
+                nctx.beginPath();
+                nctx.moveTo(fromPos.x, fromPos.y);
+                nctx.lineTo(toPos.x, toPos.y);
+                nctx.stroke();
+            });
+            nctx.shadowBlur = 0;
+            // Dibujar línea de arrastre
+            if (draggingFrom) {
+                const fromNode = nodes.find(n => n.id === draggingFrom.nodeId);
+                if (fromNode) {
+                    const start = getOutputPos(fromNode);
+                    nctx.beginPath();
+                    nctx.strokeStyle = '#ffb347';
+                    nctx.lineWidth = 4;
+                    nctx.setLineDash([8, 6]);
+                    nctx.moveTo(start.x, start.y);
+                    nctx.lineTo(mouseX, mouseY);
+                    nctx.stroke();
+                    nctx.setLineDash([]);
+                }
             }
 
+            // Dibujar nodos
+            nodes.forEach(n => {
+                // color según tipo
+                nctx.shadowColor = 'white';
+                nctx.shadowBlur = 10;
+                if (n.type === 'event') {
+                    nctx.fillStyle = '#88cc88'; // verde gloss
+                } else {
+                    nctx.fillStyle = '#66aaff'; // azul
+                }
+                // borde blanco
+                nctx.strokeStyle = 'white';
+                nctx.lineWidth = 3;
+                // rectángulo redondeado
+                nctx.beginPath();
+                nctx.roundRect(n.x, n.y, n.w, n.h, 15);
+                nctx.fill();
+                nctx.stroke();
+
+                // texto
+                nctx.shadowBlur = 5;
+                nctx.font = 'bold 14px "Segoe UI", Tahoma';
+                nctx.fillStyle = '#0a2f44';
+                nctx.textAlign = 'center';
+                nctx.textBaseline = 'middle';
+                nctx.fillText(n.label, n.x + n.w/2, n.y + n.h/2);
+
+                // pines
+                nctx.shadowBlur = 0;
+                nctx.fillStyle = '#ffffff';
+                nctx.beginPath();
+                // entrada (izquierda)
+                nctx.arc(n.x, n.y + n.h/2, 6, 0, 2*Math.PI);
+                nctx.fill();
+                nctx.strokeStyle = '#2277aa';
+                nctx.lineWidth = 2;
+                nctx.stroke();
+                // salida (derecha)
+                nctx.beginPath();
+                nctx.arc(n.x + n.w, n.y + n.h/2, 6, 0, 2*Math.PI);
+                nctx.fill();
+                nctx.stroke();
+            });
+        }
+
+        // helper roundRect
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            return this;
+        };
+
+        // Eventos del mouse en nodeCanvas
+        function handleMouseDown(e) {
+            const rect = nodeCanvas.getBoundingClientRect();
+            const scaleX = nodeCanvas.width / rect.width;
+            const scaleY = nodeCanvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+
+            // Buscar si se hizo clic en un pin de salida (derecha del nodo)
+            for (let n of nodes) {
+                const pinX = n.x + n.w;
+                const pinY = n.y + n.h/2;
+                const dist = Math.hypot(canvasX - pinX, canvasY - pinY);
+                if (dist < 10) {
+                    draggingFrom = { nodeId: n.id, pin: 'out' };
+                    mouseX = canvasX;
+                    mouseY = canvasY;
+                    drawNodes();
+                    return;
+                }
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!draggingFrom) return;
+            const rect = nodeCanvas.getBoundingClientRect();
+            const scaleX = nodeCanvas.width / rect.width;
+            const scaleY = nodeCanvas.height / rect.height;
+            mouseX = (e.clientX - rect.left) * scaleX;
+            mouseY = (e.clientY - rect.top) * scaleY;
+            drawNodes();
+        }
+
+        function handleMouseUp(e) {
+            if (!draggingFrom) return;
+
+            const rect = nodeCanvas.getBoundingClientRect();
+            const scaleX = nodeCanvas.width / rect.width;
+            const scaleY = nodeCanvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+
+            // Buscar si soltó sobre un pin de entrada de algún nodo (excluyendo el mismo)
+            let targetNode = null;
+            for (let n of nodes) {
+                if (n.id === draggingFrom.nodeId) continue; // no auto-conexión
+                const pinX = n.x;
+                const pinY = n.y + n.h/2;
+                const dist = Math.hypot(canvasX - pinX, canvasY - pinY);
+                if (dist < 10) {
+                    targetNode = n;
+                    break;
+                }
+            }
+
+            if (targetNode) {
+                // Agregar o reemplazar conexión? simplificamos: agregar, pero evitamos duplicados
+                const exists = connections.some(c => c.from === draggingFrom.nodeId && c.to === targetNode.id);
+                if (!exists) {
+                    connections.push({ from: draggingFrom.nodeId, to: targetNode.id });
+                }
+            }
+
+            draggingFrom = null;
+            drawNodes();
+        }
+
+        nodeCanvas.addEventListener('mousedown', handleMouseDown);
+        nodeCanvas.addEventListener('mousemove', handleMouseMove);
+        nodeCanvas.addEventListener('mouseup', handleMouseUp);
+        nodeCanvas.addEventListener('mouseleave', () => {
+            draggingFrom = null;
+            drawNodes();
+        });
+
+        // Inicial
+        drawNodes();
+
+        // -------------------- INTERPRETACIÓN DEL GRAFO --------------------
+        // Función que ejecuta las acciones según eventos activados
+        function processGraph() {
+            // Disparo de eventos según estado
+            // Inicio (se ejecuta al correr el juego, pero no en cada frame)
+            // Lo ejecutaremos una vez en run.
+
+            // Eventos de tecla: necesitamos saber si se activan en este frame
+            // Para simplificar, usaremos el mismo sistema: cuando se pulsa una tecla (keydown) ejecutamos las acciones conectadas a esa tecla.
+            // Esto lo haremos en los event listeners de teclado (modificamos keys)
+
+            // Evento tocar moneda: se comprueba en el gameLoop y se ejecuta si colisión nueva.
+        }
+
+        // Para ejecutar acciones según conexiones
+        function runActionsForEvent(eventNodeId) {
+            // Buscar todas las conexiones que salen de eventNodeId
+            const targets = connections.filter(c => c.from === eventNodeId).map(c => c.to);
+            targets.forEach(targetId => {
+                const node = nodes.find(n => n.id === targetId);
+                if (!node) return;
+                // ejecutar acción según label
+                switch (node.id) {
+                    case 'moveLeft':  player.vx -= MOVE_FORCE; break;
+                    case 'moveRight': player.vx += MOVE_FORCE; break;
+                    case 'jump': if (player.y + player.h >= GROUND - 0.5) player.vy = JUMP_FORCE; break;
+                    case 'addScore': score += 5; updateScore(); break;
+                    case 'setScore0': score = 0; updateScore(); break;
+                }
+            });
+        }
+
+        // Integración con teclado
+        function handleGameKeyDown(e) {
+            const code = e.code;
+            if (!gameRunning) return;
+            let eventId = null;
+            if (code === 'KeyA') eventId = 'keyA';
+            else if (code === 'KeyD') eventId = 'keyD';
+            else if (code === 'Space') eventId = 'keySpace';
+            if (eventId) {
+                e.preventDefault();
+                runActionsForEvent(eventId);
+            }
+        }
+
+        window.addEventListener('keydown', handleGameKeyDown);
+
+        // Bucle del juego
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            // Física y acciones continuas (por ahora solo impulso por teclas, pero no manejamos while)
+            // Añadimos también acciones continuas si quisieramos, pero no hay nodos "while"
+
+            // Integración con teclas para movimiento continuo (usamos las mismas conexiones, pero se disparan una vez.
+            // Para mantener presión, necesitariamos nodos "mientras". Lo dejamos como ejemplo de pulsación.
+
+            // Avanzar física
+            player.vx *= FRICTION;
+            player.vy += GRAVITY;
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // límites
+            if (player.x < 0) { player.x = 0; player.vx = 0; }
+            if (player.x + player.w > 600) { player.x = 600 - player.w; player.vx = 0; }
+            if (player.y + player.h > GROUND) { player.y = GROUND - player.h; player.vy = 0; }
+            if (player.y < 0) { player.y = 0; player.vy = 0; }
+
+            // colisión con moneda
+            const dx = (player.x + player.w/2) - coin.x;
+            const dy = (player.y + player.h/2) - coin.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < player.w/2 + coin.r) {
+                // evento toca moneda
+                runActionsForEvent('coinTouch');
+                // recolocar moneda
+                coin.x = 50 + Math.random() * 500;
+                coin.y = 50 + Math.random() * (GROUND - 70);
+            }
+
+            drawGame();
+            animFrame = requestAnimationFrame(gameLoop);
+        }
+
+        // Botones
+        document.getElementById('runBtn').addEventListener('click', () => {
+            if (gameRunning) return;
+            resetGame();
+            // ejecutar evento inicio
+            runActionsForEvent('start');
             gameRunning = true;
             gameLoop();
         });
 
-        document.getElementById('stopBtn').addEventListener('click', function() {
+        document.getElementById('stopBtn').addEventListener('click', () => {
             gameRunning = false;
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
+            if (animFrame) cancelAnimationFrame(animFrame);
             resetGame();
-            drawCanvas(); // forzar repintado
+            drawGame();
         });
 
-        // Dibujar canvas inicial
-        drawCanvas();
-
-        // Pequeño bloque de ejemplo al arrancar (para que el usuario vea algo)
-        // No sobreescribe si el workspace está vacío? Mejor poner un ejemplo por defecto en XML.
-        // Cargamos un script de ejemplo amigable:
-        const exampleXml = `
-            <xml xmlns="http://www.w3.org/1999/xhtml">
-                <block type="when_game_starts" id="start1" x="80" y="20">
-                    <statement name="ACTIONS">
-                        <block type="set_score">
-                            <field name="VALUE">0</field>
-                        </block>
-                    </statement>
-                </block>
-                <block type="while_key_down" id="keyleft" x="80" y="120">
-                    <field name="KEY">left</field>
-                    <statement name="ACTIONS">
-                        <block type="move_left"></block>
-                    </statement>
-                </block>
-                <block type="while_key_down" id="keyright" x="80" y="210">
-                    <field name="KEY">right</field>
-                    <statement name="ACTIONS">
-                        <block type="move_right"></block>
-                    </statement>
-                </block>
-                <block type="when_key_pressed" id="keyjump" x="80" y="300">
-                    <field name="KEY">space</field>
-                    <statement name="ACTIONS">
-                        <block type="jump"></block>
-                    </statement>
-                </block>
-                <block type="when_touches_coin" id="coin1" x="380" y="150">
-                    <statement name="ACTIONS">
-                        <block type="change_score">
-                            <field name="VALUE">5</field>
-                        </block>
-                    </statement>
-                </block>
-            </xml>
-        `;
-        Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(exampleXml), workspace);
-        compileScript(); // compilar ejemplo
-
-        // Prevenir comportamiento por defecto de teclas en el área de bloques (no interfiere)
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                // ya lo manejamos nosotros para el juego, pero Blockly también necesita teclas (supr, etc)
-                // No interferir con Blockly
-            }
-        });
+        // Inicial
+        drawGame();
     })();
 </script>
 </body>
