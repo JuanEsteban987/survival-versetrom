@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Pong · Creador de juegos con scripting visual</title>
-    <!-- Font Awesome para iconos sutiles (opcional) -->
+    <title>Visual Scripting Playground · Pong programable con nodos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -22,7 +21,6 @@
             align-items: center;
             padding: 8px;
         }
-        /* contenedor principal imita ventana del editor */
         .godot-editor {
             width: 1400px;
             height: 900px;
@@ -34,7 +32,6 @@
             overflow: hidden;
             border: 1px solid #4a4f5a;
         }
-        /* barra de menú superior */
         .top-menu {
             background: #20232a;
             padding: 6px 15px;
@@ -46,29 +43,20 @@
             font-size: 13px;
             font-weight: 500;
         }
-        .top-menu span {
-            cursor: default;
-        }
-        .top-menu i {
-            margin-right: 5px;
-            opacity: 0.8;
-        }
-        .top-menu .spacer {
-            flex: 1;
-        }
+        .top-menu span { cursor: default; }
+        .top-menu i { margin-right: 5px; opacity: 0.8; }
+        .top-menu .spacer { flex: 1; }
         .top-menu .online-docs {
             background: #373e4b;
             padding: 3px 10px;
             border-radius: 4px;
             color: #ddd;
         }
-        /* contenido principal con grid */
         .main-grid {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
-        /* panel izquierdo (FileSystem + nodos) */
         .left-panel {
             width: 260px;
             background: #262b33;
@@ -89,9 +77,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .panel-header i {
-            color: #7a8090;
-        }
         .tree {
             padding: 10px 0 0 8px;
             overflow-y: auto;
@@ -105,27 +90,14 @@
             cursor: default;
             border-left: 2px solid transparent;
         }
-        .tree-item:hover {
-            background: #3a3f4b;
-        }
-        .tree-item i {
-            width: 18px;
-            color: #7e879b;
-        }
-        .tree-item .vs-icon {
+        .tree-item:hover { background: #3a3f4b; }
+        .tree-item i { width: 18px; color: #7e879b; }
+        .vs-icon {
             background: #5d4e6b;
             border-radius: 3px;
             padding: 2px 4px;
             font-size: 9px;
             color: #d0bfff;
-        }
-        .separator {
-            height: 1px;
-            background: #3d424c;
-            margin: 12px 0;
-        }
-        .favorites {
-            padding: 10px;
         }
         .filter-box {
             background: #1f232a;
@@ -135,7 +107,6 @@
             padding: 5px 8px;
             display: flex;
             align-items: center;
-            color: #888;
         }
         .filter-box input {
             background: transparent;
@@ -145,7 +116,6 @@
             margin-left: 5px;
             width: 100%;
         }
-        /* panel central (escena + gráfico) */
         .center-panel {
             flex: 1;
             background: #1e2128;
@@ -153,7 +123,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-        /* pestañas superiores (Scene / Import / etc) */
         .tabs {
             background: #1b1e24;
             display: flex;
@@ -172,7 +141,6 @@
             color: #e0e6f5;
             border-bottom: 2px solid #5d7dbb;
         }
-        /* vista previa del juego (canvas) */
         .game-preview {
             height: 200px;
             background: #0f1116;
@@ -187,9 +155,7 @@
             background: #1c1f27;
             border-radius: 6px;
             box-shadow: inset 0 0 10px #00000055;
-            image-rendering: crisp-edges;
         }
-        /* área de scripting visual (graph) */
         .graph-area {
             flex: 1;
             background: #1a1d25;
@@ -202,19 +168,16 @@
             width: 100%;
             height: 100%;
             position: relative;
-            cursor: default;
         }
-        /* nodos arrastrables */
         .visual-node {
             position: absolute;
             background: #313844;
             border: 1px solid #545b6b;
             border-radius: 8px;
-            min-width: 150px;
+            min-width: 170px;
             box-shadow: 4px 4px 10px rgba(0,0,0,0.6);
             color: #dde2f0;
             font-size: 12px;
-            pointer-events: all;
             z-index: 10;
         }
         .node-header {
@@ -228,12 +191,7 @@
             gap: 5px;
             cursor: move;
         }
-        .node-header i {
-            color: #abb7d4;
-        }
-        .node-content {
-            padding: 12px 8px 8px 8px;
-        }
+        .node-content { padding: 12px 8px 8px 8px; }
         .port-container {
             display: flex;
             justify-content: space-between;
@@ -249,22 +207,14 @@
             cursor: crosshair;
             transition: 0.1s;
         }
-        .port.left-port {
-            margin-right: 8px;
-        }
-        .port.right-port {
-            margin-left: 8px;
-        }
+        .port.left-port { margin-right: 8px; }
+        .port.right-port { margin-left: 8px; }
         .port:hover {
             background: #7d95c0;
             border-color: #b7ceff;
             transform: scale(1.2);
         }
-        .port-label {
-            color: #b5c4e0;
-            font-size: 11px;
-        }
-        /* Inspector (panel derecho) */
+        .port-label { color: #b5c4e0; font-size: 11px; }
         .right-panel {
             width: 240px;
             background: #262b33;
@@ -289,13 +239,6 @@
             border-radius: 4px;
             color: #ccdcff;
         }
-        .badge-function {
-            background: #3b3f5c;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-        }
-        /* panel inferior (output) */
         .bottom-panel {
             height: 140px;
             background: #20232b;
@@ -317,7 +260,6 @@
             font-family: monospace;
             font-size: 12px;
         }
-        /* canvas de conexiones (overlay) */
         .connection-layer {
             position: absolute;
             top: 0;
@@ -332,7 +274,6 @@
             width: 100%;
             height: 100%;
         }
-        /* botón run/stop (extra) */
         .run-btn {
             background: #3f564b;
             color: white;
@@ -343,14 +284,28 @@
             margin-left: 20px;
             cursor: pointer;
         }
-        .run-btn:hover {
-            background: #4e7868;
+        .run-btn:hover { background: #4e7868; }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 5px 10px;
+            background: #262e38;
+            border-bottom: 1px solid #3a4050;
+        }
+        .toolbar button {
+            background: #353f4e;
+            border: none;
+            color: #ddd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 <div class="godot-editor">
-    <!-- Barra superior -->
+    <!-- top menu -->
     <div class="top-menu">
         <span><i class="fas fa-cube"></i> Scene</span>
         <span><i class="fas fa-project-diagram"></i> Project</span>
@@ -364,9 +319,9 @@
         <span><i class="fas fa-filter"></i></span>
     </div>
 
-    <!-- Grid principal -->
+    <!-- main -->
     <div class="main-grid">
-        <!-- IZQUIERDA: FileSystem y librería de nodos -->
+        <!-- left panel -->
         <div class="left-panel">
             <div class="panel-header"><i class="fas fa-folder-open"></i> FileSystem</div>
             <div class="filter-box"><i class="fas fa-search"></i><input placeholder="Filter nodes" value="res://"></div>
@@ -374,24 +329,16 @@
                 <div class="tree-item"><i class="fas fa-folder"></i> res://</div>
                 <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs <span class="vs-icon">VS</span></div>
                 <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs <span class="vs-icon">VS</span></div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> collision.vs</div>
                 <div class="tree-item"><i class="fas fa-image"></i> ball.png</div>
-                <div class="tree-item"><i class="fas fa-image"></i> left_pallete.png</div>
-                <div class="tree-item"><i class="fas fa-image"></i> right_pallete.png</div>
-                <div class="tree-item"><i class="fas fa-file"></i> pong.tscn</div>
-                <div class="separator"></div>
+                <div class="separator" style="height:1px; background:#3d424c; margin:12px 0;"></div>
                 <div class="panel-header"><i class="fas fa-star"></i> Favorites:</div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs</div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs</div>
                 <div class="tree-item"><i class="fas fa-code-branch"></i> Function</div>
                 <div class="tree-item"><i class="fas fa-shield-alt"></i> collision</div>
             </div>
-            <div style="padding: 10px; color:#7e88a0;">
-                <div><i class="fas fa-cubes"></i> Base Type: Area2D</div>
-                <div><i class="fas fa-list"></i> Members: Valuex, ConstructX</div>
-            </div>
         </div>
 
-        <!-- CENTRO: Vista previa y grafico -->
+        <!-- center: game + graph -->
         <div class="center-panel">
             <div class="tabs">
                 <span class="tab active">Scene</span>
@@ -402,82 +349,74 @@
                 <span class="tab">Edit</span>
                 <span class="tab">Debug</span>
             </div>
-            <!-- minijuego pong (canvas) -->
+            <!-- mini toolbar -->
+            <div class="toolbar">
+                <button id="addBallNode"><i class="fas fa-plus"></i> Ball</button>
+                <button id="addCollisionNode"><i class="fas fa-bolt"></i> Collision</button>
+                <button id="addSetVelNode"><i class="fas fa-arrow-right"></i> Set Velocity</button>
+                <button id="addRandomNode"><i class="fas fa-random"></i> Random</button>
+                <span style="flex:1"></span>
+                <button id="clearConnectionsBtn">Clear connections</button>
+            </div>
+            <!-- game canvas -->
             <div class="game-preview">
                 <canvas id="pongCanvas" width="400" height="180"></canvas>
             </div>
-            <!-- area de scripting visual con nodos -->
+            <!-- graph area -->
             <div class="graph-area">
                 <div id="graphContainer">
-                    <!-- nodos se generan con JS -->
                     <canvas id="connectionCanvas" class="connection-layer"></canvas>
+                    <!-- nodos existirán aquí -->
                 </div>
             </div>
         </div>
 
-        <!-- DERECHA: Inspector y nodos disponibles -->
+        <!-- right inspector -->
         <div class="right-panel">
             <div class="panel-header"><i class="fas fa-info-circle"></i> Inspector</div>
             <div class="inspector-section">
                 <div class="inspector-row"><span>Node:</span><span class="inspector-value">ball</span></div>
-                <div class="inspector-row"><span>direction</span><span class="inspector-value">(1, -1)</span></div>
-                <div class="inspector-row"><span>on_area_entered</span><span class="badge-function">connected</span></div>
-                <div class="inspector-row"><span>value flt</span><span class="inspector-value">0.2</span></div>
+                <div class="inspector-row"><span>velocity</span><span class="inspector-value" id="inspectorVel">(1.8, 1.2)</span></div>
+                <div class="inspector-row"><span>on_collision</span><span class="badge-function">connected</span></div>
             </div>
             <div class="inspector-section">
-                <div><i class="fas fa-cog"></i> Process</div>
-                <div class="inspector-row"><span>BuiltinFunc</span><span>rand_range</span></div>
-                <div class="inspector-row"><span>ball_dir</span><span class="inspector-value">1</span></div>
-            </div>
-            <div class="inspector-section">
-                <div><i class="fas fa-wave-square"></i> Signals</div>
-                <div>ftlto1</div>
-            </div>
-            <div class="inspector-section">
-                <div><i class="fas fa-shapes"></i> Available Nodes:</div>
-                <div class="tree-item">> Constant</div>
-                <div class="tree-item">> Property</div>
-                <div class="tree-item">> Index</div>
-                <div class="tree-item">> Flow Control</div>
-                <div class="tree-item">> Resource</div>
-                <div class="tree-item">pong.tscn</div>
+                <div>Signals</div>
+                <div class="inspector-row"><span>ball collision</span><span>➡️</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Panel inferior (Output/Debugger) -->
+    <!-- bottom panel -->
     <div class="bottom-panel">
         <div class="bottom-tabs">
-            <span>Output</span>
-            <span>Debugger</span>
-            <span>Audio</span>
-            <span>Animation</span>
-            <span style="flex:1"></span>
-            <span><i class="fas fa-terminal"></i></span>
+            <span>Output</span> <span>Debugger</span> <span>Audio</span> <span>Animation</span>
         </div>
-        <div class="bottom-content">
-            [visual script] ball_dir set to -1 from collision<br>
-            [pong] left paddle updated · frame 128
+        <div class="bottom-content" id="outputConsole">
+            [ready] Graph initialized. Conecta nodos para programar.
         </div>
     </div>
 </div>
 
 <script>
     (function() {
-        // --- Lógica del juego Pong (simple, con IA) ---
+        // ---------- LÓGICA DEL JUEGO PONG ----------
         const canvas = document.getElementById('pongCanvas');
         const ctx = canvas.getContext('2d');
         let gameRunning = true;
+        let gamePaused = false; // para no acumular bucles
 
-        // estado del pong
+        // estado del juego (expuesto para modificar desde nodos)
         let ball = {
             x: 200, y: 90,
-            vx: 1.7, vy: 1.2,
+            vx: 1.8, vy: 1.2,
             radius: 5
         };
-        const paddleWidth = 6, paddleHeight = 30;
         let leftPaddleY = 70, rightPaddleY = 70;
-        const paddleSpeed = 1.5;
+        const paddleWidth = 6, paddleHeight = 30;
+        const paddleSpeed = 1.4;
+
+        // para detectar colisiones y activar nodos
+        let collisionJustHappened = false; // se activa por un frame
 
         function resetBall() {
             ball.x = 200; ball.y = 90;
@@ -485,156 +424,143 @@
             ball.vy = (Math.random() * 2 - 1) * 1.2;
         }
 
-        function updateGame() {
+        // bucle del juego
+        function gameLoop() {
             if (!gameRunning) return;
 
-            // mover bola
+            // mover pelota
             ball.x += ball.vx;
             ball.y += ball.vy;
 
-            // colisiones superior/inferior
+            // colisión arriba/abajo
             if (ball.y - ball.radius < 0 || ball.y + ball.radius > 180) {
                 ball.vy *= -1;
             }
 
-            // IA de palas (siguen la bola)
+            // IA simple para palas (siguen la pelota)
             if (ball.y > leftPaddleY + paddleHeight/2) leftPaddleY += paddleSpeed;
             else leftPaddleY -= paddleSpeed;
             if (ball.y > rightPaddleY + paddleHeight/2) rightPaddleY += paddleSpeed;
             else rightPaddleY -= paddleSpeed;
-
-            // límites palas
             leftPaddleY = Math.max(0, Math.min(180 - paddleHeight, leftPaddleY));
             rightPaddleY = Math.max(0, Math.min(180 - paddleHeight, rightPaddleY));
 
-            // colisión izquierda
+            // colisión con palas
+            let coll = false;
+            // izquierda
             if (ball.x - ball.radius < 20 && ball.x - ball.radius > 10) {
                 if (ball.y > leftPaddleY && ball.y < leftPaddleY + paddleHeight) {
-                    ball.vx *= -1.05; // efecto
+                    ball.vx *= -1.05;
                     ball.x = 20 + ball.radius;
+                    coll = true;
                 } else if (ball.x < 5) {
                     resetBall();
                 }
             }
-            // colisión derecha
+            // derecha
             if (ball.x + ball.radius > 380 && ball.x + ball.radius < 390) {
                 if (ball.y > rightPaddleY && ball.y < rightPaddleY + paddleHeight) {
                     ball.vx *= -1.05;
                     ball.x = 380 - ball.radius;
+                    coll = true;
                 } else if (ball.x > 395) {
                     resetBall();
                 }
             }
 
+            collisionJustHappened = coll; // para activar nodos
+
+            // actualizar inspector con velocidad
+            document.getElementById('inspectorVel').innerText = `(${ball.vx.toFixed(1)}, ${ball.vy.toFixed(1)})`;
+
             drawGame();
-            requestAnimationFrame(updateGame);
+            requestAnimationFrame(gameLoop);
         }
 
         function drawGame() {
             ctx.clearRect(0, 0, 400, 180);
-            // fondo
             ctx.fillStyle = '#1a1e2c';
             ctx.fillRect(0, 0, 400, 180);
-            // línea central
             ctx.strokeStyle = '#3f4b62';
             ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(200, 10);
-            ctx.lineTo(200, 170);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(200, 10); ctx.lineTo(200, 170); ctx.stroke();
             ctx.setLineDash([]);
-
             // pelota
             ctx.fillStyle = '#d0e0ff';
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, 2*Math.PI);
-            ctx.fill();
-
+            ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, 2*Math.PI); ctx.fill();
             // palas
             ctx.fillStyle = '#aab9de';
             ctx.fillRect(15, leftPaddleY, paddleWidth, paddleHeight);
             ctx.fillRect(380 - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
-
-            // texto depuración
-            ctx.font = '8px monospace';
-            ctx.fillStyle = '#8b9aca';
-            ctx.fillText('pong preview', 10, 20);
         }
 
-        updateGame();
+        gameLoop();
 
-        // --- Sistema de nodos visuales y conexiones ---
+        // ---------- SISTEMA DE NODOS VISUALES Y CONEXIONES ----------
         const container = document.getElementById('graphContainer');
         const connectionCanvas = document.getElementById('connectionCanvas');
         const ctxLines = connectionCanvas.getContext('2d');
+        const outputDiv = document.getElementById('outputConsole');
 
-        // ajustar tamaño del canvas de líneas
-        function resizeConnectionCanvas() {
-            const rect = container.getBoundingClientRect();
-            connectionCanvas.width = rect.width;
-            connectionCanvas.height = rect.height;
-            connectionCanvas.style.width = rect.width + 'px';
-            connectionCanvas.style.height = rect.height + 'px';
-            drawAllConnections();
+        function log(message) {
+            outputDiv.innerHTML = message;
         }
-        window.addEventListener('resize', resizeConnectionCanvas);
-        const resizeObserver = new ResizeObserver(() => resizeConnectionCanvas());
-        resizeObserver.observe(container);
 
-        // datos de nodos y conexiones
+        // datos de nodos
         let nodes = [];
         let connections = [];
-        let selectedPortStart = null; // { nodeId, portType, portIndex, element }
+        let selectedPortStart = null;
 
-        // definición de nodos (coordenadas iniciales)
-        const nodeData = [
-            { id: 'ball', title: 'ball.vs', posX: 80, posY: 60, inputs: [], outputs: ['direction', 'position'] },
-            { id: 'paddle', title: 'paddle.vs', posX: 280, posY: 140, inputs: ['collision'], outputs: ['y'] },
-            { id: 'collision', title: 'collision', posX: 400, posY: 40, inputs: ['area'], outputs: ['obj'] },
-            { id: 'on_area', title: 'on_area_entered', posX: 130, posY: 230, inputs: ['body'], outputs: ['signal'] },
-            { id: 'is_ball', title: 'Is ball.vs?', posX: 350, posY: 260, inputs: ['check'], outputs: ['true','false'] },
-            { id: 'set_dir', title: 'set direction', posX: 520, posY: 180, inputs: ['vector'], outputs: [] }
-        ];
+        // tipos de nodos con su comportamiento (simulado)
+        const nodeTypes = {
+            ball: { title: 'ball.vs', inputs: [], outputs: ['collision', 'pos'] },
+            collision: { title: 'on_collision', inputs: ['body'], outputs: ['signal'] },
+            setVelocity: { title: 'set_velocity', inputs: ['vector'], outputs: [] },
+            random: { title: 'random_vector', inputs: ['min','max'], outputs: ['vector'] }
+        };
 
-        // crear nodos en el DOM
-        nodeData.forEach((n, index) => {
+        // crear nodos iniciales para demo
+        function createNode(type, id, x, y) {
+            const def = nodeTypes[type];
+            if (!def) return;
             const nodeDiv = document.createElement('div');
             nodeDiv.className = 'visual-node';
-            nodeDiv.id = `node-${n.id}`;
-            nodeDiv.style.left = n.posX + 'px';
-            nodeDiv.style.top = n.posY + 'px';
-            nodeDiv.setAttribute('data-id', n.id);
+            nodeDiv.id = `node-${id}`;
+            nodeDiv.style.left = x + 'px';
+            nodeDiv.style.top = y + 'px';
+            nodeDiv.setAttribute('data-id', id);
+            nodeDiv.setAttribute('data-type', type);
 
             // header
             const header = document.createElement('div');
             header.className = 'node-header';
-            header.innerHTML = `<i class="fas fa-cube"></i> ${n.title}`;
+            header.innerHTML = `<i class="fas fa-cube"></i> ${def.title}`;
             nodeDiv.appendChild(header);
 
             // content
             const content = document.createElement('div');
             content.className = 'node-content';
 
-            // crear puertos de entrada
-            n.inputs.forEach((inp, i) => {
+            // puertos de entrada
+            def.inputs.forEach((inp, i) => {
                 const row = document.createElement('div');
                 row.className = 'port-container';
                 row.innerHTML = `
-                    <div class="port left-port" data-port-type="input" data-port-index="${i}" data-node-id="${n.id}"></div>
+                    <div class="port left-port" data-port-type="input" data-port-index="${i}" data-node-id="${id}"></div>
                     <span class="port-label">${inp}</span>
                     <span></span>
                 `;
                 content.appendChild(row);
             });
 
-            // crear puertos de salida
-            n.outputs.forEach((out, i) => {
+            // puertos de salida
+            def.outputs.forEach((out, i) => {
                 const row = document.createElement('div');
                 row.className = 'port-container';
                 row.innerHTML = `
                     <span></span>
                     <span class="port-label">${out}</span>
-                    <div class="port right-port" data-port-type="output" data-port-index="${i}" data-node-id="${n.id}"></div>
+                    <div class="port right-port" data-port-type="output" data-port-index="${i}" data-node-id="${id}"></div>
                 `;
                 content.appendChild(row);
             });
@@ -642,15 +568,15 @@
             nodeDiv.appendChild(content);
             container.appendChild(nodeDiv);
 
-            // guardar referencia
             nodes.push({
-                id: n.id,
+                id: id,
+                type: type,
                 element: nodeDiv,
-                inputs: n.inputs,
-                outputs: n.outputs
+                inputs: def.inputs,
+                outputs: def.outputs
             });
 
-            // hacer arrastrable
+            // drag
             let offsetX, offsetY, isDragging = false;
             header.addEventListener('mousedown', (e) => {
                 isDragging = true;
@@ -666,36 +592,43 @@
                 const containerRect = container.getBoundingClientRect();
                 let newLeft = e.clientX - containerRect.left - offsetX;
                 let newTop = e.clientY - containerRect.top - offsetY;
-                // límites suaves
                 newLeft = Math.max(0, Math.min(containerRect.width - nodeDiv.offsetWidth, newLeft));
                 newTop = Math.max(0, Math.min(containerRect.height - nodeDiv.offsetHeight, newTop));
                 nodeDiv.style.left = newLeft + 'px';
                 nodeDiv.style.top = newTop + 'px';
-                drawAllConnections(); // redibujar líneas mientras mueve
+                drawAllConnections();
             });
 
-            window.addEventListener('mouseup', (e) => {
+            window.addEventListener('mouseup', () => {
                 if (isDragging) {
                     isDragging = false;
                     nodeDiv.style.zIndex = 10;
                     drawAllConnections();
                 }
             });
-        });
+        }
 
-        // manejo de conexiones con puertos
+        // crear algunos nodos iniciales
+        createNode('ball', 'ball1', 50, 50);
+        createNode('collision', 'col1', 250, 80);
+        createNode('setVelocity', 'set1', 400, 150);
+        createNode('random', 'rand1', 250, 200);
+
+        // conexiones de ejemplo
+        connections.push({ startNode: 'ball1', startIndex: 0, startType: 'output', endNode: 'col1', endIndex: 0, endType: 'input' });
+        connections.push({ startNode: 'col1', startIndex: 0, startType: 'output', endNode: 'rand1', endIndex: 0, endType: 'input' });
+        connections.push({ startNode: 'rand1', startIndex: 0, startType: 'output', endNode: 'set1', endIndex: 0, endType: 'input' });
+
+        // dibujar líneas
         function getPortCenter(portEl) {
             const containerRect = container.getBoundingClientRect();
             const rect = portEl.getBoundingClientRect();
-            const centerX = rect.left + rect.width/2 - containerRect.left;
-            const centerY = rect.top + rect.height/2 - containerRect.top;
-            return { x: centerX, y: centerY };
+            return { x: rect.left + rect.width/2 - containerRect.left, y: rect.top + rect.height/2 - containerRect.top };
         }
 
         function drawAllConnections() {
             ctxLines.clearRect(0, 0, connectionCanvas.width, connectionCanvas.height);
             if (!connectionCanvas.width || !connectionCanvas.height) return;
-
             ctxLines.strokeStyle = '#aaccff';
             ctxLines.lineWidth = 2.5;
             ctxLines.shadowColor = '#8ab3ff';
@@ -709,52 +642,50 @@
                     const end = getPortCenter(endPort);
                     ctxLines.beginPath();
                     ctxLines.moveTo(start.x, start.y);
-                    // curva bezier
-                    const cp1x = start.x + 50;
-                    const cp1y = start.y;
-                    const cp2x = end.x - 50;
-                    const cp2y = end.y;
-                    ctxLines.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, end.x, end.y);
+                    ctxLines.bezierCurveTo(start.x+50, start.y, end.x-50, end.y, end.x, end.y);
                     ctxLines.stroke();
                 }
             });
             ctxLines.shadowBlur = 0;
         }
 
-        // eventos en puertos (delegación)
+        // resize observer
+        const resizeObserver = new ResizeObserver(() => {
+            connectionCanvas.width = container.clientWidth;
+            connectionCanvas.height = container.clientHeight;
+            drawAllConnections();
+        });
+        resizeObserver.observe(container);
+
+        // manejo de conexiones click
         container.addEventListener('click', (e) => {
             const port = e.target.closest('.port');
             if (!port) {
                 if (selectedPortStart) {
-                    selectedPortStart = null; // cancelar
+                    resetPortStyle(selectedPortStart.element);
+                    selectedPortStart = null;
                 }
                 return;
             }
-
             const nodeId = port.dataset.nodeId;
             const portType = port.dataset.portType;
             const portIndex = parseInt(port.dataset.portIndex);
 
             if (!selectedPortStart) {
-                // seleccionar primer puerto (solo output puede iniciar, o permitimos ambos pero forzamos lógica)
+                // solo output puede iniciar (para simplificar)
                 if (portType === 'output') {
                     selectedPortStart = { nodeId, portType, portIndex, element: port };
                     port.style.background = '#ffd966';
-                } else {
-                    // si es input, no empezamos
-                    return;
                 }
             } else {
-                // tenemos un puerto inicio, intentar conectar
                 const start = selectedPortStart;
-                // evitar auto-conexión y solo permitir output->input
                 if (start.nodeId === nodeId) {
-                    selectedPortStart = null;
                     resetPortStyle(start.element);
+                    selectedPortStart = null;
                     return;
                 }
+                // permitir output->input
                 if (start.portType === 'output' && portType === 'input') {
-                    // crear conexión
                     connections.push({
                         startNode: start.nodeId,
                         startIndex: start.portIndex,
@@ -763,8 +694,9 @@
                         endIndex: portIndex,
                         endType: 'input'
                     });
+                    log(`[conexión] ${start.nodeId} → ${nodeId}`);
                 } else if (start.portType === 'input' && portType === 'output') {
-                    // inversa, también válida (output siempre inicio)
+                    // inversa
                     connections.push({
                         startNode: nodeId,
                         startIndex: portIndex,
@@ -773,8 +705,8 @@
                         endIndex: start.portIndex,
                         endType: 'input'
                     });
+                    log(`[conexión] ${nodeId} → ${start.nodeId}`);
                 }
-                // reset estilo
                 resetPortStyle(start.element);
                 selectedPortStart = null;
                 drawAllConnections();
@@ -785,39 +717,105 @@
             if (portEl) portEl.style.background = '';
         }
 
-        // limpiar selección si se hace clic en fondo
+        // limpiar selección con click en fondo
         container.addEventListener('mousedown', (e) => {
             if (!e.target.closest('.port') && selectedPortStart) {
                 resetPortStyle(selectedPortStart.element);
                 selectedPortStart = null;
-                drawAllConnections();
             }
         });
 
-        // inicializar canvas y dibujar líneas periódicamente
-        setTimeout(() => {
-            resizeConnectionCanvas();
+        // botones de agregar nodos
+        document.getElementById('addBallNode').addEventListener('click', () => {
+            const id = 'ball' + Date.now();
+            createNode('ball', id, 100, 100);
             drawAllConnections();
-        }, 100);
-        setInterval(drawAllConnections, 200); // por si acaso
-
-        // agregar un par de conexiones de ejemplo para que se vea funcional
-        setTimeout(() => {
-            connections.push({ startNode: 'ball', startIndex: 0, startType: 'output', endNode: 'set_dir', endIndex: 0, endType: 'input' });
-            connections.push({ startNode: 'collision', startIndex: 0, startType: 'output', endNode: 'is_ball', endIndex: 0, endType: 'input' });
-            drawAllConnections();
-        }, 500);
-
-        // botón de ejecución (opcional, lo añadimos visualmente)
-        const runButton = document.createElement('button');
-        runButton.innerText = '▶ Ejecutar';
-        runButton.className = 'run-btn';
-        document.querySelector('.top-menu').appendChild(runButton);
-        runButton.addEventListener('click', () => {
-            gameRunning = !gameRunning;
-            runButton.innerText = gameRunning ? '⏸ Pausa' : '▶ Ejecutar';
-            if (gameRunning) updateGame();
         });
+        document.getElementById('addCollisionNode').addEventListener('click', () => {
+            const id = 'col' + Date.now();
+            createNode('collision', id, 300, 120);
+            drawAllConnections();
+        });
+        document.getElementById('addSetVelNode').addEventListener('click', () => {
+            const id = 'set' + Date.now();
+            createNode('setVelocity', id, 450, 180);
+            drawAllConnections();
+        });
+        document.getElementById('addRandomNode').addEventListener('click', () => {
+            const id = 'rand' + Date.now();
+            createNode('random', id, 280, 240);
+            drawAllConnections();
+        });
+        document.getElementById('clearConnectionsBtn').addEventListener('click', () => {
+            connections = [];
+            drawAllConnections();
+            log('[sistema] conexiones eliminadas');
+        });
+
+        // ---------- MOTOR DE EJECUCIÓN DE NODOS (cada frame) ----------
+        // Evaluamos el grafo: cuando collisionJustHappened es true, activamos los nodos de colisión y seguimos conexiones
+        function processVisualScript() {
+            if (!gameRunning) return;
+
+            if (collisionJustHappened) {
+                log('[evento] ¡colisión detectada! ejecutando nodos...');
+                // buscar todos los nodos de tipo collision que tengan una conexión de entrada desde ball (o cualquiera)
+                // simplificado: disparar todos los nodos collision y seguir
+                nodes.forEach(node => {
+                    if (node.type === 'collision') {
+                        // activar salida de collision (index 0)
+                        const outgoing = connections.filter(c => c.startNode === node.id && c.startType === 'output');
+                        outgoing.forEach(conn => {
+                            // encontrar nodo destino
+                            const targetNode = nodes.find(n => n.id === conn.endNode);
+                            if (targetNode) {
+                                if (targetNode.type === 'random') {
+                                    // generar vector aleatorio
+                                    const randX = (Math.random() * 4 - 2).toFixed(1);
+                                    const randY = (Math.random() * 3 - 1.5).toFixed(1);
+                                    log(`[random] nuevo vector (${randX}, ${randY})`);
+                                    // ahora conectar con setVelocity si existe
+                                    const nextConns = connections.filter(c => c.startNode === targetNode.id && c.startType === 'output');
+                                    nextConns.forEach(nc => {
+                                        const setNode = nodes.find(n => n.id === nc.endNode);
+                                        if (setNode && setNode.type === 'setVelocity') {
+                                            // aplicar a la pelota
+                                            ball.vx = parseFloat(randX);
+                                            ball.vy = parseFloat(randY);
+                                            log(`[setVelocity] velocidad cambiada a (${ball.vx}, ${ball.vy})`);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            requestAnimationFrame(processVisualScript);
+        }
+
+        // iniciar procesamiento de script
+        setTimeout(() => {
+            processVisualScript();
+        }, 1000);
+
+        // run button
+        const runBtn = document.createElement('button');
+        runBtn.innerText = '⏸ Pausa';
+        runBtn.className = 'run-btn';
+        document.querySelector('.top-menu').appendChild(runBtn);
+        runBtn.addEventListener('click', () => {
+            gameRunning = !gameRunning;
+            runBtn.innerText = gameRunning ? '⏸ Pausa' : '▶ Ejecutar';
+            if (gameRunning) { gameLoop(); processVisualScript(); }
+        });
+
+        // draw initial lines
+        setTimeout(() => {
+            connectionCanvas.width = container.clientWidth;
+            connectionCanvas.height = container.clientHeight;
+            drawAllConnections();
+        }, 200);
     })();
 </script>
 </body>
