@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Scripting Playground · Pong programable con nodos</title>
+    <title>Visual Scripting · 100 nodos + tutorial + scripts</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -46,7 +46,7 @@
         .top-menu span { cursor: default; }
         .top-menu i { margin-right: 5px; opacity: 0.8; }
         .top-menu .spacer { flex: 1; }
-        .top-menu .online-docs {
+        .online-docs {
             background: #373e4b;
             padding: 3px 10px;
             border-radius: 4px;
@@ -75,7 +75,6 @@
             align-items: center;
             gap: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .tree {
             padding: 10px 0 0 8px;
@@ -88,10 +87,8 @@
             align-items: center;
             gap: 6px;
             cursor: default;
-            border-left: 2px solid transparent;
         }
         .tree-item:hover { background: #3a3f4b; }
-        .tree-item i { width: 18px; color: #7e879b; }
         .vs-icon {
             background: #5d4e6b;
             border-radius: 3px;
@@ -160,13 +157,13 @@
             flex: 1;
             background: #1a1d25;
             position: relative;
-            overflow: hidden;
+            overflow: auto;  /* Permitir scroll para 100 nodos */
             background-image: radial-gradient(circle at 1px 1px, #3a4050 1px, transparent 0);
             background-size: 30px 30px;
         }
         #graphContainer {
-            width: 100%;
-            height: 100%;
+            width: 2000px;        /* Área grande para colocar nodos */
+            height: 2000px;
             position: relative;
         }
         .visual-node {
@@ -174,49 +171,50 @@
             background: #313844;
             border: 1px solid #545b6b;
             border-radius: 8px;
-            min-width: 170px;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.6);
+            min-width: 140px;
+            font-size: 11px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
             color: #dde2f0;
-            font-size: 12px;
             z-index: 10;
         }
         .node-header {
             background: #232833;
-            padding: 8px 10px;
+            padding: 5px 8px;
             border-radius: 7px 7px 0 0;
             font-weight: 600;
             border-bottom: 1px solid #4a5162;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             cursor: move;
+            font-size: 11px;
         }
-        .node-content { padding: 12px 8px 8px 8px; }
+        .node-content { padding: 8px 6px; }
         .port-container {
             display: flex;
             justify-content: space-between;
-            margin: 6px 0;
+            margin: 4px 0;
             align-items: center;
         }
         .port {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             background: #4f5b70;
             border: 2px solid #818fa7;
             border-radius: 50%;
             cursor: crosshair;
             transition: 0.1s;
         }
-        .port.left-port { margin-right: 8px; }
-        .port.right-port { margin-left: 8px; }
+        .port.left-port { margin-right: 5px; }
+        .port.right-port { margin-left: 5px; }
         .port:hover {
             background: #7d95c0;
             border-color: #b7ceff;
             transform: scale(1.2);
         }
-        .port-label { color: #b5c4e0; font-size: 11px; }
+        .port-label { color: #b5c4e0; font-size: 10px; }
         .right-panel {
-            width: 240px;
+            width: 260px;
             background: #262b33;
             border-left: 1px solid #3d424c;
             display: flex;
@@ -224,23 +222,23 @@
             color: #b7bdcb;
         }
         .inspector-section {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #373d48;
         }
         .inspector-row {
             display: flex;
             justify-content: space-between;
-            margin: 8px 0;
+            margin: 5px 0;
             font-size: 12px;
         }
         .inspector-value {
             background: #1e222a;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
             color: #ccdcff;
         }
         .bottom-panel {
-            height: 140px;
+            height: 120px;
             background: #20232b;
             border-top: 1px solid #3f4551;
             display: flex;
@@ -259,6 +257,8 @@
             color: #a0a8bb;
             font-family: monospace;
             font-size: 12px;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
         .connection-layer {
             position: absolute;
@@ -274,23 +274,13 @@
             width: 100%;
             height: 100%;
         }
-        .run-btn {
-            background: #3f564b;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 16px;
-            font-weight: bold;
-            margin-left: 20px;
-            cursor: pointer;
-        }
-        .run-btn:hover { background: #4e7868; }
         .toolbar {
             display: flex;
-            gap: 10px;
-            padding: 5px 10px;
+            gap: 8px;
+            padding: 4px 8px;
             background: #262e38;
             border-bottom: 1px solid #3a4050;
+            flex-wrap: wrap;
         }
         .toolbar button {
             background: #353f4e;
@@ -299,7 +289,44 @@
             padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 11px;
+        }
+        .toolbar button.run-script {
+            background: #3f6b5e;
+            font-weight: bold;
+        }
+        .tutorial-box {
+            position: absolute;
+            top: 220px;
+            right: 300px;
+            width: 240px;
+            background: #2f3a44;
+            border: 1px solid #55718b;
+            border-radius: 8px;
+            color: #e0ecff;
+            padding: 12px;
             font-size: 12px;
+            box-shadow: 4px 4px 15px black;
+            z-index: 100;
+            pointer-events: all;
+        }
+        .tutorial-box .close {
+            float: right;
+            cursor: pointer;
+            background: #3d5266;
+            padding: 0 6px;
+            border-radius: 4px;
+        }
+        .script-editor {
+            width: 100%;
+            height: 100px;
+            background: #1b1f2a;
+            border: 1px solid #4d5a70;
+            color: #c6daf0;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 4px;
+            resize: none;
         }
     </style>
 </head>
@@ -319,7 +346,7 @@
         <span><i class="fas fa-filter"></i></span>
     </div>
 
-    <!-- main -->
+    <!-- main grid -->
     <div class="main-grid">
         <!-- left panel -->
         <div class="left-panel">
@@ -327,14 +354,14 @@
             <div class="filter-box"><i class="fas fa-search"></i><input placeholder="Filter nodes" value="res://"></div>
             <div class="tree">
                 <div class="tree-item"><i class="fas fa-folder"></i> res://</div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs <span class="vs-icon">VS</span></div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs <span class="vs-icon">VS</span></div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> collision.vs</div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> 100_nodes.vs <span class="vs-icon">VS</span></div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs</div>
+                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs</div>
                 <div class="tree-item"><i class="fas fa-image"></i> ball.png</div>
                 <div class="separator" style="height:1px; background:#3d424c; margin:12px 0;"></div>
                 <div class="panel-header"><i class="fas fa-star"></i> Favorites:</div>
                 <div class="tree-item"><i class="fas fa-code-branch"></i> Function</div>
-                <div class="tree-item"><i class="fas fa-shield-alt"></i> collision</div>
+                <div class="tree-item"><i class="fas fa-shield-alt"></i> Collision</div>
             </div>
         </div>
 
@@ -349,39 +376,43 @@
                 <span class="tab">Edit</span>
                 <span class="tab">Debug</span>
             </div>
-            <!-- mini toolbar -->
+            <!-- toolbar con botón ejecutar script y tutorial -->
             <div class="toolbar">
                 <button id="addBallNode"><i class="fas fa-plus"></i> Ball</button>
                 <button id="addCollisionNode"><i class="fas fa-bolt"></i> Collision</button>
                 <button id="addSetVelNode"><i class="fas fa-arrow-right"></i> Set Velocity</button>
                 <button id="addRandomNode"><i class="fas fa-random"></i> Random</button>
                 <span style="flex:1"></span>
-                <button id="clearConnectionsBtn">Clear connections</button>
+                <button id="runScriptBtn" class="run-script"><i class="fas fa-play"></i> Ejecutar Script</button>
+                <button id="clearConnectionsBtn">Limpiar conexiones</button>
+                <button id="showTutorialBtn"><i class="fas fa-question"></i> Tutorial</button>
             </div>
             <!-- game canvas -->
             <div class="game-preview">
                 <canvas id="pongCanvas" width="400" height="180"></canvas>
             </div>
-            <!-- graph area -->
-            <div class="graph-area">
+            <!-- graph area con scroll -->
+            <div class="graph-area" id="graphArea">
                 <div id="graphContainer">
                     <canvas id="connectionCanvas" class="connection-layer"></canvas>
-                    <!-- nodos existirán aquí -->
+                    <!-- Los 100 nodos se inyectan aquí -->
                 </div>
             </div>
         </div>
 
-        <!-- right inspector -->
+        <!-- right inspector (muestra script del nodo seleccionado) -->
         <div class="right-panel">
-            <div class="panel-header"><i class="fas fa-info-circle"></i> Inspector</div>
+            <div class="panel-header"><i class="fas fa-info-circle"></i> Inspector / Script</div>
             <div class="inspector-section">
-                <div class="inspector-row"><span>Node:</span><span class="inspector-value">ball</span></div>
-                <div class="inspector-row"><span>velocity</span><span class="inspector-value" id="inspectorVel">(1.8, 1.2)</span></div>
-                <div class="inspector-row"><span>on_collision</span><span class="badge-function">connected</span></div>
+                <div class="inspector-row"><span>Nodo seleccionado:</span> <span id="selectedNodeName">ninguno</span></div>
+                <div class="inspector-row"><span>Tipo:</span> <span id="selectedNodeType">—</span></div>
+                <label>Script (editable):</label>
+                <textarea id="nodeScriptArea" class="script-editor" placeholder="// script del nodo ...">print("hola")</textarea>
+                <button id="applyScriptBtn" style="margin-top:5px; background:#3a4a5a; border:none; color:white; padding:4px; width:100%">Aplicar cambios</button>
             </div>
             <div class="inspector-section">
-                <div>Signals</div>
-                <div class="inspector-row"><span>ball collision</span><span>➡️</span></div>
+                <div>Velocidad actual pelota:</div>
+                <div class="inspector-row"><span>vx, vy</span><span class="inspector-value" id="inspectorVel">(1.8,1.2)</span></div>
             </div>
         </div>
     </div>
@@ -392,9 +423,20 @@
             <span>Output</span> <span>Debugger</span> <span>Audio</span> <span>Animation</span>
         </div>
         <div class="bottom-content" id="outputConsole">
-            [ready] Graph initialized. Conecta nodos para programar.
+            [sistema] 100 nodos generados. Conecta nodos y pulsa "Ejecutar Script".
         </div>
     </div>
+</div>
+
+<!-- Tutorial flotante (opcional) -->
+<div id="tutorialBox" class="tutorial-box" style="display: none;">
+    <span class="close" id="closeTutorial">✖</span>
+    <h4 style="margin-bottom: 6px;">📘 Tutorial rápido</h4>
+    <p>1. Conecta puertos: haz clic en un puerto de salida (derecha) y luego en un puerto de entrada (izquierda).</p>
+    <p>2. Pulsa "Ejecutar Script" para activar el grafo desde los nodos ball (simula colisión).</p>
+    <p>3. Haz clic en cualquier nodo para ver/edit su script individual en el inspector.</p>
+    <p>4. Usa los botones de añadir para crear nuevos nodos.</p>
+    <p>5. El juego se actualiza con los cambios de velocidad.</p>
 </div>
 
 <script>
@@ -403,9 +445,7 @@
         const canvas = document.getElementById('pongCanvas');
         const ctx = canvas.getContext('2d');
         let gameRunning = true;
-        let gamePaused = false; // para no acumular bucles
 
-        // estado del juego (expuesto para modificar desde nodos)
         let ball = {
             x: 200, y: 90,
             vx: 1.8, vy: 1.2,
@@ -415,29 +455,21 @@
         const paddleWidth = 6, paddleHeight = 30;
         const paddleSpeed = 1.4;
 
-        // para detectar colisiones y activar nodos
-        let collisionJustHappened = false; // se activa por un frame
-
         function resetBall() {
             ball.x = 200; ball.y = 90;
             ball.vx = (Math.random() > 0.5 ? 1.5 : -1.5);
             ball.vy = (Math.random() * 2 - 1) * 1.2;
         }
 
-        // bucle del juego
         function gameLoop() {
             if (!gameRunning) return;
 
-            // mover pelota
             ball.x += ball.vx;
             ball.y += ball.vy;
 
-            // colisión arriba/abajo
-            if (ball.y - ball.radius < 0 || ball.y + ball.radius > 180) {
-                ball.vy *= -1;
-            }
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > 180) ball.vy *= -1;
 
-            // IA simple para palas (siguen la pelota)
+            // IA palas
             if (ball.y > leftPaddleY + paddleHeight/2) leftPaddleY += paddleSpeed;
             else leftPaddleY -= paddleSpeed;
             if (ball.y > rightPaddleY + paddleHeight/2) rightPaddleY += paddleSpeed;
@@ -445,32 +477,20 @@
             leftPaddleY = Math.max(0, Math.min(180 - paddleHeight, leftPaddleY));
             rightPaddleY = Math.max(0, Math.min(180 - paddleHeight, rightPaddleY));
 
-            // colisión con palas
-            let coll = false;
-            // izquierda
+            // colisiones con palas (solo para mantener el juego, no activan script automático)
             if (ball.x - ball.radius < 20 && ball.x - ball.radius > 10) {
                 if (ball.y > leftPaddleY && ball.y < leftPaddleY + paddleHeight) {
                     ball.vx *= -1.05;
                     ball.x = 20 + ball.radius;
-                    coll = true;
-                } else if (ball.x < 5) {
-                    resetBall();
-                }
+                } else if (ball.x < 5) resetBall();
             }
-            // derecha
             if (ball.x + ball.radius > 380 && ball.x + ball.radius < 390) {
                 if (ball.y > rightPaddleY && ball.y < rightPaddleY + paddleHeight) {
                     ball.vx *= -1.05;
                     ball.x = 380 - ball.radius;
-                    coll = true;
-                } else if (ball.x > 395) {
-                    resetBall();
-                }
+                } else if (ball.x > 395) resetBall();
             }
 
-            collisionJustHappened = coll; // para activar nodos
-
-            // actualizar inspector con velocidad
             document.getElementById('inspectorVel').innerText = `(${ball.vx.toFixed(1)}, ${ball.vy.toFixed(1)})`;
 
             drawGame();
@@ -485,10 +505,8 @@
             ctx.setLineDash([5, 5]);
             ctx.beginPath(); ctx.moveTo(200, 10); ctx.lineTo(200, 170); ctx.stroke();
             ctx.setLineDash([]);
-            // pelota
             ctx.fillStyle = '#d0e0ff';
             ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, 2*Math.PI); ctx.fill();
-            // palas
             ctx.fillStyle = '#aab9de';
             ctx.fillRect(15, leftPaddleY, paddleWidth, paddleHeight);
             ctx.fillRect(380 - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
@@ -496,30 +514,47 @@
 
         gameLoop();
 
-        // ---------- SISTEMA DE NODOS VISUALES Y CONEXIONES ----------
+        // ---------- SISTEMA DE NODOS (100 nodos pregenerados) ----------
         const container = document.getElementById('graphContainer');
         const connectionCanvas = document.getElementById('connectionCanvas');
         const ctxLines = connectionCanvas.getContext('2d');
         const outputDiv = document.getElementById('outputConsole');
+        const graphArea = document.getElementById('graphArea');
 
         function log(message) {
-            outputDiv.innerHTML = message;
+            outputDiv.innerText = message;
         }
 
-        // datos de nodos
         let nodes = [];
         let connections = [];
         let selectedPortStart = null;
+        let selectedNodeId = null; // para el inspector
 
-        // tipos de nodos con su comportamiento (simulado)
+        // tipos de nodo con definiciones
         const nodeTypes = {
-            ball: { title: 'ball.vs', inputs: [], outputs: ['collision', 'pos'] },
-            collision: { title: 'on_collision', inputs: ['body'], outputs: ['signal'] },
-            setVelocity: { title: 'set_velocity', inputs: ['vector'], outputs: [] },
-            random: { title: 'random_vector', inputs: ['min','max'], outputs: ['vector'] }
+            ball: { title: 'ball.vs', inputs: [], outputs: ['collision', 'pos'], script: 'extends Node\nfunc on_collision():\n    print("ball hit")' },
+            collision: { title: 'on_collision', inputs: ['body'], outputs: ['signal'], script: 'extends Node\nfunc _on_area_entered(area):\n    emit_signal("signal")' },
+            setVelocity: { title: 'set_velocity', inputs: ['vector'], outputs: [], script: 'extends Node\nfunc set_ball_vel(v):\n    ball.vx = v.x\n    ball.vy = v.y' },
+            random: { title: 'random_vector', inputs: ['min','max'], outputs: ['vector'], script: 'func generate():\n    return Vector2(randf()*4-2, randf()*3-1.5)' },
+            print: { title: 'print', inputs: ['message'], outputs: [], script: 'func log(msg):\n    print(msg)' },
+            math: { title: 'math_add', inputs: ['a','b'], outputs: ['result'], script: 'func add(a,b): return a+b' }
         };
 
-        // crear nodos iniciales para demo
+        // generar 100 nodos de tipos variados en una cuadrícula
+        function generate100Nodes() {
+            const types = ['ball', 'collision', 'setVelocity', 'random', 'print', 'math'];
+            let idCounter = 0;
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 10; col++) {
+                    const type = types[(row + col) % types.length];
+                    const id = type + '_' + idCounter++;
+                    const x = 50 + col * 160;  // separación horizontal
+                    const y = 50 + row * 130;  // separación vertical
+                    createNode(type, id, x, y);
+                }
+            }
+        }
+
         function createNode(type, id, x, y) {
             const def = nodeTypes[type];
             if (!def) return;
@@ -531,13 +566,11 @@
             nodeDiv.setAttribute('data-id', id);
             nodeDiv.setAttribute('data-type', type);
 
-            // header
             const header = document.createElement('div');
             header.className = 'node-header';
             header.innerHTML = `<i class="fas fa-cube"></i> ${def.title}`;
             nodeDiv.appendChild(header);
 
-            // content
             const content = document.createElement('div');
             content.className = 'node-content';
 
@@ -568,15 +601,27 @@
             nodeDiv.appendChild(content);
             container.appendChild(nodeDiv);
 
+            // Guardar info del nodo
             nodes.push({
                 id: id,
                 type: type,
                 element: nodeDiv,
                 inputs: def.inputs,
-                outputs: def.outputs
+                outputs: def.outputs,
+                script: def.script || '# sin script'
             });
 
-            // drag
+            // Evento para seleccionar nodo (click en header)
+            header.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectedNodeId = id;
+                document.getElementById('selectedNodeName').innerText = id;
+                document.getElementById('selectedNodeType').innerText = type;
+                const scriptArea = document.getElementById('nodeScriptArea');
+                scriptArea.value = nodes.find(n => n.id === id).script;
+            });
+
+            // Drag (igual que antes)
             let offsetX, offsetY, isDragging = false;
             header.addEventListener('mousedown', (e) => {
                 isDragging = true;
@@ -590,10 +635,13 @@
             window.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
                 const containerRect = container.getBoundingClientRect();
-                let newLeft = e.clientX - containerRect.left - offsetX;
-                let newTop = e.clientY - containerRect.top - offsetY;
-                newLeft = Math.max(0, Math.min(containerRect.width - nodeDiv.offsetWidth, newLeft));
-                newTop = Math.max(0, Math.min(containerRect.height - nodeDiv.offsetHeight, newTop));
+                const scrollLeft = graphArea.scrollLeft;
+                const scrollTop = graphArea.scrollTop;
+                let newLeft = e.clientX - containerRect.left - offsetX + scrollLeft;
+                let newTop = e.clientY - containerRect.top - offsetY + scrollTop;
+                // límites dentro del contenedor grande
+                newLeft = Math.max(0, Math.min(container.clientWidth - nodeDiv.offsetWidth, newLeft));
+                newTop = Math.max(0, Math.min(container.clientHeight - nodeDiv.offsetHeight, newTop));
                 nodeDiv.style.left = newLeft + 'px';
                 nodeDiv.style.top = newTop + 'px';
                 drawAllConnections();
@@ -608,31 +656,25 @@
             });
         }
 
-        // crear algunos nodos iniciales
-        createNode('ball', 'ball1', 50, 50);
-        createNode('collision', 'col1', 250, 80);
-        createNode('setVelocity', 'set1', 400, 150);
-        createNode('random', 'rand1', 250, 200);
-
-        // conexiones de ejemplo
-        connections.push({ startNode: 'ball1', startIndex: 0, startType: 'output', endNode: 'col1', endIndex: 0, endType: 'input' });
-        connections.push({ startNode: 'col1', startIndex: 0, startType: 'output', endNode: 'rand1', endIndex: 0, endType: 'input' });
-        connections.push({ startNode: 'rand1', startIndex: 0, startType: 'output', endNode: 'set1', endIndex: 0, endType: 'input' });
-
-        // dibujar líneas
+        // dibujar conexiones
         function getPortCenter(portEl) {
             const containerRect = container.getBoundingClientRect();
             const rect = portEl.getBoundingClientRect();
-            return { x: rect.left + rect.width/2 - containerRect.left, y: rect.top + rect.height/2 - containerRect.top };
+            const scrollLeft = graphArea.scrollLeft;
+            const scrollTop = graphArea.scrollTop;
+            return {
+                x: rect.left + rect.width/2 - containerRect.left + scrollLeft,
+                y: rect.top + rect.height/2 - containerRect.top + scrollTop
+            };
         }
 
         function drawAllConnections() {
             ctxLines.clearRect(0, 0, connectionCanvas.width, connectionCanvas.height);
             if (!connectionCanvas.width || !connectionCanvas.height) return;
             ctxLines.strokeStyle = '#aaccff';
-            ctxLines.lineWidth = 2.5;
+            ctxLines.lineWidth = 2;
             ctxLines.shadowColor = '#8ab3ff';
-            ctxLines.shadowBlur = 6;
+            ctxLines.shadowBlur = 4;
 
             connections.forEach(conn => {
                 const startPort = document.querySelector(`[data-node-id="${conn.startNode}"][data-port-index="${conn.startIndex}"][data-port-type="${conn.startType}"]`);
@@ -642,22 +684,24 @@
                     const end = getPortCenter(endPort);
                     ctxLines.beginPath();
                     ctxLines.moveTo(start.x, start.y);
-                    ctxLines.bezierCurveTo(start.x+50, start.y, end.x-50, end.y, end.x, end.y);
+                    ctxLines.bezierCurveTo(start.x+60, start.y, end.x-60, end.y, end.x, end.y);
                     ctxLines.stroke();
                 }
             });
             ctxLines.shadowBlur = 0;
         }
 
-        // resize observer
-        const resizeObserver = new ResizeObserver(() => {
+        // Ajustar tamaño del canvas de conexiones
+        function resizeConnectionCanvas() {
             connectionCanvas.width = container.clientWidth;
             connectionCanvas.height = container.clientHeight;
             drawAllConnections();
-        });
-        resizeObserver.observe(container);
+        }
+        window.addEventListener('resize', resizeConnectionCanvas);
+        graphArea.addEventListener('scroll', drawAllConnections);
+        new ResizeObserver(resizeConnectionCanvas).observe(container);
 
-        // manejo de conexiones click
+        // Manejo de conexiones con clic
         container.addEventListener('click', (e) => {
             const port = e.target.closest('.port');
             if (!port) {
@@ -672,7 +716,6 @@
             const portIndex = parseInt(port.dataset.portIndex);
 
             if (!selectedPortStart) {
-                // solo output puede iniciar (para simplificar)
                 if (portType === 'output') {
                     selectedPortStart = { nodeId, portType, portIndex, element: port };
                     port.style.background = '#ffd966';
@@ -684,7 +727,6 @@
                     selectedPortStart = null;
                     return;
                 }
-                // permitir output->input
                 if (start.portType === 'output' && portType === 'input') {
                     connections.push({
                         startNode: start.nodeId,
@@ -696,7 +738,6 @@
                     });
                     log(`[conexión] ${start.nodeId} → ${nodeId}`);
                 } else if (start.portType === 'input' && portType === 'output') {
-                    // inversa
                     connections.push({
                         startNode: nodeId,
                         startIndex: portIndex,
@@ -717,34 +758,26 @@
             if (portEl) portEl.style.background = '';
         }
 
-        // limpiar selección con click en fondo
-        container.addEventListener('mousedown', (e) => {
-            if (!e.target.closest('.port') && selectedPortStart) {
-                resetPortStyle(selectedPortStart.element);
-                selectedPortStart = null;
-            }
-        });
-
-        // botones de agregar nodos
+        // Botones
         document.getElementById('addBallNode').addEventListener('click', () => {
             const id = 'ball' + Date.now();
-            createNode('ball', id, 100, 100);
-            drawAllConnections();
+            createNode('ball', id, 200, 200);
+            resizeConnectionCanvas();
         });
         document.getElementById('addCollisionNode').addEventListener('click', () => {
             const id = 'col' + Date.now();
-            createNode('collision', id, 300, 120);
-            drawAllConnections();
+            createNode('collision', id, 300, 250);
+            resizeConnectionCanvas();
         });
         document.getElementById('addSetVelNode').addEventListener('click', () => {
             const id = 'set' + Date.now();
-            createNode('setVelocity', id, 450, 180);
-            drawAllConnections();
+            createNode('setVelocity', id, 400, 300);
+            resizeConnectionCanvas();
         });
         document.getElementById('addRandomNode').addEventListener('click', () => {
             const id = 'rand' + Date.now();
-            createNode('random', id, 280, 240);
-            drawAllConnections();
+            createNode('random', id, 350, 350);
+            resizeConnectionCanvas();
         });
         document.getElementById('clearConnectionsBtn').addEventListener('click', () => {
             connections = [];
@@ -752,54 +785,73 @@
             log('[sistema] conexiones eliminadas');
         });
 
-        // ---------- MOTOR DE EJECUCIÓN DE NODOS (cada frame) ----------
-        // Evaluamos el grafo: cuando collisionJustHappened es true, activamos los nodos de colisión y seguimos conexiones
-        function processVisualScript() {
-            if (!gameRunning) return;
-
-            if (collisionJustHappened) {
-                log('[evento] ¡colisión detectada! ejecutando nodos...');
-                // buscar todos los nodos de tipo collision que tengan una conexión de entrada desde ball (o cualquiera)
-                // simplificado: disparar todos los nodos collision y seguir
-                nodes.forEach(node => {
-                    if (node.type === 'collision') {
-                        // activar salida de collision (index 0)
-                        const outgoing = connections.filter(c => c.startNode === node.id && c.startType === 'output');
-                        outgoing.forEach(conn => {
-                            // encontrar nodo destino
-                            const targetNode = nodes.find(n => n.id === conn.endNode);
-                            if (targetNode) {
-                                if (targetNode.type === 'random') {
-                                    // generar vector aleatorio
-                                    const randX = (Math.random() * 4 - 2).toFixed(1);
-                                    const randY = (Math.random() * 3 - 1.5).toFixed(1);
-                                    log(`[random] nuevo vector (${randX}, ${randY})`);
-                                    // ahora conectar con setVelocity si existe
-                                    const nextConns = connections.filter(c => c.startNode === targetNode.id && c.startType === 'output');
-                                    nextConns.forEach(nc => {
-                                        const setNode = nodes.find(n => n.id === nc.endNode);
-                                        if (setNode && setNode.type === 'setVelocity') {
-                                            // aplicar a la pelota
-                                            ball.vx = parseFloat(randX);
-                                            ball.vy = parseFloat(randY);
-                                            log(`[setVelocity] velocidad cambiada a (${ball.vx}, ${ball.vy})`);
-                                        }
-                                    });
-                                }
+        // EJECUTAR SCRIPT (botón manual)
+        document.getElementById('runScriptBtn').addEventListener('click', () => {
+            log('[script] Ejecutando grafo manualmente...');
+            // Simular activación desde todos los nodos ball (o cualquier nodo con salida)
+            // Recorremos nodos de tipo ball y lanzamos sus salidas
+            let executed = false;
+            nodes.forEach(node => {
+                if (node.type === 'ball') {
+                    // buscar conexiones salientes desde ball (output index 0 por defecto)
+                    const outgoing = connections.filter(c => c.startNode === node.id && c.startType === 'output');
+                    outgoing.forEach(conn => {
+                        const targetNode = nodes.find(n => n.id === conn.endNode);
+                        if (targetNode) {
+                            if (targetNode.type === 'random') {
+                                const randX = (Math.random() * 4 - 2);
+                                const randY = (Math.random() * 3 - 1.5);
+                                log(`[random] generado (${randX.toFixed(1)}, ${randY.toFixed(1)})`);
+                                // conectar a setVelocity si existe
+                                const nextConns = connections.filter(c => c.startNode === targetNode.id && c.startType === 'output');
+                                nextConns.forEach(nc => {
+                                    const setNode = nodes.find(n => n.id === nc.endNode);
+                                    if (setNode && setNode.type === 'setVelocity') {
+                                        ball.vx = randX;
+                                        ball.vy = randY;
+                                        log(`[setVelocity] velocidad cambiada a (${ball.vx.toFixed(1)}, ${ball.vy.toFixed(1)})`);
+                                        executed = true;
+                                    }
+                                });
+                            } else if (targetNode.type === 'print') {
+                                log('[print] nodo de impresión activado');
+                                executed = true;
+                            } else if (targetNode.type === 'math') {
+                                log('[math] operación realizada (simulada)');
+                                executed = true;
                             }
-                        });
-                    }
-                });
+                        }
+                    });
+                }
+            });
+            if (!executed) log('[script] No hay rutas de ejecución (conecta ball → random → setVelocity)');
+            drawAllConnections(); // refrescar
+        });
+
+        // Aplicar script editado al nodo seleccionado
+        document.getElementById('applyScriptBtn').addEventListener('click', () => {
+            if (!selectedNodeId) {
+                alert('Selecciona un nodo primero');
+                return;
             }
-            requestAnimationFrame(processVisualScript);
-        }
+            const newScript = document.getElementById('nodeScriptArea').value;
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if (node) {
+                node.script = newScript;
+                log(`[script] nodo ${selectedNodeId} actualizado`);
+            }
+        });
 
-        // iniciar procesamiento de script
-        setTimeout(() => {
-            processVisualScript();
-        }, 1000);
+        // Tutorial
+        const tutorialBox = document.getElementById('tutorialBox');
+        document.getElementById('showTutorialBtn').addEventListener('click', () => {
+            tutorialBox.style.display = 'block';
+        });
+        document.getElementById('closeTutorial').addEventListener('click', () => {
+            tutorialBox.style.display = 'none';
+        });
 
-        // run button
+        // Pausa/Reanudar juego (botón en top menu)
         const runBtn = document.createElement('button');
         runBtn.innerText = '⏸ Pausa';
         runBtn.className = 'run-btn';
@@ -807,15 +859,26 @@
         runBtn.addEventListener('click', () => {
             gameRunning = !gameRunning;
             runBtn.innerText = gameRunning ? '⏸ Pausa' : '▶ Ejecutar';
-            if (gameRunning) { gameLoop(); processVisualScript(); }
+            if (gameRunning) gameLoop();
         });
 
-        // draw initial lines
+        // Generar 100 nodos
+        generate100Nodes();
+        resizeConnectionCanvas();
+
+        // Añadir algunas conexiones de ejemplo (opcional)
         setTimeout(() => {
-            connectionCanvas.width = container.clientWidth;
-            connectionCanvas.height = container.clientHeight;
-            drawAllConnections();
-        }, 200);
+            // conectar algunos nodos para demo
+            const ballNode = nodes.find(n => n.type === 'ball');
+            const randomNode = nodes.find(n => n.type === 'random');
+            const setNode = nodes.find(n => n.type === 'setVelocity');
+            if (ballNode && randomNode && setNode) {
+                connections.push({ startNode: ballNode.id, startIndex:0, startType:'output', endNode: randomNode.id, endIndex:0, endType:'input' });
+                connections.push({ startNode: randomNode.id, startIndex:0, startType:'output', endNode: setNode.id, endIndex:0, endType:'input' });
+                drawAllConnections();
+                log('[demo] conexiones de ejemplo creadas (ball→random→setVelocity)');
+            }
+        }, 1000);
     })();
 </script>
 </body>
