@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Scripting · 100 nodos + tutorial + scripts</title>
+    <title>Visual Scripting Pro · Editor de juegos con nodos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -11,7 +11,6 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            user-select: none;
         }
         body {
             background: #1a1d23;
@@ -57,6 +56,7 @@
             flex: 1;
             overflow: hidden;
         }
+        /* Panel izquierdo: Paleta de nodos */
         .left-panel {
             width: 260px;
             background: #262b33;
@@ -75,44 +75,45 @@
             align-items: center;
             gap: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .tree {
-            padding: 10px 0 0 8px;
+        .palette {
+            padding: 10px;
             overflow-y: auto;
             flex: 1;
         }
-        .tree-item {
-            padding: 4px 0 4px 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: default;
+        .palette-category {
+            margin-bottom: 12px;
         }
-        .tree-item:hover { background: #3a3f4b; }
-        .vs-icon {
-            background: #5d4e6b;
-            border-radius: 3px;
-            padding: 2px 4px;
-            font-size: 9px;
-            color: #d0bfff;
+        .category-title {
+            color: #aab3c5;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 11px;
+            text-transform: uppercase;
         }
-        .filter-box {
-            background: #1f232a;
-            border: 1px solid #3f4551;
+        .palette-item {
+            background: #323946;
+            border: 1px solid #4a5264;
             border-radius: 4px;
-            margin: 10px;
-            padding: 5px 8px;
+            padding: 6px 8px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
+            gap: 8px;
+            cursor: grab;
+            transition: 0.1s;
+            font-size: 11px;
         }
-        .filter-box input {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #ddd;
-            margin-left: 5px;
-            width: 100%;
+        .palette-item:hover {
+            background: #3f485a;
+            border-color: #6f7c9a;
         }
+        .palette-item i {
+            color: #8d9ac0;
+            width: 16px;
+        }
+        /* Panel central: Graph */
         .center-panel {
             flex: 1;
             background: #1e2128;
@@ -138,32 +139,40 @@
             color: #e0e6f5;
             border-bottom: 2px solid #5d7dbb;
         }
-        .game-preview {
-            height: 200px;
-            background: #0f1116;
-            border-bottom: 1px solid #3f4551;
+        .toolbar {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            background: #262e38;
+            border-bottom: 1px solid #3a4050;
         }
-        #pongCanvas {
-            width: 400px;
-            height: 180px;
-            background: #1c1f27;
-            border-radius: 6px;
-            box-shadow: inset 0 0 10px #00000055;
+        .toolbar button {
+            background: #353f4e;
+            border: none;
+            color: #ddd;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .toolbar button.run-btn {
+            background: #2b6c5e;
+            font-weight: bold;
         }
         .graph-area {
             flex: 1;
             background: #1a1d25;
             position: relative;
-            overflow: auto;  /* Permitir scroll para 100 nodos */
+            overflow: auto;
             background-image: radial-gradient(circle at 1px 1px, #3a4050 1px, transparent 0);
             background-size: 30px 30px;
         }
         #graphContainer {
-            width: 2000px;        /* Área grande para colocar nodos */
-            height: 2000px;
+            width: 5000px;
+            height: 5000px;
             position: relative;
         }
         .visual-node {
@@ -171,50 +180,73 @@
             background: #313844;
             border: 1px solid #545b6b;
             border-radius: 8px;
-            min-width: 140px;
-            font-size: 11px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+            min-width: 160px;
+            box-shadow: 4px 4px 15px rgba(0,0,0,0.8);
             color: #dde2f0;
+            font-size: 11px;
             z-index: 10;
+            pointer-events: all;
         }
         .node-header {
             background: #232833;
-            padding: 5px 8px;
+            padding: 8px 10px;
             border-radius: 7px 7px 0 0;
             font-weight: 600;
             border-bottom: 1px solid #4a5162;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             cursor: move;
-            font-size: 11px;
         }
-        .node-content { padding: 8px 6px; }
+        .node-header i {
+            color: #abb7d4;
+        }
+        .node-content {
+            padding: 10px 8px;
+        }
         .port-container {
             display: flex;
             justify-content: space-between;
-            margin: 4px 0;
+            margin: 6px 0;
             align-items: center;
         }
         .port {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             background: #4f5b70;
             border: 2px solid #818fa7;
             border-radius: 50%;
             cursor: crosshair;
             transition: 0.1s;
         }
-        .port.left-port { margin-right: 5px; }
-        .port.right-port { margin-left: 5px; }
+        .port.left-port { margin-right: 8px; }
+        .port.right-port { margin-left: 8px; }
         .port:hover {
             background: #7d95c0;
             border-color: #b7ceff;
             transform: scale(1.2);
         }
-        .port-label { color: #b5c4e0; font-size: 10px; }
+        .port-label {
+            color: #b5c4e0;
+            font-size: 10px;
+        }
+        .connection-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        #connectionCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* Panel derecho: Inspector/Script */
         .right-panel {
-            width: 260px;
+            width: 280px;
             background: #262b33;
             border-left: 1px solid #3d424c;
             display: flex;
@@ -222,23 +254,36 @@
             color: #b7bdcb;
         }
         .inspector-section {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #373d48;
         }
         .inspector-row {
             display: flex;
             justify-content: space-between;
-            margin: 5px 0;
+            margin: 8px 0;
             font-size: 12px;
         }
         .inspector-value {
             background: #1e222a;
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: 4px;
             color: #ccdcff;
         }
-        .bottom-panel {
+        .script-editor {
+            width: 100%;
             height: 120px;
+            background: #1b1f2a;
+            border: 1px solid #4d5a70;
+            color: #c6daf0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 6px;
+            resize: vertical;
+            white-space: pre;
+        }
+        /* Bottom panel */
+        .bottom-panel {
+            height: 130px;
             background: #20232b;
             border-top: 1px solid #3f4551;
             display: flex;
@@ -259,55 +304,22 @@
             font-size: 12px;
             overflow-y: auto;
             white-space: pre-wrap;
+            flex: 1;
         }
-        .connection-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 5;
-        }
-        #connectionCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .toolbar {
-            display: flex;
-            gap: 8px;
-            padding: 4px 8px;
-            background: #262e38;
-            border-bottom: 1px solid #3a4050;
-            flex-wrap: wrap;
-        }
-        .toolbar button {
-            background: #353f4e;
-            border: none;
-            color: #ddd;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        .toolbar button.run-script {
-            background: #3f6b5e;
-            font-weight: bold;
-        }
+        /* Tutorial flotante */
         .tutorial-box {
             position: absolute;
             top: 220px;
             right: 300px;
-            width: 240px;
+            width: 260px;
             background: #2f3a44;
             border: 1px solid #55718b;
             border-radius: 8px;
             color: #e0ecff;
-            padding: 12px;
+            padding: 15px;
             font-size: 12px;
-            box-shadow: 4px 4px 15px black;
-            z-index: 100;
+            box-shadow: 4px 4px 20px black;
+            z-index: 200;
             pointer-events: all;
         }
         .tutorial-box .close {
@@ -317,22 +329,11 @@
             padding: 0 6px;
             border-radius: 4px;
         }
-        .script-editor {
-            width: 100%;
-            height: 100px;
-            background: #1b1f2a;
-            border: 1px solid #4d5a70;
-            color: #c6daf0;
-            font-family: monospace;
-            font-size: 11px;
-            padding: 4px;
-            resize: none;
-        }
     </style>
 </head>
 <body>
 <div class="godot-editor">
-    <!-- top menu -->
+    <!-- Barra superior -->
     <div class="top-menu">
         <span><i class="fas fa-cube"></i> Scene</span>
         <span><i class="fas fa-project-diagram"></i> Project</span>
@@ -346,215 +347,172 @@
         <span><i class="fas fa-filter"></i></span>
     </div>
 
-    <!-- main grid -->
+    <!-- Grid principal -->
     <div class="main-grid">
-        <!-- left panel -->
+        <!-- Panel izquierdo: Paleta de nodos -->
         <div class="left-panel">
-            <div class="panel-header"><i class="fas fa-folder-open"></i> FileSystem</div>
-            <div class="filter-box"><i class="fas fa-search"></i><input placeholder="Filter nodes" value="res://"></div>
-            <div class="tree">
-                <div class="tree-item"><i class="fas fa-folder"></i> res://</div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> 100_nodes.vs <span class="vs-icon">VS</span></div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> ball.vs</div>
-                <div class="tree-item"><i class="fas fa-file-code"></i> paddle.vs</div>
-                <div class="tree-item"><i class="fas fa-image"></i> ball.png</div>
-                <div class="separator" style="height:1px; background:#3d424c; margin:12px 0;"></div>
-                <div class="panel-header"><i class="fas fa-star"></i> Favorites:</div>
-                <div class="tree-item"><i class="fas fa-code-branch"></i> Function</div>
-                <div class="tree-item"><i class="fas fa-shield-alt"></i> Collision</div>
-            </div>
-        </div>
-
-        <!-- center: game + graph -->
-        <div class="center-panel">
-            <div class="tabs">
-                <span class="tab active">Scene</span>
-                <span class="tab">Import</span>
-                <span class="tab">res://</span>
-                <span style="flex:1"></span>
-                <span class="tab">File</span>
-                <span class="tab">Edit</span>
-                <span class="tab">Debug</span>
-            </div>
-            <!-- toolbar con botón ejecutar script y tutorial -->
-            <div class="toolbar">
-                <button id="addBallNode"><i class="fas fa-plus"></i> Ball</button>
-                <button id="addCollisionNode"><i class="fas fa-bolt"></i> Collision</button>
-                <button id="addSetVelNode"><i class="fas fa-arrow-right"></i> Set Velocity</button>
-                <button id="addRandomNode"><i class="fas fa-random"></i> Random</button>
-                <span style="flex:1"></span>
-                <button id="runScriptBtn" class="run-script"><i class="fas fa-play"></i> Ejecutar Script</button>
-                <button id="clearConnectionsBtn">Limpiar conexiones</button>
-                <button id="showTutorialBtn"><i class="fas fa-question"></i> Tutorial</button>
-            </div>
-            <!-- game canvas -->
-            <div class="game-preview">
-                <canvas id="pongCanvas" width="400" height="180"></canvas>
-            </div>
-            <!-- graph area con scroll -->
-            <div class="graph-area" id="graphArea">
-                <div id="graphContainer">
-                    <canvas id="connectionCanvas" class="connection-layer"></canvas>
-                    <!-- Los 100 nodos se inyectan aquí -->
+            <div class="panel-header"><i class="fas fa-cubes"></i> Paleta de nodos</div>
+            <div class="palette">
+                <div class="palette-category">
+                    <div class="category-title">Eventos</div>
+                    <div class="palette-item" draggable="true" data-type="eventGameStart"><i class="fas fa-play"></i> Game Start</div>
+                    <div class="palette-item" draggable="true" data-type="eventCollision"><i class="fas fa-bolt"></i> On Collision</div>
+                    <div class="palette-item" draggable="true" data-type="eventTimer"><i class="fas fa-clock"></i> Timer</div>
+                </div>
+                <div class="palette-category">
+                    <div class="category-title">Acciones</div>
+                    <div class="palette-item" draggable="true" data-type="actionPrint"><i class="fas fa-print"></i> Print</div>
+                    <div class="palette-item" draggable="true" data-type="actionSetVariable"><i class="fas fa-pencil-alt"></i> Set Variable</div>
+                    <div class="palette-item" draggable="true" data-type="actionApplyForce"><i class="fas fa-wave-square"></i> Apply Force</div>
+                </div>
+                <div class="palette-category">
+                    <div class="category-title">Funciones</div>
+                    <div class="palette-item" draggable="true" data-type="funcRandom"><i class="fas fa-random"></i> Random</div>
+                    <div class="palette-item" draggable="true" data-type="funcMath"><i class="fas fa-calculator"></i> Math</div>
+                    <div class="palette-item" draggable="true" data-type="funcVector"><i class="fas fa-vector-square"></i> Vector</div>
                 </div>
             </div>
         </div>
 
-        <!-- right inspector (muestra script del nodo seleccionado) -->
+        <!-- Panel central: Graph -->
+        <div class="center-panel">
+            <div class="tabs">
+                <span class="tab active">Graph</span>
+                <span class="tab">Debug</span>
+                <span class="tab">Variables</span>
+                <span style="flex:1"></span>
+                <span class="tab">File</span>
+                <span class="tab">Edit</span>
+            </div>
+            <div class="toolbar">
+                <button id="runScriptBtn" class="run-btn"><i class="fas fa-play"></i> Ejecutar</button>
+                <button id="clearConnections"><i class="fas fa-unlink"></i> Limpiar conexiones</button>
+                <button id="showTutorialBtn"><i class="fas fa-question-circle"></i> Tutorial</button>
+                <span style="flex:1"></span>
+                <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+                <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+            </div>
+            <div class="graph-area" id="graphArea">
+                <div id="graphContainer">
+                    <canvas id="connectionCanvas" class="connection-layer"></canvas>
+                    <!-- Los nodos se agregan aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel derecho: Inspector -->
         <div class="right-panel">
             <div class="panel-header"><i class="fas fa-info-circle"></i> Inspector / Script</div>
             <div class="inspector-section">
-                <div class="inspector-row"><span>Nodo seleccionado:</span> <span id="selectedNodeName">ninguno</span></div>
+                <div class="inspector-row"><span>Nodo:</span> <span id="selectedNodeName">ninguno</span></div>
                 <div class="inspector-row"><span>Tipo:</span> <span id="selectedNodeType">—</span></div>
                 <label>Script (editable):</label>
-                <textarea id="nodeScriptArea" class="script-editor" placeholder="// script del nodo ...">print("hola")</textarea>
-                <button id="applyScriptBtn" style="margin-top:5px; background:#3a4a5a; border:none; color:white; padding:4px; width:100%">Aplicar cambios</button>
+                <textarea id="nodeScriptArea" class="script-editor" placeholder="// Código específico del nodo...">print("Hello")</textarea>
+                <button id="applyScriptBtn" style="margin-top:8px; background:#3a4a5a; border:none; color:white; padding:5px; width:100%">Aplicar cambios</button>
             </div>
             <div class="inspector-section">
-                <div>Velocidad actual pelota:</div>
-                <div class="inspector-row"><span>vx, vy</span><span class="inspector-value" id="inspectorVel">(1.8,1.2)</span></div>
+                <div>Variables globales:</div>
+                <div class="inspector-row"><span>score</span><span class="inspector-value">0</span></div>
+                <div class="inspector-row"><span>player_pos</span><span class="inspector-value">(0,0)</span></div>
             </div>
         </div>
     </div>
 
-    <!-- bottom panel -->
+    <!-- Panel inferior -->
     <div class="bottom-panel">
         <div class="bottom-tabs">
-            <span>Output</span> <span>Debugger</span> <span>Audio</span> <span>Animation</span>
+            <span>Output</span> <span>Debug</span> <span>Console</span>
         </div>
         <div class="bottom-content" id="outputConsole">
-            [sistema] 100 nodos generados. Conecta nodos y pulsa "Ejecutar Script".
+            [Sistema] Editor listo. Arrastra nodos desde la paleta y conéctalos.
         </div>
     </div>
 </div>
 
-<!-- Tutorial flotante (opcional) -->
+<!-- Tutorial flotante -->
 <div id="tutorialBox" class="tutorial-box" style="display: none;">
     <span class="close" id="closeTutorial">✖</span>
-    <h4 style="margin-bottom: 6px;">📘 Tutorial rápido</h4>
-    <p>1. Conecta puertos: haz clic en un puerto de salida (derecha) y luego en un puerto de entrada (izquierda).</p>
-    <p>2. Pulsa "Ejecutar Script" para activar el grafo desde los nodos ball (simula colisión).</p>
-    <p>3. Haz clic en cualquier nodo para ver/edit su script individual en el inspector.</p>
-    <p>4. Usa los botones de añadir para crear nuevos nodos.</p>
-    <p>5. El juego se actualiza con los cambios de velocidad.</p>
+    <h4 style="margin-bottom: 8px;">🎮 Tutorial rápido</h4>
+    <p>• Arrastra nodos desde la paleta al área gris.</p>
+    <p>• Conecta puertos: haz clic en un puerto de salida (derecha) y luego en un puerto de entrada (izquierda).</p>
+    <p>• Haz clic en un nodo para ver/editar su script en el inspector.</p>
+    <p>• Presiona "Ejecutar" para simular el flujo desde los nodos de evento.</p>
+    <p>• Usa el botón de tutorial para volver a mostrar esto.</p>
 </div>
 
 <script>
     (function() {
-        // ---------- LÓGICA DEL JUEGO PONG ----------
-        const canvas = document.getElementById('pongCanvas');
-        const ctx = canvas.getContext('2d');
-        let gameRunning = true;
-
-        let ball = {
-            x: 200, y: 90,
-            vx: 1.8, vy: 1.2,
-            radius: 5
-        };
-        let leftPaddleY = 70, rightPaddleY = 70;
-        const paddleWidth = 6, paddleHeight = 30;
-        const paddleSpeed = 1.4;
-
-        function resetBall() {
-            ball.x = 200; ball.y = 90;
-            ball.vx = (Math.random() > 0.5 ? 1.5 : -1.5);
-            ball.vy = (Math.random() * 2 - 1) * 1.2;
-        }
-
-        function gameLoop() {
-            if (!gameRunning) return;
-
-            ball.x += ball.vx;
-            ball.y += ball.vy;
-
-            if (ball.y - ball.radius < 0 || ball.y + ball.radius > 180) ball.vy *= -1;
-
-            // IA palas
-            if (ball.y > leftPaddleY + paddleHeight/2) leftPaddleY += paddleSpeed;
-            else leftPaddleY -= paddleSpeed;
-            if (ball.y > rightPaddleY + paddleHeight/2) rightPaddleY += paddleSpeed;
-            else rightPaddleY -= paddleSpeed;
-            leftPaddleY = Math.max(0, Math.min(180 - paddleHeight, leftPaddleY));
-            rightPaddleY = Math.max(0, Math.min(180 - paddleHeight, rightPaddleY));
-
-            // colisiones con palas (solo para mantener el juego, no activan script automático)
-            if (ball.x - ball.radius < 20 && ball.x - ball.radius > 10) {
-                if (ball.y > leftPaddleY && ball.y < leftPaddleY + paddleHeight) {
-                    ball.vx *= -1.05;
-                    ball.x = 20 + ball.radius;
-                } else if (ball.x < 5) resetBall();
-            }
-            if (ball.x + ball.radius > 380 && ball.x + ball.radius < 390) {
-                if (ball.y > rightPaddleY && ball.y < rightPaddleY + paddleHeight) {
-                    ball.vx *= -1.05;
-                    ball.x = 380 - ball.radius;
-                } else if (ball.x > 395) resetBall();
-            }
-
-            document.getElementById('inspectorVel').innerText = `(${ball.vx.toFixed(1)}, ${ball.vy.toFixed(1)})`;
-
-            drawGame();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function drawGame() {
-            ctx.clearRect(0, 0, 400, 180);
-            ctx.fillStyle = '#1a1e2c';
-            ctx.fillRect(0, 0, 400, 180);
-            ctx.strokeStyle = '#3f4b62';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath(); ctx.moveTo(200, 10); ctx.lineTo(200, 170); ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = '#d0e0ff';
-            ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, 2*Math.PI); ctx.fill();
-            ctx.fillStyle = '#aab9de';
-            ctx.fillRect(15, leftPaddleY, paddleWidth, paddleHeight);
-            ctx.fillRect(380 - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
-        }
-
-        gameLoop();
-
-        // ---------- SISTEMA DE NODOS (100 nodos pregenerados) ----------
+        // ---------- SISTEMA DE NODOS PROFESIONAL ----------
         const container = document.getElementById('graphContainer');
         const connectionCanvas = document.getElementById('connectionCanvas');
         const ctxLines = connectionCanvas.getContext('2d');
         const outputDiv = document.getElementById('outputConsole');
         const graphArea = document.getElementById('graphArea');
 
-        function log(message) {
-            outputDiv.innerText = message;
-        }
-
         let nodes = [];
         let connections = [];
         let selectedPortStart = null;
-        let selectedNodeId = null; // para el inspector
+        let selectedNodeId = null;
 
-        // tipos de nodo con definiciones
+        // Definición de tipos de nodo (nombre, entradas, salidas, script por defecto)
         const nodeTypes = {
-            ball: { title: 'ball.vs', inputs: [], outputs: ['collision', 'pos'], script: 'extends Node\nfunc on_collision():\n    print("ball hit")' },
-            collision: { title: 'on_collision', inputs: ['body'], outputs: ['signal'], script: 'extends Node\nfunc _on_area_entered(area):\n    emit_signal("signal")' },
-            setVelocity: { title: 'set_velocity', inputs: ['vector'], outputs: [], script: 'extends Node\nfunc set_ball_vel(v):\n    ball.vx = v.x\n    ball.vy = v.y' },
-            random: { title: 'random_vector', inputs: ['min','max'], outputs: ['vector'], script: 'func generate():\n    return Vector2(randf()*4-2, randf()*3-1.5)' },
-            print: { title: 'print', inputs: ['message'], outputs: [], script: 'func log(msg):\n    print(msg)' },
-            math: { title: 'math_add', inputs: ['a','b'], outputs: ['result'], script: 'func add(a,b): return a+b' }
+            eventGameStart: {
+                title: 'Game Start',
+                inputs: [],
+                outputs: ['start'],
+                script: '// Se ejecuta al iniciar el juego\nprint("Game started");'
+            },
+            eventCollision: {
+                title: 'On Collision',
+                inputs: ['actor'],
+                outputs: ['collided'],
+                script: '// Cuando ocurre una colisión\nvar other = get_collider();'
+            },
+            eventTimer: {
+                title: 'Timer',
+                inputs: ['time'],
+                outputs: ['timeout'],
+                script: '// Temporizador\nawait get_tree().create_timer(time).timeout;'
+            },
+            actionPrint: {
+                title: 'Print',
+                inputs: ['message'],
+                outputs: [],
+                script: '// Imprime un mensaje\nprint(message);'
+            },
+            actionSetVariable: {
+                title: 'Set Variable',
+                inputs: ['name', 'value'],
+                outputs: [],
+                script: '// Asigna una variable global\nset_global(name, value);'
+            },
+            actionApplyForce: {
+                title: 'Apply Force',
+                inputs: ['object', 'force'],
+                outputs: [],
+                script: '// Aplica una fuerza a un objeto\nobject.apply_force(force);'
+            },
+            funcRandom: {
+                title: 'Random',
+                inputs: ['min', 'max'],
+                outputs: ['result'],
+                script: '// Genera un número aleatorio\nreturn randf_range(min, max);'
+            },
+            funcMath: {
+                title: 'Math',
+                inputs: ['a', 'b', 'op'],
+                outputs: ['result'],
+                script: '// Operación matemática\nif (op == "add") return a+b;\nif (op == "sub") return a-b;'
+            },
+            funcVector: {
+                title: 'Vector',
+                inputs: ['x', 'y'],
+                outputs: ['vector'],
+                script: '// Crea un vector\nreturn Vector2(x, y);'
+            }
         };
 
-        // generar 100 nodos de tipos variados en una cuadrícula
-        function generate100Nodes() {
-            const types = ['ball', 'collision', 'setVelocity', 'random', 'print', 'math'];
-            let idCounter = 0;
-            for (let row = 0; row < 10; row++) {
-                for (let col = 0; col < 10; col++) {
-                    const type = types[(row + col) % types.length];
-                    const id = type + '_' + idCounter++;
-                    const x = 50 + col * 160;  // separación horizontal
-                    const y = 50 + row * 130;  // separación vertical
-                    createNode(type, id, x, y);
-                }
-            }
-        }
-
+        // Función para crear un nodo en el canvas
         function createNode(type, id, x, y) {
             const def = nodeTypes[type];
             if (!def) return;
@@ -566,15 +524,17 @@
             nodeDiv.setAttribute('data-id', id);
             nodeDiv.setAttribute('data-type', type);
 
+            // Cabecera
             const header = document.createElement('div');
             header.className = 'node-header';
             header.innerHTML = `<i class="fas fa-cube"></i> ${def.title}`;
             nodeDiv.appendChild(header);
 
+            // Contenido (puertos)
             const content = document.createElement('div');
             content.className = 'node-content';
 
-            // puertos de entrada
+            // Puertos de entrada
             def.inputs.forEach((inp, i) => {
                 const row = document.createElement('div');
                 row.className = 'port-container';
@@ -586,7 +546,7 @@
                 content.appendChild(row);
             });
 
-            // puertos de salida
+            // Puertos de salida
             def.outputs.forEach((out, i) => {
                 const row = document.createElement('div');
                 row.className = 'port-container';
@@ -601,17 +561,17 @@
             nodeDiv.appendChild(content);
             container.appendChild(nodeDiv);
 
-            // Guardar info del nodo
+            // Almacenar nodo
             nodes.push({
                 id: id,
                 type: type,
                 element: nodeDiv,
                 inputs: def.inputs,
                 outputs: def.outputs,
-                script: def.script || '# sin script'
+                script: def.script
             });
 
-            // Evento para seleccionar nodo (click en header)
+            // Evento para seleccionar nodo (click en cabecera)
             header.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectedNodeId = id;
@@ -621,13 +581,16 @@
                 scriptArea.value = nodes.find(n => n.id === id).script;
             });
 
-            // Drag (igual que antes)
+            // Hacer el nodo arrastrable
             let offsetX, offsetY, isDragging = false;
             header.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 const rect = nodeDiv.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
+                const containerRect = container.getBoundingClientRect();
+                const scrollLeft = graphArea.scrollLeft;
+                const scrollTop = graphArea.scrollTop;
+                offsetX = e.clientX - rect.left + scrollLeft;
+                offsetY = e.clientY - rect.top + scrollTop;
                 nodeDiv.style.zIndex = 20;
                 e.preventDefault();
             });
@@ -639,7 +602,7 @@
                 const scrollTop = graphArea.scrollTop;
                 let newLeft = e.clientX - containerRect.left - offsetX + scrollLeft;
                 let newTop = e.clientY - containerRect.top - offsetY + scrollTop;
-                // límites dentro del contenedor grande
+                // Límites
                 newLeft = Math.max(0, Math.min(container.clientWidth - nodeDiv.offsetWidth, newLeft));
                 newTop = Math.max(0, Math.min(container.clientHeight - nodeDiv.offsetHeight, newTop));
                 nodeDiv.style.left = newLeft + 'px';
@@ -656,7 +619,7 @@
             });
         }
 
-        // dibujar conexiones
+        // Dibujar conexiones
         function getPortCenter(portEl) {
             const containerRect = container.getBoundingClientRect();
             const rect = portEl.getBoundingClientRect();
@@ -672,9 +635,9 @@
             ctxLines.clearRect(0, 0, connectionCanvas.width, connectionCanvas.height);
             if (!connectionCanvas.width || !connectionCanvas.height) return;
             ctxLines.strokeStyle = '#aaccff';
-            ctxLines.lineWidth = 2;
+            ctxLines.lineWidth = 2.5;
             ctxLines.shadowColor = '#8ab3ff';
-            ctxLines.shadowBlur = 4;
+            ctxLines.shadowBlur = 6;
 
             connections.forEach(conn => {
                 const startPort = document.querySelector(`[data-node-id="${conn.startNode}"][data-port-index="${conn.startIndex}"][data-port-type="${conn.startType}"]`);
@@ -684,7 +647,7 @@
                     const end = getPortCenter(endPort);
                     ctxLines.beginPath();
                     ctxLines.moveTo(start.x, start.y);
-                    ctxLines.bezierCurveTo(start.x+60, start.y, end.x-60, end.y, end.x, end.y);
+                    ctxLines.bezierCurveTo(start.x+80, start.y, end.x-80, end.y, end.x, end.y);
                     ctxLines.stroke();
                 }
             });
@@ -701,7 +664,7 @@
         graphArea.addEventListener('scroll', drawAllConnections);
         new ResizeObserver(resizeConnectionCanvas).observe(container);
 
-        // Manejo de conexiones con clic
+        // Manejo de conexiones con clic en puertos
         container.addEventListener('click', (e) => {
             const port = e.target.closest('.port');
             if (!port) {
@@ -736,7 +699,7 @@
                         endIndex: portIndex,
                         endType: 'input'
                     });
-                    log(`[conexión] ${start.nodeId} → ${nodeId}`);
+                    log(`Conectado ${start.nodeId} → ${nodeId}`);
                 } else if (start.portType === 'input' && portType === 'output') {
                     connections.push({
                         startNode: nodeId,
@@ -746,7 +709,7 @@
                         endIndex: start.portIndex,
                         endType: 'input'
                     });
-                    log(`[conexión] ${nodeId} → ${start.nodeId}`);
+                    log(`Conectado ${nodeId} → ${start.nodeId}`);
                 }
                 resetPortStyle(start.element);
                 selectedPortStart = null;
@@ -758,88 +721,62 @@
             if (portEl) portEl.style.background = '';
         }
 
-        // Botones
-        document.getElementById('addBallNode').addEventListener('click', () => {
-            const id = 'ball' + Date.now();
-            createNode('ball', id, 200, 200);
-            resizeConnectionCanvas();
-        });
-        document.getElementById('addCollisionNode').addEventListener('click', () => {
-            const id = 'col' + Date.now();
-            createNode('collision', id, 300, 250);
-            resizeConnectionCanvas();
-        });
-        document.getElementById('addSetVelNode').addEventListener('click', () => {
-            const id = 'set' + Date.now();
-            createNode('setVelocity', id, 400, 300);
-            resizeConnectionCanvas();
-        });
-        document.getElementById('addRandomNode').addEventListener('click', () => {
-            const id = 'rand' + Date.now();
-            createNode('random', id, 350, 350);
-            resizeConnectionCanvas();
-        });
-        document.getElementById('clearConnectionsBtn').addEventListener('click', () => {
-            connections = [];
-            drawAllConnections();
-            log('[sistema] conexiones eliminadas');
+        // Arrastrar desde la paleta (drag & drop)
+        const paletteItems = document.querySelectorAll('.palette-item');
+        paletteItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.dataset.type);
+            });
         });
 
-        // EJECUTAR SCRIPT (botón manual)
+        graphArea.addEventListener('dragover', (e) => e.preventDefault());
+        graphArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('text/plain');
+            if (!type) return;
+            const rect = graphArea.getBoundingClientRect();
+            const scrollLeft = graphArea.scrollLeft;
+            const scrollTop = graphArea.scrollTop;
+            const x = e.clientX - rect.left + scrollLeft - 80; // centrar aprox
+            const y = e.clientY - rect.top + scrollTop - 40;
+            const id = type + '_' + Date.now();
+            createNode(type, id, x, y);
+            log(`Nodo ${nodeTypes[type].title} creado`);
+        });
+
+        // Log en consola
+        function log(msg) {
+            outputDiv.innerText = '[Sistema] ' + msg;
+        }
+
+        // Botones de toolbar
         document.getElementById('runScriptBtn').addEventListener('click', () => {
-            log('[script] Ejecutando grafo manualmente...');
-            // Simular activación desde todos los nodos ball (o cualquier nodo con salida)
-            // Recorremos nodos de tipo ball y lanzamos sus salidas
-            let executed = false;
+            log('Ejecutando script visual...');
+            // Simular ejecución: activar nodos de evento (Game Start)
             nodes.forEach(node => {
-                if (node.type === 'ball') {
-                    // buscar conexiones salientes desde ball (output index 0 por defecto)
+                if (node.type === 'eventGameStart') {
+                    // Buscar conexiones salientes
                     const outgoing = connections.filter(c => c.startNode === node.id && c.startType === 'output');
                     outgoing.forEach(conn => {
                         const targetNode = nodes.find(n => n.id === conn.endNode);
                         if (targetNode) {
-                            if (targetNode.type === 'random') {
-                                const randX = (Math.random() * 4 - 2);
-                                const randY = (Math.random() * 3 - 1.5);
-                                log(`[random] generado (${randX.toFixed(1)}, ${randY.toFixed(1)})`);
-                                // conectar a setVelocity si existe
-                                const nextConns = connections.filter(c => c.startNode === targetNode.id && c.startType === 'output');
-                                nextConns.forEach(nc => {
-                                    const setNode = nodes.find(n => n.id === nc.endNode);
-                                    if (setNode && setNode.type === 'setVelocity') {
-                                        ball.vx = randX;
-                                        ball.vy = randY;
-                                        log(`[setVelocity] velocidad cambiada a (${ball.vx.toFixed(1)}, ${ball.vy.toFixed(1)})`);
-                                        executed = true;
-                                    }
-                                });
-                            } else if (targetNode.type === 'print') {
-                                log('[print] nodo de impresión activado');
-                                executed = true;
-                            } else if (targetNode.type === 'math') {
-                                log('[math] operación realizada (simulada)');
-                                executed = true;
+                            if (targetNode.type === 'actionPrint') {
+                                log('Print ejecutado desde Game Start');
+                            } else if (targetNode.type === 'actionSetVariable') {
+                                log('Variable asignada');
+                            } else {
+                                log(`Nodo ${targetNode.type} activado`);
                             }
                         }
                     });
                 }
             });
-            if (!executed) log('[script] No hay rutas de ejecución (conecta ball → random → setVelocity)');
-            drawAllConnections(); // refrescar
         });
 
-        // Aplicar script editado al nodo seleccionado
-        document.getElementById('applyScriptBtn').addEventListener('click', () => {
-            if (!selectedNodeId) {
-                alert('Selecciona un nodo primero');
-                return;
-            }
-            const newScript = document.getElementById('nodeScriptArea').value;
-            const node = nodes.find(n => n.id === selectedNodeId);
-            if (node) {
-                node.script = newScript;
-                log(`[script] nodo ${selectedNodeId} actualizado`);
-            }
+        document.getElementById('clearConnections').addEventListener('click', () => {
+            connections = [];
+            drawAllConnections();
+            log('Conexiones eliminadas');
         });
 
         // Tutorial
@@ -851,34 +788,42 @@
             tutorialBox.style.display = 'none';
         });
 
-        // Pausa/Reanudar juego (botón en top menu)
-        const runBtn = document.createElement('button');
-        runBtn.innerText = '⏸ Pausa';
-        runBtn.className = 'run-btn';
-        document.querySelector('.top-menu').appendChild(runBtn);
-        runBtn.addEventListener('click', () => {
-            gameRunning = !gameRunning;
-            runBtn.innerText = gameRunning ? '⏸ Pausa' : '▶ Ejecutar';
-            if (gameRunning) gameLoop();
+        // Aplicar script editado
+        document.getElementById('applyScriptBtn').addEventListener('click', () => {
+            if (!selectedNodeId) {
+                alert('Selecciona un nodo primero');
+                return;
+            }
+            const newScript = document.getElementById('nodeScriptArea').value;
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if (node) {
+                node.script = newScript;
+                log(`Script de ${selectedNodeId} actualizado`);
+            }
         });
 
-        // Generar 100 nodos
-        generate100Nodes();
-        resizeConnectionCanvas();
+        // Zoom simple (cambiar escala del contenedor)
+        let scale = 1;
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            scale = Math.min(scale + 0.1, 2);
+            container.style.transform = `scale(${scale})`;
+            container.style.transformOrigin = '0 0';
+            resizeConnectionCanvas();
+        });
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            scale = Math.max(scale - 0.1, 0.5);
+            container.style.transform = `scale(${scale})`;
+            container.style.transformOrigin = '0 0';
+            resizeConnectionCanvas();
+        });
 
-        // Añadir algunas conexiones de ejemplo (opcional)
+        // Crear algunos nodos de ejemplo para que el área no esté vacía
         setTimeout(() => {
-            // conectar algunos nodos para demo
-            const ballNode = nodes.find(n => n.type === 'ball');
-            const randomNode = nodes.find(n => n.type === 'random');
-            const setNode = nodes.find(n => n.type === 'setVelocity');
-            if (ballNode && randomNode && setNode) {
-                connections.push({ startNode: ballNode.id, startIndex:0, startType:'output', endNode: randomNode.id, endIndex:0, endType:'input' });
-                connections.push({ startNode: randomNode.id, startIndex:0, startType:'output', endNode: setNode.id, endIndex:0, endType:'input' });
-                drawAllConnections();
-                log('[demo] conexiones de ejemplo creadas (ball→random→setVelocity)');
-            }
-        }, 1000);
+            createNode('eventGameStart', 'start1', 200, 200);
+            createNode('actionPrint', 'print1', 450, 250);
+            createNode('funcRandom', 'rand1', 400, 400);
+            log('Nodos de ejemplo creados. Arrastra más desde la paleta.');
+        }, 500);
     })();
 </script>
 </body>
