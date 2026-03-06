@@ -3,832 +3,613 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>▀▄ SCRATCH 1999 · BLOQUES ENCAJABLES ▄▀</title>
-    <!-- SortableJS para reordenar bloques como en Scratch -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <title>Creador Visual Script 2008</title>
     <style>
-        /* ========== ESTÉTICA RETRO 1999 ========== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background: #008080;
-            font-family: 'Courier New', Courier, 'MS Sans Serif', Tahoma, sans-serif;
-            margin: 20px 0;
+            background: #265987; /* fondo azul oscuro tipo XP */
+            font-family: 'Segoe UI', Tahoma, 'Lucida Grande', Verdana, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 20px;
         }
-        .window {
-            width: 1250px;
-            background: #C0C0C0;
-            padding: 6px;
-            border: 4px ridge #FFFFFF #808080 #808080 #FFFFFF;
-            box-shadow: 6px 6px 0px 0px #00000066;
+
+        /* contenedor principal — estilo ventana 2008 */
+        .ventana {
+            width: 950px;
+            background: #eef3f7;
+            border: 3px outset #ffffff;
+            border-radius: 12px 12px 8px 8px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5), inset 0 0 0 1px #d0dbe8;
+            padding: 0;
+            overflow: hidden;
         }
-        .title-bar {
-            background: #000080;
-            color: #FFFFFF;
+
+        /* barra de título con brillo */
+        .barra-titulo {
+            background: linear-gradient(180deg, #3c6ea0, #1e3f66);
+            padding: 8px 15px;
+            color: white;
+            font-size: 22px;
             font-weight: bold;
-            font-size: 18px;
-            padding: 6px 12px;
+            text-shadow: 2px 2px 0 #0a1c2e;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #f5c63f;
+            box-shadow: inset 0 -2px 0 #9bb9d9;
             display: flex;
-            justify-content: space-between;
-            border: 2px inset #FFFFFF #808080;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-        }
-        .title-bar span:last-child {
-            background: #C0C0C0;
-            color: #000;
-            padding: 2px 10px;
-            border: 2px inset #FFFFFF #808080;
-            font-size: 14px;
-        }
-        .main-layout {
-            display: flex;
-            gap: 12px;
-        }
-        /* ========== COLUMNA IZQUIERDA: ESCENARIO ========== */
-        .stage-area {
-            flex: 2;
-            border: 3px inset #FFFFFF #808080;
-            background: #808080;
-            padding: 8px;
-        }
-        .stage-area fieldset {
-            border: 2px ridge #FFFFFF #808080;
-            background: #BFBFBF;
-            margin: 0 0 12px 0;
-            padding: 8px;
-        }
-        .stage-area legend {
-            background: #C0C0C0;
-            border: 2px outset #FFFFFF #808080;
-            padding: 4px 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 15px;
-        }
-        #gameCanvas {
-            display: block;
-            width: 520px;
-            height: 340px;
-            image-rendering: pixelated;
-            border: 4px inset #FFFFFF #808080;
-            background: #E0E0E0;
-            margin: 0 auto;
-            cursor: crosshair;
-        }
-        .toolbar {
-            display: flex;
+            align-items: center;
             gap: 10px;
-            margin: 10px 0;
-            align-items: center;
-            background: #BFBFBF;
-            border: 4px inset #FFFFFF #808080;
-            padding: 8px;
         }
-        .flag-btn {
-            background: #00FF00;
-            border: 4px outset #FFFFFF #008000;
-            font-size: 24px;
-            width: 60px;
-            height: 60px;
-            cursor: pointer;
+
+        .barra-titulo span {
+            font-size: 18px;
+            font-style: italic;
+            background: #ffd966;
+            color: #1e3f66;
+            padding: 3px 12px;
+            border-radius: 30px;
+            border: 1px solid #ffe484;
+            box-shadow: inset -1px -1px 0 #a57c2b, 0 2px 4px black;
+        }
+
+        /* contenido principal */
+        .contenido {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 15px;
+            gap: 20px;
+            background: #d9e2ef url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1.5" fill="%23ffffff30"/></svg>'); /* textura tenue */
         }
-        .flag-btn:active {
-            border: 4px inset #008000 #FFFFFF;
-            transform: translate(2px,2px);
+
+        /* panel del juego (izquierda) */
+        .panel-juego {
+            flex: 1;
+            background: #b8c9dd;
+            border: 3px inset #f0f8ff;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: inset 2px 2px 5px #2b3f54, inset -2px -2px 5px #eaf0fa;
         }
-        .object-bar {
-            background: #BFBFBF;
-            border: 4px inset #FFFFFF #808080;
+
+        .titulo-panel {
+            background: linear-gradient(180deg, #e3eefb, #b3c9e3);
+            padding: 5px 8px;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px outset #ffffff;
+            border-radius: 20px;
+            text-align: center;
+            color: #1a3a5e;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px #2f4f6e;
+        }
+
+        canvas {
+            display: block;
+            margin: 10px auto;
+            border: 4px solid #2d4d6e;
+            border-radius: 8px;
+            background: #c0d3e8;
+            box-shadow: 0 0 0 2px #eaf1fc, 4px 4px 8px #1f2f40;
+            image-rendering: pixelated;
+        }
+
+        .info-juego {
+            background: #f0f8ff;
+            border: 1px solid #abc0d6;
+            border-radius: 30px;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #00264d;
+            box-shadow: inset 0 0 0 2px white, 2px 2px 0 #768ea8;
+        }
+
+        /* panel de script visual (derecha) */
+        .panel-script {
+            width: 400px;
+            background: #cddef5;
+            border: 3px inset #ffffff;
+            border-radius: 12px;
             padding: 10px;
+            box-shadow: inset 1px 1px 5px #62738b, inset -1px -1px 5px #f0f8ff;
+        }
+
+        /* botonera estilo 2008 */
+        .botonera {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: #aac1db;
+            padding: 12px;
+            border-radius: 30px;
+            border: 2px inset #e1efff;
         }
-        .object-icon {
-            background: #FFD700;
-            border: 4px outset #FFFFCC #B8860B;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+
+        .boton {
+            background: linear-gradient(180deg, #f0f9ff, #c0d6f0);
+            border: 2px outset #ffffff;
+            border-radius: 30px;
+            padding: 8px 14px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 14px;
+            color: #002b55;
             cursor: pointer;
-            box-shadow: 2px 2px 0px #000;
+            box-shadow: 0 3px 0 #7b92b0, 0 5px 8px #1f3145;
+            transition: 0.05s linear;
+            flex: 1 0 auto;
+            text-shadow: 1px 1px 0 white;
+            font-family: inherit;
         }
-        .object-icon.active {
-            border: 4px inset #B8860B #FFFFCC;
-            background: #FFA500;
-            transform: translate(2px,2px);
+
+        .boton:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #7b92b0, 0 3px 6px #1f3145;
+            border-style: inset;
+        }
+
+        .boton:disabled {
+            opacity: 0.45;
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #7b92b0;
+            cursor: not-allowed;
+            border-style: inset;
+            filter: grayscale(20%);
+        }
+
+        /* área de bloques (lista visual) */
+        .lista-bloques {
+            background: #b7ceea;
+            border: 3px inset #ddeeff;
+            border-radius: 18px;
+            padding: 12px;
+            min-height: 280px;
+            max-height: 380px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 10px #2f4965;
+        }
+
+        .bloque-item {
+            background: linear-gradient(180deg, #fefcd0, #f8e071);
+            border: 2px outset #ffffe0;
+            border-radius: 30px;
+            padding: 6px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 2px 2px 0 #987e2c, 0 4px 6px #18293e;
+            font-weight: bold;
+            color: #2a1f0c;
+        }
+
+        .bloque-icono {
+            font-size: 22px;
+            margin-right: 8px;
+            filter: drop-shadow(2px 2px 0 #f5f0b0);
+        }
+
+        .bloque-texto {
+            flex: 1;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bloque-controles button {
+            background: #e6b422;
+            border: 2px outset #fcd975;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 4px;
+            box-shadow: 1px 2px 0 #7f6600;
+            color: #2a2a0a;
+            line-height: 1;
+        }
+
+        .bloque-controles button:active {
+            transform: translate(1px, 2px);
             box-shadow: none;
         }
-        .add-object-btn {
-            background: #00FF00;
-            border: 4px outset #FFFFFF #008000;
-            padding: 8px 16px;
+
+        .bloque-controles button:disabled {
+            opacity: 0.3;
+            transform: none;
+            box-shadow: 1px 1px 0 #7f6600;
+        }
+
+        /* mensajes */
+        .mensaje {
+            margin-top: 15px;
+            background: #fffbcc;
+            border: 2px solid #daa520;
+            border-radius: 30px;
+            padding: 8px;
             font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .add-object-btn:active {
-            border: 4px inset #008000 #FFFFFF;
-            transform: translate(2px,2px);
-        }
-        /* ========== COLUMNA DERECHA: BLOQUES Y SCRIPTS ========== */
-        .code-area {
-            flex: 1.8;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        /* Paleta de bloques (arrastrables) */
-        .blocks-palette {
-            background: #BFBFBF;
-            border: 4px inset #FFFFFF #808080;
-            padding: 12px;
-        }
-        .blocks-palette legend {
-            background: #C0C0C0;
-            border: 2px outset #FFFFFF #808080;
-            padding: 2px 16px;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .block-category {
-            font-weight: bold;
-            margin: 12px 0 4px;
-            border-bottom: 2px groove #808080;
-            text-transform: uppercase;
-            color: #000080;
-        }
-        .block {
-            background: #4C6EF5; /* motion por defecto */
-            border: 4px outset #B0C4FF #002080;
-            color: white;
-            font-weight: bold;
-            padding: 10px 16px;
-            margin: 6px 4px;
-            display: inline-block;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            box-shadow: 3px 3px 0px #000;
-            cursor: grab;
-            user-select: none;
-            min-width: 160px;
             text-align: center;
-            border-radius: 8px 8px 4px 4px; /* forma de bloque Scratch */
-            position: relative;
+            color: #3f3a1f;
+            box-shadow: inset 0 0 0 2px #ffffe0, 2px 2px 0 #b99b48;
         }
-        .block.event {
-            background: #FFD700;
-            color: #000;
-            border-color: #FFFFAA #CC9900;
-            border-radius: 20px 20px 8px 8px; /* forma de evento */
-        }
-        .block.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
-        .block.control { background: #E67E22; border-color: #FFB27F #8A4500; }
-        .block.motion { background: #4C6EF5; }
-        .block:active {
-            cursor: grabbing;
-            opacity: 0.9;
-        }
-        /* Área de scripts del objeto seleccionado */
-        .script-panel {
-            background: #BFBFBF;
-            border: 4px inset #FFFFFF #808080;
-            padding: 10px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .script-panel legend {
-            background: #C0C0C0;
-            border: 2px outset #FFFFFF #808080;
-            padding: 2px 16px;
-            font-weight: bold;
-        }
-        .script-container {
-            background: #FFFFFF;
-            border: 4px inset #808080;
-            min-height: 280px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding: 10px;
-            margin: 8px 0;
-            list-style: none;
-        }
-        .script-block {
-            background: #4C6EF5;
-            border: 4px outset #B0C4FF #002080;
+
+        /* pie 2008 */
+        .pie {
+            background: #2e4d77;
             color: white;
+            padding: 8px 20px;
+            font-size: 13px;
+            border-top: 3px solid #ffc966;
+            text-align: right;
+            text-shadow: 1px 1px 0 #001122;
+        }
+
+        .pie a {
+            color: #ffd966;
             font-weight: bold;
-            padding: 10px 16px;
-            margin: 6px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 15px;
-            border-radius: 8px 8px 4px 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-            box-shadow: 2px 2px 0px #000;
-        }
-        .script-block.event {
-            background: #FFD700;
-            color: #000;
-            border-color: #FFFFAA #CC9900;
-            border-radius: 20px 20px 8px 8px;
-        }
-        .script-block.looks { background: #9B59B6; border-color: #D4A5FF #4A235A; }
-        .script-block.control { background: #E67E22; border-color: #FFB27F #8A4500; }
-        .script-block .delete-btn {
-            background: #FF6666;
-            border: 2px outset #FFB2B2 #800000;
-            color: black;
-            font-weight: bold;
-            padding: 2px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .script-block .delete-btn:active {
-            border: 2px inset #800000 #FFB2B2;
-            transform: translate(1px,1px);
-        }
-        .execution-bar {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        .exec-btn {
-            background: #C0C0C0;
-            border: 4px outset #FFFFFF #808080;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 10px 18px;
-            font-family: 'Courier New', monospace;
-            cursor: pointer;
-            flex: 1;
-            text-transform: uppercase;
-        }
-        .exec-btn:active {
-            border: 4px inset #808080 #FFFFFF;
-            transform: translate(2px,2px);
-        }
-        .exec-btn:disabled {
-            border: 4px inset #808080 #FFFFFF !important;
-            color: #808080;
-            background: #A0A0A0;
-            transform: translate(2px,2px);
-            cursor: not-allowed;
-        }
-        .footer {
-            margin-top: 18px;
-            background: #000080;
-            color: silver;
-            padding: 6px 16px;
-            border: 2px ridge #FFFFFF #808080;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-        }
-        .footer marquee {
-            width: 400px;
-            background: #000;
-            color: #0F0;
-            padding: 4px;
-            border: 2px inset #808080;
-        }
-        .glitch {
-            background: #FF00FF;
-            color: #00FFFF;
-            padding: 4px 8px;
-            border: 4px dotted #FFFF00;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 1; }
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-<div class="window">
-    <div class="title-bar">
-        <span>◈ SCRATCH 1999 · BLOQUES QUE ENCAJAN ◈</span>
-        <span>EVENTOS + DRAG & DROP</span>
+<div class="ventana">
+    <div class="barra-titulo">
+        🎮 VISUAL SCRIPT GAME CREATOR 2008
+        <span>BETA</span>
     </div>
 
-    <div class="main-layout">
-        <!-- COLUMNA IZQUIERDA: ESCENARIO Y SPRITES -->
-        <div class="stage-area">
-            <fieldset>
-                <legend>🎬 ESCENARIO (520x340)</legend>
-                <canvas id="gameCanvas" width="520" height="340"></canvas>
-            </fieldset>
-
-            <!-- Barra de herramientas: bandera y objetos -->
-            <div class="toolbar">
-                <div class="flag-btn" id="greenFlag" title="Hacer clic en bandera (ejecutar eventos de bandera)">🚩</div>
-                <div style="font-weight:bold;">OBJETOS:</div>
-                <div id="spriteIcons" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-                <button class="add-object-btn" id="addSpriteBtn">➕ NUEVO</button>
-            </div>
-            <div style="margin-top:8px; background:#BFBFBF; border:2px inset; padding:6px;">
-                <span id="activeSpriteName">🐱 GATO</span> · X:<span id="coordX">0</span> Y:<span id="coordY">0</span> DIR:<span id="dirValue">0°</span>
-            </div>
+    <div class="contenido">
+        <!-- panel del juego -->
+        <div class="panel-juego">
+            <div class="titulo-panel">▶ ZONA DE JUEGO ◀</div>
+            <canvas id="gameCanvas" width="200" height="200"></canvas>
+            <div class="info-juego" id="estadoJuego">⚡ Jugador en (0,0) · Meta (4,4)</div>
         </div>
 
-        <!-- COLUMNA DERECHA: PALETA DE BLOQUES Y SCRIPT -->
-        <div class="code-area">
-            <!-- PALETA CON BLOQUES ARRASTRABLES (EVENTOS Y ACCIONES) -->
-            <div class="blocks-palette">
-                <legend>🔷 BLOQUES (arrástralos al script)</legend>
+        <!-- panel script visual -->
+        <div class="panel-script">
+            <div class="titulo-panel">📦 SCRIPT VISUAL (apila bloques)</div>
 
-                <div class="block-category">🏁 EVENTOS</div>
-                <div class="block event" draggable="true" data-type="event_flag" data-val="">🏁 al hacer clic en bandera</div>
-                <div class="block event" draggable="true" data-type="event_click" data-val="">👆 al hacer clic en este objeto</div>
-
-                <div class="block-category">⚡ MOVIMIENTO</div>
-                <div class="block motion" draggable="true" data-type="move" data-val="10">⚡ mover 10 pasos</div>
-                <div class="block motion" draggable="true" data-type="turn" data-val="15">↻ girar 15 grados</div>
-                <div class="block motion" draggable="true" data-type="move" data-val="-10">⚡ mover -10 pasos</div>
-                <div class="block motion" draggable="true" data-type="turn" data-val="-15">↺ girar -15 grados</div>
-                <div class="block motion" draggable="true" data-type="gotoxy" data-val="150,150">⤷ ir a (150,150)</div>
-
-                <div class="block-category">💬 APARIENCIA</div>
-                <div class="block looks" draggable="true" data-type="say" data-val="HOLA">💬 decir "HOLA"</div>
-                <div class="block looks" draggable="true" data-type="say" data-val="CHAU">💬 decir "CHAU"</div>
-                <div class="block looks" draggable="true" data-type="color" data-val="#FF0000">🎨 color rojo</div>
-                <div class="block looks" draggable="true" data-type="color" data-val="#00FF00">🎨 color verde</div>
-
-                <div class="block-category">⏳ CONTROL</div>
-                <div class="block control" draggable="true" data-type="wait" data-val="0.5">⏱️ esperar 0.5 seg</div>
-                <div class="block control" draggable="true" data-type="wait" data-val="1">⏱️ esperar 1 seg</div>
+            <div class="botonera">
+                <button class="boton" id="btnArriba">⬆ ARRIBA</button>
+                <button class="boton" id="btnAbajo">⬇ ABAJO</button>
+                <button class="boton" id="btnIzq">⬅ IZQUIERDA</button>
+                <button class="boton" id="btnDer">➜ DERECHA</button>
+                <button class="boton" id="btnEjecutar">▶ EJECUTAR</button>
+                <button class="boton" id="btnResetJuego">⟲ RESET</button>
+                <button class="boton" id="btnLimpiar">✖ LIMPIAR</button>
             </div>
 
-            <!-- SCRIPT DEL OBJETO SELECCIONADO (con Sortable) -->
-            <div class="script-panel">
-                <legend>📜 SCRIPT DE <span id="scriptOwner">GATO</span></legend>
-                <div class="script-container" id="scriptContainer">
-                    <!-- Los bloques se inyectan aquí -->
-                </div>
-                <div class="execution-bar">
-                    <button class="exec-btn" id="runScriptBtn">▶ EJECUTAR SCRIPT</button>
-                    <button class="exec-btn" id="stopScriptBtn" disabled>⏹ DETENER</button>
-                    <button class="exec-btn" id="clearScriptBtn">🗑 LIMPIAR</button>
-                </div>
-                <div style="margin-top:6px; text-align:center; border-top:2px groove #808080; padding:4px;">
-                    <span class="glitch">¡ARRASTRA BLOQUES PARA ENCAJARLOS!</span>
-                </div>
+            <!-- lista de bloques visuales -->
+            <div id="listaBloques" class="lista-bloques">
+                <!-- los bloques se generan dinámicamente -->
+            </div>
+
+            <div id="mensajeBox" class="mensaje">
+                🧩 Arrastra mentalmente los bloques ;)
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        <span>⏺ 56k MODEM · NETSCAPE 4.0</span>
-        <marquee scrollamount="4" behavior="scroll">🚀 1999 · BLOQUES ENCAJABLES · EVENTOS · MULTISPRITE 🚀</marquee>
-        <span>HITS: 0042</span>
+    <div class="pie">
+        ⚡ 2008 visual style · <a href="#">creador de juegos</a> · funcional!
     </div>
 </div>
 
 <script>
     (function() {
-        // ----- CONFIGURACIÓN INICIAL -----
+        // ---------- CONSTANTES Y ESTADO ----------
+        const GRID_SIZE = 5;
+        const CELL_SIZE = 40; // 200/5
+        const META = { x: 4, y: 4 };
+
+        // Posición del jugador
+        let jugador = { x: 0, y: 0 };
+
+        // Lista de comandos (script visual)
+        let comandos = [];  // ej: ['up', 'down', 'left', 'right']
+
+        // Control de ejecución
+        let ejecutando = false;
+        let timeoutId = null;
+
+        // Elementos del DOM
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const listaDiv = document.getElementById('listaBloques');
+        const mensajeDiv = document.getElementById('mensajeBox');
+        const estadoJuegoDiv = document.getElementById('estadoJuego');
 
-        // Sprites múltiples
-        let sprites = [
-            { id: 'sprite0', name: '🐱 GATO', x: 150, y: 150, direction: 0, color: '#FFD700', message: null, script: [] },
-            { id: 'sprite1', name: '🐶 PERRO', x: 300, y: 200, direction: 90, color: '#B78A5B', message: null, script: [] }
-        ];
-        let activeSpriteId = 'sprite0';
-        let isRunning = false;
-        let stopRequested = false;
-        let executionTimer = null;
+        // Botones de acción (para habilitar/deshabilitar)
+        const btnArriba = document.getElementById('btnArriba');
+        const btnAbajo = document.getElementById('btnAbajo');
+        const btnIzq = document.getElementById('btnIzq');
+        const btnDer = document.getElementById('btnDer');
+        const btnEjecutar = document.getElementById('btnEjecutar');
+        const btnResetJuego = document.getElementById('btnResetJuego');
+        const btnLimpiar = document.getElementById('btnLimpiar');
 
-        // Elementos DOM
-        const spriteIconsDiv = document.getElementById('spriteIcons');
-        const activeSpriteNameSpan = document.getElementById('activeSpriteName');
-        const scriptOwnerSpan = document.getElementById('scriptOwner');
-        const scriptContainer = document.getElementById('scriptContainer');
-        const coordXSpan = document.getElementById('coordX');
-        const coordYSpan = document.getElementById('coordY');
-        const dirSpan = document.getElementById('dirValue');
-        const runBtn = document.getElementById('runScriptBtn');
-        const stopBtn = document.getElementById('stopScriptBtn');
-        const clearBtn = document.getElementById('clearScriptBtn');
-        const addSpriteBtn = document.getElementById('addSpriteBtn');
-        const greenFlag = document.getElementById('greenFlag');
+        const todosBotones = [btnArriba, btnAbajo, btnIzq, btnDer, btnEjecutar, btnResetJuego, btnLimpiar];
 
-        // ----- FUNCIONES DE DIBUJO -----
-        function drawGrid() {
-            ctx.strokeStyle = '#A0A0A0';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i <= canvas.width; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.strokeStyle = '#C0C0C0';
-                ctx.stroke();
+        // ---------- DIBUJAR JUEGO (estilo retro 2008) ----------
+        function dibujarGrid() {
+            ctx.clearRect(0, 0, 200, 200);
+
+            // Dibujar celdas con relieve
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    let x = i * CELL_SIZE;
+                    let y = j * CELL_SIZE;
+
+                    // Fondo tipo tablero
+                    ctx.fillStyle = (i + j) % 2 === 0 ? '#afc9eb' : '#8fb0da';
+                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+
+                    // Borde biselado
+                    ctx.strokeStyle = '#eef5ff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x+1, y+1, CELL_SIZE-2, CELL_SIZE-2);
+                }
             }
-            for (let i = 0; i <= canvas.height; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.strokeStyle = '#C0C0C0';
-                ctx.stroke();
-            }
-        }
 
-        function drawSprite(spr) {
-            const x = spr.x;
-            const y = spr.y;
-            const dir = spr.direction;
-            // cuerpo
+            // Dibujar meta (estrella roja con brillo)
+            let mx = META.x * CELL_SIZE;
+            let my = META.y * CELL_SIZE;
             ctx.beginPath();
-            ctx.arc(x, y, 20, 0, 2 * Math.PI);
-            ctx.fillStyle = spr.color;
+            ctx.arc(mx + CELL_SIZE/2, my + CELL_SIZE/2, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff3333';
+            ctx.shadowColor = '#ffd966';
+            ctx.shadowBlur = 12;
             ctx.fill();
-            ctx.strokeStyle = '#000';
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffff99';
+            ctx.font = 'bold 20px "Segoe UI", Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⭐', mx + CELL_SIZE/2, my + CELL_SIZE/2 - 1);
+
+            // Dibujar jugador (carita sonriente 2008)
+            let px = jugador.x * CELL_SIZE;
+            let py = jugador.y * CELL_SIZE;
+            ctx.beginPath();
+            ctx.arc(px + CELL_SIZE/2, py + CELL_SIZE/2, 14, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffe066';
+            ctx.shadowColor = '#b8860b';
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.strokeStyle = '#a67c1e';
             ctx.lineWidth = 2;
             ctx.stroke();
-            // ojos
-            ctx.fillStyle = '#000';
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#1a1a1a';
             ctx.beginPath();
-            ctx.arc(x - 7, y - 6, 3, 0, 2 * Math.PI);
+            ctx.arc(px + 25, py + 15, 3, 0, 2*Math.PI);
+            ctx.arc(px + 15, py + 15, 3, 0, 2*Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x + 7, y - 6, 3, 0, 2 * Math.PI);
-            ctx.fill();
-            // dirección (flecha roja)
-            const rad = dir * Math.PI / 180;
-            const arrowX = x + 26 * Math.cos(rad);
-            const arrowY = y - 26 * Math.sin(rad);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(arrowX, arrowY);
-            ctx.strokeStyle = '#FF0000';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#422013';
+            ctx.lineWidth = 3;
+            ctx.arc(px + 20, py + 28, 6, 0.1, Math.PI - 0.1);
             ctx.stroke();
-            ctx.beginPath();
-            ctx.fillStyle = '#FF0000';
-            ctx.arc(arrowX, arrowY, 4, 0, 2 * Math.PI);
-            ctx.fill();
 
-            // mensaje si tiene
-            if (spr.message) {
-                ctx.fillStyle = '#FFFFCC';
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.ellipse(x, y - 40, 60, 25, 0, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = '#000080';
-                ctx.font = 'bold 16px "Courier New", monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(spr.message, x, y - 40);
+            // Actualizar texto de estado
+            estadoJuegoDiv.innerText = `🎮 Jugador (${jugador.x},${jugador.y})  ·  Meta (4,4)`;
+        }
+
+        // ---------- MANEJAR MOVIMIENTO (con límites) ----------
+        function moverJugador(dx, dy) {
+            let nuevoX = jugador.x + dx;
+            let nuevoY = jugador.y + dy;
+            if (nuevoX >= 0 && nuevoX < GRID_SIZE && nuevoY >= 0 && nuevoY < GRID_SIZE) {
+                jugador.x = nuevoX;
+                jugador.y = nuevoY;
             }
+            dibujarGrid();
         }
 
-        function redraw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGrid();
-            sprites.forEach(s => drawSprite(s));
-
-            const active = getActiveSprite();
-            if (active) {
-                coordXSpan.innerText = Math.round(active.x);
-                coordYSpan.innerText = Math.round(active.y);
-                dirSpan.innerText = active.direction + '°';
+        // ---------- COMPROBAR VICTORIA ----------
+        function verificarVictoria() {
+            if (jugador.x === META.x && jugador.y === META.y) {
+                mensajeDiv.innerHTML = '🏆 ¡VICTORIA! ¡Has ganado! 🏆';
+                return true;
             }
+            return false;
         }
 
-        // ----- UTILIDADES SPRITE -----
-        function getActiveSprite() {
-            return sprites.find(s => s.id === activeSpriteId);
-        }
-
-        function setActiveSprite(id) {
-            activeSpriteId = id;
-            updateSpriteIcons();
-            renderScript();
-            redraw();
-        }
-
-        function updateSpriteIcons() {
-            let html = '';
-            sprites.forEach(s => {
-                const activeClass = (s.id === activeSpriteId) ? 'active' : '';
-                html += `<div class="object-icon ${activeClass}" data-id="${s.id}" style="background:${s.color};">${s.name}<br><span style="font-size:9px;">[${Math.round(s.x)},${Math.round(s.y)}]</span></div>`;
-            });
-            spriteIconsDiv.innerHTML = html;
-            document.querySelectorAll('.object-icon').forEach(icon => {
-                icon.addEventListener('click', (e) => {
-                    const id = icon.dataset.id;
-                    setActiveSprite(id);
-                });
-            });
-            const active = getActiveSprite();
-            if (active) {
-                activeSpriteNameSpan.innerText = active.name;
-                scriptOwnerSpan.innerText = active.name;
-            }
-        }
-
-        // ----- GESTIÓN DE SCRIPT (bloques en el contenedor) -----
-        function renderScript() {
-            const active = getActiveSprite();
-            if (!active) return;
-            const script = active.script;
-            if (script.length === 0) {
-                scriptContainer.innerHTML = '<div style="color:#888; padding:8px;">-- Arrastra bloques aquí para apilarlos --</div>';
+        // ---------- RENDERIZAR LISTA DE BLOQUES VISUALES ----------
+        function renderBloques() {
+            if (comandos.length === 0) {
+                listaDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#2b4b6f; font-style:italic;">⬆️ Añade bloques con los botones ⬆️</div>';
                 return;
             }
+
             let html = '';
-            script.forEach((block, index) => {
-                let text = '';
-                let blockClass = 'script-block';
-                switch (block.type) {
-                    case 'event_flag': text = '🏁 al hacer clic en bandera'; blockClass += ' event'; break;
-                    case 'event_click': text = '👆 al hacer clic en este objeto'; blockClass += ' event'; break;
-                    case 'move': text = `⚡ mover ${block.val} pasos`; blockClass += ' motion'; break;
-                    case 'turn': text = `↻ girar ${block.val}°`; blockClass += ' motion'; break;
-                    case 'gotoxy': text = `⤷ ir a (${block.val})`; blockClass += ' motion'; break;
-                    case 'say': text = `💬 decir "${block.val}"`; blockClass += ' looks'; break;
-                    case 'color': text = `🎨 cambiar color`; blockClass += ' looks'; break;
-                    case 'wait': text = `⏱️ esperar ${block.val} seg`; blockClass += ' control'; break;
-                    default: text = block.type;
+            comandos.forEach((cmd, idx) => {
+                let icono = '';
+                let texto = '';
+                switch (cmd) {
+                    case 'up': icono = '⬆️'; texto = 'MOVER ARRIBA'; break;
+                    case 'down': icono = '⬇️'; texto = 'MOVER ABAJO'; break;
+                    case 'left': icono = '⬅️'; texto = 'MOVER IZQUIERDA'; break;
+                    case 'right': icono = '➡️'; texto = 'MOVER DERECHA'; break;
+                    default: icono = '🔷'; texto = cmd;
                 }
-                html += `<div class="${blockClass}" data-index="${index}" data-type="${block.type}" data-val="${block.val}">
-                    <span>${text}</span>
-                    <span class="delete-btn" data-index="${index}">✖</span>
+                html += `<div class="bloque-item" data-index="${idx}">
+                    <div style="display: flex; align-items: center;">
+                        <span class="bloque-icono">${icono}</span>
+                        <span class="bloque-texto">${texto}</span>
+                    </div>
+                    <div class="bloque-controles">
+                        <button class="btn-up" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>↑</button>
+                        <button class="btn-down" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>↓</button>
+                        <button class="btn-delete" data-index="${idx}" ${ejecutando ? 'disabled' : ''}>✖</button>
+                    </div>
                 </div>`;
             });
-            scriptContainer.innerHTML = html;
-            // Añadir eventos a los botones de eliminar
-            document.querySelectorAll('.script-block .delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const idx = btn.dataset.index;
-                    removeScriptBlock(parseInt(idx));
-                });
-            });
-            // Inicializar Sortable para reordenar bloques dentro del script
-            new Sortable(scriptContainer, {
-                animation: 150,
-                handle: '.script-block',
-                onEnd: function(evt) {
-                    if (isRunning) return;
-                    const active = getActiveSprite();
-                    if (!active) return;
-                    // Reordenar el array según el nuevo orden de los hijos
-                    const items = Array.from(scriptContainer.children);
-                    const newScript = [];
-                    items.forEach(item => {
-                        if (item.classList && item.classList.contains('script-block')) {
-                            const index = item.dataset.index; // índice original
-                            if (index !== undefined) {
-                                newScript.push(active.script[parseInt(index)]);
-                            }
-                        }
-                    });
-                    active.script = newScript;
-                    renderScript(); // re-render para actualizar índices
-                }
-            });
-        }
+            listaDiv.innerHTML = html;
 
-        function removeScriptBlock(index) {
-            if (isRunning) return;
-            const active = getActiveSprite();
-            if (active) {
-                active.script.splice(index, 1);
-                renderScript();
+            // Deshabilitar botones internos si estamos ejecutando (por si acaso)
+            if (ejecutando) {
+                document.querySelectorAll('.bloque-controles button').forEach(btn => btn.disabled = true);
             }
         }
 
-        // ----- DRAG & DROP DESDE PALETA AL SCRIPT -----
-        document.querySelectorAll('.block').forEach(block => {
-            block.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    type: block.dataset.type,
-                    val: block.dataset.val
-                }));
-                e.dataTransfer.effectAllowed = 'copy';
-            });
-        });
+        // ---------- FUNCIONES DE MODIFICACIÓN DE SCRIPT ----------
+        function agregarComando(cmd) {
+            if (ejecutando) return;
+            comandos.push(cmd);
+            renderBloques();
+            mensajeDiv.innerHTML = '➕ Bloque añadido. ¡Ejecuta el script!';
+        }
 
-        scriptContainer.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-        });
-
-        scriptContainer.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (isRunning) return;
-            const rawData = e.dataTransfer.getData('text/plain');
-            if (!rawData) return;
-            try {
-                const blockData = JSON.parse(rawData);
-                const active = getActiveSprite();
-                if (!active) return;
-                active.script.push({ type: blockData.type, val: blockData.val });
-                renderScript();
-                redraw();
-            } catch (ex) {}
-        });
-
-        // ----- EJECUCIÓN DE SCRIPT (con eventos) -----
-        async function runScript(scriptArray, sprite) {
-            if (isRunning) return;
-            isRunning = true;
-            stopRequested = false;
-            runBtn.disabled = true;
-            stopBtn.disabled = false;
-            // Deshabilitar interacciones
-            document.querySelectorAll('.delete-btn, .add-object-btn, .block, .object-icon').forEach(el => el.style.pointerEvents = 'none');
-
-            for (let i = 0; i < scriptArray.length; i++) {
-                if (stopRequested) break;
-                const block = scriptArray[i];
-                await executeBlock(block, sprite);
-                redraw();
-                await new Promise(r => setTimeout(r, 300));
+        function eliminarComando(index) {
+            if (ejecutando) return;
+            if (index >= 0 && index < comandos.length) {
+                comandos.splice(index, 1);
+                renderBloques();
             }
-
-            isRunning = false;
-            stopRequested = false;
-            runBtn.disabled = false;
-            stopBtn.disabled = true;
-            document.querySelectorAll('.delete-btn, .add-object-btn, .block, .object-icon').forEach(el => el.style.pointerEvents = 'auto');
-            redraw();
         }
 
-        function executeBlock(block, sprite) {
-            return new Promise((resolve) => {
-                switch (block.type) {
-                    case 'move':
-                        const rad = sprite.direction * Math.PI / 180;
-                        let dx = parseInt(block.val) * Math.cos(rad);
-                        let dy = -parseInt(block.val) * Math.sin(rad);
-                        sprite.x += dx;
-                        sprite.y += dy;
-                        sprite.x = Math.min(Math.max(sprite.x, 20), 500);
-                        sprite.y = Math.min(Math.max(sprite.y, 20), 320);
-                        setTimeout(resolve, 200);
-                        break;
-                    case 'turn':
-                        sprite.direction = (sprite.direction + parseInt(block.val) + 360) % 360;
-                        setTimeout(resolve, 200);
-                        break;
-                    case 'gotoxy':
-                        const coords = block.val.split(',').map(Number);
-                        if (coords.length === 2) {
-                            sprite.x = Math.min(Math.max(coords[0], 20), 500);
-                            sprite.y = Math.min(Math.max(coords[1], 20), 320);
-                        }
-                        setTimeout(resolve, 200);
-                        break;
-                    case 'say':
-                        sprite.message = block.val;
-                        setTimeout(() => { sprite.message = null; redraw(); resolve(); }, 800);
-                        return; // resolve después del timeout
-                    case 'color':
-                        sprite.color = block.val;
-                        setTimeout(resolve, 200);
-                        break;
-                    case 'wait':
-                        setTimeout(resolve, parseFloat(block.val) * 1000);
-                        return;
-                    case 'event_flag':
-                    case 'event_click':
-                        // estos no ejecutan acción, solo son marcadores
-                        setTimeout(resolve, 100);
-                        break;
-                    default:
-                        setTimeout(resolve, 100);
-                }
-            });
+        function moverArriba(index) {
+            if (ejecutando) return;
+            if (index > 0) {
+                [comandos[index-1], comandos[index]] = [comandos[index], comandos[index-1]];
+                renderBloques();
+            }
         }
 
-        // ----- EVENTOS -----
-        // Bandera verde: ejecutar scripts de todos los objetos que empiecen con event_flag
-        greenFlag.addEventListener('click', () => {
-            if (isRunning) {
-                stopRequested = true;
+        function moverAbajo(index) {
+            if (ejecutando) return;
+            if (index < comandos.length - 1) {
+                [comandos[index], comandos[index+1]] = [comandos[index+1], comandos[index]];
+                renderBloques();
+            }
+        }
+
+        function limpiarScript() {
+            if (ejecutando) return;
+            comandos = [];
+            renderBloques();
+            mensajeDiv.innerHTML = '🧽 Script limpiado. Crea uno nuevo.';
+        }
+
+        function resetJugador() {
+            if (ejecutando) {
+                detenerEjecucion();
+            }
+            jugador = { x: 0, y: 0 };
+            dibujarGrid();
+            mensajeDiv.innerHTML = '🔁 Jugador reiniciado a (0,0)';
+        }
+
+        // ---------- EJECUCIÓN DEL SCRIPT (con retardo) ----------
+        function detenerEjecucion() {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            ejecutando = false;
+            habilitarBotones(true);
+            renderBloques(); // para habilitar botones internos
+            mensajeDiv.innerHTML = '⏸️ Ejecución detenida.';
+        }
+
+        function habilitarBotones(habilitar) {
+            todosBotones.forEach(btn => btn.disabled = !habilitar);
+            // los botones de bloque se actualizan en renderBloques
+        }
+
+        function ejecutarScript() {
+            if (ejecutando) return;
+            if (comandos.length === 0) {
+                mensajeDiv.innerHTML = '⚠️ No hay bloques en el script. Añade algunos.';
                 return;
             }
-            // Buscar todos los sprites cuyo primer bloque sea event_flag
-            sprites.forEach(sprite => {
-                if (sprite.script.length > 0 && sprite.script[0].type === 'event_flag') {
-                    // Ejecutar el script completo (excepto el primer bloque de evento)
-                    const scriptToRun = sprite.script.slice(1); // omitimos el evento
-                    if (scriptToRun.length > 0) {
-                        // Lanzamos cada script en paralelo (para no bloquear)
-                        (function(spr, scr) {
-                            setTimeout(() => {
-                                runScript(scr, spr);
-                            }, 10);
-                        })(sprite, scriptToRun);
-                    }
+
+            // Reiniciar posición si se desea, pero respetamos posición actual
+            // Podríamos preguntar, pero lo dejamos así. El usuario puede reset manual.
+            ejecutando = true;
+            habilitarBotones(false);
+            renderBloques();  // deshabilita los botones de bloque
+            mensajeDiv.innerHTML = '⚙️ Ejecutando script...';
+
+            let indice = 0;
+
+            function paso() {
+                if (!ejecutando) return; // se detuvo externamente
+
+                if (indice >= comandos.length) {
+                    // Terminó
+                    mensajeDiv.innerHTML = '✅ Script finalizado.';
+                    detenerEjecucion();
+                    return;
                 }
-            });
-        });
 
-        // Detectar clic en canvas sobre algún sprite (evento clic en objeto)
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const mouseX = (e.clientX - rect.left) * scaleX;
-            const mouseY = (e.clientY - rect.top) * scaleY;
-
-            // Buscar sprite que contenga el punto (radio 20)
-            const clickedSprite = sprites.find(s => {
-                const dx = mouseX - s.x;
-                const dy = mouseY - s.y;
-                return Math.sqrt(dx*dx + dy*dy) < 25;
-            });
-
-            if (clickedSprite && clickedSprite.script.length > 0 && clickedSprite.script[0].type === 'event_click') {
-                const scriptToRun = clickedSprite.script.slice(1);
-                if (scriptToRun.length > 0) {
-                    runScript(scriptToRun, clickedSprite);
+                const cmd = comandos[indice];
+                switch (cmd) {
+                    case 'up': moverJugador(0, -1); break;
+                    case 'down': moverJugador(0, 1); break;
+                    case 'left': moverJugador(-1, 0); break;
+                    case 'right': moverJugador(1, 0); break;
                 }
+
+                // Comprobar victoria
+                if (verificarVictoria()) {
+                    detenerEjecucion();
+                    return;
+                }
+
+                indice++;
+                timeoutId = setTimeout(paso, 400); // velocidad 2008: pausita
+            }
+
+            paso();
+        }
+
+        // ---------- EVENTOS (delegación en lista de bloques) ----------
+        listaDiv.addEventListener('click', (e) => {
+            if (ejecutando) return;
+
+            const target = e.target;
+            if (target.classList.contains('btn-up')) {
+                const idx = target.getAttribute('data-index');
+                if (idx !== null) moverArriba(parseInt(idx));
+            } else if (target.classList.contains('btn-down')) {
+                const idx = target.getAttribute('data-index');
+                if (idx !== null) moverAbajo(parseInt(idx));
+            } else if (target.classList.contains('btn-delete')) {
+                const idx = target.getAttribute('data-index');
+                if (idx !== null) eliminarComando(parseInt(idx));
             }
         });
 
-        // Botones de control manual
-        runBtn.addEventListener('click', () => {
-            const active = getActiveSprite();
-            if (active && active.script.length > 0) {
-                runScript(active.script, active); // ejecuta todo, incluyendo eventos (que no hacen nada)
-            }
-        });
-
-        stopBtn.addEventListener('click', () => {
-            if (isRunning) {
-                stopRequested = true;
-                stopBtn.disabled = true;
-            }
-        });
-
-        clearBtn.addEventListener('click', () => {
-            if (isRunning) return;
-            const active = getActiveSprite();
-            if (active) {
-                active.script = [];
-                renderScript();
-            }
-        });
-
-        addSpriteBtn.addEventListener('click', () => {
-            if (isRunning) return;
-            const newId = 'sprite' + Date.now();
-            const newName = `👾 OBJ${sprites.length+1}`;
-            const newColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
-            sprites.push({
-                id: newId,
-                name: newName,
-                x: 100 + Math.random() * 200,
-                y: 100 + Math.random() * 150,
-                direction: 0,
-                color: newColor,
-                message: null,
-                script: []
-            });
-            updateSpriteIcons();
-            redraw();
-        });
+        // Botones principales
+        btnArriba.addEventListener('click', () => agregarComando('up'));
+        btnAbajo.addEventListener('click', () => agregarComando('down'));
+        btnIzq.addEventListener('click', () => agregarComando('left'));
+        btnDer.addEventListener('click', () => agregarComando('right'));
+        btnEjecutar.addEventListener('click', ejecutarScript);
+        btnResetJuego.addEventListener('click', resetJugador);
+        btnLimpiar.addEventListener('click', limpiarScript);
 
         // Inicializar
-        updateSpriteIcons();
-        redraw();
-        renderScript();
+        dibujarGrid();
+        renderBloques();
 
-        // Prevenir drag por defecto en canvas
-        canvas.addEventListener('dragover', (e) => e.preventDefault());
-        canvas.addEventListener('drop', (e) => e.preventDefault());
+        // Ejemplo de script precargado para que se vea "visual" desde el inicio
+        comandos = ['up', 'right', 'down', 'right', 'up']; // pequeña rutina
+        renderBloques();
+        mensajeDiv.innerHTML = '🎮 Script de ejemplo cargado. ¡Pulsa EJECUTAR!';
     })();
 </script>
-<!-- CONTADOR OCULTO Y COSAS DE LA ÉPOCA -->
-<div style="display: none;">© 1999 Geocities AngelFire Tripod — Best viewed with 640x480</div>
 </body>
 </html>
